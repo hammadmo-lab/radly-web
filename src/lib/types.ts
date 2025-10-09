@@ -7,6 +7,15 @@ export type PatientBlock = {
   history?: string
 }
 
+export type StrictReport = {
+  title?: string
+  technique?: string
+  findings?: string
+  impression?: string
+  recommendations?: string
+  [k: string]: unknown
+}
+
 export type GenReq = {
   template_id: string
   patient?: PatientBlock

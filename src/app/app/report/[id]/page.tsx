@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { jobs, api } from '@/lib/api'
+import { jobs, exportDocxDirect, exportDocxLink } from '@/lib/api'
 import { JobStatus, JobDoneResult } from '@/lib/types'
 import { toast } from 'sonner'
 import { ArrowLeft, Copy, Download, FileText, Plus, AlertCircle, Loader2 } from 'lucide-react'
@@ -74,25 +74,38 @@ export default function ReportPage({ params }: ReportPageProps) {
     
     setIsExporting(true)
     try {
-      const response = await api.post<{ docx_url: string }>('/v1/export/docx', {
+      await exportDocxDirect({
         report: result.report,
         patient: undefined, // Optional patient block
         include_identifiers: false,
+        filename: `${result.report.title || 'report'}.docx`,
       })
-      
-      const docxUrl = response.data.docx_url
-      
-      // Download the file
-      const link = document.createElement('a')
-      link.href = docxUrl
-      link.download = `report-${params.id}.docx`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      
       toast.success('Report exported successfully!')
-    } catch {
-      toast.error('Failed to export report')
+    } catch (err: unknown) {
+      console.error('Export failed:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+      toast.error(`Failed to export report: ${errorMessage}`)
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const handleExportViaLink = async () => {
+    const result = jobStatus?.status === 'done' ? jobStatus.result : cachedResult
+    if (!result?.report) return
+    
+    setIsExporting(true)
+    try {
+      await exportDocxLink({
+        report: result.report,
+        patient: undefined, // Optional patient block
+        include_identifiers: false,
+        filename: `${result.report.title || 'report'}.docx`,
+      })
+    } catch (err: unknown) {
+      console.error('Export link failed:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+      toast.error(`Failed to get download link: ${errorMessage}`)
     } finally {
       setIsExporting(false)
     }
@@ -199,7 +212,16 @@ export default function ReportPage({ params }: ReportPageProps) {
             className="flex items-center space-x-2"
           >
             <Download className="w-4 h-4" />
-            <span>{isExporting ? 'Exporting...' : 'Export DOCX'}</span>
+            <span>{isExporting ? 'Exporting...' : 'Download (.docx)'}</span>
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleExportViaLink}
+            disabled={isExporting}
+            className="flex items-center space-x-2"
+          >
+            <FileText className="w-4 h-4" />
+            <span>{isExporting ? 'Getting link...' : 'Get download link'}</span>
           </Button>
         </div>
       </div>
