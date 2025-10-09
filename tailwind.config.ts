@@ -1,6 +1,13 @@
 import type { Config } from 'tailwindcss'
 
-export default {
-  darkMode: ['class'],
-  content: ['./src/**/*.{ts,tsx}', './app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
-} satisfies Config
+const config: Config = {
+  // Use a string (correct Tailwind typing), not ['class']
+  darkMode: 'class',
+  content: [
+    './src/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+  ],
+}
+
+export default config
