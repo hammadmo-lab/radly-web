@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, type Variants, type Transition } from "framer-motion"
 import { JobDoneResult } from "@/lib/types"
 
 interface ReportRendererProps {
@@ -17,29 +17,29 @@ export default function ReportRenderer({ report, className = "" }: ReportRendere
     )
   }
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
+  const easeBezier: Transition['ease'] = [0.25, 0.1, 0.25, 1] // standard ease-in-out
+
+  const containerVariants: Variants = {
+    hidden: { opacity: 0, y: 8 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
-        ease: "easeOut",
-        staggerChildren: 0.1
-      }
-    }
+        duration: 0.28,
+        ease: easeBezier,
+        when: 'beforeChildren',
+        staggerChildren: 0.06,
+      } as Transition,
+    },
   }
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 6 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: {
-        duration: 0.4,
-        ease: "easeOut"
-      }
-    }
+      transition: { duration: 0.18, ease: easeBezier } as Transition,
+    },
   }
 
   return (
@@ -48,6 +48,7 @@ export default function ReportRenderer({ report, className = "" }: ReportRendere
       variants={containerVariants}
       initial="hidden"
       animate="visible"
+      role="article"
     >
       {/* Header */}
       <motion.header className="text-center" variants={itemVariants}>
