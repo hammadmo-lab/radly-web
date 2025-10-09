@@ -1,14 +1,15 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { api } from '@/lib/api'
-import { Report } from '@/types'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { jobs, api } from '@/lib/api'
+import { JobStatus, JobDoneResult } from '@/lib/types'
 import { toast } from 'sonner'
-import { ArrowLeft, Copy, Download, FileText, Plus } from 'lucide-react'
+import { ArrowLeft, Copy, Download, FileText, Plus, AlertCircle, Loader2 } from 'lucide-react'
+import ReportRenderer from '@/components/ReportRenderer'
 
 interface ReportPageProps {
   params: {
@@ -18,20 +19,50 @@ interface ReportPageProps {
 
 export default function ReportPage({ params }: ReportPageProps) {
   const [isExporting, setIsExporting] = useState(false)
+  const [cachedResult, setCachedResult] = useState<JobDoneResult | null>(null)
 
-  const { data: report, isLoading } = useQuery({
-    queryKey: ['report', params.id],
+  // Check for cached result first
+  useEffect(() => {
+    const cached = sessionStorage.getItem('radly:lastResult')
+    if (cached) {
+      try {
+        setCachedResult(JSON.parse(cached))
+      } catch (e) {
+        console.warn('Failed to parse cached result:', e)
+      }
+    }
+  }, [])
+
+  const { data: jobStatus, isLoading, error } = useQuery({
+    queryKey: ['job', params.id],
     queryFn: async () => {
-      const response = await api.get<Report>(`/v1/reports/${params.id}`)
+      const response = await jobs.get(params.id)
       return response.data
+    },
+    refetchInterval: (query) => {
+      // Keep polling if job is still running
+      const data = query.state.data as JobStatus | undefined
+      if (data?.status === 'queued' || data?.status === 'running') {
+        return 2500
+      }
+      return false
     },
   })
 
   const handleCopyReport = async () => {
-    if (!report) return
+    const result = jobStatus?.status === 'done' ? jobStatus.result : cachedResult
+    if (!result?.report) return
     
     try {
-      await navigator.clipboard.writeText(report.generated_content)
+      const reportText = [
+        result.report.title && `# ${result.report.title}`,
+        result.report.technique && `## Technique\n${result.report.technique}`,
+        result.report.findings && `## Findings\n${result.report.findings}`,
+        result.report.impression && `## Impression\n${result.report.impression}`,
+        result.report.recommendations && `## Recommendations\n${result.report.recommendations}`,
+      ].filter(Boolean).join('\n\n')
+      
+      await navigator.clipboard.writeText(reportText)
       toast.success('Report copied to clipboard!')
     } catch {
       toast.error('Failed to copy report')
@@ -39,24 +70,23 @@ export default function ReportPage({ params }: ReportPageProps) {
   }
 
   const handleExportDocx = async () => {
-    if (!report) return
+    const result = jobStatus?.status === 'done' ? jobStatus.result : cachedResult
+    if (!result?.report) return
     
     setIsExporting(true)
     try {
-      let docxUrl = report.docx_url
+      const response = await api.post<{ docx_url: string }>('/v1/export/docx', {
+        report: result.report,
+        patient: undefined, // Optional patient block
+        include_identifiers: false,
+      })
       
-      // If no docx_url exists, generate one
-      if (!docxUrl) {
-        const response = await api.post<{ docx_url: string }>(`/v1/export/docx`, {
-          report_id: report.id
-        })
-        docxUrl = response.data.docx_url
-      }
-
+      const docxUrl = response.data.docx_url
+      
       // Download the file
       const link = document.createElement('a')
       link.href = docxUrl
-      link.download = `report-${report.id}.docx`
+      link.download = `report-${params.id}.docx`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -69,30 +99,56 @@ export default function ReportPage({ params }: ReportPageProps) {
     }
   }
 
-  if (isLoading) {
+  // Show loading state while job is running
+  if (isLoading || (jobStatus?.status === 'queued' || jobStatus?.status === 'running')) {
     return (
-      <div className="max-w-4xl mx-auto">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-muted rounded w-1/3"></div>
-          <Card>
-            <CardHeader>
-              <div className="h-6 bg-muted rounded w-1/2"></div>
-              <div className="h-4 bg-muted rounded w-1/4"></div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="h-4 bg-muted rounded"></div>
-                <div className="h-4 bg-muted rounded w-5/6"></div>
-                <div className="h-4 bg-muted rounded w-4/6"></div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="max-w-4xl mx-auto text-center py-12">
+        <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
+        <h2 className="text-xl font-semibold text-foreground mb-2">
+          {jobStatus?.status === 'queued' ? 'Job Queued' : 
+           jobStatus?.status === 'running' ? 'Processing Report' : 'Loading...'}
+        </h2>
+        <p className="text-muted-foreground">
+          {jobStatus?.status === 'queued' ? 'Your report is in the queue' :
+           jobStatus?.status === 'running' ? 'Please wait while we generate your report' :
+           'Loading report details...'}
+        </p>
       </div>
     )
   }
 
-  if (!report) {
+  // Show error state
+  if (error || jobStatus?.status === 'error') {
+    return (
+      <div className="max-w-4xl mx-auto text-center py-12">
+        <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+        <h2 className="text-xl font-semibold text-foreground mb-2">
+          Report Error
+        </h2>
+        <p className="text-muted-foreground mb-6">
+          {jobStatus?.status === 'error' ? jobStatus.error : 'There was an error loading the report'}
+        </p>
+        {cachedResult && (
+          <div className="mb-6">
+            <p className="text-sm text-muted-foreground mb-4">
+              We have a cached version of this report available.
+            </p>
+            <Button onClick={() => setCachedResult(cachedResult)}>
+              Use Cached Result
+            </Button>
+          </div>
+        )}
+        <Link href="/app/reports">
+          <Button variant="default">Back to Reports</Button>
+        </Link>
+      </div>
+    )
+  }
+
+  // Get the result to display
+  const result = jobStatus?.status === 'done' ? jobStatus.result : cachedResult
+  
+  if (!result?.report) {
     return (
       <div className="max-w-4xl mx-auto text-center py-12">
         <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -123,7 +179,7 @@ export default function ReportPage({ params }: ReportPageProps) {
           <div>
             <h1 className="text-3xl font-bold text-foreground">Medical Report</h1>
             <p className="text-muted-foreground">
-              Generated on {new Date(report.created_at).toLocaleDateString()}
+              {result.elapsed_ms ? `Generated in ${Math.round(result.elapsed_ms / 1000)}s` : 'Generated report'}
             </p>
           </div>
         </div>
@@ -149,102 +205,15 @@ export default function ReportPage({ params }: ReportPageProps) {
         </div>
       </div>
 
-      {/* Patient Information */}
-      {report.patient && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Patient Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {report.patient.name && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Name</p>
-                  <p className="text-foreground">{report.patient.name}</p>
-                </div>
-              )}
-              {report.patient.mrn && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">MRN</p>
-                  <p className="text-foreground">{report.patient.mrn}</p>
-                </div>
-              )}
-              {report.patient.age && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Age</p>
-                  <p className="text-foreground">{report.patient.age}</p>
-                </div>
-              )}
-              {report.patient.sex && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Sex</p>
-                  <p className="text-foreground">{report.patient.sex}</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Clinical Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Clinical Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground mb-2">Indication</p>
-            <p className="text-foreground">{report.indication}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-muted-foreground mb-2">Findings</p>
-            <p className="text-foreground whitespace-pre-wrap">{report.findings_text}</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Generated Report */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Generated Report</CardTitle>
-          <CardDescription>
-            AI-generated medical report based on the provided information
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="prose prose-sm max-w-none">
-            <div className="whitespace-pre-wrap text-foreground">
-              {report.generated_content}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Signature */}
-      {report.signature && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Signature</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center">
-              {report.signature.name && (
-                <p className="text-foreground font-medium">{report.signature.name}</p>
-              )}
-              {report.signature.date && (
-                <p className="text-muted-foreground">{report.signature.date}</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Report Content */}
+      <ReportRenderer report={result.report} />
 
       {/* Actions */}
       <div className="flex justify-center space-x-4 pt-6">
-        <Link href="/app/generate">
+        <Link href="/app/templates">
           <Button variant="default" className="flex items-center space-x-2">
             <Plus className="w-4 h-4" />
-            <span>New Report</span>
+            <span>Back to Templates</span>
           </Button>
         </Link>
       </div>
