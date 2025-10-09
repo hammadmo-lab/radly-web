@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { GenReq, EnqueueResp, JobStatus } from './types'
+import { GenReq, EnqueueResp, JobStatus, StrictReport, PatientBlock } from './types'
 
 const EDGE_BASE_URL = process.env.NEXT_PUBLIC_EDGE_BASE!
 const CLIENT_KEY = process.env.NEXT_PUBLIC_PUBLIC_CLIENT_KEY!
@@ -168,3 +168,80 @@ export const jobs = {
 }
 
 export { ApiError }
+
+export function extractFilenameFromCD(cd: string): string | null {
+  const m = /filename\*=UTF-8''([^;]+)|filename="([^"]+)"/i.exec(cd || '');
+  const raw = (m?.[1] || m?.[2] || '').trim();
+  if (!raw) return null;
+  try { return decodeURIComponent(raw); } catch { return raw; }
+}
+
+export async function exportDocxDirect(payload: {
+  report: StrictReport;
+  patient?: PatientBlock;
+  include_identifiers?: boolean;
+  filename?: string;
+}): Promise<void> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_EDGE_BASE}/v1/export/docx`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-client-key': process.env.NEXT_PUBLIC_PUBLIC_CLIENT_KEY ?? '',
+    },
+    body: JSON.stringify(payload),
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    throw new Error(`Export failed ${res.status}: ${errText}`);
+  }
+
+  const ct = res.headers.get('content-type') || '';
+  // Ensure we didn't get HTML/JSON error back
+  if (!ct.includes('application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
+    const preview = await res.text().catch(() => '');
+    throw new Error(`Unexpected content-type: ${ct}. Body: ${preview.slice(0,300)}`);
+  }
+
+  const blob = await res.blob();
+  const cd = res.headers.get('Content-Disposition') || '';
+  const fallback = (payload.filename || `${payload.report.title || 'report'}.docx`).replace(/\//g, '_');
+  const name = extractFilenameFromCD(cd) || fallback;
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+export async function exportDocxLink(payload: {
+  report: StrictReport;
+  patient?: PatientBlock;
+  include_identifiers?: boolean;
+  filename?: string;
+}): Promise<void> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_EDGE_BASE}/v1/export/docx/link`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-client-key': process.env.NEXT_PUBLIC_PUBLIC_CLIENT_KEY ?? '',
+    },
+    body: JSON.stringify(payload),
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    throw new Error(`Export link failed ${res.status}: ${errText}`);
+  }
+
+  const data = await res.json().catch(() => null);
+  const url = data?.presigned_url as string | undefined;
+  if (!url) throw new Error('No presigned_url in response');
+  window.location.href = url;
+}

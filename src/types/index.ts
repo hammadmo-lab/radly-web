@@ -43,7 +43,6 @@ export interface Report {
     date?: string
   }
   generated_content: string
-  docx_url?: string
   created_at: string
   updated_at: string
 }
