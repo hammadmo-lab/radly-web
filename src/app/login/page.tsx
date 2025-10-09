@@ -11,6 +11,13 @@ import { toast } from 'sonner'
 import { FileText, Mail, Apple } from 'lucide-react'
 import { getRemaining, markSent } from '@/lib/otpThrottle'
 
+function computeRedirectTo() {
+  const origin = typeof window !== 'undefined'
+    ? window.location.origin
+    : (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '')
+  return `${origin}/auth/callback`
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [sending, setSending] = useState(false)
@@ -44,15 +51,10 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setSending(true)
     try {
-      const redirectTo =
-        (typeof window !== 'undefined'
-          ? window.location.origin
-          : process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'http://localhost:3000') + '/auth/callback'
-      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo
+          redirectTo: computeRedirectTo()
         }
       })
       if (error) throw error
@@ -67,15 +69,10 @@ export default function LoginPage() {
   const handleAppleLogin = async () => {
     setSending(true)
     try {
-      const redirectTo =
-        (typeof window !== 'undefined'
-          ? window.location.origin
-          : process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'http://localhost:3000') + '/auth/callback'
-      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
-          redirectTo
+          redirectTo: computeRedirectTo()
         }
       })
       if (error) throw error
@@ -100,14 +97,9 @@ export default function LoginPage() {
 
     try {
       setSending(true)
-      const redirectTo =
-        (typeof window !== 'undefined'
-          ? window.location.origin
-          : process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'http://localhost:3000') + '/auth/callback'
-      
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: redirectTo }
+        options: { emailRedirectTo: computeRedirectTo() }
       })
       
       if (error) {
