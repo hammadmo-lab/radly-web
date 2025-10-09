@@ -25,6 +25,15 @@ export type GenReq = {
   options?: Record<string, unknown>
 }
 
+export type GeneratePayload = {
+  template_id: string
+  patient?: PatientBlock
+  findings_text?: string
+  history?: string
+  technique?: string
+  options?: Record<string, unknown>
+}
+
 export type EnqueueResp = { job_id: string; status: 'queued' | string }
 
 export type JobDoneResult = {
@@ -36,6 +45,7 @@ export type JobDoneResult = {
     recommendations?: string
     [k: string]: unknown
   }
+  patient?: PatientBlock
   ui_banner?: string
   template_id?: string
   provider?: string

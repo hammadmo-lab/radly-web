@@ -10,13 +10,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { generateFormSchema, GenerateFormData } from '@/lib/schemas'
+import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
 import { jobs, api } from '@/lib/api'
-import { pollUntil } from '@/lib/poll'
 import { Template } from '@/types'
-import { GenReq, JobStatus } from '@/lib/types'
+import { GenReq } from '@/lib/types'
 import { toast } from 'sonner'
 import { ArrowLeft, FileText, User, Calendar, AlertCircle } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import GenerateLoading from '@/components/GenerateLoading'
 import Link from 'next/link'
 
 export default function GeneratePage() {
@@ -25,7 +26,8 @@ export default function GeneratePage() {
   const templateId = searchParams.get('templateId')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [timeout, setTimeout] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [stage, setStage] = useState<'queued' | 'running' | 'finalizing' | 'done' | 'error'>('queued')
   const abortControllerRef = useRef<AbortController | null>(null)
 
   const { data: template } = useQuery({
@@ -41,16 +43,25 @@ export default function GeneratePage() {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
-  } = useForm<GenerateFormData>({
+  } = useForm<GenerateFormValues>({
     resolver: zodResolver(generateFormSchema),
     defaultValues: {
-      template_id: templateId || '',
+      templateId: templateId || '',
+      includePatient: false,
+      patient: { name: '', mrn: '', age: undefined, dob: '', sex: '', history: '' },
+      indication: '',
+      findings: '',
+      technique: '',
       signature: {
         date: new Date().toLocaleDateString(),
       },
     },
   })
+
+  const includePatient = watch('includePatient')
 
   // Cleanup on unmount or visibility change
   useEffect(() => {
@@ -69,24 +80,32 @@ export default function GeneratePage() {
     }
   }, [])
 
-  const onSubmit = async (data: GenerateFormData) => {
+  const onSubmit = async (data: GenerateFormValues) => {
     setIsSubmitting(true)
     setError(null)
-    setTimeout(false)
+    setLoading(true)
+    setStage('queued')
     
     try {
+      // Build patient object based on includePatient toggle
+      const patient = data.includePatient
+        ? {
+            name: data.patient.name || undefined,
+            mrn: data.patient.mrn || undefined,
+            age: data.patient.age ?? undefined,
+            dob: data.patient.dob || undefined,
+            sex: data.patient.sex || undefined,
+            history: data.patient.history || undefined,
+          }
+        : {} // empty object -> backend treats as "no patient block"
+
       // Build GenReq from form data
       const genReq: GenReq = {
-        template_id: templateId || data.template_id,
-        patient: {
-          name: data.patient?.name,
-          age: data.patient?.age,
-          sex: data.patient?.sex,
-          history: data.indication,
-        },
-        findings_text: data.findings_text,
+        template_id: templateId || data.templateId,
+        patient, // {} or filled
+        findings_text: data.findings,
         history: data.indication,
-        technique: undefined, // Optional field
+        technique: data.technique || undefined,
         options: {},
       }
 
@@ -108,85 +127,71 @@ export default function GeneratePage() {
       // Create abort controller for polling
       abortControllerRef.current = new AbortController()
 
-      // Poll for completion
-      const pollResult = await pollUntil(
-        async () => {
+      // Start polling with stage updates
+      const pollJob = async () => {
+        try {
           console.debug('Polling job status for:', jobId)
           const { data: jobStatus } = await jobs.get(jobId)
-          return jobStatus
-        },
-        (jobStatus: JobStatus) => jobStatus.status === 'done' || jobStatus.status === 'error',
-        {
-          intervalMs: 2500,
-          maxMs: 120000,
-          signal: abortControllerRef.current?.signal,
+          
+          if (jobStatus.status === 'queued') {
+            setStage('queued')
+          } else if (jobStatus.status === 'running') {
+            setStage('running')
+          } else if (jobStatus.status === 'done') {
+            setStage('finalizing')
+            // Brief delay to show finalizing stage
+            setTimeout(() => {
+              sessionStorage.setItem('radly:lastResult', JSON.stringify(jobStatus.result))
+              toast.success('Report generated successfully!')
+              router.replace(`/app/report/${jobId}`)
+            }, 400)
+            return
+          } else if (jobStatus.status === 'error') {
+            setStage('error')
+            setLoading(false)
+            setError(jobStatus.error || 'Report generation failed')
+            toast.error(jobStatus.error || 'Report generation failed')
+            return
+          }
+
+          // Continue polling if not done/error
+          if (jobStatus.status === 'queued' || jobStatus.status === 'running') {
+            setTimeout(pollJob, 2500)
+          }
+        } catch (err: unknown) {
+          console.error('Polling error:', err)
+          setStage('error')
+          setLoading(false)
+          const errorMessage = err instanceof Error ? err.message : 'Failed to check job status'
+          setError(errorMessage)
+          toast.error(errorMessage)
         }
-      )
-
-      if (pollResult.aborted) {
-        console.debug('Polling aborted')
-        return
       }
 
-      if (pollResult.timedOut) {
-        console.debug('Polling timed out')
-        setTimeout(true)
-        toast.info('Still processing... You can open the report anyway.')
-        return
-      }
+      // Start polling
+      pollJob()
 
-      const jobStatus = pollResult.result!
-      
-      if (jobStatus.status === 'done') {
-        console.debug('Job completed successfully')
-        sessionStorage.setItem('radly:lastResult', JSON.stringify(jobStatus.result))
-        toast.success('Report generated successfully!')
-        router.replace(`/app/report/${jobId}`)
-      } else if (jobStatus.status === 'error') {
-        console.debug('Job failed:', jobStatus.error)
-        setError(jobStatus.error || 'Report generation failed')
-        toast.error(jobStatus.error || 'Report generation failed')
-      }
     } catch (err: unknown) {
       console.error('Generate error:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to start report generation'
       setError(errorMessage)
+      setStage('error')
+      setLoading(false)
       toast.error(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  if (isSubmitting) {
-    return (
-      <div className="fixed inset-0 bg-primary text-primary-foreground flex items-center justify-center z-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-foreground mx-auto mb-6"></div>
-          <h2 className="text-2xl font-bold mb-2">Generating Report</h2>
-          <p className="text-lg opacity-90 mb-4">
-            Please wait while we process your medical report...
-          </p>
-          {timeout && (
-            <div className="mt-4">
-              <p className="text-sm opacity-75 mb-4">Still processing... This may take a few more minutes.</p>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  const lastJobId = sessionStorage.getItem('radly:lastJobId')
-                  if (lastJobId) {
-                    router.push(`/app/report/${lastJobId}`)
-                  }
-                }}
-                className="bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-              >
-                Open Anyway
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-    )
+  const handleCancelGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    setLoading(false)
+    setIsSubmitting(false)
+    toast.info('Generation cancelled')
   }
+
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -246,32 +251,41 @@ export default function GeneratePage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Label htmlFor="template_id">Select Template</Label>
+                <Label htmlFor="templateId">Select Template</Label>
                 <Input
-                  id="template_id"
-                  {...register('template_id')}
+                  id="templateId"
+                  {...register('templateId')}
                   placeholder="Enter template ID"
                 />
-                {errors.template_id && (
-                  <p className="text-sm text-destructive">{errors.template_id.message}</p>
+                {errors.templateId && (
+                  <p className="text-sm text-destructive">{errors.templateId.message}</p>
                 )}
               </div>
             </CardContent>
           </Card>
         )}
 
+        {/* Patient Data Toggle */}
+        <div className="flex items-center justify-between rounded-xl border p-4">
+          <div>
+            <Label className="font-medium">Include patient data in report</Label>
+            <p className="text-sm text-muted-foreground">Toggle to include name/age/sex/MRN/history in the generated report and DOCX.</p>
+          </div>
+          <Switch checked={includePatient} onCheckedChange={(v) => setValue('includePatient', v)} />
+        </div>
+
         {/* Patient Information */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <User className="w-5 h-5" />
-              <span>Patient Information (Optional)</span>
+              <span>Patient Information</span>
             </CardTitle>
             <CardDescription>
               Provide patient details if available
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${includePatient ? '' : 'opacity-50 pointer-events-none'}`}>
             <div className="space-y-2">
               <Label htmlFor="patient.name">Patient Name</Label>
               <Input
@@ -298,17 +312,29 @@ export default function GeneratePage() {
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="patient.dob">Date of Birth</Label>
+              <Input
+                id="patient.dob"
+                {...register('patient.dob')}
+                placeholder="01/01/1980"
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="patient.sex">Sex</Label>
-              <select
+              <Input
                 id="patient.sex"
                 {...register('patient.sex')}
-                className="w-full px-3 py-2 border border-input rounded-md bg-background"
-              >
-                <option value="">Select...</option>
-                <option value="M">Male</option>
-                <option value="F">Female</option>
-                <option value="Other">Other</option>
-              </select>
+                placeholder="Male/Female"
+              />
+            </div>
+            <div className="md:col-span-2 space-y-2">
+              <Label htmlFor="patient.history">Patient History (optional)</Label>
+              <Textarea
+                id="patient.history"
+                rows={3}
+                {...register('patient.history')}
+                placeholder="Relevant past history..."
+              />
             </div>
           </CardContent>
         </Card>
@@ -323,11 +349,11 @@ export default function GeneratePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="indication">Indication *</Label>
+              <Label htmlFor="indication">Indication / Clinical history (required)</Label>
               <Textarea
                 id="indication"
                 {...register('indication')}
-                placeholder="Describe the clinical indication for this examination..."
+                placeholder="Reason for study..."
                 rows={3}
               />
               {errors.indication && (
@@ -335,16 +361,24 @@ export default function GeneratePage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="findings_text">Findings *</Label>
+              <Label htmlFor="findings">Findings (required)</Label>
               <Textarea
-                id="findings_text"
-                {...register('findings_text')}
-                placeholder="Describe the clinical findings in detail..."
+                id="findings"
+                {...register('findings')}
+                placeholder="- Bullet 1\n- Bullet 2\nor free text..."
                 rows={6}
               />
-              {errors.findings_text && (
-                <p className="text-sm text-destructive">{errors.findings_text.message}</p>
+              {errors.findings && (
+                <p className="text-sm text-destructive">{errors.findings.message}</p>
               )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="technique">Technique (optional)</Label>
+              <Input
+                id="technique"
+                {...register('technique')}
+                placeholder="Portal venous phase..."
+              />
             </div>
           </CardContent>
         </Card>
@@ -390,6 +424,13 @@ export default function GeneratePage() {
           </Button>
         </div>
       </form>
+
+      {/* Loading Overlay */}
+      <GenerateLoading 
+        visible={loading} 
+        status={stage}
+        onCancel={handleCancelGeneration}
+      />
     </div>
   )
 }

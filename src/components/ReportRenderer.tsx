@@ -1,14 +1,40 @@
 "use client"
 
 import { motion, type Variants, type Transition } from "framer-motion"
-import { JobDoneResult } from "@/lib/types"
+import { JobDoneResult, PatientBlock } from "@/lib/types"
 
 interface ReportRendererProps {
   report: JobDoneResult["report"]
+  patient?: PatientBlock
   className?: string
 }
 
-export default function ReportRenderer({ report, className = "" }: ReportRendererProps) {
+export function PatientHeader({ patient }: { patient?: PatientBlock }) {
+  if (!patient) return null
+  const hasAny = patient.name || patient.age !== undefined || patient.sex || patient.history || patient.mrn || patient.dob
+  if (!hasAny) return null
+  
+  return (
+    <motion.section 
+      className="rounded-xl border p-4 mb-4 bg-white"
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.18 }}
+    >
+      <h3 className="font-semibold mb-2 text-[#0D2240]">Patient</h3>
+      <div className="grid gap-2 md:grid-cols-3 text-sm">
+        {patient.name && <div><span className="text-muted-foreground">Name:</span> {patient.name}</div>}
+        {patient.age !== undefined && <div><span className="text-muted-foreground">Age:</span> {patient.age}</div>}
+        {patient.sex && <div><span className="text-muted-foreground">Sex:</span> {patient.sex}</div>}
+        {patient.mrn && <div><span className="text-muted-foreground">MRN:</span> {patient.mrn}</div>}
+        {patient.dob && <div><span className="text-muted-foreground">DOB:</span> {patient.dob}</div>}
+        {patient.history && <div className="md:col-span-3"><span className="text-muted-foreground">History:</span> {patient.history}</div>}
+      </div>
+    </motion.section>
+  )
+}
+
+export default function ReportRenderer({ report, patient, className = "" }: ReportRendererProps) {
   if (!report) {
     return (
       <div className="max-w-3xl mx-auto bg-white shadow-md p-6 rounded-2xl">
@@ -50,6 +76,9 @@ export default function ReportRenderer({ report, className = "" }: ReportRendere
       animate="visible"
       role="article"
     >
+      {/* Patient Header */}
+      <PatientHeader patient={patient} />
+
       {/* Header */}
       <motion.header className="text-center" variants={itemVariants}>
         {report.title && (

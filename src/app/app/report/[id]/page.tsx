@@ -74,10 +74,11 @@ export default function ReportPage({ params }: ReportPageProps) {
     
     setIsExporting(true)
     try {
+      const includePatient = !!(result.patient && Object.keys(result.patient).length > 0)
       await exportDocxDirect({
         report: result.report,
-        patient: undefined, // Optional patient block
-        include_identifiers: false,
+        patient: result.patient || {},
+        include_identifiers: includePatient,
         filename: `${result.report.title || 'report'}.docx`,
       })
       toast.success('Report exported successfully!')
@@ -96,10 +97,11 @@ export default function ReportPage({ params }: ReportPageProps) {
     
     setIsExporting(true)
     try {
+      const includePatient = !!(result.patient && Object.keys(result.patient).length > 0)
       await exportDocxLink({
         report: result.report,
-        patient: undefined, // Optional patient block
-        include_identifiers: false,
+        patient: result.patient || {},
+        include_identifiers: includePatient,
         filename: `${result.report.title || 'report'}.docx`,
       })
     } catch (err: unknown) {
@@ -227,7 +229,7 @@ export default function ReportPage({ params }: ReportPageProps) {
       </div>
 
       {/* Report Content */}
-      <ReportRenderer report={result.report} />
+      <ReportRenderer report={result.report} patient={result.patient} />
 
       {/* Actions */}
       <div className="flex justify-center space-x-4 pt-6">
