@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { GenReq, EnqueueResp, JobStatus } from './types'
 
 const EDGE_BASE_URL = process.env.NEXT_PUBLIC_EDGE_BASE!
 const CLIENT_KEY = process.env.NEXT_PUBLIC_PUBLIC_CLIENT_KEY!
@@ -68,8 +69,12 @@ async function apiRequest<T = unknown>(
   
   const requestHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
-    'x-client-key': CLIENT_KEY,
     ...headers,
+  }
+
+  // Add client key if present
+  if (CLIENT_KEY) {
+    requestHeaders['x-client-key'] = CLIENT_KEY
   }
 
   // Add authorization header if session exists
@@ -80,6 +85,7 @@ async function apiRequest<T = unknown>(
   const requestOptions: RequestInit = {
     method,
     headers: requestHeaders,
+    cache: 'no-store',
   }
 
   if (body && method !== 'GET') {
@@ -154,6 +160,11 @@ export const api = {
   
   delete: <T = unknown>(endpoint: string, options?: Omit<ApiOptions, 'method' | 'body'>) =>
     apiRequest<T>(endpoint, { ...options, method: 'DELETE' }),
+}
+
+export const jobs = {
+  enqueue: (body: GenReq) => api.post<EnqueueResp>('/v1/generate/async', body),
+  get: (id: string) => api.get<JobStatus>(`/v1/jobs/${id}`),
 }
 
 export { ApiError }

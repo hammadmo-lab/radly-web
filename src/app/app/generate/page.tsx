@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -11,18 +11,22 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { generateFormSchema, GenerateFormData } from '@/lib/schemas'
-import { api } from '@/lib/api'
+import { jobs, api } from '@/lib/api'
+import { pollUntil } from '@/lib/poll'
 import { Template } from '@/types'
+import { GenReq, JobStatus } from '@/lib/types'
 import { toast } from 'sonner'
-import { ArrowLeft, FileText, User, Calendar } from 'lucide-react'
+import { ArrowLeft, FileText, User, Calendar, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 
 export default function GeneratePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const templateId = searchParams.get('templateId')
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [jobId, setJobId] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [timeout, setTimeout] = useState(false)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const { data: template } = useQuery({
     queryKey: ['template', templateId],
@@ -48,55 +52,137 @@ export default function GeneratePage() {
     },
   })
 
-  // Poll for job completion
+  // Cleanup on unmount or visibility change
   useEffect(() => {
-    if (!jobId) return
-
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await api.get<{ status: string; report_id?: string; error?: string }>(`/v1/generate/${jobId}`)
-        const { status, report_id, error } = response.data
-
-        if (status === 'completed' && report_id) {
-          clearInterval(pollInterval)
-          setIsGenerating(false)
-          toast.success('Report generated successfully!')
-          router.push(`/app/report/${report_id}`)
-        } else if (status === 'failed') {
-          clearInterval(pollInterval)
-          setIsGenerating(false)
-          toast.error(error || 'Report generation failed')
-        }
-      } catch (error) {
-        console.error('Polling error:', error)
+    const handleVisibilityChange = () => {
+      if (document.hidden && abortControllerRef.current) {
+        abortControllerRef.current.abort()
       }
-    }, 2500) // Poll every 2.5 seconds
+    }
 
-    return () => clearInterval(pollInterval)
-  }, [jobId, router])
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [])
 
   const onSubmit = async (data: GenerateFormData) => {
-    setIsGenerating(true)
+    setIsSubmitting(true)
+    setError(null)
+    setTimeout(false)
+    
     try {
-      const response = await api.post<{ job_id: string }>('/v1/generate', data)
-      setJobId(response.data.job_id)
-      toast.success('Report generation started!')
-    } catch (error) {
-      setIsGenerating(false)
-      toast.error('Failed to start report generation')
-      console.error('Generate error:', error)
+      // Build GenReq from form data
+      const genReq: GenReq = {
+        template_id: templateId || data.template_id,
+        patient: {
+          name: data.patient?.name,
+          age: data.patient?.age,
+          sex: data.patient?.sex,
+          history: data.indication,
+        },
+        findings_text: data.findings_text,
+        history: data.indication,
+        technique: undefined, // Optional field
+        options: {},
+      }
+
+      console.debug('Enqueuing job with:', genReq)
+      
+      // Enqueue the job
+      const { data: enqueueResp } = await jobs.enqueue(genReq)
+      
+      if (!enqueueResp.job_id) {
+        throw new Error('No job ID returned from server')
+      }
+
+      const jobId = enqueueResp.job_id
+      console.debug('Job enqueued with ID:', jobId)
+      
+      // Store job ID in session storage
+      sessionStorage.setItem('radly:lastJobId', jobId)
+
+      // Create abort controller for polling
+      abortControllerRef.current = new AbortController()
+
+      // Poll for completion
+      const pollResult = await pollUntil(
+        async () => {
+          console.debug('Polling job status for:', jobId)
+          const { data: jobStatus } = await jobs.get(jobId)
+          return jobStatus
+        },
+        (jobStatus: JobStatus) => jobStatus.status === 'done' || jobStatus.status === 'error',
+        {
+          intervalMs: 2500,
+          maxMs: 120000,
+          signal: abortControllerRef.current?.signal,
+        }
+      )
+
+      if (pollResult.aborted) {
+        console.debug('Polling aborted')
+        return
+      }
+
+      if (pollResult.timedOut) {
+        console.debug('Polling timed out')
+        setTimeout(true)
+        toast.info('Still processing... You can open the report anyway.')
+        return
+      }
+
+      const jobStatus = pollResult.result!
+      
+      if (jobStatus.status === 'done') {
+        console.debug('Job completed successfully')
+        sessionStorage.setItem('radly:lastResult', JSON.stringify(jobStatus.result))
+        toast.success('Report generated successfully!')
+        router.replace(`/app/report/${jobId}`)
+      } else if (jobStatus.status === 'error') {
+        console.debug('Job failed:', jobStatus.error)
+        setError(jobStatus.error || 'Report generation failed')
+        toast.error(jobStatus.error || 'Report generation failed')
+      }
+    } catch (err: unknown) {
+      console.error('Generate error:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Failed to start report generation'
+      setError(errorMessage)
+      toast.error(errorMessage)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-  if (isGenerating) {
+  if (isSubmitting) {
     return (
       <div className="fixed inset-0 bg-primary text-primary-foreground flex items-center justify-center z-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-foreground mx-auto mb-6"></div>
           <h2 className="text-2xl font-bold mb-2">Generating Report</h2>
-          <p className="text-lg opacity-90">
+          <p className="text-lg opacity-90 mb-4">
             Please wait while we process your medical report...
           </p>
+          {timeout && (
+            <div className="mt-4">
+              <p className="text-sm opacity-75 mb-4">Still processing... This may take a few more minutes.</p>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  const lastJobId = sessionStorage.getItem('radly:lastJobId')
+                  if (lastJobId) {
+                    router.push(`/app/report/${lastJobId}`)
+                  }
+                }}
+                className="bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+              >
+                Open Anyway
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -119,6 +205,19 @@ export default function GeneratePage() {
           </p>
         </div>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <AlertCircle className="w-5 h-5 text-destructive" />
+            <div>
+              <h3 className="text-sm font-medium text-destructive">Error</h3>
+              <p className="text-sm text-destructive/80">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Template Selection Banner */}
       {!templateId && (
@@ -286,8 +385,8 @@ export default function GeneratePage() {
           <Link href="/app/templates">
             <Button variant="outline">Cancel</Button>
           </Link>
-          <Button type="submit" disabled={isGenerating}>
-            {isGenerating ? 'Generating...' : 'Generate Report'}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Generating...' : 'Generate Report'}
           </Button>
         </div>
       </form>
