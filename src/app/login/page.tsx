@@ -11,13 +11,6 @@ import { toast } from 'sonner'
 import { FileText, Mail, Apple } from 'lucide-react'
 import { getRemaining, markSent } from '@/lib/otpThrottle'
 
-function computeRedirectTo() {
-  const origin = typeof window !== 'undefined'
-    ? window.location.origin
-    : (process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '')
-  return `${origin}/auth/callback`
-}
-
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [sending, setSending] = useState(false)
@@ -51,10 +44,14 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setSending(true)
     try {
+      const redirectTo = `${window.location.origin}/auth/callback`;
+      console.info('Google OAuth redirectTo:', redirectTo);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: computeRedirectTo()
+          redirectTo,
+          queryParams: { prompt: 'select_account' }
         }
       })
       if (error) throw error
@@ -69,10 +66,13 @@ export default function LoginPage() {
   const handleAppleLogin = async () => {
     setSending(true)
     try {
+      const redirectTo = `${window.location.origin}/auth/callback`;
+      console.info('Apple OAuth redirectTo:', redirectTo);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
-          redirectTo: computeRedirectTo()
+          redirectTo
         }
       })
       if (error) throw error
@@ -97,9 +97,12 @@ export default function LoginPage() {
 
     try {
       setSending(true)
+      const redirectTo = `${window.location.origin}/auth/callback`;
+      console.info('Magic link redirectTo:', redirectTo);
+      
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: computeRedirectTo() }
+        options: { emailRedirectTo: redirectTo }
       })
       
       if (error) {
