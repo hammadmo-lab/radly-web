@@ -1,96 +1,65 @@
-"use client";
-
-import { useEffect, useMemo, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { getSupabaseClient } from "@/lib/supabase";
+'use client';
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { getSupabaseClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
-
-function hasMessage(x: unknown): x is { message: string } {
-  if (typeof x !== "object" || x === null) return false;
-  const rec = x as Record<string, unknown>;
-  return typeof rec.message === "string";
-}
-
-function getErrMessage(e: unknown): string {
-  if (typeof e === "string") return e;
-  if (hasMessage(e)) return e.message;
-  return "Auth failed.";
-}
-
-function getWindowHash(): string | null {
-  if (typeof window === 'undefined') return null;
-  return window.location.hash;
-}
 
 function AuthCallbackContent() {
   const router = useRouter();
   const search = useSearchParams();
-  const supabase = useMemo(() => getSupabaseClient(), []);
-  const [message, setMessage] = useState("Signing you in…");
+  const [msg, setMsg] = useState('Completing sign-in…');
 
   useEffect(() => {
-    let cancelled = false;
+    const run = async () => {
+      // 1) Prefer query string
+      let code = search?.get('code') ?? null;
+      let next = search?.get('next') ?? '/app/templates';
 
-    async function run() {
+      // 2) Fallback: parse from hash if someone redirected with #code=...
+      if (!code && typeof window !== 'undefined' && window.location.hash) {
+        const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+        code = hash.get('code');
+        const hnext = hash.get('next');
+        if (hnext) next = hnext;
+        // Normalize URL once so refreshes keep the query params
+        if (code) {
+          const url = new URL(window.location.href);
+          url.hash = '';
+          url.searchParams.set('code', code);
+          if (next) url.searchParams.set('next', next);
+          window.history.replaceState({}, '', url.toString());
+        }
+      }
+
+      if (!code) {
+        setMsg('Missing authorization code. Please go back and try again.');
+        return;
+      }
+
       try {
-        const code = search.get("code");
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code || "");
-
-        if (!error && data?.session) {
-          if (!cancelled) {
-            setMessage("Done. Redirecting…");
-            router.replace("/app/templates");
-          }
+        const supabase = getSupabaseClient();
+        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+        if (error) {
+          setMsg(`Sign-in failed: ${error.message}`);
           return;
         }
-
-        const hash = getWindowHash();
-        if (!data?.session && hash && hash.includes("access_token")) {
-          const params = new URLSearchParams(hash.slice(1));
-          const access_token = params.get("access_token");
-          const refresh_token = params.get("refresh_token");
-          if (access_token && refresh_token) {
-            const { data: setData, error: setErr } = await supabase.auth.setSession({
-              access_token,
-              refresh_token,
-            });
-            if (setErr) throw setErr;
-            if (setData?.session && !cancelled) {
-              setMessage("Done. Redirecting…");
-              router.replace("/app/templates");
-              return;
-            }
-          }
-        }
-
-        const fallback = "invalid request: both auth code and code verifier should be non-empty";
-        setMessage(error?.message ?? (code ? "Unable to complete sign-in." : fallback));
-      } catch (err: unknown) {
-        if (!cancelled) setMessage(getErrMessage(err));
+        // Success – send to next or app home
+        router.replace(next || '/app/templates');
+      } catch (e: unknown) {
+        setMsg(`Unexpected error: ${e instanceof Error ? e.message : String(e)}`);
       }
-    }
-
-    run();
-    return () => {
-      cancelled = true;
     };
-  }, [router, search, supabase]);
+    run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  return (
-    <main className="p-8">
-      <p className="text-sm text-muted-foreground">{message}</p>
-    </main>
-  );
+  return <p className="p-6 text-sm text-muted-foreground">{msg}</p>;
 }
 
 export default function AuthCallback() {
   return (
-    <Suspense fallback={
-      <main className="p-8">
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </main>
-    }>
+    <Suspense fallback={<p className="p-6 text-sm text-muted-foreground">Loading...</p>}>
       <AuthCallbackContent />
     </Suspense>
   );

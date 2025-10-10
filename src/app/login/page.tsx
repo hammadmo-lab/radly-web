@@ -1,22 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import type { AuthError } from '@supabase/supabase-js';
 import { getSupabaseClient } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 
 export const dynamic = 'force-dynamic';
 
 type OAuthProvider = 'google' | 'apple';
-
-function getOrigin(): string | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    return window.location.origin;
-  } catch {
-    return null;
-  }
-}
 
 function toErrorMessage(e: unknown): string {
   if (typeof e === 'string') return e;
@@ -30,32 +20,27 @@ export default function LoginPage() {
   const [loading, setLoading] = useState<OAuthProvider | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Check for required environment variables
+  const hasRequiredEnvs = typeof window !== 'undefined' && 
+    process.env.NEXT_PUBLIC_SUPABASE_URL && 
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
   async function handleSignIn(provider: OAuthProvider) {
     setLoading(provider);
     setErrorMsg(null);
     try {
-      const origin = getOrigin();
+      const origin = typeof window !== 'undefined' ? window.location.origin : undefined;
       const redirectTo = origin ? `${origin}/auth/callback` : undefined;
       const supabase = getSupabaseClient();
 
-      // Allow Supabase's actual return where data.url can be string | null
-      const { data, error }: {
-        data: { url?: string | null } | null;
-        error: AuthError | null;
-      } = await supabase.auth.signInWithOAuth({
+      await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo,
           queryParams: { prompt: 'select_account' },
-        },
+          skipBrowserRedirect: false
+        }
       });
-
-      if (error) throw error;
-
-      const url = data?.url ?? undefined; // url may be string | null
-      if (typeof window !== 'undefined' && url) {
-        window.location.assign(url);
-      }
     } catch (e: unknown) {
       setErrorMsg(toErrorMessage(e));
     } finally {
@@ -67,6 +52,12 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-md space-y-4">
         <h1 className="text-2xl font-semibold text-center">Sign in to Radly</h1>
+
+        {!hasRequiredEnvs && (
+          <p role="alert" className="text-sm text-yellow-600 border border-yellow-200 rounded-md p-2">
+            Warning: Missing required environment variables (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)
+          </p>
+        )}
 
         {errorMsg && (
           <p role="alert" className="text-sm text-red-600 border border-red-200 rounded-md p-2">
