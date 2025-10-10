@@ -124,6 +124,21 @@ export default function GeneratePage() {
       const jobId = enqueueResp.job_id
       console.debug('Job enqueued with ID:', jobId)
       
+      // Add optimistic row to localStorage
+      try {
+        const local = JSON.parse(localStorage.getItem('radly_recent_jobs_local') || '[]')
+        local.unshift({
+          job_id: jobId,
+          status: 'queued',
+          template_id: genReq.template_id,
+          title: 'Generating…',
+          created_at: Date.now()
+        })
+        localStorage.setItem('radly_recent_jobs_local', JSON.stringify(local))
+      } catch (e) {
+        console.warn('Failed to update localStorage:', e)
+      }
+      
       // Store job ID in session storage
       sessionStorage.setItem('radly:lastJobId', jobId)
 
@@ -158,7 +173,7 @@ export default function GeneratePage() {
             setTimeout(() => {
               sessionStorage.setItem('radly:lastResult', JSON.stringify(job.result))
               toast.success('Report generated successfully!')
-              router.replace(`/app/report/${jobId}`)
+              router.push('/app/reports')
             }, 400)
             return
           } else if (job.status === 'error') {
