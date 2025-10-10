@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getJob, getQueueStats, JobStatusResponse } from "@/lib/jobs";
-import { useAuthToken } from "@/hooks/useAuthToken";
 import ReportRenderer from "@/components/ReportRenderer";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -14,7 +13,6 @@ export const dynamic = 'force-dynamic';
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { getAuthHeader } = useAuthToken();
 
   const [jobStatus, setJobStatus] = useState<JobStatusResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -31,7 +29,7 @@ export default function JobDetailPage() {
 
     async function tickStatus() {
       try {
-        const s = await getJob(id, getAuthHeader());
+        const s = await getJob(id);
         if (cancelled) return;
         setJobStatus(s);
 
@@ -52,7 +50,7 @@ export default function JobDetailPage() {
 
     async function tickStats() {
       try {
-        const qs = await getQueueStats(getAuthHeader());
+        const qs = await getQueueStats();
         if (cancelled) return;
         setQueueDepth(qs.queue_depth);
         setRunning(qs.jobs_running);
@@ -74,7 +72,7 @@ export default function JobDetailPage() {
       statusTimer.current = null;
       statsTimer.current = null;
     };
-  }, [id, getAuthHeader]);
+  }, [id]);
 
   // Progress computation
   useEffect(() => {
