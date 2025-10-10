@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { supabase } from '@/lib/supabase'
+import { getAuthRedirect } from '@/lib/urls'
 import { toast } from 'sonner'
 import { FileText, Mail, Apple } from 'lucide-react'
 import { getRemaining, markSent } from '@/lib/otpThrottle'
@@ -44,8 +45,8 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setSending(true)
     try {
-      const redirectTo = `${window.location.origin}/auth/callback`;
-      console.info('Google OAuth redirectTo:', redirectTo);
+      const redirectTo = getAuthRedirect()
+      console.info('[auth] redirectTo →', redirectTo)
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -66,8 +67,8 @@ export default function LoginPage() {
   const handleAppleLogin = async () => {
     setSending(true)
     try {
-      const redirectTo = `${window.location.origin}/auth/callback`;
-      console.info('Apple OAuth redirectTo:', redirectTo);
+      const redirectTo = getAuthRedirect()
+      console.info('[auth] redirectTo →', redirectTo)
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
@@ -97,8 +98,8 @@ export default function LoginPage() {
 
     try {
       setSending(true)
-      const redirectTo = `${window.location.origin}/auth/callback`;
-      console.info('Magic link redirectTo:', redirectTo);
+      const redirectTo = getAuthRedirect()
+      console.info('[auth] redirectTo →', redirectTo)
       
       const { error } = await supabase.auth.signInWithOtp({
         email,
