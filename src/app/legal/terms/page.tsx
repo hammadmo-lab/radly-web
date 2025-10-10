@@ -10,6 +10,8 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { FileText, CheckCircle } from 'lucide-react'
 
+export const dynamic = 'force-dynamic';
+
 export default function TermsPage() {
   const [termsContent, setTermsContent] = useState('')
   const [accepted, setAccepted] = useState(false)
@@ -54,8 +56,10 @@ This is a placeholder. Please contact support if you need the complete terms.`)
         accepted_terms_at: new Date().toISOString(),
       };
       const { error } = await supabase
-        .from('profiles')
-        .upsert(profileData as never)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from('profiles' as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .upsert(profileData as any)
 
       if (error) throw error
 

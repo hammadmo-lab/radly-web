@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { FileText, Zap, Shield, Users } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase";
 
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
