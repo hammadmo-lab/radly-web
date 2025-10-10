@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { api } from '@/lib/api'
+import { apiFetch } from '@/lib/api'
 import { Search, FileText, Plus, RefreshCw } from 'lucide-react'
 
 export const dynamic = 'force-dynamic';
@@ -42,11 +42,10 @@ export default function TemplatesPage() {
     queryKey: ['templates'],
     queryFn: async () => {
       try {
-        const response = await api.get<ApiTemplate[]>('/v1/templates')
-        const raw = response.data ?? []
+        const raw = await apiFetch('/v1/templates')
         
         // Normalize to UI shape that ALWAYS has .name
-        const normalized: UITemplate[] = raw.map(t => ({
+        const normalized: UITemplate[] = raw.map((t: ApiTemplate) => ({
           id: t.template_id ?? '',
           name: t.title ?? '',
           modality: t.modality ?? '',

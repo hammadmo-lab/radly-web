@@ -205,46 +205,28 @@ export async function getJson<T>(path: string): Promise<ApiResponse<T>> {
 export { ApiError }
 
 /**
- * Secure API fetch function that automatically includes authentication headers.
- * This function should only be called from client-side code.
- * 
- * @param path - API endpoint path (e.g., "/v1/jobs/recent")
- * @param init - Optional fetch init options
- * @returns Promise<Response> - The fetch response
- * @throws Error if not authenticated or request fails
+ * Central API helper that injects the Supabase token
  */
-export async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
-  const token = await getAccessTokenOrThrow();
-  
-  // Ensure path starts with /
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  const url = `${EDGE_BASE_URL}${normalizedPath}`;
-  
-  // Merge headers
-  const headers: Record<string, string> = {
-    'Authorization': `Bearer ${token}`,
-    'X-Client-Key': CLIENT_KEY,
-    ...init?.headers as Record<string, string>,
-  };
-  
-  // Add Content-Type if body is present and not already set
-  if (init?.body && !headers['Content-Type']) {
-    headers['Content-Type'] = 'application/json';
-  }
-  
-  const response = await fetch(url, {
+export async function apiFetch(path: string, init: RequestInit = {}) {
+  const supabase = getSupabaseClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+
+  const headers = new Headers(init.headers || {});
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+  if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+
+  const res = await fetch(`${EDGE_BASE_URL}${path}`, {
     ...init,
     headers,
     cache: 'no-store',
   });
-  
-  // Throw on non-2xx status codes
-  if (!response.ok) {
-    const errorText = await response.text().catch(() => '');
-    throw new Error(`API request failed: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ''}`);
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`API ${res.status}: ${text || res.statusText}`);
   }
-  
-  return response;
+  return res.json();
 }
 
 export function extractFilenameFromCD(cd: string): string | null {

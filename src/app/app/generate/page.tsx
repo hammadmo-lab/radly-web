@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
-import { api } from '@/lib/api'
+import { apiFetch } from '@/lib/api'
 import { enqueueJob } from '@/lib/jobs'
 import { Template } from '@/types'
 import { GenReq } from '@/lib/types'
@@ -34,11 +34,11 @@ export default function GeneratePage() {
     queryFn: async () => {
       if (!templateId) return null
       try {
-        const response = await api.get<Template>(`/v1/templates/${templateId}`)
-        return response.data
+        const template = await apiFetch(`/v1/templates/${templateId}`)
+        return template
       } catch (err: unknown) {
         // If unauthenticated, redirect to login
-        if (err instanceof Error && err.message === 'unauthenticated') {
+        if (err instanceof Error && err.message.includes('401')) {
           router.push('/login')
           return null
         }
@@ -134,7 +134,7 @@ export default function GeneratePage() {
       const errorMessage = err instanceof Error ? err.message : 'Failed to start report generation'
       
       // If unauthenticated, redirect to login
-      if (errorMessage === 'unauthenticated') {
+      if (errorMessage.includes('401')) {
         router.push('/login')
         return
       }

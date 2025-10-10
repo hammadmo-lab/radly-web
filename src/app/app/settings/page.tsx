@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/components/auth-provider'
 import { getSupabaseClient } from '@/lib/supabase'
-import { api } from '@/lib/api'
+import { apiFetch } from '@/lib/api'
 import { UserProfile } from '@/types'
 import { toast } from 'sonner'
 import { User, Settings, Shield, Wifi } from 'lucide-react'
@@ -50,7 +50,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const testConnectivity = async () => {
       try {
-        await api.get('/health')
+        await apiFetch('/health')
         setConnectivityStatus('connected')
       } catch {
         setConnectivityStatus('error')

@@ -26,7 +26,7 @@ export default function ReportsPage() {
       setErr(errorMessage);
       
       // If unauthenticated, redirect to login
-      if (errorMessage === 'unauthenticated') {
+      if (errorMessage.includes('401')) {
         router.push('/login');
         return;
       }
