@@ -3,7 +3,7 @@ import { StrictReport, PatientBlock } from './types'
 
 // Ensure BASE_URL has no trailing slash
 const EDGE_BASE_URL = process.env.NEXT_PUBLIC_EDGE_BASE!.replace(/\/$/, '')
-const CLIENT_KEY = process.env.NEXT_PUBLIC_PUBLIC_CLIENT_KEY!
+const CLIENT_KEY = process.env.NEXT_PUBLIC_CLIENT_KEY!
 
 interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
@@ -209,23 +209,19 @@ export { ApiError }
 export async function apiFetch(path: string, init: RequestInit = {}) {
   const supabase = getSupabaseClient();
   const { data: { session } } = await supabase.auth.getSession();
-  const token = session?.access_token;
 
-  const headers = new Headers(init.headers || {});
-  if (token) headers.set('Authorization', `Bearer ${token}`);
-  if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+  const headers = new Headers(init.headers);
+  if (session?.access_token) headers.set('Authorization', `Bearer ${session.access_token}`);
+  headers.set('Content-Type', 'application/json');
+  headers.set('X-App-Client', 'web');
 
-  const res = await fetch(`${EDGE_BASE_URL}${path}`, {
-    ...init,
-    headers,
-    cache: 'no-store',
-  });
-
+  const res = await fetch(`${EDGE_BASE_URL}${path}`, { ...init, headers, credentials: 'omit' });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`API ${res.status}: ${text || res.statusText}`);
   }
-  return res.json();
+  const ct = res.headers.get('content-type') || '';
+  return ct.includes('application/json') ? res.json() : res.text();
 }
 
 export function extractFilenameFromCD(cd: string): string | null {
