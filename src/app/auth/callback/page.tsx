@@ -1,49 +1,70 @@
-'use client'
-import { useEffect, useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+"use client";
 
-function AuthCallbackContent() {
-  const router = useRouter()
-  const params = useSearchParams()
-  const [err, setErr] = useState<string | null>(null)
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { createClient } from "@/lib/supabase";
+
+export default function AuthCallback() {
+  const router = useRouter();
+  const search = useSearchParams();
+  const supabase = useMemo(() => createClient(), []);
+  const [message, setMessage] = useState("Signing you in…");
 
   useEffect(() => {
-    (async () => {
+    let cancelled = false;
+
+    async function run() {
       try {
-        const code = params.get('code')
-        if (code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(code)
-          if (error) throw error
-          router.replace('/app/templates'); return
+        // Preferred: PKCE flow. Handles ?code= and most hash flows internally.
+        const { data, error } = await supabase.auth.exchangeCodeForSession();
+
+        if (!error && data?.session) {
+          if (!cancelled) {
+            setMessage("Done. Redirecting…");
+            router.replace("/app/templates");
+          }
+          return;
         }
 
-        if (typeof window !== 'undefined' && window.location.hash) {
-          const h = new URLSearchParams(window.location.hash.slice(1))
-          const access_token = h.get('access_token')
-          const refresh_token = h.get('refresh_token')
+        // Fallback: explicit fragment parsing if provider sent #access_token
+        const hash = window.location.hash;
+        if (!data?.session && hash && hash.includes("access_token")) {
+          const params = new URLSearchParams(hash.slice(1));
+          const access_token = params.get("access_token");
+          const refresh_token = params.get("refresh_token");
           if (access_token && refresh_token) {
-            const { error } = await supabase.auth.setSession({ access_token, refresh_token })
-            if (error) throw error
-            router.replace('/app/templates'); return
+            const { data: setData, error: setErr } = await supabase.auth.setSession({
+              access_token,
+              refresh_token,
+            });
+            if (setErr) throw setErr;
+            if (setData?.session && !cancelled) {
+              setMessage("Done. Redirecting…");
+              router.replace("/app/templates");
+              return;
+            }
           }
         }
 
-        // Nothing to exchange; go to login
-        router.replace('/login')
-      } catch (e: unknown) {
-        setErr(e instanceof Error ? e.message : 'Authentication failed')
+        // Friendly message if we still failed
+        const code = search.get("code");
+        const fallback =
+          "invalid request: both auth code and code verifier should be non-empty";
+        setMessage(error?.message ?? (code ? "Unable to complete sign-in." : fallback));
+      } catch (err: any) {
+        if (!cancelled) setMessage(err?.message ?? "Auth failed.");
       }
-    })()
-  }, [params, router])
+    }
 
-  return <div className="p-6 text-sm">{err ?? 'Signing you in…'}</div>
-}
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [router, search, supabase]);
 
-export default function AuthCallback() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm">Loading...</div>}>
-      <AuthCallbackContent />
-    </Suspense>
-  )
+    <main className="p-8">
+      <p className="text-sm text-muted-foreground">{message}</p>
+    </main>
+  );
 }

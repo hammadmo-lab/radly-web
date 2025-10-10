@@ -1,30 +1,36 @@
-'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuthToken } from '@/hooks/useAuthToken'
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { FileText, Zap, Shield, Users } from "lucide-react"
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileText, Zap, Shield, Users } from "lucide-react";
+import { createClient } from "@/lib/supabase";
 
 export default function Home() {
-  const router = useRouter()
-  const [busy, setBusy] = useState(false)
-  const { status } = useAuthToken()
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [authed, setAuthed] = useState(false);
+  const supabase = createClient();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setAuthed(!!data.session));
+  }, [supabase]);
 
   function goToApp() {
-    if (busy) return
-    setBusy(true)
+    if (busy) return;
+    setBusy(true);
     try {
-      const href = status === 'authenticated' ? '/app/templates' : '/login'
-      router.push(href)
+      const href = authed ? "/app/templates" : "/login";
+      router.push(href);
     } finally {
-      setBusy(false)
+      setBusy(false);
     }
   }
 
   function goToDemo() {
-    router.push('/demo')
+    router.push("/demo");
   }
 
   return (
@@ -38,12 +44,8 @@ export default function Home() {
             </div>
             <span className="text-xl font-bold text-primary">Radly</span>
           </div>
-          <Button 
-            variant="default" 
-            onClick={goToApp}
-            disabled={busy}
-          >
-            {busy ? 'Loading…' : 'Get Started'}
+          <Button variant="default" onClick={goToApp} disabled={busy}>
+            {busy ? "Loading…" : "Get Started"}
           </Button>
         </div>
       </header>
@@ -55,22 +57,23 @@ export default function Home() {
             AI-Powered Medical Report Generation
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Transform your clinical findings into professional, accurate medical reports 
-            in seconds. Streamline your workflow with intelligent templates and automated generation.
+            Transform your clinical findings into professional, accurate medical reports in
+            seconds. Streamline your workflow with intelligent templates and automated
+            generation.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              variant="default" 
+            <Button
+              size="lg"
+              variant="default"
               className="w-full sm:w-auto"
               onClick={goToApp}
               disabled={busy}
             >
-              {busy ? 'Loading…' : 'Start Generating Reports'}
+              {busy ? "Loading…" : "Start Generating Reports"}
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
+            <Button
+              size="lg"
+              variant="outline"
               className="w-full sm:w-auto"
               onClick={goToDemo}
             >
@@ -83,14 +86,13 @@ export default function Home() {
       {/* Features Section */}
       <section className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
-            Why Choose Radly?
-          </h2>
+          <h2 className="text-3xl font-bold text-foreground mb-4">Why Choose Radly?</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Built for healthcare professionals who demand accuracy, efficiency, and compliance.
+            Built for healthcare professionals who demand accuracy, efficiency, and
+            compliance.
           </p>
         </div>
-        
+
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="text-center hover:bg-muted/60 transition border-border">
             <CardHeader>
@@ -101,8 +103,8 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Generate comprehensive medical reports in seconds, not hours. 
-                Focus on patient care, not paperwork.
+                Generate comprehensive medical reports in seconds, not hours. Focus on
+                patient care, not paperwork.
               </CardDescription>
             </CardContent>
           </Card>
@@ -116,8 +118,8 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Enterprise-grade security and compliance. Your patient data 
-                is protected with bank-level encryption.
+                Enterprise-grade security and compliance. Your patient data is protected
+                with bank-level encryption.
               </CardDescription>
             </CardContent>
           </Card>
@@ -131,8 +133,8 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Pre-built templates for every specialty. Customize and save 
-                your own templates for consistent reporting.
+                Pre-built templates for every specialty. Customize and save your own
+                templates for consistent reporting.
               </CardDescription>
             </CardContent>
           </Card>
@@ -146,8 +148,8 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Share templates, collaborate on reports, and maintain 
-                consistency across your entire medical team.
+                Share templates, collaborate on reports, and maintain consistency across
+                your entire medical team.
               </CardDescription>
             </CardContent>
           </Card>
@@ -161,16 +163,17 @@ export default function Home() {
             Ready to Transform Your Medical Reporting?
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Join thousands of healthcare professionals who trust Radly for their reporting needs.
+            Join thousands of healthcare professionals who trust Radly for their reporting
+            needs.
           </p>
-          <Button 
-            size="lg" 
-            variant="secondary" 
+          <Button
+            size="lg"
+            variant="secondary"
             className="bg-background text-primary hover:bg-muted"
             onClick={goToApp}
             disabled={busy}
           >
-            {busy ? 'Loading…' : 'Get Started Today'}
+            {busy ? "Loading…" : "Get Started Today"}
           </Button>
         </div>
       </section>
@@ -200,5 +203,5 @@ export default function Home() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
