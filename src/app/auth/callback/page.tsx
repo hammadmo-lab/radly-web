@@ -1,28 +1,37 @@
+// src/app/auth/callback/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSupabaseClient } from '@/lib/supabase';
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'; // client page
 
 export default function AuthCallback() {
-  const [err, setErr] = useState<string | null>(null);
   const router = useRouter();
+  const [msg, setMsg] = useState('Completing sign-in…');
 
   useEffect(() => {
     (async () => {
       try {
         const supabase = getSupabaseClient();
-        // This reads the code from the URL and finishes PKCE
+
+        // IMPORTANT: explicit exchange (do NOT rely on detectSessionInUrl)
         const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
-        if (error) throw error;
+        if (error) {
+          console.error(error);
+          setMsg(`Sign-in failed: ${error.message}`);
+          return;
+        }
+
+        setMsg('Signed in. Redirecting…');
         router.replace('/app/reports');
-      } catch (e: unknown) {
-        setErr(e instanceof Error ? e.message : 'Sign-in failed: invalid flow state');
+      } catch (e: any) {
+        console.error(e);
+        setMsg(`Sign-in failed: ${e?.message ?? 'unknown error'}`);
       }
     })();
   }, [router]);
 
-  return <div className="p-6">{err ?? 'Signing you in…'}</div>;
+  return <main className="mx-auto max-w-md py-16">{msg}</main>;
 }
