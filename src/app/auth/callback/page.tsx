@@ -1,45 +1,45 @@
 'use client';
+
+import { getSupabaseClient } from '@/lib/supabase';
+import { useRouter, useSearchParams } from 'next/navigation';
+import * as React from 'react';
+import { Suspense } from 'react';
+
 export const dynamic = 'force-dynamic';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import type { AuthError, Session } from '@supabase/supabase-js';
-import { getSupabaseClient } from '@/lib/supabase';
-
-export default function AuthCallback() {
+function CallbackContent() {
   const router = useRouter();
-  const [msg, setMsg] = useState('Completing sign-in…');
+  const params = useSearchParams();
+  const [msg, setMsg] = React.useState('Finishing sign-in…');
 
-  useEffect(() => {
+  React.useEffect(() => {
+    const code = params.get('code');
+    if (!code) {
+      setMsg('Missing auth code.');
+      return;
+    }
     (async () => {
       try {
         const supabase = getSupabaseClient();
-
-        // IMPORTANT: explicit exchange (do NOT rely on detectSessionInUrl)
-        const { error }: {
-          data: {
-            session: Session | null;
-            provider_token?: string | null;
-            provider_refresh_token?: string | null;
-          } | null;
-          error: AuthError | null;
-        } = await supabase.auth.exchangeCodeForSession(window.location.href);
-        
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) {
-          console.error(error);
           setMsg(`Sign-in failed: ${error.message}`);
           return;
         }
-
-        setMsg('Signed in. Redirecting…');
         router.replace('/app/reports');
       } catch (e: unknown) {
-        console.error(e);
-        const errorMessage = e instanceof Error ? e.message : 'unknown error';
-        setMsg(`Sign-in failed: ${errorMessage}`);
+        setMsg(e instanceof Error ? e.message : 'Sign-in failed.');
       }
     })();
-  }, [router]);
+  }, [params, router]);
 
-  return <main className="mx-auto max-w-md py-16">{msg}</main>;
+  return <main className="p-8">{msg}</main>;
+}
+
+export default function CallbackPage() {
+  return (
+    <Suspense fallback={<main className="p-8">Loading...</main>}>
+      <CallbackContent />
+    </Suspense>
+  );
 }

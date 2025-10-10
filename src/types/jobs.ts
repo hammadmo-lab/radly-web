@@ -1,6 +1,6 @@
 // src/types/jobs.ts
 
-export type JobStatusType = 'queued' | 'running' | 'done' | 'error' | 'unknown';
+export type JobStatusType = 'queued' | 'running' | 'completed' | 'error' | 'unknown';
 
 export interface EnqueueResponse {
   job_id: string;
@@ -42,12 +42,13 @@ export interface JobStatusResponse {
 }
 
 export interface RecentJobRow {
-  job_id: string;
-  template_id: string;
-  user_id?: string;
-  status: JobStatusType | string;
-  created_at: string;          // ISO timestamp
-  finished_at?: string | null; // ISO timestamp or null
+  id: string;
+  name: string;
+  status: 'queued' | 'running' | 'completed' | 'error';
+  owner_id: string;
+  created_at: string;
+  started_at?: string | null;
+  completed_at?: string | null;
 }
 
 export interface RecentJobsResponse {

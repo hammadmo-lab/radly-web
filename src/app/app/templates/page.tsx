@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { apiFetch } from '@/lib/api'
+import { authedFetch } from '@/lib/api'
 import { Search, FileText, Plus, RefreshCw } from 'lucide-react'
 
 export const dynamic = 'force-dynamic';
@@ -42,7 +42,15 @@ export default function TemplatesPage() {
     queryKey: ['templates'],
     queryFn: async () => {
       try {
-        const raw = await apiFetch('/v1/templates')
+        const res = await authedFetch(`${process.env.NEXT_PUBLIC_EDGE_BASE}/v1/templates`)
+        if (!res.ok) {
+          if (res.status === 401) {
+            router.push('/login')
+            return []
+          }
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+        }
+        const raw = await res.json()
         
         // Normalize to UI shape that ALWAYS has .name
         const normalized: UITemplate[] = raw.map((t: ApiTemplate) => ({
