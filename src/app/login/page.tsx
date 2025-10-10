@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import type { AuthError, Session } from '@supabase/supabase-js';
+import type { AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 
@@ -20,13 +20,11 @@ function getOrigin(): string | null {
   }
 }
 
-// Type guards / helpers
-function hasMessage(x: unknown): x is { message: string } {
-  return typeof x === 'object' && x !== null && 'message' in x && typeof (x as Record<string, unknown>).message === 'string';
-}
-function errToMessage(e: unknown): string {
+function toErrorMessage(e: unknown): string {
   if (typeof e === 'string') return e;
-  if (hasMessage(e)) return e.message;
+  if (e && typeof e === 'object' && 'message' in e && typeof (e as any).message === 'string') {
+    return (e as { message: string }).message;
+  }
   return 'Unexpected error';
 }
 
@@ -41,23 +39,26 @@ export default function LoginPage() {
       const origin = getOrigin();
       const redirectTo = origin ? `${origin}/auth/callback` : undefined;
 
-      const { data, error }: { data: { url?: string } | null; error: AuthError | null } =
-        await supabase.auth.signInWithOAuth({
-          provider,
-          options: {
-            redirectTo,
-            queryParams: { prompt: 'select_account' },
-          },
-        });
+      // Allow Supabase's actual return where data.url can be string | null
+      const { data, error }: {
+        data: { url?: string | null } | null;
+        error: AuthError | null;
+      } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo,
+          queryParams: { prompt: 'select_account' },
+        },
+      });
 
       if (error) throw error;
 
-      // In some environments Supabase returns a URL to navigate to
-      if (typeof window !== 'undefined' && data?.url) {
-        window.location.assign(data.url);
+      const url = data?.url ?? undefined; // url may be string | null
+      if (typeof window !== 'undefined' && url) {
+        window.location.assign(url);
       }
     } catch (e: unknown) {
-      setErrorMsg(errToMessage(e));
+      setErrorMsg(toErrorMessage(e));
     } finally {
       setLoading(null);
     }
