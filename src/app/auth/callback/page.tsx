@@ -4,11 +4,15 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
+function hasMessage(x: unknown): x is { message: string } {
+  if (typeof x !== "object" || x === null) return false;
+  const rec = x as Record<string, unknown>;
+  return typeof rec.message === "string";
+}
+
 function getErrMessage(e: unknown): string {
   if (typeof e === "string") return e;
-  if (e && typeof e === "object" && "message" in e && typeof (e as any).message === "string") {
-    return (e as { message: string }).message;
-  }
+  if (hasMessage(e)) return e.message;
   return "Auth failed.";
 }
 
@@ -23,7 +27,8 @@ export default function AuthCallback() {
 
     async function run() {
       try {
-        const { data, error } = await supabase.auth.exchangeCodeForSession();
+        const code = search.get("code");
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code || "");
 
         if (!error && data?.session) {
           if (!cancelled) {
@@ -52,7 +57,6 @@ export default function AuthCallback() {
           }
         }
 
-        const code = search.get("code");
         const fallback = "invalid request: both auth code and code verifier should be non-empty";
         setMessage(error?.message ?? (code ? "Unable to complete sign-in." : fallback));
       } catch (err: unknown) {
