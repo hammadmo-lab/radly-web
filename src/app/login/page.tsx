@@ -1,6 +1,7 @@
 'use client';
-export const dynamic = 'force-dynamic'; // do not prerender
-export const revalidate = 0;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;               // MUST be a number (or false), not a function
+export const fetchCache = 'default-no-store';
 
 import { useCallback, useState } from "react";
 import { createClient } from "@/lib/supabase";
@@ -11,8 +12,7 @@ function getOrigin(): string | null {
 }
 
 function hasMessage(x: unknown): x is { message: string } {
-  if (typeof x !== 'object' || x === null) return false;
-  return typeof (x as Record<string, unknown>).message === 'string';
+  return typeof x === 'object' && x !== null && typeof (x as any).message === 'string';
 }
 
 function getErrMessage(e: unknown) {
@@ -36,16 +36,11 @@ export default function LoginPage() {
     setError(null);
     try {
       const redirectTo = buildRedirectTo();
-      const queryParams = provider === 'google' 
-        ? { access_type: "offline", prompt: "consent" }
-        : undefined;
-      
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo,           // guarded
-          skipBrowserRedirect: false, // full-page redirect (no popup/new tab)
-          queryParams,
+          redirectTo,
+          queryParams: { prompt: 'select_account' },
         },
       });
       if (error) throw error;
