@@ -14,7 +14,6 @@ import { toast } from 'sonner'
 import { User, Settings, Shield, Wifi } from 'lucide-react'
 
 export const dynamic = 'force-dynamic';
-export const fetchCache = 'default-no-store';
 
 export default function SettingsPage() {
   const { user } = useAuth()
@@ -73,8 +72,10 @@ export default function SettingsPage() {
         default_signature_date_format: defaultDateFormat,
       };
       const { error } = await supabase
-        .from('profiles')
-        .upsert(profileData as never)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .from('profiles' as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .upsert(profileData as any)
 
       if (error) throw error
       toast.success('Settings saved successfully!')
