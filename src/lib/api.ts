@@ -1,6 +1,5 @@
 import { getSupabaseClient } from './supabase'
 import { StrictReport, PatientBlock } from './types'
-import { getAccessTokenOrThrow } from './auth'
 
 // Ensure BASE_URL has no trailing slash
 const EDGE_BASE_URL = process.env.NEXT_PUBLIC_EDGE_BASE!.replace(/\/$/, '')
