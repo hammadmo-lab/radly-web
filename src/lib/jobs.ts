@@ -1,14 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/lib/jobs.ts
 import { z } from "zod";
+import { createClient } from "@/lib/supabase";
 
 const EDGE = process.env.NEXT_PUBLIC_EDGE_BASE!;
 const CLIENT_KEY = process.env.NEXT_PUBLIC_CLIENT_KEY!;
 
-const headers: HeadersInit = {
-  "Content-Type": "application/json",
-  "x-client-key": CLIENT_KEY,
-};
+async function bearerHeaders(): Promise<HeadersInit> {
+  const supabase = createClient();
+  const { data } = await supabase.auth.getSession();
+  const access_token = data.session?.access_token;
+  if (!access_token) throw new Error("Not authenticated");
+  return {
+    "Content-Type": "application/json",
+    "x-client-key": CLIENT_KEY,
+    "Authorization": `Bearer ${access_token}`,
+  };
+}
 
 export const EnqueueResp = z.object({
   job_id: z.string(),
@@ -24,27 +32,33 @@ export const JobStatusResp = z.object({
 });
 export type JobStatusRespT = z.infer<typeof JobStatusResp>;
 
-export async function enqueueGenerate(payload: unknown) {
+export async function enqueueGenerate(body: any): Promise<{ job_id: string }> {
   const r = await fetch(`${EDGE}/v1/generate/async`, {
     method: "POST",
-    headers,
-    body: JSON.stringify(payload),
+    headers: await bearerHeaders(),
+    body: JSON.stringify(body),
+    cache: "no-store",
   });
-  if (!r.ok) throw new Error(`enqueue failed: ${r.status}`);
-  const json = await r.json();
-  return EnqueueResp.parse(json);
+  if (!r.ok) throw new Error(`enqueue failed ${r.status}`);
+  return r.json();
 }
 
-export async function getJobStatus(jobId: string): Promise<JobStatusRespT> {
-  const r = await fetch(`${EDGE}/v1/jobs/${jobId}`, { headers, cache: "no-store" });
-  if (!r.ok) throw new Error(`status ${r.status}`);
-  return JobStatusResp.parse(await r.json());
+export async function getJobStatus(jobId: string) {
+  const r = await fetch(`${EDGE}/v1/jobs/${jobId}`, {
+    headers: await bearerHeaders(),
+    cache: "no-store",
+  });
+  if (!r.ok) throw new Error(`job status ${r.status}`);
+  return r.json();
 }
 
-export async function listRecent(limit = 50) {
-  const r = await fetch(`${EDGE}/v1/jobs/recent?limit=${limit}`, { headers, cache: "no-store" });
+export async function getRecentJobs(limit = 50) {
+  const r = await fetch(`${EDGE}/v1/jobs/recent?limit=${limit}`, {
+    headers: await bearerHeaders(),
+    cache: "no-store",
+  });
   if (!r.ok) throw new Error(`recent ${r.status}`);
-  return (await r.json()) as { jobs: any[]; count: number };
+  return r.json();
 }
 
 const QueueStats = z.object({
@@ -55,7 +69,10 @@ const QueueStats = z.object({
 export type QueueStatsT = z.infer<typeof QueueStats>;
 
 export async function getQueueStats(): Promise<QueueStatsT> {
-  const r = await fetch(`${EDGE}/v1/queue/stats`, { headers, cache: "no-store" });
+  const r = await fetch(`${EDGE}/v1/queue/stats`, { 
+    headers: await bearerHeaders(), 
+    cache: "no-store" 
+  });
   if (!r.ok) throw new Error(`queue stats ${r.status}`);
   return QueueStats.parse(await r.json());
 }
