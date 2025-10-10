@@ -1,18 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createClient } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 
 type AuthStatus = "loading" | "authenticated" | "signed_out";
 
 export function useAuthToken() {
-  const supabase = createClient();
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [token, setToken] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    const supabase = getSupabaseClient();
 
     const init = async () => {
       const { data } = await supabase.auth.getSession();
@@ -37,7 +37,7 @@ export function useAuthToken() {
       cancelled = true;
       sub.subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, []);
 
   const getAuthHeader = useCallback((): Record<string, string> => (token ? { Authorization: `Bearer ${token}` } : {}), [token]);
 

@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
+export const dynamic = 'force-dynamic';
+
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();

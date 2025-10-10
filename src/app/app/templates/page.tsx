@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 import { Search, FileText, Plus, RefreshCw } from 'lucide-react'
 
+export const dynamic = 'force-dynamic';
+
 // Types for raw API response
 type ApiTemplate = {
   template_id: string;

@@ -2,11 +2,9 @@
 
 import { useEffect, useMemo, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-export const fetchCache = 'default-no-store';
 
 function hasMessage(x: unknown): x is { message: string } {
   if (typeof x !== "object" || x === null) return false;
@@ -28,7 +26,7 @@ function getWindowHash(): string | null {
 function AuthCallbackContent() {
   const router = useRouter();
   const search = useSearchParams();
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => getSupabaseClient(), []);
   const [message, setMessage] = useState("Signing you in…");
 
   useEffect(() => {

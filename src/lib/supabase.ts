@@ -1,29 +1,24 @@
-"use client";
+'use client';
 
-import { createBrowserClient } from "@supabase/ssr";
+// Lazy, browser-only Supabase client
+import { createClient } from '@supabase/supabase-js';
 
-export type SupabaseClient = ReturnType<typeof createBrowserClient>;
-
-export function createClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  return createBrowserClient(url, key);
-}
-
-// Lazy initialization to avoid SSR issues
-let _supabase: ReturnType<typeof createClient> | null = null;
+let _client: ReturnType<typeof createClient> | null = null;
 
 export function getSupabaseClient() {
-  if (!_supabase) {
-    _supabase = createClient();
+  if (typeof window === 'undefined') {
+    throw new Error('getSupabaseClient() called on the server. Use server-side Supabase utilities instead.');
   }
-  return _supabase;
-}
+  if (_client) return _client;
 
-// Legacy export for backward compatibility - now lazy
-export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
-  get(target, prop) {
-    const client = getSupabaseClient();
-    return client[prop as keyof typeof client];
-  }
-});
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  _client = createClient(url, anon, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  });
+  return _client;
+}

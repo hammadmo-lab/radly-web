@@ -7,6 +7,8 @@ import { Loader2, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthToken } from '@/hooks/useAuthToken';
 
+export const dynamic = 'force-dynamic';
+
 export default function ReportsPage() {
   const { status, getAuthHeader } = useAuthToken();
   const [loading, setLoading] = useState(true);

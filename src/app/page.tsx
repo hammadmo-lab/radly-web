@@ -6,17 +6,17 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Zap, Shield, Users } from "lucide-react";
-import { createClient } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 
 export default function Home() {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [authed, setAuthed] = useState(false);
-  const supabase = createClient();
 
   useEffect(() => {
+    const supabase = getSupabaseClient();
     supabase.auth.getSession().then(({ data }) => setAuthed(!!data.session));
-  }, [supabase]);
+  }, []);
 
   function goToApp() {
     if (busy) return;
