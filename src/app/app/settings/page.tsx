@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/components/auth-provider'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseClient } from '@/lib/supabase'
 import { api } from '@/lib/api'
 import { UserProfile } from '@/types'
 import { toast } from 'sonner'
@@ -24,6 +24,7 @@ export default function SettingsPage() {
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) return null
+      const supabase = getSupabaseClient()
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -62,6 +63,7 @@ export default function SettingsPage() {
 
     setIsSaving(true)
     try {
+      const supabase = getSupabaseClient()
       const { error } = await supabase
         .from('profiles')
         .upsert({
