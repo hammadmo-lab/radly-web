@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getJob, getQueueStats, JobStatusResponse } from "@/lib/jobs";
+import { JobResultSchema, StrictReport, Patient } from "@/types/report";
 import ReportRenderer from "@/components/ReportRenderer";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -144,9 +145,15 @@ export default function JobDetailPage() {
 
   // Done → render the report
   const result = jobStatus.result!;
+  
+  // Parse & type the payload
+  const parsed = JobResultSchema.parse(result);
+  const resultReport: StrictReport = parsed.report;
+  const resultPatient: Patient = parsed.patient ?? {};
+  
   return (
     <div className="py-8">
-      <ReportRenderer report={result.report} patient={result.patient} />
+      <ReportRenderer report={resultReport} patient={resultPatient} />
     </div>
   );
 }
