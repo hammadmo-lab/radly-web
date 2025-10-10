@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getJobStatus, getQueueStats, JobStatusRespT } from "@/lib/jobs";
+import { getJob, getQueueStats, JobStatusResponse } from "@/lib/jobs";
+import { useAuthToken } from "@/hooks/useAuthToken";
 import ReportRenderer from "@/components/ReportRenderer";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -11,8 +12,9 @@ import { Progress } from "@/components/ui/progress";
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { getAuthHeader } = useAuthToken();
 
-  const [status, setStatus] = useState<JobStatusRespT | null>(null);
+  const [jobStatus, setJobStatus] = useState<JobStatusResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [queueDepth, setQueueDepth] = useState<number | null>(null);
   const [running, setRunning] = useState<number | null>(null);
@@ -27,9 +29,9 @@ export default function JobDetailPage() {
 
     async function tickStatus() {
       try {
-        const s = await getJobStatus(id);
+        const s = await getJob(id, getAuthHeader());
         if (cancelled) return;
-        setStatus(s);
+        setJobStatus(s);
 
         if (s.status === "running" && !startedAtMs.current) {
           startedAtMs.current = Date.now();
@@ -48,7 +50,7 @@ export default function JobDetailPage() {
 
     async function tickStats() {
       try {
-        const qs = await getQueueStats();
+        const qs = await getQueueStats(getAuthHeader());
         if (cancelled) return;
         setQueueDepth(qs.queue_depth);
         setRunning(qs.jobs_running);
@@ -70,20 +72,20 @@ export default function JobDetailPage() {
       statusTimer.current = null;
       statsTimer.current = null;
     };
-  }, [id]);
+  }, [id, getAuthHeader]);
 
   // Progress computation
   useEffect(() => {
-    if (!status) return;
+    if (!jobStatus) return;
 
     // queued: 10% → 35%, show queue info
-    if (status.status === "queued") {
+    if (jobStatus.status === "queued") {
       setProgress((prev) => (prev < 35 ? Math.min(35, Math.max(10, prev + 3)) : prev));
       return;
     }
 
     // running: ramp from 35% to 95% over ~30–60s
-    if (status.status === "running") {
+    if (jobStatus.status === "running") {
       const started = startedAtMs.current ?? Date.now();
       const elapsed = (Date.now() - started) / 1000; // seconds
       // ease to 95% over ~45s
@@ -92,20 +94,20 @@ export default function JobDetailPage() {
       return;
     }
 
-    if (status.status === "done") {
+    if (jobStatus.status === "done") {
       setProgress(100);
     }
-    if (status.status === "error") {
+    if (jobStatus.status === "error") {
       setProgress(0);
     }
-  }, [status]);
+  }, [jobStatus]);
 
   // Error UI
-  if (err || status?.status === "error") {
+  if (err || jobStatus?.status === "error") {
     return (
       <div className="max-w-3xl mx-auto py-16 text-center space-y-4">
         <p className="text-red-600 font-medium">Report generation failed.</p>
-        <p className="text-sm text-muted-foreground">{err ?? status?.error ?? "Unknown error"}</p>
+        <p className="text-sm text-muted-foreground">{err ?? jobStatus?.error ?? "Unknown error"}</p>
         <div className="flex gap-2 justify-center">
           <Button onClick={() => router.push("/app/templates")}>Back to Templates</Button>
           <Button variant="outline" onClick={() => router.refresh()}>Retry</Button>
@@ -115,7 +117,7 @@ export default function JobDetailPage() {
   }
 
   // Loading / Polling UI
-  if (!status || status.status !== "done") {
+  if (!jobStatus || jobStatus.status !== "done") {
     const jobsAhead =
       queueDepth != null && running != null ? Math.max(0, queueDepth - running) : null;
 
@@ -124,7 +126,7 @@ export default function JobDetailPage() {
         <div className="flex items-center gap-3">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           <div className="text-sm text-muted-foreground">
-            {status?.status === "running" ? "Generating your report…" : "Queued… waiting to start"}
+            {jobStatus?.status === "running" ? "Generating your report…" : "Queued… waiting to start"}
           </div>
         </div>
         <Progress value={progress} />
@@ -134,14 +136,14 @@ export default function JobDetailPage() {
             : "Fetching queue status…"}
         </div>
         <div className="text-xs text-muted-foreground">
-          Status: {status?.status ?? "checking"} • Job ID: {id}
+          Status: {jobStatus?.status ?? "checking"} • Job ID: {id}
         </div>
       </div>
     );
   }
 
   // Done → render the report
-  const result = status.result!;
+  const result = jobStatus.result!;
   return (
     <div className="py-8">
       <ReportRenderer report={result.report} patient={result.patient} />
