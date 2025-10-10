@@ -4,6 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
+function getErrMessage(e: unknown): string {
+  if (typeof e === "string") return e;
+  if (e && typeof e === "object" && "message" in e && typeof (e as any).message === "string") {
+    return (e as { message: string }).message;
+  }
+  return "Auth failed.";
+}
+
 export default function AuthCallback() {
   const router = useRouter();
   const search = useSearchParams();
@@ -15,7 +23,6 @@ export default function AuthCallback() {
 
     async function run() {
       try {
-        // Preferred: PKCE flow. Handles ?code= and most hash flows internally.
         const { data, error } = await supabase.auth.exchangeCodeForSession();
 
         if (!error && data?.session) {
@@ -26,7 +33,6 @@ export default function AuthCallback() {
           return;
         }
 
-        // Fallback: explicit fragment parsing if provider sent #access_token
         const hash = window.location.hash;
         if (!data?.session && hash && hash.includes("access_token")) {
           const params = new URLSearchParams(hash.slice(1));
@@ -46,13 +52,11 @@ export default function AuthCallback() {
           }
         }
 
-        // Friendly message if we still failed
         const code = search.get("code");
-        const fallback =
-          "invalid request: both auth code and code verifier should be non-empty";
+        const fallback = "invalid request: both auth code and code verifier should be non-empty";
         setMessage(error?.message ?? (code ? "Unable to complete sign-in." : fallback));
-      } catch (err: any) {
-        if (!cancelled) setMessage(err?.message ?? "Auth failed.");
+      } catch (err: unknown) {
+        if (!cancelled) setMessage(getErrMessage(err));
       }
     }
 
