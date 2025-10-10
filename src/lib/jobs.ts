@@ -12,10 +12,9 @@ export type RecentJobRow = {
 };
 
 // List recent jobs for THIS user only
-export async function getRecentJobs(limit = 25): Promise<RecentJobRow[]> {
+export async function getRecentJobs(limit = 50): Promise<RecentJobRow[]> {
   try {
-    const res = await apiFetch(`/v1/jobs/recent?limit=${limit}`);
-    const json = await res.json();
+    const json = await apiFetch(`/v1/jobs/recent?limit=${limit}`);
     const schema = z.object({
       jobs: z.array(
         z.object({
@@ -32,7 +31,7 @@ export async function getRecentJobs(limit = 25): Promise<RecentJobRow[]> {
     return parsed.success ? parsed.data.jobs : [];
   } catch (error) {
     // If unauthenticated, return empty array
-    if (error instanceof Error && error.message === "unauthenticated") {
+    if (error instanceof Error && error.message.includes("401")) {
       return [];
     }
     // For other errors, re-throw
@@ -42,23 +41,20 @@ export async function getRecentJobs(limit = 25): Promise<RecentJobRow[]> {
 
 // Enqueue a job owned by THIS user
 export async function enqueueJob(payload: Record<string, unknown>) {
-  const res = await apiFetch('/v1/jobs/enqueue', {
+  return apiFetch('/v1/jobs/enqueue', {
     method: "POST",
     body: JSON.stringify(payload),
   });
-  return res.json();
 }
 
 // Get job status for THIS user only
 export async function getJob(jobId: string) {
-  const res = await apiFetch(`/v1/jobs/${jobId}`);
-  return res.json();
+  return apiFetch(`/v1/jobs/${jobId}`);
 }
 
 // Get queue stats (user-scoped)
 export async function getQueueStats() {
-  const res = await apiFetch('/v1/queue/stats');
-  return res.json();
+  return apiFetch('/v1/queue/stats');
 }
 
 // Type exports for compatibility

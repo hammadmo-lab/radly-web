@@ -47,7 +47,7 @@ export default function JobDetailPage() {
         setErr(errorMessage);
         
         // If unauthenticated, redirect to login
-        if (errorMessage === 'unauthenticated') {
+        if (errorMessage.includes('401')) {
           router.push('/login');
           return;
         }
@@ -65,7 +65,7 @@ export default function JobDetailPage() {
         setRunning(qs.jobs_running);
       } catch (e: unknown) {
         // If unauthenticated, redirect to login
-        if (e instanceof Error && e.message === 'unauthenticated') {
+        if (e instanceof Error && e.message.includes('401')) {
           router.push('/login');
           return;
         }
