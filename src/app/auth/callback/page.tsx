@@ -16,6 +16,11 @@ function getErrMessage(e: unknown): string {
   return "Auth failed.";
 }
 
+function getWindowHash(): string | null {
+  if (typeof window === 'undefined') return null;
+  return window.location.hash;
+}
+
 export default function AuthCallback() {
   const router = useRouter();
   const search = useSearchParams();
@@ -38,7 +43,7 @@ export default function AuthCallback() {
           return;
         }
 
-        const hash = window.location.hash;
+        const hash = getWindowHash();
         if (!data?.session && hash && hash.includes("access_token")) {
           const params = new URLSearchParams(hash.slice(1));
           const access_token = params.get("access_token");
