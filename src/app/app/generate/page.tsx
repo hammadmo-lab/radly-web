@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -12,13 +12,12 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
 import { api } from '@/lib/api'
-import { jobs } from '@/lib/jobs'
+import { enqueueGenerate } from '@/lib/jobs'
 import { Template } from '@/types'
 import { GenReq } from '@/lib/types'
 import { toast } from 'sonner'
 import { ArrowLeft, FileText, User, Calendar, AlertCircle } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
-import GenerateLoading from '@/components/GenerateLoading'
 import Link from 'next/link'
 
 export default function GeneratePage() {
@@ -27,9 +26,6 @@ export default function GeneratePage() {
   const templateId = searchParams.get('templateId')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [stage, setStage] = useState<'queued' | 'running' | 'finalizing' | 'done' | 'error'>('queued')
-  const abortControllerRef = useRef<AbortController | null>(null)
 
   const { data: template } = useQuery({
     queryKey: ['template', templateId],
@@ -64,28 +60,10 @@ export default function GeneratePage() {
 
   const includePatient = watch('includePatient')
 
-  // Cleanup on unmount or visibility change
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
-    }
-  }, [])
 
   const onSubmit = async (data: GenerateFormValues) => {
     setIsSubmitting(true)
     setError(null)
-    setLoading(true)
-    setStage('queued')
     
     try {
       // Build patient object based on includePatient toggle
@@ -112,24 +90,10 @@ export default function GeneratePage() {
 
       console.debug('Enqueuing job with:', genReq)
       
-      // Enqueue the job
-      const { data: enqueueResp, error: enqueueErr } = await jobs.enqueue(genReq)
-      
-      if (enqueueErr) {
-        console.error('enqueue failed', enqueueErr)
-        setError(enqueueErr)
-        setLoading(false)
-        return
-      }
-      
-      if (!enqueueResp || !enqueueResp.job_id) {
-        console.error('No job ID returned from server')
-        setError('No job ID returned from server')
-        setLoading(false)
-        return
-      }
-
+      // Enqueue the job using new typed helper
+      const enqueueResp = await enqueueGenerate(genReq)
       const jobId = enqueueResp.job_id
+      
       console.debug('Job enqueued with ID:', jobId)
       
       // Add optimistic row to localStorage
@@ -150,85 +114,20 @@ export default function GeneratePage() {
       // Store job ID in session storage
       sessionStorage.setItem('radly:lastJobId', jobId)
 
-      // Create abort controller for polling
-      abortControllerRef.current = new AbortController()
-
-      // Start polling with stage updates
-      const pollJob = async () => {
-        try {
-          console.debug('Polling job status for:', jobId)
-          const { data: job, error: jobErr } = await jobs.status(jobId)
-          
-          if (jobErr) {
-            setError(jobErr || 'Polling failed')
-            setLoading(false)
-            return
-          }
-          
-          if (!job) {
-            console.warn('No job data received, continuing to poll...')
-            setTimeout(pollJob, 2500)
-            return
-          }
-          
-          if (job.status === 'queued') {
-            setStage('queued')
-          } else if (job.status === 'running') {
-            setStage('running')
-          } else if (job.status === 'done' && job.result) {
-            setStage('finalizing')
-            // Brief delay to show finalizing stage
-            setTimeout(() => {
-              sessionStorage.setItem('radly:lastResult', JSON.stringify(job.result))
-              toast.success('Report generated successfully!')
-              router.push('/app/reports')
-            }, 400)
-            return
-          } else if (job.status === 'error') {
-            setStage('error')
-            setLoading(false)
-            setError(job.error || 'Report generation failed')
-            toast.error(job.error || 'Report generation failed')
-            return
-          }
-
-          // Continue polling if not done/error
-          if (job.status === 'queued' || job.status === 'running') {
-            setTimeout(pollJob, 2500)
-          }
-        } catch (err: unknown) {
-          console.error('Polling error:', err)
-          setStage('error')
-          setLoading(false)
-          const errorMessage = err instanceof Error ? err.message : 'Failed to check job status'
-          setError(errorMessage)
-          toast.error(errorMessage)
-        }
-      }
-
-      // Start polling
-      pollJob()
+      // Navigate to the report detail page
+      toast.success('Report generation started!')
+      router.push(`/app/report/${jobId}`)
 
     } catch (err: unknown) {
       console.error('Generate error:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to start report generation'
       setError(errorMessage)
-      setStage('error')
-      setLoading(false)
       toast.error(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleCancelGeneration = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-    }
-    setLoading(false)
-    setIsSubmitting(false)
-    toast.info('Generation cancelled')
-  }
 
 
   return (
@@ -463,12 +362,6 @@ export default function GeneratePage() {
         </div>
       </form>
 
-      {/* Loading Overlay */}
-      <GenerateLoading 
-        visible={loading} 
-        status={stage}
-        onCancel={handleCancelGeneration}
-      />
     </div>
   )
 }
