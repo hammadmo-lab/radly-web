@@ -5,12 +5,10 @@ import { getRecentJobs } from '@/lib/jobs';
 import { Button } from '@/components/ui/button';
 import { Loader2, Eye } from 'lucide-react';
 import Link from 'next/link';
-import { useAuthToken } from '@/hooks/useAuthToken';
 
 export const dynamic = 'force-dynamic';
 
 export default function ReportsPage() {
-  const { status, getAuthHeader } = useAuthToken();
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<RecentJobRow[]>([]);
   const [err, setErr] = useState<string | null>(null);
@@ -19,27 +17,18 @@ export default function ReportsPage() {
     try {
       setLoading(true);
       setErr(null);
-      const jobs = await getRecentJobs(50, getAuthHeader());
+      const jobs = await getRecentJobs(50);
       setRows(jobs);
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : 'Failed to load reports');
     } finally {
       setLoading(false);
     }
-  }, [getAuthHeader]);
+  }, []);
 
   useEffect(() => {
-    if (status !== 'authenticated') return;
     load();
-  }, [status, load]);
-
-  if (status !== 'authenticated') {
-    return (
-      <div className="p-6">
-        <p className="text-sm text-muted-foreground">Please sign in to view your reports.</p>
-      </div>
-    );
-  }
+  }, [load]);
 
   if (loading) {
     return (

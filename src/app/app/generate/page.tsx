@@ -13,7 +13,6 @@ import { Label } from '@/components/ui/label'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
 import { api } from '@/lib/api'
 import { enqueueJob } from '@/lib/jobs'
-import { useAuthToken } from '@/hooks/useAuthToken'
 import { Template } from '@/types'
 import { GenReq } from '@/lib/types'
 import { toast } from 'sonner'
@@ -29,7 +28,6 @@ export default function GeneratePage() {
   const templateId = searchParams.get('templateId')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { status, getAuthHeader } = useAuthToken()
 
   const { data: template } = useQuery({
     queryKey: ['template', templateId],
@@ -66,11 +64,6 @@ export default function GeneratePage() {
 
 
   const onSubmit = async (data: GenerateFormValues) => {
-    if (status !== 'authenticated') {
-      setError('Please sign in to generate reports')
-      return
-    }
-    
     setIsSubmitting(true)
     setError(null)
     
@@ -100,7 +93,7 @@ export default function GeneratePage() {
       console.debug('Enqueuing job with:', genReq)
       
       // Enqueue the job using new typed helper
-      const enqueueResp = await enqueueJob(genReq, getAuthHeader())
+      const enqueueResp = await enqueueJob(genReq)
       const jobId = enqueueResp.job_id
       
       console.debug('Job enqueued with ID:', jobId)
