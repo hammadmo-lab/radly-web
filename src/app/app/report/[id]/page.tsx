@@ -1,245 +1,150 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { jobs, exportDocxDirect, exportDocxLink } from '@/lib/api'
-import { JobStatus, JobDoneResult } from '@/lib/types'
-import { toast } from 'sonner'
-import { ArrowLeft, Copy, Download, FileText, Plus, AlertCircle, Loader2 } from 'lucide-react'
-import ReportRenderer from '@/components/ReportRenderer'
+import { useEffect, useRef, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { getJobStatus, getQueueStats, JobStatusRespT } from "@/lib/jobs";
+import ReportRenderer from "@/components/ReportRenderer";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
-interface ReportPageProps {
-  params: {
-    id: string
-  }
-}
+export default function JobDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
 
-export default function ReportPage({ params }: ReportPageProps) {
-  const [isExporting, setIsExporting] = useState(false)
-  const [cachedResult, setCachedResult] = useState<JobDoneResult | null>(null)
+  const [status, setStatus] = useState<JobStatusRespT | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [queueDepth, setQueueDepth] = useState<number | null>(null);
+  const [running, setRunning] = useState<number | null>(null);
+  const [progress, setProgress] = useState<number>(10);
 
-  // Check for cached result first
+  const statusTimer = useRef<number | null>(null);
+  const statsTimer = useRef<number | null>(null);
+  const startedAtMs = useRef<number | null>(null);
+
   useEffect(() => {
-    const cached = sessionStorage.getItem('radly:lastResult')
-    if (cached) {
+    let cancelled = false;
+
+    async function tickStatus() {
       try {
-        setCachedResult(JSON.parse(cached))
-      } catch (e) {
-        console.warn('Failed to parse cached result:', e)
+        const s = await getJobStatus(id);
+        if (cancelled) return;
+        setStatus(s);
+
+        if (s.status === "running" && !startedAtMs.current) {
+          startedAtMs.current = Date.now();
+        }
+        if (s.status === "done" || s.status === "error") {
+          if (statusTimer.current) window.clearInterval(statusTimer.current);
+          statusTimer.current = null;
+        }
+      } catch (e: unknown) {
+        if (cancelled) return;
+        setErr(e instanceof Error ? e.message : "Failed to fetch job status");
+        if (statusTimer.current) window.clearInterval(statusTimer.current);
+        statusTimer.current = null;
       }
     }
-  }, [])
 
-  const { data: jobStatus, isLoading, error } = useQuery({
-    queryKey: ['job', params.id],
-    queryFn: async () => {
-      const response = await jobs.get(params.id)
-      return response.data
-    },
-    refetchInterval: (query) => {
-      // Keep polling if job is still running
-      const data = query.state.data as JobStatus | undefined
-      if (data?.status === 'queued' || data?.status === 'running') {
-        return 2500
+    async function tickStats() {
+      try {
+        const qs = await getQueueStats();
+        if (cancelled) return;
+        setQueueDepth(qs.queue_depth);
+        setRunning(qs.jobs_running);
+      } catch {
+        // ignore transient stats errors
       }
-      return false
-    },
-  })
-
-  const handleCopyReport = async () => {
-    const result = jobStatus?.status === 'done' ? jobStatus.result : cachedResult
-    if (!result?.report) return
-    
-    try {
-      const reportText = [
-        result.report.title && `# ${result.report.title}`,
-        result.report.technique && `## Technique\n${result.report.technique}`,
-        result.report.findings && `## Findings\n${result.report.findings}`,
-        result.report.impression && `## Impression\n${result.report.impression}`,
-        result.report.recommendations && `## Recommendations\n${result.report.recommendations}`,
-      ].filter(Boolean).join('\n\n')
-      
-      await navigator.clipboard.writeText(reportText)
-      toast.success('Report copied to clipboard!')
-    } catch {
-      toast.error('Failed to copy report')
     }
-  }
 
-  const handleExportDocx = async () => {
-    const result = jobStatus?.status === 'done' ? jobStatus.result : cachedResult
-    if (!result?.report) return
-    
-    setIsExporting(true)
-    try {
-      const includePatient = !!(result.patient && Object.keys(result.patient).length > 0)
-      await exportDocxDirect({
-        report: result.report,
-        patient: result.patient || {},
-        include_identifiers: includePatient,
-        filename: `${result.report.title || 'report'}.docx`,
-      })
-      toast.success('Report exported successfully!')
-    } catch (err: unknown) {
-      console.error('Export failed:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
-      toast.error(`Failed to export report: ${errorMessage}`)
-    } finally {
-      setIsExporting(false)
+    // kick off
+    tickStatus();
+    tickStats();
+    statusTimer.current = window.setInterval(tickStatus, 2000);
+    statsTimer.current = window.setInterval(tickStats, 4000);
+
+    return () => {
+      cancelled = true;
+      if (statusTimer.current) window.clearInterval(statusTimer.current);
+      if (statsTimer.current) window.clearInterval(statsTimer.current);
+      statusTimer.current = null;
+      statsTimer.current = null;
+    };
+  }, [id]);
+
+  // Progress computation
+  useEffect(() => {
+    if (!status) return;
+
+    // queued: 10% → 35%, show queue info
+    if (status.status === "queued") {
+      setProgress((prev) => (prev < 35 ? Math.min(35, Math.max(10, prev + 3)) : prev));
+      return;
     }
-  }
 
-  const handleExportViaLink = async () => {
-    const result = jobStatus?.status === 'done' ? jobStatus.result : cachedResult
-    if (!result?.report) return
-    
-    setIsExporting(true)
-    try {
-      const includePatient = !!(result.patient && Object.keys(result.patient).length > 0)
-      await exportDocxLink({
-        report: result.report,
-        patient: result.patient || {},
-        include_identifiers: includePatient,
-        filename: `${result.report.title || 'report'}.docx`,
-      })
-    } catch (err: unknown) {
-      console.error('Export link failed:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
-      toast.error(`Failed to get download link: ${errorMessage}`)
-    } finally {
-      setIsExporting(false)
+    // running: ramp from 35% to 95% over ~30–60s
+    if (status.status === "running") {
+      const started = startedAtMs.current ?? Date.now();
+      const elapsed = (Date.now() - started) / 1000; // seconds
+      // ease to 95% over ~45s
+      const pct = 35 + Math.min(60, elapsed) * (60 / 45); // ~+1.33%/s
+      setProgress(Math.min(95, pct));
+      return;
     }
-  }
 
-  // Show loading state while job is running
-  if (isLoading || (jobStatus?.status === 'queued' || jobStatus?.status === 'running')) {
+    if (status.status === "done") {
+      setProgress(100);
+    }
+    if (status.status === "error") {
+      setProgress(0);
+    }
+  }, [status]);
+
+  // Error UI
+  if (err || status?.status === "error") {
     return (
-      <div className="max-w-4xl mx-auto text-center py-12">
-        <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
-        <h2 className="text-xl font-semibold text-foreground mb-2">
-          {jobStatus?.status === 'queued' ? 'Job Queued' : 
-           jobStatus?.status === 'running' ? 'Processing Report' : 'Loading...'}
-        </h2>
-        <p className="text-muted-foreground">
-          {jobStatus?.status === 'queued' ? 'Your report is in the queue' :
-           jobStatus?.status === 'running' ? 'Please wait while we generate your report' :
-           'Loading report details...'}
-        </p>
+      <div className="max-w-3xl mx-auto py-16 text-center space-y-4">
+        <p className="text-red-600 font-medium">Report generation failed.</p>
+        <p className="text-sm text-muted-foreground">{err ?? status?.error ?? "Unknown error"}</p>
+        <div className="flex gap-2 justify-center">
+          <Button onClick={() => router.push("/app/templates")}>Back to Templates</Button>
+          <Button variant="outline" onClick={() => router.refresh()}>Retry</Button>
+        </div>
       </div>
-    )
+    );
   }
 
-  // Show error state
-  if (error || jobStatus?.status === 'error') {
+  // Loading / Polling UI
+  if (!status || status.status !== "done") {
+    const jobsAhead =
+      queueDepth != null && running != null ? Math.max(0, queueDepth - running) : null;
+
     return (
-      <div className="max-w-4xl mx-auto text-center py-12">
-        <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-        <h2 className="text-xl font-semibold text-foreground mb-2">
-          Report Error
-        </h2>
-        <p className="text-muted-foreground mb-6">
-          {jobStatus?.status === 'error' ? jobStatus.error : 'There was an error loading the report'}
-        </p>
-        {cachedResult && (
-          <div className="mb-6">
-            <p className="text-sm text-muted-foreground mb-4">
-              We have a cached version of this report available.
-            </p>
-            <Button onClick={() => setCachedResult(cachedResult)}>
-              Use Cached Result
-            </Button>
+      <div className="max-w-2xl mx-auto py-12 space-y-4">
+        <div className="flex items-center gap-3">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          <div className="text-sm text-muted-foreground">
+            {status?.status === "running" ? "Generating your report…" : "Queued… waiting to start"}
           </div>
-        )}
-        <Link href="/app/reports">
-          <Button variant="default">Back to Reports</Button>
-        </Link>
+        </div>
+        <Progress value={progress} />
+        <div className="text-xs text-muted-foreground">
+          {jobsAhead != null
+            ? `Queue: ~${jobsAhead} job${jobsAhead === 1 ? "" : "s"} ahead`
+            : "Fetching queue status…"}
+        </div>
+        <div className="text-xs text-muted-foreground">
+          Status: {status?.status ?? "checking"} • Job ID: {id}
+        </div>
       </div>
-    )
+    );
   }
 
-  // Get the result to display
-  const result = jobStatus?.status === 'done' ? jobStatus.result : cachedResult
-  
-  if (!result?.report) {
-    return (
-      <div className="max-w-4xl mx-auto text-center py-12">
-        <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-        <h2 className="text-xl font-semibold text-foreground mb-2">
-          Report Not Found
-        </h2>
-        <p className="text-muted-foreground mb-6">
-          The requested report could not be found or you don&apos;t have permission to view it.
-        </p>
-        <Link href="/app/reports">
-          <Button variant="default">Back to Reports</Button>
-        </Link>
-      </div>
-    )
-  }
-
+  // Done → render the report
+  const result = status.result!;
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/app/reports">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Reports
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Medical Report</h1>
-            <p className="text-muted-foreground">
-              {result.elapsed_ms ? `Generated in ${Math.round(result.elapsed_ms / 1000)}s` : 'Generated report'}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            onClick={handleCopyReport}
-            className="flex items-center space-x-2"
-          >
-            <Copy className="w-4 h-4" />
-            <span>Copy</span>
-          </Button>
-          <Button
-            variant="default"
-            onClick={handleExportDocx}
-            disabled={isExporting}
-            className="flex items-center space-x-2"
-          >
-            <Download className="w-4 h-4" />
-            <span>{isExporting ? 'Exporting...' : 'Download (.docx)'}</span>
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleExportViaLink}
-            disabled={isExporting}
-            className="flex items-center space-x-2"
-          >
-            <FileText className="w-4 h-4" />
-            <span>{isExporting ? 'Getting link...' : 'Get download link'}</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* Report Content */}
+    <div className="py-8">
       <ReportRenderer report={result.report} patient={result.patient} />
-
-      {/* Actions */}
-      <div className="flex justify-center space-x-4 pt-6">
-        <Link href="/app/templates">
-          <Button variant="default" className="flex items-center space-x-2">
-            <Plus className="w-4 h-4" />
-            <span>Back to Templates</span>
-          </Button>
-        </Link>
-      </div>
     </div>
-  )
+  );
 }

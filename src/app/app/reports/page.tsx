@@ -1,9 +1,10 @@
 'use client';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { jobs } from '@/lib/jobs';
+import { listRecent } from '@/lib/jobs';
 import type { RecentJobRow } from '@/types/jobs';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye } from 'lucide-react';
+import Link from 'next/link';
 
 export default function ReportsPage() {
   const [rows, setRows] = useState<RecentJobRow[]>([]);
@@ -13,17 +14,17 @@ export default function ReportsPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-   setErrorMsg(null);
-    const { data, error } = await jobs.recent(50);
-    if (error) {
-      setErrorMsg(error);
+    setErrorMsg(null);
+    try {
+      const data = await listRecent(50);
+      const list = (data?.jobs ?? []) as RecentJobRow[];
+      setRows(list);
+    } catch (error) {
+      setErrorMsg(error instanceof Error ? error.message : 'Failed to load reports');
       setRows([]);
+    } finally {
       setLoading(false);
-      return;
     }
-    const list = (data?.jobs ?? []) as RecentJobRow[];
-    setRows(list);
-    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export default function ReportsPage() {
         {rows.length === 0 && !loading && <p className="text-muted-foreground">No reports yet.</p>}
         {rows.map((r) => (
           <div key={r.job_id} className="rounded-lg border p-4 text-sm">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-start">
               <div>
                 <div className="font-medium">{r.template_id}</div>
                 <div className="text-muted-foreground">Job: {r.job_id}</div>
@@ -61,6 +62,14 @@ export default function ReportsPage() {
                 <div className="uppercase text-xs tracking-wide">{r.status}</div>
                 <div className="text-muted-foreground">{new Date(r.created_at).toLocaleString()}</div>
               </div>
+            </div>
+            <div className="mt-3 flex justify-end">
+              <Link href={`/app/report/${r.job_id}`}>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Eye className="w-4 h-4" />
+                  View Report
+                </Button>
+              </Link>
             </div>
           </div>
         ))}
