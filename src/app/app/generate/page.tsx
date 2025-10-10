@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
-import { jobs, api } from '@/lib/api'
+import { api } from '@/lib/api'
+import { jobs } from '@/lib/jobs'
 import { Template } from '@/types'
 import { GenReq } from '@/lib/types'
 import { toast } from 'sonner'
@@ -114,9 +115,16 @@ export default function GeneratePage() {
       // Enqueue the job
       const { data: enqueueResp, error: enqueueErr } = await jobs.enqueue(genReq)
       
-      if (enqueueErr || !enqueueResp?.job_id) {
+      if (enqueueErr) {
         console.error('enqueue failed', enqueueErr)
-        setError(enqueueErr?.message || 'Failed to start generation')
+        setError(enqueueErr)
+        setLoading(false)
+        return
+      }
+      
+      if (!enqueueResp || !enqueueResp.job_id) {
+        console.error('No job ID returned from server')
+        setError('No job ID returned from server')
         setLoading(false)
         return
       }
@@ -152,7 +160,7 @@ export default function GeneratePage() {
           const { data: job, error: jobErr } = await jobs.status(jobId)
           
           if (jobErr) {
-            setError(jobErr.message || 'Polling failed')
+            setError(jobErr || 'Polling failed')
             setLoading(false)
             return
           }
