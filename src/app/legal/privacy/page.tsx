@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText } from 'lucide-react'
 
+export const dynamic = 'force-dynamic';
+
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-muted to-background">

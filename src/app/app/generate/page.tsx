@@ -18,6 +18,8 @@ import { Template } from '@/types'
 import { GenReq } from '@/lib/types'
 import { toast } from 'sonner'
 import { ArrowLeft, FileText, User, Calendar, AlertCircle } from 'lucide-react'
+
+export const dynamic = 'force-dynamic';
 import { Switch } from '@/components/ui/switch'
 import Link from 'next/link'
 

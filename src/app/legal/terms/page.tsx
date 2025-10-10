@@ -49,12 +49,13 @@ This is a placeholder. Please contact support if you need the complete terms.`)
         return
       }
 
+      const profileData = {
+        id: user.id,
+        accepted_terms_at: new Date().toISOString(),
+      };
       const { error } = await supabase
         .from('profiles')
-        .upsert({
-          id: user.id,
-          accepted_terms_at: new Date().toISOString(),
-        })
+        .upsert(profileData as never)
 
       if (error) throw error
 
