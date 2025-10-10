@@ -1,5 +1,6 @@
 import { getSupabaseClient } from './supabase'
 import { StrictReport, PatientBlock } from './types'
+import { getAccessTokenOrThrow } from './auth'
 
 // Ensure BASE_URL has no trailing slash
 const EDGE_BASE_URL = process.env.NEXT_PUBLIC_EDGE_BASE!.replace(/\/$/, '')
@@ -203,6 +204,49 @@ export async function getJson<T>(path: string): Promise<ApiResponse<T>> {
 
 export { ApiError }
 
+/**
+ * Secure API fetch function that automatically includes authentication headers.
+ * This function should only be called from client-side code.
+ * 
+ * @param path - API endpoint path (e.g., "/v1/jobs/recent")
+ * @param init - Optional fetch init options
+ * @returns Promise<Response> - The fetch response
+ * @throws Error if not authenticated or request fails
+ */
+export async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
+  const token = await getAccessTokenOrThrow();
+  
+  // Ensure path starts with /
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const url = `${EDGE_BASE_URL}${normalizedPath}`;
+  
+  // Merge headers
+  const headers: Record<string, string> = {
+    'Authorization': `Bearer ${token}`,
+    'X-Client-Key': CLIENT_KEY,
+    ...init?.headers as Record<string, string>,
+  };
+  
+  // Add Content-Type if body is present and not already set
+  if (init?.body && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
+  
+  const response = await fetch(url, {
+    ...init,
+    headers,
+    cache: 'no-store',
+  });
+  
+  // Throw on non-2xx status codes
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => '');
+    throw new Error(`API request failed: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ''}`);
+  }
+  
+  return response;
+}
+
 export function extractFilenameFromCD(cd: string): string | null {
   const m = /filename\*=UTF-8''([^;]+)|filename="([^"]+)"/i.exec(cd || '');
   const raw = (m?.[1] || m?.[2] || '').trim();
@@ -216,20 +260,10 @@ export async function exportDocxDirect(payload: {
   include_identifiers?: boolean;
   filename?: string;
 }): Promise<void> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_EDGE_BASE}/v1/export/docx`, {
+  const res = await apiFetch('/v1/export/docx', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-client-key': process.env.NEXT_PUBLIC_PUBLIC_CLIENT_KEY ?? '',
-    },
     body: JSON.stringify(payload),
-    cache: 'no-store',
   });
-
-  if (!res.ok) {
-    const errText = await res.text().catch(() => '');
-    throw new Error(`Export failed ${res.status}: ${errText}`);
-  }
 
   const ct = res.headers.get('content-type') || '';
   // Ensure we didn't get HTML/JSON error back
@@ -259,20 +293,10 @@ export async function exportDocxLink(payload: {
   include_identifiers?: boolean;
   filename?: string;
 }): Promise<void> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_EDGE_BASE}/v1/export/docx/link`, {
+  const res = await apiFetch('/v1/export/docx/link', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-client-key': process.env.NEXT_PUBLIC_PUBLIC_CLIENT_KEY ?? '',
-    },
     body: JSON.stringify(payload),
-    cache: 'no-store',
   });
-
-  if (!res.ok) {
-    const errText = await res.text().catch(() => '');
-    throw new Error(`Export link failed ${res.status}: ${errText}`);
-  }
 
   const data = await res.json().catch(() => null);
   const url = data?.presigned_url as string | undefined;

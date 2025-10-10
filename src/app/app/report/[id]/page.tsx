@@ -43,7 +43,15 @@ export default function JobDetailPage() {
         }
       } catch (e: unknown) {
         if (cancelled) return;
-        setErr(e instanceof Error ? e.message : "Failed to fetch job status");
+        const errorMessage = e instanceof Error ? e.message : "Failed to fetch job status";
+        setErr(errorMessage);
+        
+        // If unauthenticated, redirect to login
+        if (errorMessage === 'unauthenticated') {
+          router.push('/login');
+          return;
+        }
+        
         if (statusTimer.current) window.clearInterval(statusTimer.current);
         statusTimer.current = null;
       }
@@ -55,8 +63,13 @@ export default function JobDetailPage() {
         if (cancelled) return;
         setQueueDepth(qs.queue_depth);
         setRunning(qs.jobs_running);
-      } catch {
-        // ignore transient stats errors
+      } catch (e: unknown) {
+        // If unauthenticated, redirect to login
+        if (e instanceof Error && e.message === 'unauthenticated') {
+          router.push('/login');
+          return;
+        }
+        // ignore other transient stats errors
       }
     }
 
