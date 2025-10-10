@@ -5,13 +5,13 @@ global.fetch = jest.fn()
 
 // Mock Supabase
 jest.mock('@/lib/supabase', () => ({
-  supabase: {
+  getSupabaseClient: jest.fn().mockReturnValue({
     auth: {
       getSession: jest.fn().mockResolvedValue({
         data: { session: { access_token: 'mock-token' } }
       })
     }
-  }
+  })
 }))
 
 describe('API Client', () => {
@@ -36,7 +36,9 @@ describe('API Client', () => {
         ok: true,
         status: 200,
         json: () => Promise.resolve({ data: 'test' }),
-        headers: new Map([['content-type', 'application/json']])
+        headers: {
+          get: jest.fn().mockReturnValue('application/json')
+        }
       }
 
       ;(fetch as jest.Mock).mockResolvedValue(mockResponse)
@@ -67,7 +69,9 @@ describe('API Client', () => {
         ok: true,
         status: 200,
         json: () => Promise.resolve({ data: 'success' }),
-        headers: new Map([['content-type', 'application/json']])
+        headers: {
+          get: jest.fn().mockReturnValue('application/json')
+        }
       }
 
       ;(fetch as jest.Mock)
@@ -98,7 +102,9 @@ describe('API Client', () => {
         ok: false,
         status: 400,
         json: () => Promise.resolve({ error: 'Bad Request' }),
-        headers: new Map([['content-type', 'application/json']])
+        headers: {
+          get: jest.fn().mockReturnValue('application/json')
+        }
       }
 
       ;(fetch as jest.Mock).mockResolvedValue(mockResponse)
@@ -118,7 +124,9 @@ describe('API Client', () => {
         ok: true,
         status: 200,
         json: () => Promise.resolve({ data: 'test' }),
-        headers: new Map([['content-type', 'application/json']])
+        headers: {
+          get: jest.fn().mockReturnValue('application/json')
+        }
       }
 
       ;(fetch as jest.Mock).mockResolvedValue(mockResponse)
@@ -140,7 +148,9 @@ describe('API Client', () => {
         ok: true,
         status: 200,
         json: () => Promise.resolve({ data: 'test' }),
-        headers: new Map([['content-type', 'application/json']])
+        headers: {
+          get: jest.fn().mockReturnValue('application/json')
+        }
       }
 
       ;(fetch as jest.Mock).mockResolvedValue(mockResponse)

@@ -33,8 +33,17 @@ export default function GeneratePage() {
     queryKey: ['template', templateId],
     queryFn: async () => {
       if (!templateId) return null
-      const response = await api.get<Template>(`/v1/templates/${templateId}`)
-      return response.data
+      try {
+        const response = await api.get<Template>(`/v1/templates/${templateId}`)
+        return response.data
+      } catch (err: unknown) {
+        // If unauthenticated, redirect to login
+        if (err instanceof Error && err.message === 'unauthenticated') {
+          router.push('/login')
+          return null
+        }
+        throw err
+      }
     },
     enabled: !!templateId,
   })
@@ -123,6 +132,13 @@ export default function GeneratePage() {
     } catch (err: unknown) {
       console.error('Generate error:', err)
       const errorMessage = err instanceof Error ? err.message : 'Failed to start report generation'
+      
+      // If unauthenticated, redirect to login
+      if (errorMessage === 'unauthenticated') {
+        router.push('/login')
+        return
+      }
+      
       setError(errorMessage)
       toast.error(errorMessage)
     } finally {

@@ -5,10 +5,12 @@ import { getRecentJobs } from '@/lib/jobs';
 import { Button } from '@/components/ui/button';
 import { Loader2, Eye } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
 export default function ReportsPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<RecentJobRow[]>([]);
   const [err, setErr] = useState<string | null>(null);
@@ -20,11 +22,18 @@ export default function ReportsPage() {
       const jobs = await getRecentJobs(50);
       setRows(jobs);
     } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : 'Failed to load reports');
+      const errorMessage = e instanceof Error ? e.message : 'Failed to load reports';
+      setErr(errorMessage);
+      
+      // If unauthenticated, redirect to login
+      if (errorMessage === 'unauthenticated') {
+        router.push('/login');
+        return;
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     load();
