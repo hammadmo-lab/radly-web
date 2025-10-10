@@ -1,81 +1,73 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { useQuery } from '@tanstack/react-query'
-import { getJson } from '@/lib/api'
+import * as jobsApi from '@/lib/jobs'
 import { toast } from 'sonner'
 import { Search, FileText, Plus, Calendar, User, AlertCircle, Copy } from 'lucide-react'
 
-type Job = {
-  job_id?: string;
-  template_id?: string;
-  created_at?: string;
-  status?: string;
-};
-
-type RecentJobsResponse = {
-  jobs?: Job[];
-  count: number;
-};
-
-type ReportSummary = {
+type Row = {
   id: string;
-  title: string;
+  createdAt?: string;
+  templateId?: string;
   status: string;
-  createdAt?: Date | null;
+  title?: string;
 };
-
-function mapJobsToReports(jobs: Job[] = []): ReportSummary[] {
-  return jobs.map((job) => ({
-    id: job.job_id ?? crypto.randomUUID(),
-    title: job.template_id ?? "Report",
-    status: job.status ?? "done",
-    createdAt: job.created_at ? new Date(job.created_at) : null,
-  }));
-}
 
 export default function ReportsPage() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filteredReports, setFilteredReports] = useState<ReportSummary[]>([])
+  const [rows, setRows] = useState<Row[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const { data: apiResponse, isLoading, refetch } = useQuery({
-    queryKey: ['reports'],
-    queryFn: async () => {
-      const response = await getJson<RecentJobsResponse>('/v1/jobs/recent?limit=50')
-      return response
-    },
-  })
-
-  // Extract data and error from API response
-  const jobs = apiResponse?.data?.jobs
-  const apiError = apiResponse?.error
-
-  // Filter reports based on search term
-  React.useEffect(() => {
-    if (jobs) {
-      const reports = mapJobsToReports(jobs)
-      const filtered = reports.filter(report =>
-        report.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.status?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      setFilteredReports(filtered)
+  async function load() {
+    setLoading(true);
+    setErr(null);
+    const { data, error } = await jobsApi.recent(50);
+    if (error) {
+      // Treat 404 as empty list (older backends might not have /jobs/recent)
+      if (error.status === 404) {
+        setRows([]);
+        setLoading(false);
+        return;
+      }
+      setErr(`${error.message}: ${error.status}`);
+      setLoading(false);
+      return;
     }
-  }, [jobs, searchTerm])
+    const mapped = (data?.jobs ?? []).map((j: unknown) => ({
+      id: String((j as { job_id?: string; id?: string }).job_id || (j as { job_id?: string; id?: string }).id || ''),
+      createdAt: (j as { created_at?: string; time?: string }).created_at || (j as { created_at?: string; time?: string }).time || '',
+      templateId: (j as { template_id?: string }).template_id || '',
+      status: (j as { status?: string }).status || 'done',
+      title: ((j as { result?: { report?: { title?: string } }; title?: string }).result?.report?.title) || (j as { result?: { report?: { title?: string } }; title?: string }).title || 'Report',
+    })) as Row[];
+    setRows(mapped);
+    setLoading(false);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  // Filter rows based on search term
+  const filteredRows = rows.filter(row =>
+    row.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    row.status?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    row.templateId?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Handle retry
   const handleRetry = () => {
-    refetch()
+    load();
   }
 
   // Copy error details to clipboard
   const copyErrorDetails = () => {
-    const errorText = `Status: ${apiError?.status}\nMessage: ${apiError?.message}${apiError?.body ? `\nBody: ${apiError.body}` : ''}`
-    navigator.clipboard.writeText(errorText)
-    toast.success('Error details copied to clipboard')
+    const errorText = `Error: ${err}`;
+    navigator.clipboard.writeText(errorText);
+    toast.success('Error details copied to clipboard');
   }
 
   return (
@@ -97,14 +89,14 @@ export default function ReportsPage() {
       </div>
 
       {/* Error Display */}
-      {apiError && (
+      {err && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-start space-x-3">
             <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
             <div className="flex-1">
               <h3 className="text-sm font-medium text-red-800">Failed to load reports</h3>
               <p className="text-sm text-red-700 mt-1">
-                Status: {apiError.status} - {apiError.message}
+                {err}
               </p>
               <div className="mt-3 flex space-x-2">
                 <Button 
@@ -142,7 +134,7 @@ export default function ReportsPage() {
       </div>
 
       {/* Reports List */}
-      {isLoading ? (
+      {loading ? (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
             <Card key={i} className="animate-pulse">
@@ -159,7 +151,7 @@ export default function ReportsPage() {
             </Card>
           ))}
         </div>
-      ) : !jobs || jobs.length === 0 ? (
+      ) : !rows || rows.length === 0 ? (
         <div className="text-center py-12">
           <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -182,26 +174,26 @@ export default function ReportsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredReports.map((report) => (
-            <Card key={report.id} className="hover:bg-muted/60 transition border-border">
+          {filteredRows.map((row) => (
+            <Card key={row.id} className="hover:bg-muted/60 transition border-border">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-lg">
-                      {report.title || 'Untitled Report'}
+                      {row.title || 'Untitled Report'}
                     </CardTitle>
                     <CardDescription className="flex items-center space-x-4 mt-1">
                       <span className="flex items-center space-x-1">
                         <Calendar className="w-3 h-3" />
-                        <span>{report.createdAt ? report.createdAt.toLocaleDateString() : 'Unknown date'}</span>
+                        <span>{row.createdAt ? new Date(row.createdAt).toLocaleDateString() : 'Unknown date'}</span>
                       </span>
                       <span className="flex items-center space-x-1">
                         <User className="w-3 h-3" />
-                        <span>Status: {report.status || 'Unknown'}</span>
+                        <span>Status: {row.status || 'Unknown'}</span>
                       </span>
                     </CardDescription>
                   </div>
-                  <Link href={`/app/report/${report.id}`}>
+                  <Link href={`/app/report/${row.id}`}>
                     <Button variant="outline" size="sm">
                       View Report
                     </Button>
@@ -213,13 +205,13 @@ export default function ReportsPage() {
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Job ID</p>
                     <p className="text-foreground text-sm line-clamp-2">
-                      {report.id || 'Unknown'}
+                      {row.id || 'Unknown'}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Status</p>
+                    <p className="text-sm font-medium text-muted-foreground">Template</p>
                     <p className="text-foreground text-sm line-clamp-3">
-                      {report.status || 'Unknown'}
+                      {row.templateId || 'Unknown'}
                     </p>
                   </div>
                 </div>
