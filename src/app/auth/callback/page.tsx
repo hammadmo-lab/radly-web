@@ -15,7 +15,7 @@ export default function AuthCallback() {
       try {
         const supabase = getSupabaseClient();
         // This reads the code from the URL and finishes PKCE
-        const { error } = await supabase.auth.exchangeCodeForSession();
+        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
         if (error) throw error;
         router.replace('/app/reports');
       } catch (e: unknown) {
