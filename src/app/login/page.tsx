@@ -22,7 +22,7 @@ function getOrigin(): string | null {
 
 function toErrorMessage(e: unknown): string {
   if (typeof e === 'string') return e;
-  if (e && typeof e === 'object' && 'message' in e && typeof (e as any).message === 'string') {
+  if (e && typeof e === 'object' && 'message' in e && typeof (e as Record<string, unknown>).message === 'string') {
     return (e as { message: string }).message;
   }
   return 'Unexpected error';
