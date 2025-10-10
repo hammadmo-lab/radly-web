@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import type { AuthError } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { getSupabaseClient } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 
 export const dynamic = 'force-dynamic';
@@ -38,6 +38,7 @@ export default function LoginPage() {
     try {
       const origin = getOrigin();
       const redirectTo = origin ? `${origin}/auth/callback` : undefined;
+      const supabase = getSupabaseClient();
 
       // Allow Supabase's actual return where data.url can be string | null
       const { data, error }: {

@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'default-no-store';
 
 function hasMessage(x: unknown): x is { message: string } {
   if (typeof x !== "object" || x === null) return false;
@@ -21,7 +25,7 @@ function getWindowHash(): string | null {
   return window.location.hash;
 }
 
-export default function AuthCallback() {
+function AuthCallbackContent() {
   const router = useRouter();
   const search = useSearchParams();
   const supabase = useMemo(() => createClient(), []);
@@ -79,5 +83,17 @@ export default function AuthCallback() {
     <main className="p-8">
       <p className="text-sm text-muted-foreground">{message}</p>
     </main>
+  );
+}
+
+export default function AuthCallback() {
+  return (
+    <Suspense fallback={
+      <main className="p-8">
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      </main>
+    }>
+      <AuthCallbackContent />
+    </Suspense>
   );
 }

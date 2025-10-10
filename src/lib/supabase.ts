@@ -10,5 +10,20 @@ export function createClient() {
   return createBrowserClient(url, key);
 }
 
-// Legacy export for backward compatibility
-export const supabase = createClient();
+// Lazy initialization to avoid SSR issues
+let _supabase: ReturnType<typeof createClient> | null = null;
+
+export function getSupabaseClient() {
+  if (!_supabase) {
+    _supabase = createClient();
+  }
+  return _supabase;
+}
+
+// Legacy export for backward compatibility - now lazy
+export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+  get(target, prop) {
+    const client = getSupabaseClient();
+    return client[prop as keyof typeof client];
+  }
+});

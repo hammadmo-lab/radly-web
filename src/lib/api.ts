@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { getSupabaseClient } from './supabase'
 import { StrictReport, PatientBlock } from './types'
 
 // Ensure BASE_URL has no trailing slash
@@ -88,6 +88,7 @@ async function apiRequest<T = unknown>(
   const url = `${EDGE_BASE_URL}${normalizedEndpoint}`
   
   // Get session for authorization
+  const supabase = getSupabaseClient()
   const { data: { session } } = await supabase.auth.getSession()
   
   const requestHeaders: Record<string, string> = {
