@@ -1,77 +1,98 @@
 'use client';
+
+import React, { useState } from 'react';
+import type { AuthError, Session } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;               // MUST be a number (or false), not a function
+export const revalidate = 0;
 export const fetchCache = 'default-no-store';
 
-import { useCallback, useState } from "react";
-import { createClient } from "@/lib/supabase";
+type OAuthProvider = 'google' | 'apple';
 
 function getOrigin(): string | null {
   if (typeof window === 'undefined') return null;
-  return window.location.origin;
+  try {
+    return window.location.origin;
+  } catch {
+    return null;
+  }
 }
 
+// Type guards / helpers
 function hasMessage(x: unknown): x is { message: string } {
-  return typeof x === 'object' && x !== null && typeof (x as any).message === 'string';
+  return typeof x === 'object' && x !== null && 'message' in x && typeof (x as Record<string, unknown>).message === 'string';
 }
-
-function getErrMessage(e: unknown) {
+function errToMessage(e: unknown): string {
   if (typeof e === 'string') return e;
   if (hasMessage(e)) return e.message;
-  return 'Authentication failed.';
+  return 'Unexpected error';
 }
 
 export default function LoginPage() {
-  const supabase = createClient();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<OAuthProvider | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const buildRedirectTo = () => {
-    const origin = getOrigin();
-    return origin ? `${origin}/auth/callback` : undefined;
-  };
-
-  const handleSignIn = useCallback(async (provider: 'google' | 'apple') => {
-    setLoading(true);
-    setError(null);
+  async function handleSignIn(provider: OAuthProvider) {
+    setLoading(provider);
+    setErrorMsg(null);
     try {
-      const redirectTo = buildRedirectTo();
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo,
-          queryParams: { prompt: 'select_account' },
-        },
-      });
+      const origin = getOrigin();
+      const redirectTo = origin ? `${origin}/auth/callback` : undefined;
+
+      const { data, error }: { data: { url?: string } | null; error: AuthError | null } =
+        await supabase.auth.signInWithOAuth({
+          provider,
+          options: {
+            redirectTo,
+            queryParams: { prompt: 'select_account' },
+          },
+        });
+
       if (error) throw error;
-    } catch (err) {
-      setError(getErrMessage(err));
+
+      // In some environments Supabase returns a URL to navigate to
+      if (typeof window !== 'undefined' && data?.url) {
+        window.location.assign(data.url);
+      }
+    } catch (e: unknown) {
+      setErrorMsg(errToMessage(e));
     } finally {
-      setLoading(false);
+      setLoading(null);
     }
-  }, [supabase]);
+  }
 
   return (
-    <main className="mx-auto max-w-sm p-6 space-y-3">
-      {error && (
-        <div className="text-red-600 text-sm mb-4 p-3 bg-red-50 rounded">
-          {error}
+    <main className="min-h-screen flex items-center justify-center p-6">
+      <div className="w-full max-w-md space-y-4">
+        <h1 className="text-2xl font-semibold text-center">Sign in to Radly</h1>
+
+        {errorMsg && (
+          <p role="alert" className="text-sm text-red-600 border border-red-200 rounded-md p-2">
+            {errorMsg}
+          </p>
+        )}
+
+        <div className="grid gap-3">
+          <Button
+            onClick={() => handleSignIn('google')}
+            disabled={loading !== null}
+            aria-busy={loading === 'google'}
+          >
+            {loading === 'google' ? 'Redirecting…' : 'Continue with Google'}
+          </Button>
+
+          <Button
+            onClick={() => handleSignIn('apple')}
+            disabled={loading !== null}
+            aria-busy={loading === 'apple'}
+            variant="secondary"
+          >
+            {loading === 'apple' ? 'Redirecting…' : 'Continue with Apple'}
+          </Button>
         </div>
-      )}
-      <button 
-        className="btn btn-primary w-full" 
-        onClick={() => handleSignIn('google')}
-        disabled={loading}
-      >
-        {loading ? 'Signing in...' : 'Continue with Google'}
-      </button>
-      <button 
-        className="btn w-full" 
-        onClick={() => handleSignIn('apple')}
-        disabled={loading}
-      >
-        {loading ? 'Signing in...' : 'Continue with Apple'}
-      </button>
+      </div>
     </main>
   );
 }
