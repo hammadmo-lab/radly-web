@@ -1,10 +1,9 @@
-// src/app/login/page.tsx
 'use client';
-
-import { useCallback, useMemo, useState } from 'react';
-import { getSupabaseClient } from '@/lib/supabase';
-
 export const dynamic = 'force-dynamic';
+
+import { useMemo, useState } from 'react';
+import type { OAuthResponse } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/lib/supabase';
 
 export default function Login() {
   const [busy, setBusy] = useState(false);
@@ -18,7 +17,7 @@ export default function Login() {
   };
 
   const signInGoogle = withBusy(async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error }: OAuthResponse = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: toCallback(),
@@ -29,7 +28,7 @@ export default function Login() {
   });
 
   const signInApple = withBusy(async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error }: OAuthResponse = await supabase.auth.signInWithOAuth({
       provider: 'apple',
       options: { redirectTo: toCallback() },
     });

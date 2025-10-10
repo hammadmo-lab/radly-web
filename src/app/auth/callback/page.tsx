@@ -1,11 +1,10 @@
-// src/app/auth/callback/page.tsx
 'use client';
+export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { AuthError, Session } from '@supabase/supabase-js';
 import { getSupabaseClient } from '@/lib/supabase';
-
-export const dynamic = 'force-dynamic'; // client page
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -17,7 +16,15 @@ export default function AuthCallback() {
         const supabase = getSupabaseClient();
 
         // IMPORTANT: explicit exchange (do NOT rely on detectSessionInUrl)
-        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+        const { error }: {
+          data: {
+            session: Session | null;
+            provider_token?: string | null;
+            provider_refresh_token?: string | null;
+          } | null;
+          error: AuthError | null;
+        } = await supabase.auth.exchangeCodeForSession(window.location.href);
+        
         if (error) {
           console.error(error);
           setMsg(`Sign-in failed: ${error.message}`);
@@ -26,9 +33,10 @@ export default function AuthCallback() {
 
         setMsg('Signed in. Redirecting…');
         router.replace('/app/reports');
-      } catch (e: any) {
+      } catch (e: unknown) {
         console.error(e);
-        setMsg(`Sign-in failed: ${e?.message ?? 'unknown error'}`);
+        const errorMessage = e instanceof Error ? e.message : 'unknown error';
+        setMsg(`Sign-in failed: ${errorMessage}`);
       }
     })();
   }, [router]);
