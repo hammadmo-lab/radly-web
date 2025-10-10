@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { useAuthToken } from '@/hooks/useAuthToken'
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,13 +10,14 @@ import { FileText, Zap, Shield, Users } from "lucide-react"
 export default function Home() {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
+  const { status } = useAuthToken()
 
-  async function goToApp() {
+  function goToApp() {
     if (busy) return
     setBusy(true)
     try {
-      const { data } = await supabase.auth.getSession()
-      router.push(data.session ? '/app/templates' : '/login')
+      const href = status === 'authenticated' ? '/app/templates' : '/login'
+      router.push(href)
     } finally {
       setBusy(false)
     }
@@ -42,7 +43,7 @@ export default function Home() {
             onClick={goToApp}
             disabled={busy}
           >
-            {busy ? 'Checking…' : 'Get Started'}
+            {busy ? 'Loading…' : 'Get Started'}
           </Button>
         </div>
       </header>
@@ -65,7 +66,7 @@ export default function Home() {
               onClick={goToApp}
               disabled={busy}
             >
-              {busy ? 'Checking…' : 'Start Generating Reports'}
+              {busy ? 'Loading…' : 'Start Generating Reports'}
             </Button>
             <Button 
               size="lg" 
@@ -169,7 +170,7 @@ export default function Home() {
             onClick={goToApp}
             disabled={busy}
           >
-            {busy ? 'Checking…' : 'Get Started Today'}
+            {busy ? 'Loading…' : 'Get Started Today'}
           </Button>
         </div>
       </section>
