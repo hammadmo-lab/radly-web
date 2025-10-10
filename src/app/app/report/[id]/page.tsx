@@ -86,7 +86,7 @@ export default function JobDetailPage() {
       statusTimer.current = null;
       statsTimer.current = null;
     };
-  }, [id]);
+  }, [id, router]);
 
   // Progress computation
   useEffect(() => {

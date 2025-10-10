@@ -18,8 +18,8 @@ export default function AuthCallback() {
         const { error } = await supabase.auth.exchangeCodeForSession();
         if (error) throw error;
         router.replace('/app/reports');
-      } catch (e: any) {
-        setErr(e?.message || 'Sign-in failed: invalid flow state');
+      } catch (e: unknown) {
+        setErr(e instanceof Error ? e.message : 'Sign-in failed: invalid flow state');
       }
     })();
   }, [router]);
