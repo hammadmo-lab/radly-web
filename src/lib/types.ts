@@ -34,7 +34,12 @@ export type GeneratePayload = {
   options?: Record<string, unknown>
 }
 
-export type EnqueueResp = { job_id: string; status: 'queued' | string }
+export type EnqueueResp = { job_id: string; status?: string }
+
+export type ApiResult<T> = { 
+  data: T | null; 
+  error?: { status: number; message: string; body?: unknown } 
+}
 
 export type JobDoneResult = {
   report: {

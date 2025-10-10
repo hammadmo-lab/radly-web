@@ -112,10 +112,13 @@ export default function GeneratePage() {
       console.debug('Enqueuing job with:', genReq)
       
       // Enqueue the job
-      const { data: enqueueResp } = await jobs.enqueue(genReq)
+      const { data: enqueueResp, error: enqueueErr } = await jobs.enqueue(genReq)
       
-      if (!enqueueResp.job_id) {
-        throw new Error('No job ID returned from server')
+      if (enqueueErr || !enqueueResp?.job_id) {
+        console.error('enqueue failed', enqueueErr)
+        setError(enqueueErr?.message || 'Failed to start generation')
+        setLoading(false)
+        return
       }
 
       const jobId = enqueueResp.job_id
@@ -131,31 +134,43 @@ export default function GeneratePage() {
       const pollJob = async () => {
         try {
           console.debug('Polling job status for:', jobId)
-          const { data: jobStatus } = await jobs.get(jobId)
+          const { data: job, error: jobErr } = await jobs.status(jobId)
           
-          if (jobStatus.status === 'queued') {
+          if (jobErr) {
+            setError(jobErr.message || 'Polling failed')
+            setLoading(false)
+            return
+          }
+          
+          if (!job) {
+            console.warn('No job data received, continuing to poll...')
+            setTimeout(pollJob, 2500)
+            return
+          }
+          
+          if (job.status === 'queued') {
             setStage('queued')
-          } else if (jobStatus.status === 'running') {
+          } else if (job.status === 'running') {
             setStage('running')
-          } else if (jobStatus.status === 'done') {
+          } else if (job.status === 'done' && job.result) {
             setStage('finalizing')
             // Brief delay to show finalizing stage
             setTimeout(() => {
-              sessionStorage.setItem('radly:lastResult', JSON.stringify(jobStatus.result))
+              sessionStorage.setItem('radly:lastResult', JSON.stringify(job.result))
               toast.success('Report generated successfully!')
               router.replace(`/app/report/${jobId}`)
             }, 400)
             return
-          } else if (jobStatus.status === 'error') {
+          } else if (job.status === 'error') {
             setStage('error')
             setLoading(false)
-            setError(jobStatus.error || 'Report generation failed')
-            toast.error(jobStatus.error || 'Report generation failed')
+            setError(job.error || 'Report generation failed')
+            toast.error(job.error || 'Report generation failed')
             return
           }
 
           // Continue polling if not done/error
-          if (jobStatus.status === 'queued' || jobStatus.status === 'running') {
+          if (job.status === 'queued' || job.status === 'running') {
             setTimeout(pollJob, 2500)
           }
         } catch (err: unknown) {

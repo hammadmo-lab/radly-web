@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { GenReq, EnqueueResp, JobStatus, StrictReport, PatientBlock } from './types'
+import { GenReq, EnqueueResp, JobStatus, StrictReport, PatientBlock, ApiResult } from './types'
 
 // Ensure BASE_URL has no trailing slash
 const EDGE_BASE_URL = process.env.NEXT_PUBLIC_EDGE_BASE!.replace(/\/$/, '')
@@ -200,7 +200,20 @@ export async function getJson<T>(path: string): Promise<ApiResponse<T>> {
 }
 
 export const jobs = {
-  enqueue: (body: GenReq) => api.post<EnqueueResp>('/v1/generate/async', body),
+  enqueue: async (req: GenReq): Promise<ApiResult<EnqueueResp>> => {
+    const response = await api.post<EnqueueResp>('/v1/generate/async', req)
+    return {
+      data: response.data,
+      error: response.error
+    }
+  },
+  status: async (jobId: string): Promise<ApiResult<JobStatus>> => {
+    const response = await api.get<JobStatus>(`/v1/jobs/${jobId}`)
+    return {
+      data: response.data,
+      error: response.error
+    }
+  },
   get: (id: string) => api.get<JobStatus>(`/v1/jobs/${id}`),
 }
 
