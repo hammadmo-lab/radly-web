@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
-import { apiFetch } from '@/lib/api'
+import { authedFetch } from '@/lib/api'
 import { enqueueJob } from '@/lib/jobs'
 import { GenReq } from '@/lib/types'
 import { toast } from 'sonner'
@@ -33,7 +33,15 @@ export default function GeneratePage() {
     queryFn: async () => {
       if (!templateId) return null
       try {
-        const template = await apiFetch(`/v1/templates/${templateId}`)
+        const res = await authedFetch(`${process.env.NEXT_PUBLIC_EDGE_BASE}/v1/templates/${templateId}`)
+        if (!res.ok) {
+          if (res.status === 401) {
+            router.push('/login')
+            return null
+          }
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+        }
+        const template = await res.json()
         return template
       } catch (err: unknown) {
         // If unauthenticated, redirect to login

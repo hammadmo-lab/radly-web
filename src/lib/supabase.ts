@@ -1,29 +1,21 @@
-// src/lib/supabase.ts
-'use client';
+import { createClient } from '@supabase/supabase-js';
 
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+let browserClient: ReturnType<typeof createClient> | null = null;
 
-let _client: SupabaseClient | null = null;
-
-/** Always return the same browser client instance. */
-export function getSupabaseClient(): SupabaseClient {
-  if (_client) return _client;
-
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  if (!url || !anon) {
-    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY');
+export function getSupabaseClient() {
+  if (typeof window === 'undefined') {
+    throw new Error('getSupabaseClient() called during SSR');
   }
-
-  _client = createClient(url, anon, {
-    auth: {
-      persistSession: true,
-      storageKey: 'radly-auth',       // <- must be stable across pages
-      detectSessionInUrl: false,      // <- we handle URL exchange manually
-      flowType: 'pkce',
-      autoRefreshToken: true,
-    },
-  });
-
-  return _client;
+  if (!browserClient) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    browserClient = createClient(url, anon, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false, // we will call exchangeCodeForSession manually
+      },
+    });
+  }
+  return browserClient;
 }
