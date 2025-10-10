@@ -42,7 +42,7 @@ export default function ReportsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filteredReports, setFilteredReports] = useState<ReportSummary[]>([])
 
-  const { data: apiResponse, isLoading, error, refetch } = useQuery({
+  const { data: apiResponse, isLoading, refetch } = useQuery({
     queryKey: ['reports'],
     queryFn: async () => {
       const response = await getJson<RecentJobsResponse>('/v1/jobs/recent?limit=50')
@@ -53,18 +53,18 @@ export default function ReportsPage() {
   // Extract data and error from API response
   const jobs = apiResponse?.data?.jobs
   const apiError = apiResponse?.error
-  const reports = jobs ? mapJobsToReports(jobs) : []
 
   // Filter reports based on search term
   React.useEffect(() => {
-    if (reports) {
+    if (jobs) {
+      const reports = mapJobsToReports(jobs)
       const filtered = reports.filter(report =>
         report.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         report.status?.toLowerCase().includes(searchTerm.toLowerCase())
       )
       setFilteredReports(filtered)
     }
-  }, [reports, searchTerm])
+  }, [jobs, searchTerm])
 
   // Handle retry
   const handleRetry = () => {
