@@ -1,7 +1,8 @@
 import { supabase } from './supabase'
 import { GenReq, EnqueueResp, JobStatus, StrictReport, PatientBlock } from './types'
 
-const EDGE_BASE_URL = process.env.NEXT_PUBLIC_EDGE_BASE!
+// Ensure BASE_URL has no trailing slash
+const EDGE_BASE_URL = process.env.NEXT_PUBLIC_EDGE_BASE!.replace(/\/$/, '')
 const CLIENT_KEY = process.env.NEXT_PUBLIC_PUBLIC_CLIENT_KEY!
 
 interface ApiOptions {
@@ -13,8 +14,12 @@ interface ApiOptions {
 }
 
 interface ApiResponse<T = unknown> {
-  data: T
-  error?: string
+  data: T | null
+  error?: {
+    status: number
+    message: string
+    body?: string
+  }
   status: number
 }
 
@@ -27,6 +32,23 @@ class ApiError extends Error {
     super(message)
     this.name = 'ApiError'
   }
+}
+
+// Helper function to normalize paths and add /v1/ prefix
+function normalizePath(path: string): string {
+  // Remove leading slash if present
+  let normalized = path.startsWith('/') ? path.slice(1) : path
+  
+  // Add /v1/ prefix for reports and jobs if not already present
+  if ((normalized === 'reports' || normalized === 'jobs' || normalized.startsWith('reports/') || normalized.startsWith('jobs/')) && !normalized.startsWith('v1/')) {
+    normalized = `v1/${normalized}`
+  }
+  
+  // Convert double slashes to single slashes
+  normalized = normalized.replace(/\/+/g, '/')
+  
+  // Ensure leading slash
+  return normalized.startsWith('/') ? normalized : `/${normalized}`
 }
 
 async function fetchWithTimeout(
@@ -62,7 +84,8 @@ async function apiRequest<T = unknown>(
     retry = 1,
   } = options
 
-  const url = `${EDGE_BASE_URL}${endpoint}`
+  const normalizedEndpoint = normalizePath(endpoint)
+  const url = `${EDGE_BASE_URL}${normalizedEndpoint}`
   
   // Get session for authorization
   const { data: { session } } = await supabase.auth.getSession()
@@ -114,7 +137,16 @@ async function apiRequest<T = unknown>(
           : `HTTP ${response.status}: ${response.statusText}${text ? ` — ${text}` : ''}`
         
         console.warn(`API Error ${response.status}: ${errorMessage}`)
-        throw new ApiError(errorMessage, response.status, response)
+        
+        return {
+          data: null,
+          error: {
+            status: response.status,
+            message: errorMessage,
+            body: text
+          },
+          status: response.status,
+        }
       }
 
       return {
@@ -135,14 +167,14 @@ async function apiRequest<T = unknown>(
   }
 
   // If we get here, all retries failed
-  if (lastError instanceof ApiError) {
-    throw lastError
+  return {
+    data: null,
+    error: {
+      status: lastError instanceof ApiError ? lastError.status : 0,
+      message: lastError?.message || 'Request failed',
+    },
+    status: lastError instanceof ApiError ? lastError.status : 0,
   }
-
-  throw new ApiError(
-    lastError?.message || 'Request failed',
-    0
-  )
 }
 
 export const api = {
@@ -160,6 +192,11 @@ export const api = {
   
   delete: <T = unknown>(endpoint: string, options?: Omit<ApiOptions, 'method' | 'body'>) =>
     apiRequest<T>(endpoint, { ...options, method: 'DELETE' }),
+}
+
+// Helper function for JSON requests with path normalization
+export async function getJson<T>(path: string): Promise<ApiResponse<T>> {
+  return api.get<T>(path)
 }
 
 export const jobs = {
