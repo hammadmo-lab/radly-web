@@ -1,9 +1,31 @@
+'use client'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileText, Zap, Shield, Users } from "lucide-react"
 
 export default function Home() {
+  const router = useRouter()
+  const [busy, setBusy] = useState(false)
+
+  async function goToApp() {
+    if (busy) return
+    setBusy(true)
+    try {
+      const { data } = await supabase.auth.getSession()
+      router.push(data.session ? '/app/templates' : '/login')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function goToDemo() {
+    router.push('/demo')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-muted to-background">
       {/* Header */}
@@ -15,9 +37,13 @@ export default function Home() {
             </div>
             <span className="text-xl font-bold text-primary">Radly</span>
           </div>
-          <Link href="/login">
-            <Button variant="default">Get Started</Button>
-          </Link>
+          <Button 
+            variant="default" 
+            onClick={goToApp}
+            disabled={busy}
+          >
+            {busy ? 'Checking…' : 'Get Started'}
+          </Button>
         </div>
       </header>
 
@@ -32,12 +58,21 @@ export default function Home() {
             in seconds. Streamline your workflow with intelligent templates and automated generation.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/login">
-              <Button size="lg" variant="default" className="w-full sm:w-auto">
-                Start Generating Reports
-              </Button>
-            </Link>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto">
+            <Button 
+              size="lg" 
+              variant="default" 
+              className="w-full sm:w-auto"
+              onClick={goToApp}
+              disabled={busy}
+            >
+              {busy ? 'Checking…' : 'Start Generating Reports'}
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="w-full sm:w-auto"
+              onClick={goToDemo}
+            >
               View Demo
             </Button>
           </div>
@@ -127,11 +162,15 @@ export default function Home() {
           <p className="text-xl mb-8 opacity-90">
             Join thousands of healthcare professionals who trust Radly for their reporting needs.
           </p>
-          <Link href="/login">
-            <Button size="lg" variant="secondary" className="bg-background text-primary hover:bg-muted">
-              Get Started Today
-            </Button>
-          </Link>
+          <Button 
+            size="lg" 
+            variant="secondary" 
+            className="bg-background text-primary hover:bg-muted"
+            onClick={goToApp}
+            disabled={busy}
+          >
+            {busy ? 'Checking…' : 'Get Started Today'}
+          </Button>
         </div>
       </section>
 
