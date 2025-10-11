@@ -12,8 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
 import { authedFetch } from '@/lib/api'
-import { enqueueJob } from '@/lib/jobs'
-import { GenReq } from '@/lib/types'
+import { createJob } from '@/lib/jobs'
 import { toast } from 'sonner'
 import { ArrowLeft, FileText, User, Calendar, AlertCircle } from 'lucide-react'
 
@@ -96,21 +95,26 @@ export default function GeneratePage() {
           }
         : {} // empty object -> backend treats as "no patient block"
 
-      // Build GenReq from form data
-      const genReq: GenReq = {
+      // Build payload for createJob
+      const payload = {
         template_id: templateId || data.templateId,
-        patient, // {} or filled
-        findings_text: data.findings,
-        history: data.indication,
-        technique: data.technique || undefined,
-        options: {},
+        report: {
+          title: template?.name || 'Medical Report',
+          findings: data.findings,
+          impression: data.indication,
+          recommendations: data.technique,
+        },
+        patient: data.includePatient ? patient : undefined,
+        findings: data.findings,
+        impression: data.indication,
+        recommendations: data.technique,
       }
 
-      console.debug('Enqueuing job with:', genReq)
+      console.debug('Creating job with:', payload)
       
-      // Enqueue the job using new typed helper
-      const enqueueResp = await enqueueJob(genReq)
-      const jobId = enqueueResp.job_id
+      // Create the job using new worker-based helper
+      const createResp = await createJob(payload)
+      const jobId = createResp.job_id
       
       console.debug('Job enqueued with ID:', jobId)
       
@@ -120,7 +124,7 @@ export default function GeneratePage() {
         local.unshift({
           job_id: jobId,
           status: 'queued',
-          template_id: genReq.template_id,
+          template_id: payload.template_id,
           title: 'Generating…',
           created_at: Date.now()
         })
