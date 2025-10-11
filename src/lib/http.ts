@@ -3,7 +3,7 @@
 import { API_BASE, RADLY_CLIENT_KEY } from '@/lib/config';
 import { getAccessToken } from '@/utils/supabase/client';
 
-type Opts = RequestInit & { json?: any };
+type Opts = RequestInit & { json?: unknown };
 
 async function authHeaders(init?: RequestInit) {
   const token = await getAccessToken().catch(() => null);

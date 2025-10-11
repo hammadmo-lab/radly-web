@@ -1,5 +1,5 @@
 // lib/reports.ts
-import { createClient as createBrowserSupabase } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 
 export type RecentReportRow = {
   job_id: string;
@@ -14,8 +14,6 @@ export type RecentReportRow = {
  * Safe for 'use client' components. Never imports `next/headers`.
  */
 export async function getRecentReportsClient(limit = 50): Promise<RecentReportRow[]> {
-  const supabase = createBrowserSupabase();
-
   const { data: auth, error: authErr } = await supabase.auth.getUser();
   if (authErr) throw new Error(`Auth error: ${authErr.message}`);
   if (!auth?.user) {

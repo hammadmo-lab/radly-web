@@ -1,7 +1,7 @@
 // src/lib/edge.ts
 'use client';
 
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 
 const EDGE_BASE =
   process.env.NEXT_PUBLIC_EDGE_BASE?.replace(/\/+$/, '') || 'https://edge.radly.app';
@@ -27,7 +27,6 @@ export async function edgeFetch<T = unknown>(
   const wantAuth = init.auth !== false;
   let authHeader: Record<string, string> = {};
   if (wantAuth) {
-    const supabase = createClient();
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token;
     if (token) authHeader = { Authorization: `Bearer ${token}` };
