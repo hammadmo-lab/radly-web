@@ -1,45 +1,19 @@
 'use client';
-
-import { getSupabaseClient } from '@/lib/supabase';
-import * as React from 'react';
-
-export const dynamic = 'force-dynamic';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
-  const redirectTo = typeof window !== 'undefined'
-    ? `${window.location.origin}/auth/callback`
-    : undefined;
-
-  const signIn = async (provider: 'google' | 'apple') => {
-    const supabase = getSupabaseClient();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo },
-    });
-    if (error) alert(error.message);
-  };
-
-  const magic = async () => {
-    const email = prompt('Enter your email for the magic link:')?.trim();
-    if (!email) return;
-    const supabase = getSupabaseClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: redirectTo },
-    });
-    if (error) alert(error.message);
-    else alert('Check your inbox for the magic link.');
-  };
+  const router = useRouter();
+  
+  useEffect(() => {
+    router.replace('/auth/signin');
+  }, [router]);
 
   return (
-    <main className="p-8 space-y-4">
-      <h1 className="text-2xl font-semibold">Sign in</h1>
-      <div className="space-x-4">
-        <button onClick={() => signIn('google')}>Continue with Google</button>
-        <button onClick={() => signIn('apple')}>Continue with Apple</button>
-      </div>
-      <div>
-        <button onClick={magic}>Send me a magic link</button>
+    <main className="min-h-screen grid place-items-center p-6">
+      <div className="w-full max-w-md rounded-2xl p-6 shadow border bg-white">
+        <h1 className="text-2xl font-semibold mb-6">Sign in</h1>
+        <div>Redirecting...</div>
       </div>
     </main>
   );

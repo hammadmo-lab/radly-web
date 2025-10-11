@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getSupabaseClient } from "@/lib/supabase";
+import { createBrowserSupabase } from '@/lib/supabase/client'
 
 type AuthStatus = "loading" | "authenticated" | "signed_out";
 
@@ -12,7 +12,7 @@ export function useAuthToken() {
 
   useEffect(() => {
     let cancelled = false;
-    const supabase = getSupabaseClient();
+    const supabase = createBrowserSupabase();
 
     const init = async () => {
       const { data } = await supabase.auth.getSession();

@@ -1,49 +1,117 @@
-"use client";
-import { signIn } from "next-auth/react";
+'use client'
+
+import { useState } from 'react'
+import { createBrowserSupabase } from '@/lib/supabase/client'
+
+const allowMagic = process.env.NEXT_PUBLIC_ALLOW_MAGIC_LINK === '1'
+const allowGoogle = process.env.NEXT_PUBLIC_ALLOW_GOOGLE === '1'
+const allowApple = process.env.NEXT_PUBLIC_ALLOW_APPLE === '1'
 
 export default function SignInPage() {
+  const supabase = createBrowserSupabase()
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const origin =
+    typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || ''
+
+  async function signInWithGoogle() {
+    setLoading(true)
+    try {
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${origin}/auth/callback?next=/`,
+          // Supports PKCE Authorization Code by default
+        },
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function signInWithApple() {
+    setLoading(true)
+    try {
+      await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: `${origin}/auth/callback?next=/`,
+        },
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function sendMagicLink(e: React.FormEvent) {
+    e.preventDefault()
+    if (!email) return
+    setLoading(true)
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${origin}/auth/callback?next=/`,
+        },
+      })
+      if (error) {
+        alert(error.message)
+      } else {
+        alert('Check your email for the magic link.')
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <main className="min-h-screen grid place-items-center p-6">
-      <div className="w-full max-w-sm rounded-2xl shadow p-6 space-y-4">
-        <h1 className="text-2xl font-semibold">Sign in</h1>
-        <button
-          className="w-full rounded-md border px-4 py-2 hover:bg-gray-50 transition-colors"
-          onClick={() => signIn("google", { callbackUrl: "/" })}
-        >
-          Continue with Google
-        </button>
-        {/* Render Apple button only if APPLE_* envs exist at build time */}
-        {process.env.NEXT_PUBLIC_HAS_APPLE === "1" && (
-          <button
-            className="w-full rounded-md border px-4 py-2 hover:bg-gray-50 transition-colors"
-            onClick={() => signIn("apple", { callbackUrl: "/" })}
-          >
-            Continue with Apple
-          </button>
-        )}
-        {/* Optional: magic link form only if Email provider configured */}
-        {process.env.NEXT_PUBLIC_HAS_EMAIL === "1" && (
-          <form
-            className="space-y-2"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const email = new FormData(e.currentTarget).get("email") as string;
-              await signIn("email", { email, callbackUrl: "/" });
-            }}
-          >
-            <input 
-              name="email" 
-              type="email" 
-              required 
-              placeholder="you@example.com" 
-              className="w-full rounded-md border px-3 py-2" 
+    <main className="min-h-screen flex items-center justify-center bg-white">
+      <div className="w-full max-w-md rounded-2xl border p-8 shadow-sm">
+        <h1 className="text-2xl font-semibold mb-6 text-center">Sign in</h1>
+
+        <div className="space-y-3">
+          {allowGoogle && (
+            <button
+              onClick={signInWithGoogle}
+              disabled={loading}
+              className="w-full rounded-xl border py-2 text-sm hover:bg-gray-50 transition-colors"
+            >
+              Continue with Google
+            </button>
+          )}
+
+          {allowApple && (
+            <button
+              onClick={signInWithApple}
+              disabled={loading}
+              className="w-full rounded-xl border py-2 text-sm hover:bg-gray-50 transition-colors"
+            >
+              Continue with Apple
+            </button>
+          )}
+        </div>
+
+        {allowMagic && (
+          <form onSubmit={sendMagicLink} className="mt-6 space-y-3">
+            <label className="block text-sm">Email</label>
+            <input
+              type="email"
+              className="w-full rounded-xl border px-3 py-2 text-sm"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
-            <button className="w-full rounded-md border px-4 py-2 hover:bg-gray-50 transition-colors">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-xl bg-black text-white py-2 text-sm hover:bg-gray-800 transition-colors"
+            >
               Send me a magic link
             </button>
           </form>
         )}
       </div>
     </main>
-  );
+  )
 }

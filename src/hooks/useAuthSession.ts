@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { getSupabaseClient } from "@/lib/supabase";
+import { createBrowserSupabase } from '@/lib/supabase/client'
 
 export function useAuthSession() {
-  const supabase = useMemo(() => getSupabaseClient(), []);
+  const supabase = useMemo(() => createBrowserSupabase(), []);
   const [mounted, setMounted] = useState(false);
   const [session, setSession] = useState<Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]>(null);
 
