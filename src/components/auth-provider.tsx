@@ -26,6 +26,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
+    }).catch((error) => {
+      console.error('Error getting session:', error)
+      setSession(null)
+      setUser(null)
+      setLoading(false)
     })
 
     // Listen for auth changes
@@ -41,8 +46,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signOut = async () => {
-    const supabase = createBrowserSupabase()
-    await supabase.auth.signOut()
+    try {
+      const supabase = createBrowserSupabase()
+      await supabase.auth.signOut()
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
   }
 
   const value = {
