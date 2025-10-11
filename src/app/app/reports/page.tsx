@@ -5,7 +5,7 @@ import { Loader2, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { RecentReportRow } from '@/lib/reports';
-import { getRecentReports } from '@/lib/reports';
+import { getRecentReportsClient } from '@/lib/reports';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,10 +19,10 @@ export default function ReportsPage() {
     try {
       setLoading(true);
       setErr(null);
-      const reports = await getRecentReports(50);
+      const reports = await getRecentReportsClient(50);
       setRows(reports);
-    } catch (e: any) {
-      const message = e?.message || 'Failed to load reports';
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to load reports';
       setErr(message);
       if (message.toLowerCase().includes('401')) {
         router.push('/login');
