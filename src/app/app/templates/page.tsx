@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { authedFetch } from '@/lib/api'
+import { apiFetch } from '@/lib/api'
 import { Search, FileText, Plus, RefreshCw } from 'lucide-react'
 
 export const dynamic = 'force-dynamic';
@@ -42,7 +42,7 @@ export default function TemplatesPage() {
     queryKey: ['templates'],
     queryFn: async () => {
       try {
-        const res = await authedFetch(`${process.env.NEXT_PUBLIC_EDGE_BASE}/v1/templates`)
+        const res = await apiFetch('/templates')
         if (!res.ok) {
           if (res.status === 401) {
             router.push('/login')
