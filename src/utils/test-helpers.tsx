@@ -19,30 +19,11 @@ export const mockUser: User = {
   is_anonymous: false,
   phone: '',
   email_confirmed_at: '2024-01-01T00:00:00Z',
-  phone_confirmed_at: null,
+  phone_confirmed_at: undefined,
   confirmed_at: '2024-01-01T00:00:00Z',
-  recovery_sent_at: null,
+  recovery_sent_at: undefined,
   last_sign_in_at: '2024-01-01T00:00:00Z',
-  banned_until: null,
   is_sso_user: false,
-  deleted_at: null,
-  is_super_admin: false,
-  email_change_sent_at: null,
-  email_change: null,
-  email_change_token_current: null,
-  email_change_confirm_status: 0,
-  phone_change: null,
-  phone_change_sent_at: null,
-  phone_change_token_current: null,
-  phone_change_confirm_status: 0,
-  reauthentication_sent_at: null,
-  reauthentication_token_current: null,
-  reauthentication_confirm_status: 0,
-  is_anonymous: false,
-  provider: 'email',
-  providers: ['email'],
-  created_at: '2024-01-01T00:00:00Z',
-  updated_at: '2024-01-01T00:00:00Z',
 }
 
 export const mockSession: Session = {
@@ -89,7 +70,7 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   session?: Session | null
   loading?: boolean
   queryClient?: QueryClient
-  profile?: any
+  profile?: Record<string, unknown>
 }
 
 export function renderWithProviders(
@@ -204,7 +185,7 @@ export const createMockQueryClient = () =>
     defaultOptions: {
       queries: {
         retry: false,
-        cacheTime: 0,
+        gcTime: 0,
       },
       mutations: {
         retry: false,
@@ -213,7 +194,7 @@ export const createMockQueryClient = () =>
   })
 
 // Accessibility testing utilities
-export const getByRole = (container: HTMLElement, role: string, options?: any) => {
+export const getByRole = (container: HTMLElement, role: string) => {
   return container.querySelector(`[role="${role}"]`)
 }
 
