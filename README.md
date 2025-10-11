@@ -57,48 +57,35 @@ A production-ready Next.js 15 + TypeScript application for AI-powered medical re
    ```
 
 3. **Set up environment variables**
-   ```bash
-   cp .env.example .env.local
-   ```
-   
-   Update `.env.local` with your configuration:
+   Create a `.env.local` file with your configuration:
    ```env
-   # NextAuth Configuration (Required)
-   NEXTAUTH_URL=http://localhost:3000
-   NEXTAUTH_SECRET=your-nextauth-secret-key-here
-   
-   # Google OAuth Provider (Required)
-   GOOGLE_CLIENT_ID=your-google-client-id
-   GOOGLE_CLIENT_SECRET=your-google-client-secret
-   
-   # Apple OAuth Provider (Optional)
-   APPLE_CLIENT_ID=your-apple-client-id
-   APPLE_CLIENT_SECRET=your-apple-client-secret
-   
-   # Email Provider (Optional)
-   EMAIL_SERVER=smtp://username:password@smtp.example.com:587
-   EMAIL_FROM=noreply@example.com
-   
-   # Public flags for conditional UI rendering
-   NEXT_PUBLIC_HAS_APPLE=0
-   NEXT_PUBLIC_HAS_EMAIL=0
-   
-   # Legacy Supabase variables (can be removed if not using Supabase for other features)
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   # Supabase Configuration (Required)
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   
+   # Optional: Service Role Key (for server-only operations)
+   # SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   
+   # Optional UI toggles
+   NEXT_PUBLIC_ALLOW_MAGIC_LINK=1
+   NEXT_PUBLIC_ALLOW_GOOGLE=1
+   NEXT_PUBLIC_ALLOW_APPLE=1
+   
+   # Site URL for redirects
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
+   
+   # Legacy variables (can be removed if not using)
    NEXT_PUBLIC_EDGE_BASE=https://edge.radly.app
    NEXT_PUBLIC_PUBLIC_CLIENT_KEY=your_client_key
    NEXT_PUBLIC_APP_NAME=Radly
    ```
 
-   **Important OAuth Setup:**
-   - In Google Cloud Console, create a "Web application" OAuth client
-   - Add these Authorized redirect URIs:
-     - `http://localhost:3000/api/auth/callback/google` (development)
-     - `https://radly.app/api/auth/callback/google` (production)
-     - `https://<preview>.vercel.app/api/auth/callback/google` (for each Vercel preview)
-   - Do NOT use implicit flow or JS origins that cause `#access_token` - we want server-side callback with `?code=...`
+   **Important Supabase Setup:**
+   - In Supabase Dashboard → Authentication → URL Configuration:
+     - Site URL: `http://localhost:3000` (dev) and `https://YOUR_DOMAIN` (prod)
+     - Redirect URLs: add `http://localhost:3000/auth/callback` and `https://YOUR_DOMAIN/auth/callback`
+   - Enable Google and Apple providers in Supabase Dashboard → Authentication → Providers
+   - Configure OAuth credentials in Supabase (not in environment variables)
 
 4. **Run the development server**
    ```bash
@@ -143,12 +130,12 @@ src/
 ## Key Features
 
 ### Authentication
-- NextAuth.js with PKCE authorization code flow
-- Google OAuth integration (no implicit token flow)
+- Supabase Auth with PKCE authorization code flow
+- Google OAuth integration
 - Apple OAuth integration (optional)
-- Magic Link email authentication (optional)
+- Magic Link email authentication (OTP)
 - Protected routes with middleware
-- Custom styled sign-in page at `/auth/signin`
+- Clean, centered sign-in page at `/auth/signin`
 - Comprehensive error handling
 
 ### Report Generation

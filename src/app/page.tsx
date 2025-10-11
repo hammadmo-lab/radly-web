@@ -24,7 +24,7 @@ export default function Home() {
     if (busy) return;
     setBusy(true);
     try {
-      const href = authed ? "/app/templates" : "/login";
+      const href = authed ? "/app/templates" : "/auth/signin";
       router.push(href);
     } finally {
       setBusy(false);

@@ -1,21 +1,37 @@
-import { withAuth } from "next-auth/middleware";
+import { NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import type { NextRequest } from 'next/server'
 
-export default withAuth(
-  function middleware(req) {
-    // Add any additional middleware logic here if needed
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
-  }
-);
+export async function middleware(req: NextRequest) {
+  const res = NextResponse.next()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return req.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            res.cookies.set(name, value, options)
+          })
+        },
+      },
+    }
+  )
+
+  // Refresh session if expired
+  await supabase.auth.getSession()
+  
+  return res
+}
 
 export const config = {
   matcher: [
-    // Protect all app routes except auth pages
-    "/app/:path*",
+    // Protect these paths
+    '/app/:path*',
     // Allow auth pages and API routes
-    "/((?!auth|api/auth|_next/static|_next/image|favicon.ico).*)",
+    '/((?!auth|api|_next/static|_next/image|favicon.ico).*)',
   ],
-};
+}
