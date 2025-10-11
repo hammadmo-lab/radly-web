@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { apiFetch } from '@/lib/api'
+import { listTemplates } from '@/lib/templates'
 import { Search, FileText, Plus, RefreshCw } from 'lucide-react'
 
 export const dynamic = 'force-dynamic';
@@ -42,25 +42,17 @@ export default function TemplatesPage() {
     queryKey: ['templates'],
     queryFn: async () => {
       try {
-        const res = await apiFetch('/templates')
-        if (!res.ok) {
-          if (res.status === 401) {
-            router.push('/login')
-            return []
-          }
-          throw new Error(`HTTP ${res.status}: ${res.statusText}`)
-        }
-        const raw = await res.json()
+        const raw = await listTemplates()
         
         // Normalize to UI shape that ALWAYS has .name
-        const normalized: UITemplate[] = raw.map((t: ApiTemplate) => ({
+        const normalized: UITemplate[] = raw.map((t) => ({
           id: t.template_id ?? '',
-          name: t.title ?? '',
-          modality: t.modality ?? '',
-          bodySystem: t.body_system ?? '',
-          description: t.description ?? '',
-          created_at: t.created_at ?? '',
-          updated_at: t.updated_at ?? '',
+          name: t.name ?? '',
+          modality: '', // Add default values for missing fields
+          bodySystem: '',
+          description: '',
+          created_at: '',
+          updated_at: '',
         }))
         
         return normalized
