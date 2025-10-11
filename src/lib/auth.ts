@@ -1,6 +1,5 @@
 import Google from "next-auth/providers/google";
 import Apple from "next-auth/providers/apple";
-import Email from "next-auth/providers/email";
 import type { NextAuthOptions } from "next-auth";
 
 const {
@@ -36,9 +35,11 @@ const providers = [google];
 if (APPLE_CLIENT_ID && APPLE_CLIENT_SECRET) {
   providers.push(Apple({ clientId: APPLE_CLIENT_ID, clientSecret: APPLE_CLIENT_SECRET }));
 }
-// Only include Email if configured
+// Only include Email if configured - import dynamically to avoid nodemailer dependency
 if (EMAIL_SERVER && EMAIL_FROM) {
-  providers.push(Email({ server: EMAIL_SERVER, from: EMAIL_FROM }));
+  // Dynamic import to avoid bundling nodemailer when not needed
+  const EmailProvider = require("next-auth/providers/email").default;
+  providers.push(EmailProvider({ server: EMAIL_SERVER, from: EMAIL_FROM }));
 }
 
 export const authOptions: NextAuthOptions = {
