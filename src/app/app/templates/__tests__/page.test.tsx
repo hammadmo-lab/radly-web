@@ -2,6 +2,7 @@ import React from 'react'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import TemplatesPage from '@/app/app/templates/page'
+import { listTemplates } from '@/lib/templates'
 
 // Mock the templates API
 const mockTemplates = [
@@ -179,8 +180,7 @@ describe('TemplatesPage', () => {
 
   describe('Error Handling', () => {
     it('should handle template loading error', async () => {
-      const { listTemplates } = require('@/lib/templates')
-      listTemplates.mockRejectedValueOnce(new Error('Failed to fetch templates'))
+      jest.mocked(listTemplates).mockRejectedValueOnce(new Error('Failed to fetch templates'))
 
       render(
         <TestWrapper>
@@ -195,8 +195,7 @@ describe('TemplatesPage', () => {
     })
 
     it('should retry loading when retry button is clicked', async () => {
-      const { listTemplates } = require('@/lib/templates')
-      listTemplates.mockRejectedValueOnce(new Error('Failed to fetch templates'))
+      jest.mocked(listTemplates).mockRejectedValueOnce(new Error('Failed to fetch templates'))
         .mockResolvedValueOnce(mockTemplates)
 
       render(
@@ -220,8 +219,7 @@ describe('TemplatesPage', () => {
 
   describe('Empty States', () => {
     it('should show no templates message when no templates are available', async () => {
-      const { listTemplates } = require('@/lib/templates')
-      listTemplates.mockResolvedValueOnce([])
+      jest.mocked(listTemplates).mockResolvedValueOnce([])
 
       render(
         <TestWrapper>

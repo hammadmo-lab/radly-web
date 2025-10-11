@@ -2,6 +2,7 @@ import React from 'react'
 import { render, screen, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthGuard } from '@/components/auth-guard'
+import { useAuth } from '@/components/auth-provider'
 
 // Mock Next.js router
 const mockPush = jest.fn()
@@ -38,7 +39,7 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => {
 }
 
 // Get mocked functions
-const mockUseAuth = require('@/components/auth-provider').useAuth
+const mockUseAuth = jest.mocked(useAuth)
 
 describe('AuthGuard', () => {
   beforeEach(() => {

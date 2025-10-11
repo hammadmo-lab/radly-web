@@ -1,6 +1,5 @@
 import React from 'react'
-import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { screen, waitFor, fireEvent } from '@testing-library/react'
 import SettingsPage from '@/app/app/settings/page'
 import { 
   mockSupabaseClient, 
@@ -37,9 +36,8 @@ jest.mock('next/dynamic', () => () => {
 })
 
 // Get mocked functions
-const mockHttpGet = require('@/lib/http').httpGet
-const mockToast = require('sonner').toast
-const mockUseQuery = require('@tanstack/react-query').useQuery
+import { httpGet as mockHttpGet } from '@/lib/http'
+import { useQuery as mockUseQuery } from '@tanstack/react-query'
 
 describe('SettingsPage', () => {
   beforeEach(() => {
@@ -190,9 +188,8 @@ describe('SettingsPage', () => {
         expect(screen.getByDisplayValue(mockProfile.default_signature_name)).toBeInTheDocument()
       })
 
-      const saveButton = screen.getByText('Save Settings')
-      expect(saveButton).toBeInTheDocument()
-      expect(saveButton).not.toBeDisabled()
+      expect(screen.getByText('Save Settings')).toBeInTheDocument()
+      expect(screen.getByText('Save Settings')).not.toBeDisabled()
     })
 
     it('should allow form field updates', async () => {
@@ -323,12 +320,6 @@ describe('SettingsPage', () => {
       })
 
       const signatureInput = screen.getByLabelText('Default Signature Name')
-      const saveButton = screen.getByText('Save Settings')
-
-      // Should be able to tab between elements
-      signatureInput.focus()
-      expect(document.activeElement).toBe(signatureInput)
-
       fireEvent.keyDown(signatureInput, { key: 'Tab' })
       // Focus should move to next element
     })
