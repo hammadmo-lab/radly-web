@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
-import { apiFetch } from '@/lib/api'
+import { httpGet } from '@/lib/http'
 import { enqueueJob } from '@/lib/jobs'
 import { toast } from 'sonner'
 import { ArrowLeft, FileText, User, Calendar, AlertCircle } from 'lucide-react'
@@ -32,15 +32,7 @@ export default function GeneratePage() {
     queryFn: async () => {
       if (!templateId) return null
       try {
-        const res = await apiFetch(`/templates/${templateId}`)
-        if (!res.ok) {
-          if (res.status === 401) {
-            router.push('/login')
-            return null
-          }
-          throw new Error(`HTTP ${res.status}: ${res.statusText}`)
-        }
-        const template = await res.json()
+        const template = await httpGet(`/v1/templates/${templateId}`)
         return template
       } catch (err: unknown) {
         // If unauthenticated, redirect to login

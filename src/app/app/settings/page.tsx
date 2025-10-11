@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/components/auth-provider'
 import { getSupabaseClient } from '@/lib/supabase'
-import { apiFetch } from '@/lib/api'
+import { httpGet } from '@/lib/http'
 import { UserProfile } from '@/types'
 import { toast } from 'sonner'
 import { User, Settings, Shield, Wifi } from 'lucide-react'
@@ -50,10 +50,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const testConnectivity = async () => {
       try {
-        const res = await apiFetch('/health')
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}: ${res.statusText}`)
-        }
+        await httpGet('/v1/health')
         setConnectivityStatus('connected')
       } catch {
         setConnectivityStatus('error')
@@ -174,6 +171,7 @@ export default function SettingsPage() {
               value={defaultDateFormat}
               onChange={(e) => setDefaultDateFormat(e.target.value)}
               className="w-full px-3 py-2 border border-input rounded-md bg-background"
+              aria-label="Default date format"
             >
               <option value="MM/DD/YYYY">MM/DD/YYYY</option>
               <option value="DD/MM/YYYY">DD/MM/YYYY</option>
