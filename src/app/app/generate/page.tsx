@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
-import { authedFetch } from '@/lib/api'
-import { createJob } from '@/lib/jobs'
+import { apiFetch } from '@/lib/api'
+import { enqueueJob } from '@/lib/jobs'
 import { toast } from 'sonner'
 import { ArrowLeft, FileText, User, Calendar, AlertCircle } from 'lucide-react'
 
@@ -32,7 +32,7 @@ export default function GeneratePage() {
     queryFn: async () => {
       if (!templateId) return null
       try {
-        const res = await authedFetch(`${process.env.NEXT_PUBLIC_EDGE_BASE}/v1/templates/${templateId}`)
+        const res = await apiFetch(`/templates/${templateId}`)
         if (!res.ok) {
           if (res.status === 401) {
             router.push('/login')
@@ -95,7 +95,7 @@ export default function GeneratePage() {
           }
         : {} // empty object -> backend treats as "no patient block"
 
-      // Build payload for createJob
+      // Build payload for enqueueJob
       const payload = {
         template_id: templateId || data.templateId,
         report: {
@@ -104,16 +104,13 @@ export default function GeneratePage() {
           impression: data.indication,
           recommendations: data.technique,
         },
-        patient: data.includePatient ? patient : undefined,
-        findings: data.findings,
-        impression: data.indication,
-        recommendations: data.technique,
+        patient: data.includePatient ? patient : {},
       }
 
       console.debug('Creating job with:', payload)
       
-      // Create the job using new worker-based helper
-      const createResp = await createJob(payload)
+      // Enqueue the job using new API helper
+      const createResp = await enqueueJob(payload)
       const jobId = createResp.job_id
       
       console.debug('Job enqueued with ID:', jobId)

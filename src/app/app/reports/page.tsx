@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { RecentJobRow } from '@/lib/jobs';
 import { getRecentJobs } from '@/lib/jobs';
+import { createSupabaseBrowser } from "@/utils/supabase/browser";
 
 export const dynamic = 'force-dynamic';
 
@@ -14,6 +15,16 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<RecentJobRow[]>([]);
   const [err, setErr] = useState<string | null>(null);
+
+  // Authentication guard
+  useEffect(() => {
+    const supabase = createSupabaseBrowser();
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) {
+        router.push("/login");
+      }
+    });
+  }, [router]);
 
   const load = useCallback(async () => {
     try {

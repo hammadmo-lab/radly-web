@@ -1,65 +1,61 @@
 // src/lib/jobs.ts
-'use client';
+"use client";
 
-import { edgeFetch } from './edge';
+import { apiFetch } from "./api";
 
-// Types used in UI
 export type RecentJobRow = {
   job_id: string;
-  status: 'queued' | 'running' | 'done' | 'error';
+  status: string;
   template_id?: string | null;
-  created_at?: number;
 };
 
-export type CreateJobPayload = {
-  // match backend expectations
-  template_id?: string; // if you have templated flows
-  report?: Record<string, unknown>;
-  patient?: Record<string, unknown>;
-  findings?: string;
-  impression?: string;
-  recommendations?: string;
-  // include any other fields your backend expects
-};
-
-export async function createJob(payload: CreateJobPayload) {
-  // MUST be POST
-  const res = await edgeFetch<{ job_id: string; status: string }>(
-    '/v1/generate/async',
-    {
-      method: 'POST',
-      body: JSON.stringify(payload),
-      auth: true,
-    }
-  );
-  return res;
-}
-
-export async function getJob(jobId: string) {
-  return edgeFetch<{ job_id: string; status: RecentJobRow['status'] }>(
-    `/v1/jobs/${encodeURIComponent(jobId)}`,
-    { method: 'GET', auth: true }
-  );
+export async function enqueueJob(payload: {
+  template_id: string;
+  report: Record<string, unknown>;
+  patient: Record<string, unknown>;
+}) {
+  const res = await apiFetch("/generate/async", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`HTTP ${res.status}: ${text}`);
+  }
+  return res.json() as Promise<{ status: string; job_id: string }>;
 }
 
 export async function getRecentJobs(limit = 50) {
-  return edgeFetch<RecentJobRow[]>(
-    `/v1/jobs/recent?limit=${encodeURIComponent(limit)}`,
-    { method: 'GET', auth: true }
-  );
+  const res = await apiFetch(`/jobs/recent?limit=${limit}`);
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`HTTP ${res.status}: ${text}`);
+  }
+  return (await res.json()) as RecentJobRow[];
+}
+
+export async function getJob(jobId: string) {
+  const res = await apiFetch(`/jobs/${encodeURIComponent(jobId)}`);
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`HTTP ${res.status}: ${text}`);
+  }
+  return res.json();
 }
 
 export async function getQueueStats() {
-  return edgeFetch<{ queue_depth: number; jobs_running: number }>(
-    '/v1/queue/stats',
-    { method: 'GET', auth: true }
-  );
+  const res = await apiFetch('/queue/stats');
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`HTTP ${res.status}: ${text}`);
+  }
+  return res.json();
 }
 
 // Type exports for compatibility
 export type JobStatusResponse = {
   job_id: string;
-  status: RecentJobRow['status'];
+  status: string;
   result?: Record<string, unknown>;
   error?: string;
 };
