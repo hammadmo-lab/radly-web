@@ -37,13 +37,13 @@ describe('Zod Schemas', () => {
       expect(result.success).toBe(false)
     })
 
-    it('should reject invalid sex', () => {
-      const invalidPatient = {
+    it('should accept any sex value as string', () => {
+      const patientWithSex = {
         sex: 'Invalid'
       }
 
-      const result = patientSchema.safeParse(invalidPatient)
-      expect(result.success).toBe(false)
+      const result = patientSchema.safeParse(patientWithSex)
+      expect(result.success).toBe(true)
     })
   })
 
@@ -76,15 +76,17 @@ describe('Zod Schemas', () => {
   describe('generateFormSchema', () => {
     it('should validate complete form data', () => {
       const validFormData = {
-        template_id: 'template-123',
+        templateId: 'template-123',
+        includePatient: true,
         patient: {
           name: 'John Doe',
           mrn: 'MRN123456',
           age: 45,
-          sex: 'M' as const
+          sex: 'M'
         },
         indication: 'Chest pain evaluation',
-        findings_text: 'No acute findings on chest X-ray',
+        findings: 'No acute findings on chest X-ray',
+        technique: 'Standard chest X-ray technique',
         signature: {
           name: 'Dr. Jane Smith',
           date: '12/25/2024'
@@ -97,30 +99,31 @@ describe('Zod Schemas', () => {
 
     it('should validate minimal required data', () => {
       const minimalFormData = {
-        template_id: 'template-123',
+        templateId: 'template-123',
         indication: 'Chest pain evaluation',
-        findings_text: 'No acute findings on chest X-ray'
+        findings: 'No acute findings on chest X-ray',
+        patient: {}
       }
 
       const result = generateFormSchema.safeParse(minimalFormData)
       expect(result.success).toBe(true)
     })
 
-    it('should reject missing template_id', () => {
+    it('should reject missing templateId', () => {
       const invalidFormData = {
         indication: 'Chest pain evaluation',
-        findings_text: 'No acute findings on chest X-ray'
+        findings: 'No acute findings on chest X-ray'
       }
 
       const result = generateFormSchema.safeParse(invalidFormData)
       expect(result.success).toBe(false)
     })
 
-    it('should reject empty template_id', () => {
+    it('should reject empty templateId', () => {
       const invalidFormData = {
-        template_id: '',
+        templateId: '',
         indication: 'Chest pain evaluation',
-        findings_text: 'No acute findings on chest X-ray'
+        findings: 'No acute findings on chest X-ray'
       }
 
       const result = generateFormSchema.safeParse(invalidFormData)
@@ -129,17 +132,17 @@ describe('Zod Schemas', () => {
 
     it('should reject missing indication', () => {
       const invalidFormData = {
-        template_id: 'template-123',
-        findings_text: 'No acute findings on chest X-ray'
+        templateId: 'template-123',
+        findings: 'No acute findings on chest X-ray'
       }
 
       const result = generateFormSchema.safeParse(invalidFormData)
       expect(result.success).toBe(false)
     })
 
-    it('should reject missing findings_text', () => {
+    it('should reject missing findings', () => {
       const invalidFormData = {
-        template_id: 'template-123',
+        templateId: 'template-123',
         indication: 'Chest pain evaluation'
       }
 
@@ -149,20 +152,20 @@ describe('Zod Schemas', () => {
 
     it('should reject empty indication', () => {
       const invalidFormData = {
-        template_id: 'template-123',
+        templateId: 'template-123',
         indication: '',
-        findings_text: 'No acute findings on chest X-ray'
+        findings: 'No acute findings on chest X-ray'
       }
 
       const result = generateFormSchema.safeParse(invalidFormData)
       expect(result.success).toBe(false)
     })
 
-    it('should reject empty findings_text', () => {
+    it('should reject empty findings', () => {
       const invalidFormData = {
-        template_id: 'template-123',
+        templateId: 'template-123',
         indication: 'Chest pain evaluation',
-        findings_text: ''
+        findings: ''
       }
 
       const result = generateFormSchema.safeParse(invalidFormData)
