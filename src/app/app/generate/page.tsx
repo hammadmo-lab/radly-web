@@ -91,7 +91,7 @@ export default function GeneratePage() {
       const payload = {
         template_id: templateId || data.templateId,
         report: {
-          title: template?.name || 'Medical Report',
+          title: (template as { name?: string })?.name || 'Medical Report',
           findings: data.findings,
           impression: data.indication,
           recommendations: data.technique,
@@ -161,7 +161,7 @@ export default function GeneratePage() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Generate Report</h1>
           <p className="text-muted-foreground">
-            {template ? `Using template: ${template.name}` : 'Create a new medical report'}
+            {template ? `Using template: ${(template as { name?: string }).name}` : 'Create a new medical report'}
           </p>
         </div>
       </div>

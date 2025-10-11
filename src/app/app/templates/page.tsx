@@ -13,17 +13,6 @@ import { Search, FileText, Plus, RefreshCw } from 'lucide-react'
 export const dynamic = 'force-dynamic';
 
 // Types for raw API response
-type ApiTemplate = {
-  template_id: string;
-  title: string;
-  modality?: string;
-  body_system?: string;
-  description?: string;
-  created_at?: string;
-  updated_at?: string;
-};
-
-// Normalized UI template type
 type UITemplate = {
   id: string;
   name: string;
