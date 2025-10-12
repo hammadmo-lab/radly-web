@@ -34,7 +34,13 @@ export default function ReportsPage() {
       setRows(jobs);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Failed to load reports';
-      setErr(message);
+      // If backend doesn't have /v1/jobs/recent yet, treat as empty state silently
+      if (message.includes('404') || /jobs\/recent/i.test(message)) {
+        setRows([]);
+        setErr(null);
+      } else {
+        setErr(message);
+      }
       if (message.toLowerCase().includes('401')) {
         router.push('/login');
         return;

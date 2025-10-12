@@ -40,7 +40,7 @@ test.describe('Report Generation Flow', () => {
       const template = TEST_TEMPLATES[0];
       
       // Mock template API response
-      await page.route(`**/api/v1/templates/${template.id}**`, route => {
+      await page.route(`**/api/v1/template/${template.id}**`, route => {
         route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -437,7 +437,7 @@ test.describe('Report Generation Flow', () => {
       const invalidTemplateId = 'non-existent-template';
       
       // Mock template not found error
-      await page.route(`**/api/v1/templates/${invalidTemplateId}**`, route => {
+      await page.route(`**/api/v1/template/${invalidTemplateId}**`, route => {
         route.fulfill({
           status: 404,
           contentType: 'application/json',
