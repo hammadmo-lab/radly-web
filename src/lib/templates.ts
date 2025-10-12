@@ -45,6 +45,15 @@ export async function fetchTemplates(httpGet: <T=unknown>(url: string) => Promis
   return data.map((item: unknown) => normalizeTemplateListItem(item as Record<string, unknown>));
 }
 
+// Simple normalizer function as requested
+export function normalizeTemplate(raw: Record<string, unknown>) {
+  return {
+    id: String(raw?.id || raw?.template_id || ''),
+    title: String(raw?.title || raw?.name || '(Untitled Template)'),
+    updatedAt: raw?.updatedAt || raw?.updated_at || raw?.modified_at || null,
+  };
+}
+
 // Legacy export for backward compatibility
 export type TemplateSummary = { template_id: string; name?: string };
 export const listTemplates = () => httpGet<TemplateSummary[]>('/v1/templates');
