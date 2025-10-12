@@ -44,7 +44,7 @@ export default function TemplatesPage() {
   }, [templates, searchTerm])
 
   const handleUseTemplate = (templateId: string) => {
-    router.push(`/app/generate?templateId=${templateId}`)
+    router.push(`/app/generate?template=${encodeURIComponent(templateId)}`)
   }
 
   if (error) {
