@@ -3,18 +3,13 @@ import { TEST_USERS } from './fixtures/test-data';
 
 test.describe('Settings Management', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to a page first to establish context
-    await page.goto('/');
-    // Mock authentication state
-    await page.evaluate(() => {
-      localStorage.setItem('supabase.auth.token', 'mock-token');
-    });
+    // Navigate directly to protected route (test mode bypasses auth)
+    await page.goto('/app/settings');
+    await page.waitForLoadState('networkidle');
   });
 
   test.describe('Settings Page', () => {
-    test('should display settings page correctly', async ({ page, navigation }) => {
-      await navigation.goToSettings();
-      
+    test('should display settings page correctly', async ({ page }) => {
       // Check page title and heading
       await expect(page).toHaveTitle(/Settings/);
       await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
@@ -23,9 +18,7 @@ test.describe('Settings Management', () => {
       await expect(page.getByText('Manage your account settings and preferences')).toBeVisible();
     });
 
-    test('should display all settings sections', async ({ page, navigation }) => {
-      await navigation.goToSettings();
-      
+    test('should display all settings sections', async ({ page }) => {
       // Check for all main sections
       await expect(page.getByText('Account Information')).toBeVisible();
       await expect(page.getByText('Terms & Privacy')).toBeVisible();

@@ -15,6 +15,8 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Global timeout for tests */
   timeout: 60_000,
+  /* Global setup for environment variables */
+  globalSetup: require.resolve('./e2e/global-setup.ts'),
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html'],
@@ -40,6 +42,11 @@ export default defineConfig({
     
     /* Global timeout for navigation */
     navigationTimeout: 30000,
+    
+    /* Add test mode header to all requests */
+    extraHTTPHeaders: {
+      'X-Test-Mode': 'true',
+    },
   },
 
   /* Configure projects for major browsers */
@@ -82,9 +89,14 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run start',
+    command: 'npm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: true, // ✅ critical fix for CI
+    reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
+    /* Add test mode environment variables */
+    env: {
+      NEXT_PUBLIC_TEST_MODE: 'true',
+      NEXT_PUBLIC_BYPASS_AUTH: 'true',
+    },
   },
 });

@@ -1,4 +1,34 @@
 // Test data fixtures for E2E tests
+
+// Test user credentials - these should be test accounts in your Supabase project
+export const TEST_USERS = {
+  validUser: {
+    email: 'test@radly.com',
+    password: 'testpassword123', // Only if using email/password auth
+    name: 'Test User',
+  },
+  magicLinkUser: {
+    email: 'magic@radly.com',
+    name: 'Magic Link User',
+  },
+  googleUser: {
+    email: 'google@radly.com',
+    name: 'Google User',
+  },
+  adminUser: {
+    email: 'admin@radly.com',
+    password: 'adminpassword123',
+    name: 'Admin User',
+    role: 'admin',
+  },
+  standardUser: {
+    email: 'standard@radly.com',
+    password: 'standardpassword123',
+    name: 'Standard User',
+    role: 'user',
+  },
+} as const;
+
 export const TEST_PATIENTS = [
   {
     name: 'John Doe',

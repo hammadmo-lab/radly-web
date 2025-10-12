@@ -1,14 +1,11 @@
 import { test, expect } from './fixtures/auth';
-import { TEST_TEMPLATES, MOCK_API_RESPONSES } from './fixtures/test-data';
+import { TEST_TEMPLATES, MOCK_API_RESPONSES, TEST_USERS } from './fixtures/test-data';
 
 test.describe('Templates Management', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to a page first to establish context
-    await page.goto('/');
-    // Mock authentication state
-    await page.evaluate(() => {
-      localStorage.setItem('supabase.auth.token', 'mock-token');
-    });
+    // Navigate directly to protected route (test mode bypasses auth)
+    await page.goto('/app/templates');
+    await page.waitForLoadState('networkidle');
   });
 
   test.describe('Templates Page', () => {

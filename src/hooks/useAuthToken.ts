@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createBrowserSupabase } from '@/lib/supabase/client'
+import { isTestMode, getTestSession } from '@/lib/test-mode'
 
 type AuthStatus = "loading" | "authenticated" | "signed_out";
 
@@ -11,6 +12,15 @@ export function useAuthToken() {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
+    // Return test token in test mode
+    if (isTestMode()) {
+      const testSession = getTestSession()
+      setToken(testSession?.access_token || 'test-access-token')
+      setUserId(testSession?.user?.id || 'test-user-id-12345')
+      setStatus("authenticated")
+      return
+    }
+
     let cancelled = false;
     const supabase = createBrowserSupabase();
 
