@@ -32,7 +32,7 @@ export default function GeneratePage() {
     queryFn: async () => {
       if (!templateId) return null
       try {
-        const template = await httpGet(`/v1/templates/${templateId}`)
+        const template = await httpGet(`/v1/template/${templateId}`)
         return template
       } catch (err: unknown) {
         // If unauthenticated, redirect to login

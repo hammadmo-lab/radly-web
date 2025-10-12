@@ -1,8 +1,12 @@
 import type { NextConfig } from "next";
 
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
+import bundleAnalyzer from '@next/bundle-analyzer';
+
+const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
+
+const apiBase = (process.env.NEXT_PUBLIC_API_BASE || 'https://edge.radly.app').replace(/\/+$/, '');
 
 const securityHeaders = [
   {
@@ -41,7 +45,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://edge.radly.app https://*.supabase.co",
+      `connect-src 'self' ${apiBase} https://*.supabase.co`,
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
