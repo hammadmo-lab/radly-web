@@ -14,16 +14,21 @@ export function AuthGuard({ children, redirectTo = '/auth/signin' }: AuthGuardPr
   const { user, loading } = useAuth()
   const router = useRouter()
 
-  // Skip auth check in test mode
-  if (isTestMode()) {
-    return <>{children}</>
-  }
-
   useEffect(() => {
+    // Skip auth check in test mode
+    if (isTestMode()) {
+      return
+    }
+    
     if (!loading && !user) {
       router.push(redirectTo)
     }
   }, [user, loading, router, redirectTo])
+
+  // Skip auth check in test mode
+  if (isTestMode()) {
+    return <>{children}</>
+  }
 
   if (loading) {
     return (

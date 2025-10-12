@@ -2,6 +2,7 @@
  * Supabase client wrapper with test mode support
  */
 import { createBrowserClient } from '@supabase/ssr'
+import { Session } from '@supabase/supabase-js'
 import { isTestMode, getTestSession } from './test-mode'
 
 /**
@@ -31,7 +32,7 @@ export function getSupabaseClient() {
         signOut: async () => ({
           error: null,
         }),
-        onAuthStateChange: (callback: any) => {
+        onAuthStateChange: (callback: (event: string, session: Session | null) => void) => {
           // Immediately call the callback with the test session
           callback('SIGNED_IN', testSession)
           return {
