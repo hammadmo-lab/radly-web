@@ -7,21 +7,12 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { listTemplates } from '@/lib/templates'
+import { fetchTemplates } from '@/lib/templates'
+import { httpGet } from '@/lib/http'
 import { Search, FileText, Plus, RefreshCw } from 'lucide-react'
 
 export const dynamic = 'force-dynamic';
 
-// Types for raw API response
-type UITemplate = {
-  id: string;
-  name: string;
-  modality: string;
-  bodySystem: string;
-  description: string;
-  created_at: string;
-  updated_at: string;
-};
 
 export default function TemplatesPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -31,20 +22,8 @@ export default function TemplatesPage() {
     queryKey: ['templates'],
     queryFn: async () => {
       try {
-        const raw = await listTemplates()
-        
-        // Normalize to UI shape that ALWAYS has .name
-        const normalized: UITemplate[] = raw.map((t) => ({
-          id: t.template_id ?? '',
-          name: t.name ?? '',
-          modality: '', // Add default values for missing fields
-          bodySystem: '',
-          description: '',
-          created_at: '',
-          updated_at: '',
-        }))
-        
-        return normalized
+        const items = await fetchTemplates(httpGet)
+        return items
       } catch (err) {
         console.error('Failed to fetch templates:', err)
         throw err
@@ -58,10 +37,9 @@ export default function TemplatesPage() {
     if (!q) return templates ?? []
     
     return (templates ?? []).filter(t => 
-      (t.name || '').toLowerCase().includes(q) ||
-      (t.description || '').toLowerCase().includes(q) ||
+      (t.title || '').toLowerCase().includes(q) ||
       (t.modality || '').toLowerCase().includes(q) ||
-      (t.bodySystem || '').toLowerCase().includes(q)
+      (t.anatomy || '').toLowerCase().includes(q)
     )
   }, [templates, searchTerm])
 
@@ -163,18 +141,15 @@ export default function TemplatesPage() {
           {filteredTemplates.map((template) => (
             <Card key={template.id} className="hover:bg-muted/60 transition border-border">
               <CardHeader>
-                <CardTitle className="text-lg">{template.name}</CardTitle>
+                <CardTitle className="text-lg">{template.title}</CardTitle>
                 <CardDescription className="text-sm text-accent font-medium">
-                  {template.modality} • {template.bodySystem}
+                  {template.modality && template.anatomy ? `${template.modality} • ${template.anatomy}` : template.modality || template.anatomy || ''}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
-                  {template.description}
-                </p>
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-muted-foreground">
-                    Updated {template.updated_at ? new Date(template.updated_at).toLocaleDateString() : 'Unknown'}
+                    {template.updatedAt ? `Updated ${new Date(template.updatedAt).toLocaleDateString()}` : "Updated Unknown"}
                   </span>
                   <Button
                     size="sm"
