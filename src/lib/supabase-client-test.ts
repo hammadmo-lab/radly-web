@@ -1,14 +1,17 @@
 /**
  * Supabase client wrapper with test mode support
  */
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createBrowserClient } from '@supabase/ssr'
 import { isTestMode, getTestSession } from './test-mode'
 
 /**
  * Get Supabase client with test mode support
  */
 export function getSupabaseClient() {
-  const client = createClientComponentClient()
+  const client = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   // If in test mode, override auth methods
   if (isTestMode()) {
