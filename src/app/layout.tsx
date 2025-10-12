@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { PerformanceMonitor } from "@/components/performance-monitor";
+import { ClientPerformanceSetup } from "@/components/client-performance-setup";
 
 const inter = Inter({
   subsets: ["latin"],
+  display: 'swap', // Prevent FOIT (Flash of Invisible Text)
   variable: "--font-inter",
 });
 
@@ -25,6 +28,8 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        <ClientPerformanceSetup />
+        <PerformanceMonitor />
       </body>
     </html>
   );
