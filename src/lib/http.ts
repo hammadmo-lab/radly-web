@@ -1,7 +1,19 @@
 import type { ApiError } from '@/types/api';
+import { createBrowserSupabase } from '@/lib/supabase/client';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE!;
 const CLIENT_KEY = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY!;
+
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const supabase = createBrowserSupabase();
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('Failed to get auth token:', error);
+    return null;
+  }
+}
 
 async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -17,11 +29,19 @@ async function handle<T>(res: Response): Promise<T> {
 }
 
 export async function httpGet<T = unknown>(path: string): Promise<T> {
+  const token = await getAuthToken();
+  
+  const headers: Record<string, string> = {
+    'x-client-key': CLIENT_KEY,
+  };
+  
+  if (token) {
+    headers['authorization'] = `Bearer ${token}`;
+  }
+  
   const res = await fetch(`${BASE_URL}${path}`, {
     method: 'GET',
-    headers: {
-      'x-client-key': CLIENT_KEY,
-    },
+    headers,
     credentials: 'include',
     cache: 'no-store',
   });
@@ -29,12 +49,20 @@ export async function httpGet<T = unknown>(path: string): Promise<T> {
 }
 
 export async function httpPost<TBody, TResp = unknown>(path: string, body: TBody): Promise<TResp> {
+  const token = await getAuthToken();
+  
+  const headers: Record<string, string> = {
+    'content-type': 'application/json',
+    'x-client-key': CLIENT_KEY,
+  };
+  
+  if (token) {
+    headers['authorization'] = `Bearer ${token}`;
+  }
+  
   const res = await fetch(`${BASE_URL}${path}`, {
     method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-client-key': CLIENT_KEY,
-    },
+    headers,
     body: JSON.stringify(body),
     credentials: 'include',
   });
@@ -42,12 +70,20 @@ export async function httpPost<TBody, TResp = unknown>(path: string, body: TBody
 }
 
 export async function httpPut<TBody, TResp = unknown>(path: string, body: TBody): Promise<TResp> {
+  const token = await getAuthToken();
+  
+  const headers: Record<string, string> = {
+    'content-type': 'application/json',
+    'x-client-key': CLIENT_KEY,
+  };
+  
+  if (token) {
+    headers['authorization'] = `Bearer ${token}`;
+  }
+  
   const res = await fetch(`${BASE_URL}${path}`, {
     method: 'PUT',
-    headers: {
-      'content-type': 'application/json',
-      'x-client-key': CLIENT_KEY,
-    },
+    headers,
     body: JSON.stringify(body),
     credentials: 'include',
   });
