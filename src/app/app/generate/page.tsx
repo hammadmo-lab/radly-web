@@ -14,16 +14,32 @@ import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
 import { httpGet } from '@/lib/http'
 import { enqueueJob } from '@/lib/jobs'
 import { toast } from 'sonner'
-import { ArrowLeft, FileText, User, Calendar, AlertCircle } from 'lucide-react'
+import { ArrowLeft, User, Calendar, AlertCircle } from 'lucide-react'
 
 export const dynamic = 'force-dynamic';
 import { Switch } from '@/components/ui/switch'
 import Link from 'next/link'
 
+// Defensive template ID resolver to handle typos and legacy links
+function resolveTemplateId(searchParams: URLSearchParams | Record<string, string | string[] | undefined>) {
+  const get = (k: string) => {
+    if (searchParams instanceof URLSearchParams) return searchParams.get(k) || undefined;
+    const v = (searchParams as Record<string, unknown>)[k];
+    return Array.isArray(v) ? v[0] : v;
+  };
+  // accept common/typo variants
+  const keys = ["template", "templateId", "template_id", "templated", "templte", "tid"];
+  for (const k of keys) {
+    const val = get(k);
+    if (val) return String(val);
+  }
+  return undefined;
+}
+
 export default function GeneratePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const templateId = searchParams.get('templateId')
+  const templateId = resolveTemplateId(searchParams);
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -32,8 +48,10 @@ export default function GeneratePage() {
     queryFn: async () => {
       if (!templateId) return null
       try {
-        const template = await httpGet(`/v1/template/${templateId}`)
-        return template
+        const data = await httpGet(`/v1/template/${templateId}`) as Record<string, unknown>;
+        const templateTitle =
+          (data && (data.title || data.name || data.display_name || data.label)) || "(Untitled Template)";
+        return { ...data, templateTitle };
       } catch (err: unknown) {
         // If unauthenticated, redirect to login
         if (err instanceof Error && err.message.includes('401')) {
@@ -68,6 +86,21 @@ export default function GeneratePage() {
   })
 
   const includePatient = watch('includePatient')
+
+  // Handle missing template ID gracefully
+  if (!templateId) {
+    return (
+      <div className="p-6">
+        <h2 className="text-xl font-semibold">Missing template id</h2>
+        <p className="text-sm text-muted-foreground mt-2">
+          The page URL must include ?template=&lt;id&gt;.
+        </p>
+        <a href="/app/templates" className="mt-4 inline-flex items-center px-3 py-2 rounded-lg bg-primary text-primary-foreground">
+          Back to Templates
+        </a>
+      </div>
+    );
+  }
 
 
   const onSubmit = async (data: GenerateFormValues) => {
@@ -160,8 +193,8 @@ export default function GeneratePage() {
         </Link>
         <div>
           <h1 className="text-3xl font-bold text-foreground">Generate Report</h1>
-          <p className="text-muted-foreground">
-            {template ? `Using template: ${(template as { name?: string }).name}` : 'Create a new medical report'}
+          <p className="text-sm text-muted-foreground">
+            Using template: {(template as { templateTitle?: string })?.templateTitle || "(Untitled Template)"}
           </p>
         </div>
       </div>
@@ -179,46 +212,8 @@ export default function GeneratePage() {
         </div>
       )}
 
-      {/* Template Selection Banner */}
-      {!templateId && (
-        <div className="bg-muted border border-border rounded-lg p-4">
-          <div className="flex items-center space-x-2">
-            <FileText className="w-5 h-5 text-muted-foreground" />
-            <div>
-              <h3 className="text-sm font-medium text-foreground">No template selected</h3>
-              <p className="text-sm text-muted-foreground">
-                Choose a template from the Templates page to get started with a pre-filled form.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Template Selection */}
-        {!templateId && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <FileText className="w-5 h-5" />
-                <span>Template</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Label htmlFor="templateId">Select Template</Label>
-                <Input
-                  id="templateId"
-                  {...register('templateId')}
-                  placeholder="Enter template ID"
-                />
-                {errors.templateId && (
-                  <p className="text-sm text-destructive">{errors.templateId.message}</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Patient Data Toggle */}
         <div className="flex items-center justify-between rounded-xl border p-4">
