@@ -120,16 +120,15 @@ export default function GeneratePage() {
           }
         : {} // empty object -> backend treats as "no patient block"
 
-      // Build payload for enqueueJob
+      // Build payload for enqueueJob - flattened structure
       const payload = {
-        template_id: templateId || data.templateId,
-        report: {
-          title: (template as { name?: string })?.name || 'Medical Report',
-          findings: data.findings,
-          impression: data.indication,
-          recommendations: data.technique,
-        },
-        patient: data.includePatient ? patient : {},
+        templateId: templateId || data.templateId,
+        indication: data.indication,
+        findings: data.findings,
+        impression: data.indication, // mapping indication to impression
+        technique: data.technique,
+        patient: data.includePatient ? patient : undefined,
+        signature: data.signature,
       }
 
       console.debug('Creating job with:', payload)
@@ -146,7 +145,7 @@ export default function GeneratePage() {
         local.unshift({
           job_id: jobId,
           status: 'queued',
-          template_id: payload.template_id,
+          template_id: payload.templateId,
           title: 'Generating…',
           created_at: Date.now()
         })
