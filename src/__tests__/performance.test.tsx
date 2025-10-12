@@ -7,7 +7,7 @@ import { PageLoader, CardLoader, ButtonLoader } from '@/components/loading'
 
 // Mock dynamic import
 jest.mock('next/dynamic', () => {
-  return (_importFunc: () => Promise<{ default: React.ComponentType<Record<string, unknown>> }>, _options: Record<string, unknown>) => {
+  return () => {
     const MockComponent = () => <div>Mock Component</div>
     MockComponent.displayName = 'MockComponent'
     return MockComponent
