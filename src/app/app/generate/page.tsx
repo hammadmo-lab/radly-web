@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
 import { httpGet } from '@/lib/http'
 import { enqueueJob } from '@/lib/jobs'
+import { buildSigninWithNext } from '@/lib/redirect'
 import { toast } from 'sonner'
 import { ArrowLeft, User, Calendar, AlertCircle } from 'lucide-react'
 
@@ -53,9 +54,10 @@ export default function GeneratePage() {
           (data && (data.title || data.name || data.display_name || data.label)) || "(Untitled Template)";
         return { ...data, templateTitle };
       } catch (err: unknown) {
-        // If unauthenticated, redirect to login
+        // If unauthenticated, redirect to signin with next parameter
         if (err instanceof Error && err.message.includes('401')) {
-          router.push('/login')
+          const current = window.location.pathname + window.location.search
+          window.location.href = buildSigninWithNext(current)
           return null
         }
         throw err
@@ -167,8 +169,8 @@ export default function GeneratePage() {
       // Handle 401 errors with proper redirect to signin with next parameter
       if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) {
         toast.error('Session expired. Please sign in again.')
-        const next = encodeURIComponent(window.location.pathname + window.location.search)
-        router.push(`/signin?next=${next}`)
+        const current = window.location.pathname + window.location.search
+        window.location.href = buildSigninWithNext(current)
         return
       }
       

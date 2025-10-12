@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createBrowserSupabase } from '@/lib/supabase/client'
+import { sanitizeNext } from '@/lib/redirect'
 
 const allowMagic = process.env.NEXT_PUBLIC_ALLOW_MAGIC_LINK === '1'
 const allowGoogle = process.env.NEXT_PUBLIC_ALLOW_GOOGLE === '1'
@@ -17,7 +18,7 @@ function SignInContent() {
     typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || ''
 
   // Get the next parameter or default to /app/templates
-  const next = searchParams.get('next') || '/app/templates'
+  const next = sanitizeNext(searchParams.get('next'))
 
   async function signInWithGoogle() {
     setLoading(true)
