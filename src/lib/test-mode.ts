@@ -37,11 +37,25 @@ export function getTestUser() {
   return {
     id: 'test-user-id-12345',
     email: 'test@radly.test',
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z',
+    aud: 'authenticated',
+    role: 'authenticated',
+    app_metadata: {},
     user_metadata: {
       full_name: 'Test User',
     },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    identities: [],
+    factors: [],
+    is_anonymous: false,
+    phone: '',
+    email_confirmed_at: '2024-01-01T00:00:00Z',
+    phone_confirmed_at: undefined,
+    confirmed_at: '2024-01-01T00:00:00Z',
+    last_sign_in_at: '2024-01-01T00:00:00Z',
+    is_sso_user: false,
+    provider: 'email',
+    providers: ['email'],
   }
 }
 
@@ -59,7 +73,7 @@ export function getTestSession() {
     refresh_token: 'test-refresh-token',
     expires_in: 3600,
     expires_at: Math.floor(Date.now() / 1000) + 3600,
-    token_type: 'bearer',
+    token_type: 'bearer' as const,
     user,
   }
 }
