@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
-import { createBrowserSupabase } from '@/lib/supabase/client'
 import { getSupabaseClient } from '@/lib/supabase-client-test'
 
 interface AuthContextType {
