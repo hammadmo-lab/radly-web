@@ -161,16 +161,18 @@ export default function GeneratePage() {
       toast.success('Report generation started!')
       router.push(`/app/report/${jobId}`)
 
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('Generate error:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Failed to start report generation'
       
-      // If unauthenticated, redirect to login
-      if (errorMessage.includes('401')) {
-        router.push('/login')
+      // Handle 401 errors with proper redirect to signin with next parameter
+      if (err?.status === 401) {
+        toast.error('Session expired. Please sign in again.')
+        const next = encodeURIComponent(window.location.pathname + window.location.search)
+        router.push(`/signin?next=${next}`)
         return
       }
       
+      const errorMessage = err instanceof Error ? err.message : 'Failed to start report generation'
       setError(errorMessage)
       toast.error(errorMessage)
     } finally {

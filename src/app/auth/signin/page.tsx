@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserSupabase } from '@/lib/supabase/client'
 
 const allowMagic = process.env.NEXT_PUBLIC_ALLOW_MAGIC_LINK === '1'
@@ -9,10 +10,15 @@ const allowApple = process.env.NEXT_PUBLIC_ALLOW_APPLE === '1'
 
 export default function SignInPage() {
   const supabase = createBrowserSupabase()
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const origin =
     typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || ''
+
+  // Get the next parameter or default to /app/templates
+  const next = searchParams.get('next') || '/app/templates'
 
   async function signInWithGoogle() {
     setLoading(true)
@@ -20,7 +26,7 @@ export default function SignInPage() {
       await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${origin}/auth/callback?next=/`,
+          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
           // Supports PKCE Authorization Code by default
         },
       })
@@ -35,7 +41,7 @@ export default function SignInPage() {
       await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
-          redirectTo: `${origin}/auth/callback?next=/`,
+          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
         },
       })
     } finally {
@@ -51,7 +57,7 @@ export default function SignInPage() {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${origin}/auth/callback?next=/`,
+          emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
         },
       })
       if (error) {

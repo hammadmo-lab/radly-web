@@ -1,48 +1,62 @@
-import { NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
-import type { NextRequest } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 
 export async function middleware(req: NextRequest) {
-  // Check for test mode
-  const isTestMode =
-    process.env.NEXT_PUBLIC_TEST_MODE === 'true' ||
-    process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true' ||
-    req.headers.get('X-Test-Mode') === 'true' ||
-    req.nextUrl.searchParams.get('test') === 'true'
-
-  // Bypass authentication in test mode
-  if (isTestMode) {
-    return NextResponse.next()
-  }
-
-  // Normal authentication flow
-  const res = NextResponse.next()
+  const res = NextResponse.next();
+  
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
-          return req.cookies.getAll()
+          return req.cookies.getAll();
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            res.cookies.set(name, value, options)
-          })
+            res.cookies.set(name, value, options);
+          });
         },
       },
     }
-  )
-
-  // Refresh session if expired
-  await supabase.auth.getSession()
+  );
   
-  return res
+  const { data: { session } } = await supabase.auth.getSession();
+
+  const { pathname, search } = req.nextUrl;
+  const wantsApp = pathname.startsWith('/app');
+  const wantsSignin = pathname === '/signin' || pathname === '/login' || pathname === '/auth/signin';
+  const isRoot = pathname === '/' || pathname === '';
+
+  // Unauthed access to /app -> signin with next
+  if (wantsApp && !session) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/signin';
+    url.search = `?next=${encodeURIComponent(pathname + (search || ''))}`;
+    return NextResponse.redirect(url);
+  }
+
+  // Already authed -> visiting /signin ==> go to next or templates
+  if (wantsSignin && session) {
+    const url = req.nextUrl.clone();
+    const next = req.nextUrl.searchParams.get('next') || '/app/templates';
+    url.pathname = next;
+    url.search = '';
+    return NextResponse.redirect(url);
+  }
+
+  // Root redirect: if authed, land on templates
+  if (isRoot && session) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/app/templates';
+    return NextResponse.redirect(url);
+  }
+
+  return res;
 }
 
 export const config = {
   matcher: [
-    // Protect these paths
-    '/app/:path*',
+    '/((?!_next|favicon.ico|robots.txt|sitemap.xml|images|api).*)',
   ],
-}
+};

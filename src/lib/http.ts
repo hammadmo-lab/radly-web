@@ -20,7 +20,12 @@ export async function httpGet<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
     headers: await authHeaders(init),
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    const err: any = new Error(`HTTP ${res.status}: ${text}`);
+    err.status = res.status;
+    throw err;
+  }
   return res.json();
 }
 
@@ -31,6 +36,11 @@ export async function httpPost<T>(path: string, opts?: Opts): Promise<T> {
     headers: await authHeaders(opts),
     body: opts?.json !== undefined ? JSON.stringify(opts.json) : opts?.body,
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    const err: any = new Error(`HTTP ${res.status}: ${text}`);
+    err.status = res.status;
+    throw err;
+  }
   return res.json();
 }

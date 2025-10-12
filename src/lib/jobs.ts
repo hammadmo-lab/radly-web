@@ -1,4 +1,4 @@
-import { httpGet } from '@/lib/http';
+import { httpPost } from '@/lib/http';
 
 export type RecentJobRow = { job_id: string; status: string; template_id?: string };
 
@@ -63,20 +63,7 @@ export async function enqueueJob(input: EnqueueInput) {
     if (Object.keys(s).length) body.signature = s;
   }
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/v1/generate/async`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-client-key": process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY!,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`enqueue failed: ${res.status} ${res.statusText} ${text}`);
-  }
-  return res.json();
+  return httpPost('/v1/generate/async', { json: body });
 }
 
 export const getRecentJobs = (limit = 50) =>
