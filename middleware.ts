@@ -25,7 +25,7 @@ export async function middleware(req: NextRequest) {
 
   const { pathname, search } = req.nextUrl;
   const wantsApp = pathname.startsWith('/app');
-  const wantsSignin = pathname === '/signin' || pathname === '/login' || pathname === '/auth/signin';
+  const wantsSignin = pathname === '/signin' || pathname === '/auth/signin';
   const isRoot = pathname === '/' || pathname === '';
 
   // Unauthed access to /app -> signin with next
