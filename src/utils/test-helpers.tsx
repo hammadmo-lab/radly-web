@@ -31,10 +31,10 @@ export const mockSession: Session = {
   refresh_token: 'mock-refresh-token',
   expires_in: 3600,
   expires_at: Date.now() / 1000 + 3600,
-  token_type: 'bearer',
+  token_type: 'bearer' as const,
   user: mockUser,
-  provider_token: null,
-  provider_refresh_token: null,
+  provider_token: undefined,
+  provider_refresh_token: undefined,
 }
 
 export const mockUserProfile = {
