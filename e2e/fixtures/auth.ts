@@ -1,19 +1,6 @@
 import { test as base, expect } from '@playwright/test';
 import { Page } from '@playwright/test';
-
-// Test user credentials - these should be test accounts in your Supabase project
-export const TEST_USERS = {
-  validUser: {
-    email: 'test@radly.com',
-    password: 'testpassword123', // Only if using email/password auth
-  },
-  magicLinkUser: {
-    email: 'magic@radly.com',
-  },
-  googleUser: {
-    email: 'google@radly.com',
-  },
-} as const;
+import { TEST_USERS } from './test-data';
 
 // Test data for reports
 export const TEST_DATA = {
@@ -47,8 +34,9 @@ export class AuthHelper {
   async signInWithMagicLink(email: string = TEST_USERS.magicLinkUser.email) {
     await this.page.goto('/auth/signin');
     
-    // Fill in email
-    await this.page.getByLabel('Email').fill(email);
+    // Fill in email - try multiple selectors for flexibility
+    const emailInput = this.page.locator('input[type="email"]').or(this.page.getByLabel('Email'));
+    await emailInput.fill(email);
     
     // Click send magic link button
     await this.page.getByRole('button', { name: 'Send me a magic link' }).click();

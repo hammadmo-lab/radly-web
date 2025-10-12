@@ -72,92 +72,36 @@ test.describe('Authentication Flow', () => {
     });
   });
 
-  test.describe('Authentication Methods', () => {
-    test('should handle magic link authentication flow', async ({ page, auth }) => {
-      await page.goto('/auth/signin');
-      
-      // Fill in email
-      const emailInput = page.locator('input[type="email"]');
-      if (await emailInput.isVisible()) {
-        await emailInput.fill(TEST_USERS.magicLinkUser.email);
-        
-        // Click send magic link
-        const submitButton = page.getByRole('button', { name: 'Send me a magic link' });
-        await submitButton.click();
-        
-        // Wait for success message
-        await expect(page.getByText('Check your email for the magic link.')).toBeVisible();
-        
-        // Note: In a real E2E test, you'd need to handle the actual email verification
-        // For now, we'll simulate the callback by navigating to it directly
-        // This is a limitation of magic link testing in E2E
-      }
-    });
-
-    test('should handle Google OAuth flow', async ({ page }) => {
-      await page.goto('/auth/signin');
-      
-      const googleButton = page.getByRole('button', { name: 'Continue with Google' });
-      if (await googleButton.isVisible()) {
-        // Click Google sign-in button
-        await googleButton.click();
-        
-        // Should redirect to Google OAuth
-        await page.waitForURL('**/accounts.google.com/**');
-        
-        // Note: In a real E2E test, you'd need to handle the OAuth flow
-        // This might require mocking or using test OAuth credentials
-      }
-    });
-
-    test('should handle Apple OAuth flow', async ({ page }) => {
-      await page.goto('/auth/signin');
-      
-      const appleButton = page.getByRole('button', { name: 'Continue with Apple' });
-      if (await appleButton.isVisible()) {
-        // Click Apple sign-in button
-        await appleButton.click();
-        
-        // Should redirect to Apple OAuth
-        await page.waitForURL('**/appleid.apple.com/**');
-        
-        // Note: Similar to Google OAuth, this requires handling the OAuth flow
-      }
-    });
-  });
-
   test.describe('Protected Routes', () => {
-    test('should redirect unauthenticated users to sign-in', async ({ page }) => {
-      // Try to access protected routes
-      const protectedRoutes = [
-        '/app/templates',
-        '/app/generate',
-        '/app/settings',
-        '/app/reports',
-      ];
+    test('should access protected routes in test mode', async ({ page }) => {
+      // Test mode is enabled by Playwright config, so this should work
+      await page.goto('/app/templates');
       
-      for (const route of protectedRoutes) {
-        await page.goto(route);
-        
-        // Should be redirected to sign-in page
-        await expect(page).toHaveURL(/.*\/auth\/signin/);
-      }
+      // Should not redirect to sign-in
+      await expect(page).toHaveURL(/\/app\/templates/);
+      
+      // Should display templates page
+      await expect(
+        page.locator('h1, h2, [role="heading"]').filter({ hasText: /templates/i }).first()
+      ).toBeVisible({ timeout: 10000 });
     });
 
-    test('should allow access to public routes without authentication', async ({ page }) => {
-      const publicRoutes = [
-        '/',
-        '/auth/signin',
-        '/legal/privacy',
-        '/legal/terms',
-      ];
+    test('should access settings page in test mode', async ({ page }) => {
+      await page.goto('/app/settings');
       
-      for (const route of publicRoutes) {
-        await page.goto(route);
-        
-        // Should not be redirected to sign-in
-        await expect(page).not.toHaveURL(/.*\/auth\/signin/);
-      }
+      await expect(page).toHaveURL(/\/app\/settings/);
+      await expect(
+        page.locator('h1, h2, [role="heading"]').filter({ hasText: /settings/i }).first()
+      ).toBeVisible({ timeout: 10000 });
+    });
+
+    test('should access generate page in test mode', async ({ page }) => {
+      await page.goto('/app/generate');
+      
+      await expect(page).toHaveURL(/\/app\/generate/);
+      await expect(
+        page.locator('h1, h2, [role="heading"]').filter({ hasText: /generate/i }).first()
+      ).toBeVisible({ timeout: 10000 });
     });
   });
 

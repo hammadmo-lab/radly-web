@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { PerformanceMonitor } from "@/components/performance-monitor";
 import { ClientPerformanceSetup } from "@/components/client-performance-setup";
+import { TestModeIndicator } from "@/components/test-mode-indicator";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,6 +31,7 @@ export default function RootLayout({
         </Providers>
         <ClientPerformanceSetup />
         <PerformanceMonitor />
+        <TestModeIndicator />
       </body>
     </html>
   );
