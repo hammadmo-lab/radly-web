@@ -12,7 +12,6 @@ export async function middleware(req: NextRequest) {
 
   // Bypass authentication in test mode
   if (isTestMode) {
-    console.log('🧪 Middleware: Test mode detected, bypassing authentication')
     return NextResponse.next()
   }
 

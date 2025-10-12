@@ -74,33 +74,50 @@ test.describe('Authentication Flow', () => {
 
   test.describe('Protected Routes', () => {
     test('should access protected routes in test mode', async ({ page }) => {
-      // Test mode is enabled by Playwright config, so this should work
+      // Test mode is enabled by Playwright config, so authentication should be bypassed
       await page.goto('/app/templates');
       
       // Should not redirect to sign-in
       await expect(page).toHaveURL(/\/app\/templates/);
       
-      // Should display templates page
+      // Wait for page to load completely
+      await page.waitForLoadState('networkidle');
+      
+      // Should display templates page with proper heading
       await expect(
-        page.locator('h1, h2, [role="heading"]').filter({ hasText: /templates/i }).first()
+        page.getByRole('heading', { name: /templates/i })
       ).toBeVisible({ timeout: 10000 });
     });
 
     test('should access settings page in test mode', async ({ page }) => {
+      // Test mode is enabled by Playwright config, so authentication should be bypassed
       await page.goto('/app/settings');
       
+      // Should not redirect to sign-in
       await expect(page).toHaveURL(/\/app\/settings/);
+      
+      // Wait for page to load completely
+      await page.waitForLoadState('networkidle');
+      
+      // Should display settings page with proper heading
       await expect(
-        page.locator('h1, h2, [role="heading"]').filter({ hasText: /settings/i }).first()
+        page.getByRole('heading', { name: /settings/i })
       ).toBeVisible({ timeout: 10000 });
     });
 
     test('should access generate page in test mode', async ({ page }) => {
+      // Test mode is enabled by Playwright config, so authentication should be bypassed
       await page.goto('/app/generate');
       
+      // Should not redirect to sign-in
       await expect(page).toHaveURL(/\/app\/generate/);
+      
+      // Wait for page to load completely
+      await page.waitForLoadState('networkidle');
+      
+      // Should display generate page with proper heading
       await expect(
-        page.locator('h1, h2, [role="heading"]').filter({ hasText: /generate/i }).first()
+        page.getByRole('heading', { name: /generate report/i })
       ).toBeVisible({ timeout: 10000 });
     });
   });

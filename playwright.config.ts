@@ -91,10 +91,12 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true, // Always reuse existing server to avoid port conflicts
     timeout: 120 * 1000,
     /* Add test mode environment variables */
     env: {
+      NODE_ENV: 'test',
+      TEST_MODE: 'true',
       NEXT_PUBLIC_TEST_MODE: 'true',
       NEXT_PUBLIC_BYPASS_AUTH: 'true',
     },

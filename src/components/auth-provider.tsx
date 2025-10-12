@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { createBrowserSupabase } from '@/lib/supabase/client'
+import { getSupabaseClient } from '@/lib/supabase-client-test'
 
 interface AuthContextType {
   user: User | null
@@ -19,7 +20,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const supabase = createBrowserSupabase()
+    // Use test-mode client if in test mode, otherwise use regular client
+    const supabase = getSupabaseClient()
     
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -47,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      const supabase = createBrowserSupabase()
+      const supabase = getSupabaseClient()
       await supabase.auth.signOut()
     } catch (error) {
       console.error('Error signing out:', error)
