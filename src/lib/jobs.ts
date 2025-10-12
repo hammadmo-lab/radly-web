@@ -1,23 +1,7 @@
-import { httpPost } from '@/lib/http';
+import { httpPost, httpGet } from '@/lib/http';
+import type { EnqueueInput } from '@/types/api';
 
 export type RecentJobRow = { job_id: string; status: string; template_id?: string };
-
-type EnqueueInput = {
-  templateId: string;
-  indication?: string | null;
-  findings: string;
-  impression?: string | null;
-  technique?: string | null;
-  patient?: {
-    name?: string | null;
-    age?: number | null;
-    sex?: string | null;
-    mrn?: string | null;
-    dob?: string | null;        // UI-local date
-    history?: string | null;
-  } | null;
-  signature?: { name?: string | null; date?: string | null } | null;
-};
 
 function toISO(d?: string | null): string | null {
   if (!d) return null;
@@ -34,7 +18,7 @@ function toISO(d?: string | null): string | null {
   return null;
 }
 
-export async function enqueueJob(input: EnqueueInput) {
+export async function enqueueJob(input: EnqueueInput): Promise<{ job_id: string }> {
   const body: Record<string, unknown> = {
     template_id: input.templateId,
     findings: input.findings,
@@ -63,7 +47,7 @@ export async function enqueueJob(input: EnqueueInput) {
     if (Object.keys(s).length) body.signature = s;
   }
 
-  return httpPost('/v1/generate/async', { json: body });
+  return httpPost<Record<string, unknown>, { job_id: string }>('/v1/generate/async', body);
 }
 
 export const getRecentJobs = (limit = 50) =>

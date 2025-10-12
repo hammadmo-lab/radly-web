@@ -1,16 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createBrowserSupabase } from '@/lib/supabase/client'
 
 const allowMagic = process.env.NEXT_PUBLIC_ALLOW_MAGIC_LINK === '1'
 const allowGoogle = process.env.NEXT_PUBLIC_ALLOW_GOOGLE === '1'
 const allowApple = process.env.NEXT_PUBLIC_ALLOW_APPLE === '1'
 
-export default function SignInPage() {
+function SignInContent() {
   const supabase = createBrowserSupabase()
-  const router = useRouter()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -119,5 +118,20 @@ export default function SignInPage() {
         )}
       </div>
     </main>
+  )
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md rounded-2xl border p-8 shadow-sm">
+          <h1 className="text-2xl font-semibold mb-6 text-center">Sign in</h1>
+          <div className="text-center">Loading...</div>
+        </div>
+      </main>
+    }>
+      <SignInContent />
+    </Suspense>
   )
 }
