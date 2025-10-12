@@ -7,6 +7,7 @@ import { FileText, Settings, LogOut, BookTemplate, BarChart3 } from 'lucide-reac
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { isTestMode } from '@/lib/test-mode'
 
 export default function AppLayout({
   children,
@@ -15,6 +16,7 @@ export default function AppLayout({
 }) {
   const { user, signOut } = useAuth()
   const router = useRouter()
+  const testMode = isTestMode()
 
   const handleSignOut = async () => {
     try {
@@ -29,6 +31,13 @@ export default function AppLayout({
   return (
     <AuthGuard>
       <div className="min-h-screen bg-background">
+        {/* Test Mode Indicator */}
+        {testMode && (
+          <div className="bg-yellow-100 border-b border-yellow-200 px-4 py-2 text-center text-sm text-yellow-800">
+            🧪 Test Mode Active
+          </div>
+        )}
+        
         {/* Header */}
         <header className="bg-background border-b">
           <div className="container mx-auto px-4 py-4">
@@ -68,7 +77,7 @@ export default function AppLayout({
 
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-muted-foreground">
-                  {user?.email}
+                  {testMode ? 'test@radly.test' : user?.email}
                 </span>
                 <Button
                   variant="outline"

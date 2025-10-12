@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth-provider'
+import { isTestMode } from '@/lib/test-mode'
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -12,6 +13,11 @@ interface AuthGuardProps {
 export function AuthGuard({ children, redirectTo = '/auth/signin' }: AuthGuardProps) {
   const { user, loading } = useAuth()
   const router = useRouter()
+
+  // Skip auth check in test mode
+  if (isTestMode()) {
+    return <>{children}</>
+  }
 
   useEffect(() => {
     if (!loading && !user) {

@@ -15,21 +15,29 @@ export function getSupabaseClient() {
 
   // If in test mode, override auth methods
   if (isTestMode()) {
+    const testSession = getTestSession()
     return {
       ...client,
       auth: {
         ...client.auth,
         getSession: async () => ({
-          data: { session: getTestSession() },
+          data: { session: testSession },
           error: null,
         }),
         getUser: async () => ({
-          data: { user: getTestSession()?.user || null },
+          data: { user: testSession?.user || null },
           error: null,
         }),
         signOut: async () => ({
           error: null,
         }),
+        onAuthStateChange: (callback: any) => {
+          // Immediately call the callback with the test session
+          callback('SIGNED_IN', testSession)
+          return {
+            data: { subscription: { unsubscribe: () => {} } }
+          }
+        },
       },
     }
   }
