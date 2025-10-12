@@ -161,11 +161,11 @@ export default function GeneratePage() {
       toast.success('Report generation started!')
       router.push(`/app/report/${jobId}`)
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Generate error:', err)
       
       // Handle 401 errors with proper redirect to signin with next parameter
-      if (err?.status === 401) {
+      if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) {
         toast.error('Session expired. Please sign in again.')
         const next = encodeURIComponent(window.location.pathname + window.location.search)
         router.push(`/signin?next=${next}`)
