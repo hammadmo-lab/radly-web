@@ -365,7 +365,7 @@
 
   /* Mobile-optimized animations */
   .animate-mobile {
-    @apply animate-in fade-in slide-in-from-bottom-4 duration-300;
+    @apply animate-pulse duration-300;
   }
 
   /* Mobile-optimized focus */
