@@ -24,7 +24,7 @@ export default function Home() {
     if (busy) return;
     setBusy(true);
     try {
-      const href = authed ? "/app/templates" : "/auth/signin";
+      const href = authed ? "/app/dashboard" : "/auth/signin";
       router.push(href);
     } finally {
       setBusy(false);
@@ -36,17 +36,17 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-muted to-background">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-violet-50">
       {/* Header */}
-      <header className="border-b bg-background/80 backdrop-blur-sm">
+      <header className="border-b bg-white/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <FileText className="w-5 h-5 text-primary-foreground" />
+            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-lg flex items-center justify-center">
+              <FileText className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-primary">Radly</span>
+            <span className="text-xl font-bold text-gradient-brand">Radly</span>
           </div>
-          <Button variant="default" onClick={goToApp} disabled={busy}>
+          <Button className="btn-primary" onClick={goToApp} disabled={busy}>
             {busy ? "Loading…" : "Get Started"}
           </Button>
         </div>
@@ -159,7 +159,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-primary text-primary-foreground py-16">
+      <section className="bg-gradient-to-r from-emerald-500 to-violet-500 text-white py-16">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">
             Ready to Transform Your Medical Reporting?
@@ -170,8 +170,7 @@ export default function Home() {
           </p>
           <Button
             size="lg"
-            variant="secondary"
-            className="bg-background text-primary hover:bg-muted"
+            className="bg-white text-emerald-600 hover:bg-gray-100"
             onClick={goToApp}
             disabled={busy}
           >
@@ -181,25 +180,25 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-background border-t py-8">
+      <footer className="bg-white border-t py-8">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <div className="w-6 h-6 bg-primary rounded flex items-center justify-center">
-                <FileText className="w-4 h-4 text-primary-foreground" />
+              <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-violet-500 rounded flex items-center justify-center">
+                <FileText className="w-4 h-4 text-white" />
               </div>
-              <span className="font-semibold text-primary">Radly</span>
+              <span className="font-semibold text-gradient-brand">Radly</span>
             </div>
             <div className="flex space-x-6">
-              <Link href="/legal/terms" className="text-muted-foreground hover:text-primary">
+              <Link href="/legal/terms" className="text-gray-600 hover:text-emerald-600">
                 Terms of Service
               </Link>
-              <Link href="/legal/privacy" className="text-muted-foreground hover:text-primary">
+              <Link href="/legal/privacy" className="text-gray-600 hover:text-emerald-600">
                 Privacy Policy
               </Link>
             </div>
           </div>
-          <div className="text-center text-muted-foreground mt-4">
+          <div className="text-center text-gray-500 mt-4">
             <p>&copy; 2024 Radly. All rights reserved.</p>
           </div>
         </div>
