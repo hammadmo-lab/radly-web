@@ -29,7 +29,7 @@ interface ToastOptions {
 export const showToast = {
   success: (message: string, options?: ToastOptions) => {
     toast.success(message, {
-      icon: options?.icon || <CheckCircle2 className="w-5 h-5 text-success" />,
+      icon: options?.icon,
       action: options?.action && {
         label: options.action.label,
         onClick: options.action.onClick
@@ -41,7 +41,7 @@ export const showToast = {
   
   error: (message: string, options?: ToastOptions) => {
     toast.error(message, {
-      icon: options?.icon || <XCircle className="w-5 h-5 text-destructive" />,
+      icon: options?.icon,
       action: options?.action && {
         label: options.action.label,
         onClick: options.action.onClick
@@ -53,7 +53,7 @@ export const showToast = {
   
   warning: (message: string, options?: ToastOptions) => {
     toast.warning(message, {
-      icon: options?.icon || <AlertTriangle className="w-5 h-5 text-warning" />,
+      icon: options?.icon,
       action: options?.action && {
         label: options.action.label,
         onClick: options.action.onClick
@@ -65,7 +65,7 @@ export const showToast = {
   
   info: (message: string, options?: ToastOptions) => {
     toast.info(message, {
-      icon: options?.icon || <Info className="w-5 h-5 text-accent" />,
+      icon: options?.icon,
       action: options?.action && {
         label: options.action.label,
         onClick: options.action.onClick

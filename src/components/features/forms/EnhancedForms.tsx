@@ -15,7 +15,6 @@ import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
 
 interface FormFieldProps {
   label: string
@@ -61,9 +60,7 @@ export function FormField({
   onAutoSave
 }: FormFieldProps) {
   const [isDirty, setIsDirty] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved' | 'error'>('saved')
   const timeoutRef = useRef<NodeJS.Timeout>()
 
@@ -82,15 +79,12 @@ export function FormField({
 
     timeoutRef.current = setTimeout(async () => {
       if (value.trim()) {
-        setIsSaving(true)
         setSaveStatus('saving')
         try {
           await onAutoSave(value)
           setSaveStatus('saved')
-        } catch (error) {
+        } catch {
           setSaveStatus('error')
-        } finally {
-          setIsSaving(false)
         }
       }
     }, autoSaveDelay)
