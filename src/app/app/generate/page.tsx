@@ -7,12 +7,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { CollapsibleFormSection } from '@/components/features/generate/CollapsibleFormSection'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
 import { httpGet } from '@/lib/http'
 import { enqueueJob } from '@/lib/jobs'
@@ -289,35 +288,56 @@ export default function GeneratePage() {
           >
             {/* Step 1: Template Selection */}
             {currentStep === 1 && (
-              <Card className="bg-white border-2 border-gray-100">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <FileText className="w-5 h-5" />
-                    <span>Template Selection</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Confirm the template you&apos;re using for this report
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-                    <h3 className="font-semibold text-emerald-700">
+              <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b-2 border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">Template Selection</h3>
+                      <p className="text-sm text-gray-600">Confirm the template you&apos;re using for this report</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-6">
+                  <div className="p-6 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200">
+                    <h3 className="font-bold text-emerald-700 text-xl mb-2">
                       {(template as { templateTitle?: string })?.templateTitle || "(Untitled Template)"}
                     </h3>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-gray-600">
                       Template ID: {templateId}
                     </p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
 
             {/* Step 2: Patient Information */}
             {currentStep === 2 && (
               <div className="space-y-6">
                 {/* Patient Data Toggle */}
-                <Card className="bg-white border-2 border-gray-100">
-                  <CardContent className="p-6">
+                <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden">
+                  {/* Header */}
+                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b-2 border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900">Patient Data Settings</h3>
+                        <p className="text-sm text-gray-600">Configure patient information inclusion</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Form Fields */}
+                  <div className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
                         <Label className="font-medium text-gray-900">Include patient data in report</Label>
@@ -325,167 +345,193 @@ export default function GeneratePage() {
                       </div>
                       <Switch checked={includePatient} onCheckedChange={(v) => setValue('includePatient', v)} />
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
-                <CollapsibleFormSection
-                  id="patient-info"
-                  title="Patient Information"
-                  description="Provide patient details if available"
-                  icon={User}
-                  defaultOpen={includePatient}
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="patient.name">Patient Name</Label>
-                      <Input
-                        id="patient.name"
-                        {...register('patient.name')}
-                        placeholder="John Doe"
-                        disabled={!includePatient}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="patient.mrn">Medical Record Number</Label>
-                      <Input
-                        id="patient.mrn"
-                        {...register('patient.mrn')}
-                        placeholder="MRN123456"
-                        disabled={!includePatient}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="patient.age">Age</Label>
-                      <Input
-                        id="patient.age"
-                        type="number"
-                        {...register('patient.age', { valueAsNumber: true })}
-                        placeholder="45"
-                        disabled={!includePatient}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="patient.dob">Date of Birth</Label>
-                      <Input
-                        id="patient.dob"
-                        {...register('patient.dob')}
-                        placeholder="01/01/1980"
-                        disabled={!includePatient}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="patient.sex">Sex</Label>
-                      <Input
-                        id="patient.sex"
-                        {...register('patient.sex')}
-                        placeholder="Male/Female"
-                        disabled={!includePatient}
-                      />
+                {/* Patient Information Section */}
+                <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden">
+                  {/* Header */}
+                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b-2 border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                        <User className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900">Patient Information</h3>
+                        <p className="text-sm text-gray-600">Provide patient details if available</p>
+                      </div>
                     </div>
                   </div>
-                </CollapsibleFormSection>
+
+                  {/* Form Fields */}
+                  <div className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="patient.name" className="text-gray-900 font-medium">Patient Name</Label>
+                        <Input
+                          id="patient.name"
+                          {...register('patient.name')}
+                          placeholder="John Doe"
+                          disabled={!includePatient}
+                          className="border-2 border-gray-200 focus:border-emerald-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="patient.mrn" className="text-gray-900 font-medium">Medical Record Number</Label>
+                        <Input
+                          id="patient.mrn"
+                          {...register('patient.mrn')}
+                          placeholder="MRN123456"
+                          disabled={!includePatient}
+                          className="border-2 border-gray-200 focus:border-emerald-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="patient.age" className="text-gray-900 font-medium">Age</Label>
+                        <Input
+                          id="patient.age"
+                          type="number"
+                          {...register('patient.age', { valueAsNumber: true })}
+                          placeholder="45"
+                          disabled={!includePatient}
+                          className="border-2 border-gray-200 focus:border-emerald-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="patient.dob" className="text-gray-900 font-medium">Date of Birth</Label>
+                        <Input
+                          id="patient.dob"
+                          {...register('patient.dob')}
+                          placeholder="01/01/1980"
+                          disabled={!includePatient}
+                          className="border-2 border-gray-200 focus:border-emerald-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="patient.sex" className="text-gray-900 font-medium">Sex</Label>
+                        <Input
+                          id="patient.sex"
+                          {...register('patient.sex')}
+                          placeholder="Male/Female"
+                          disabled={!includePatient}
+                          className="border-2 border-gray-200 focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
             {/* Step 3: Clinical Data */}
             {currentStep === 3 && (
-              <Card className="bg-white border-2 border-gray-100">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Stethoscope className="w-5 h-5" />
-                    <span>Clinical Information</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Provide the clinical details for the report
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
+              <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b-2 border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                      <Stethoscope className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">Clinical Information</h3>
+                      <p className="text-sm text-gray-600">Provide the clinical details for the report</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Form Fields */}
+                <div className="p-6 space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="indication" className="text-gray-900">Indication / Clinical history (required)</Label>
+                    <Label htmlFor="indication" className="text-gray-900 font-medium">Indication / Clinical history (required)</Label>
                     <Textarea
                       id="indication"
                       {...register('indication')}
                       placeholder="Reason for study..."
                       rows={3}
-                      className="border-gray-300 focus:border-emerald-500"
+                      className="border-2 border-gray-200 focus:border-emerald-500"
                     />
                     {errors.indication && (
                       <p className="text-sm text-red-600">{errors.indication.message}</p>
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="findings" className="text-gray-900">Findings (required)</Label>
+                    <Label htmlFor="findings" className="text-gray-900 font-medium">Findings (required)</Label>
                     <Textarea
                       id="findings"
                       {...register('findings')}
                       placeholder="- Bullet 1\n- Bullet 2\nor free text..."
                       rows={6}
-                      className="border-gray-300 focus:border-emerald-500"
+                      className="border-2 border-gray-200 focus:border-emerald-500"
                     />
                     {errors.findings && (
                       <p className="text-sm text-red-600">{errors.findings.message}</p>
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="technique" className="text-gray-900">Technique (optional)</Label>
+                    <Label htmlFor="technique" className="text-gray-900 font-medium">Technique (optional)</Label>
                     <Input
                       id="technique"
                       {...register('technique')}
                       placeholder="Portal venous phase..."
-                      className="border-gray-300 focus:border-emerald-500"
+                      className="border-2 border-gray-200 focus:border-emerald-500"
                     />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
 
             {/* Step 4: Review */}
             {currentStep === 4 && (
               <div className="space-y-6">
-                <Card className="bg-white border-2 border-gray-100">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <CheckCircle className="w-5 h-5" />
-                      <span>Review & Submit</span>
-                    </CardTitle>
-                    <CardDescription>
-                      Review your information before generating the report
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden">
+                  {/* Header */}
+                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b-2 border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900">Review & Submit</h3>
+                        <p className="text-sm text-gray-600">Review your information before generating the report</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Form Fields */}
+                  <div className="p-6 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="signature.name" className="text-gray-900">Signature Name</Label>
+                        <Label htmlFor="signature.name" className="text-gray-900 font-medium">Signature Name</Label>
                         <Input
                           id="signature.name"
                           {...register('signature.name')}
                           placeholder="Dr. Jane Smith"
-                          className="border-gray-300 focus:border-emerald-500"
+                          className="border-2 border-gray-200 focus:border-emerald-500"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="signature.date" className="text-gray-900">Date</Label>
+                        <Label htmlFor="signature.date" className="text-gray-900 font-medium">Date</Label>
                         <Input
                           id="signature.date"
                           {...register('signature.date')}
                           placeholder={new Date().toLocaleDateString()}
-                          className="border-gray-300 focus:border-emerald-500"
+                          className="border-2 border-gray-200 focus:border-emerald-500"
                         />
                       </div>
                     </div>
                     
                     {/* Summary */}
-                    <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                      <h4 className="font-semibold mb-2 text-gray-900">Report Summary</h4>
-                      <div className="text-sm space-y-1 text-gray-700">
+                    <div className="mt-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200">
+                      <h4 className="font-bold mb-4 text-gray-900 text-lg">Report Summary</h4>
+                      <div className="text-sm space-y-2 text-gray-700">
                         <p><strong>Template:</strong> {(template as { templateTitle?: string })?.templateTitle || "(Untitled Template)"}</p>
                         <p><strong>Patient Data:</strong> {includePatient ? 'Included' : 'Not included'}</p>
                         <p><strong>Indication:</strong> {watch('indication') || 'Not provided'}</p>
                         <p><strong>Findings:</strong> {watch('findings') ? `${watch('findings').length} characters` : 'Not provided'}</p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
             )}
           </motion.div>

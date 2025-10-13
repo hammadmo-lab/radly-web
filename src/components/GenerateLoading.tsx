@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, Sparkles, Zap, FileText, Check } from 'lucide-react'
-import { Card } from '@/components/ui/card'
+import { Sparkles, CheckCircle, Loader2 } from 'lucide-react'
 
 interface GenerateLoadingProps {
   jobId?: string
@@ -11,53 +10,60 @@ interface GenerateLoadingProps {
   estimatedTime?: string | null
 }
 
-export function GenerateLoading({ queuePosition, estimatedTime }: GenerateLoadingProps) {
+export function GenerateLoading({ jobId, queuePosition, estimatedTime }: GenerateLoadingProps) {
   const [progress, setProgress] = useState(0)
   const [currentFactIndex, setCurrentFactIndex] = useState(0)
 
-  const medicalFacts = [
-    "Analyzing imaging parameters...",
-    "Processing anatomical landmarks...",
-    "Generating clinical observations...",
-    "Formatting medical terminology...",
-    "Finalizing report structure...",
-  ]
-
-  const steps = [
-    { label: 'Received', icon: Check, completed: true },
-    { label: 'Processing', icon: Zap, completed: progress > 30 },
-    { label: 'Generating', icon: Sparkles, completed: progress > 60 },
-    { label: 'Finalizing', icon: FileText, completed: progress > 90 },
+  const facts = [
+    "🔬 Analyzing imaging parameters...",
+    "🧬 Processing anatomical landmarks...",
+    "⚡ Generating clinical observations...",
+    "📝 Formatting medical terminology...",
+    "✨ Finalizing report structure...",
   ]
 
   useEffect(() => {
-    const progressInterval = setInterval(() => {
-      setProgress((prev) => {
+    // Simulate progress
+    const interval = setInterval(() => {
+      setProgress(prev => {
         if (prev >= 95) return prev
-        return prev + Math.random() * 3
+        return prev + Math.random() * 5
       })
-    }, 500)
+    }, 800)
 
+    // Rotate facts
     const factInterval = setInterval(() => {
-      setCurrentFactIndex((prev) => (prev + 1) % medicalFacts.length)
+      setCurrentFactIndex(prev => (prev + 1) % facts.length)
     }, 3000)
 
     return () => {
-      clearInterval(progressInterval)
+      clearInterval(interval)
       clearInterval(factInterval)
     }
-  }, [medicalFacts.length])
+  }, [facts.length])
+
+  const steps = [
+    { label: 'Received', completed: true },
+    { label: 'Processing', completed: progress > 30 },
+    { label: 'Generating', completed: progress > 60 },
+    { label: 'Finalizing', completed: progress > 90 },
+  ]
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-violet-50 p-4">
-      <Card className="w-full max-w-2xl shadow-2xl border-2 border-gray-100 overflow-hidden">
-        {/* Header with Animated Icon */}
-        <div className="bg-gradient-to-r from-emerald-500 to-violet-500 p-8 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-violet-50 p-6">
+      <div className="w-full max-w-3xl">
+        {/* ANIMATED HEADER */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          {/* ANIMATED ICON */}
           <motion.div
-            className="inline-flex p-6 rounded-full bg-white/20 backdrop-blur-lg mb-4"
+            className="inline-flex p-8 rounded-full bg-gradient-to-br from-emerald-500 to-violet-500 shadow-2xl mb-6"
             animate={{
-              scale: [1, 1.1, 1],
-              rotate: [0, 180, 360],
+              scale: [1, 1.05, 1],
+              rotate: [0, 5, -5, 0],
             }}
             transition={{
               duration: 2,
@@ -65,96 +71,155 @@ export function GenerateLoading({ queuePosition, estimatedTime }: GenerateLoadin
               ease: "easeInOut",
             }}
           >
-            <Loader2 className="w-12 h-12 text-white" />
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            >
+              <Loader2 className="w-16 h-16 text-white" />
+            </motion.div>
           </motion.div>
-          
-          <h2 className="text-3xl font-bold text-white mb-2">
+
+          <h1 className="text-5xl font-bold text-gray-900 mb-4">
             Generating Your Report
-          </h2>
-          
+          </h1>
+
+          {/* ROTATING FACTS */}
           <AnimatePresence mode="wait">
             <motion.p
               key={currentFactIndex}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="text-white/90 text-lg"
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="text-2xl text-gray-600 font-medium"
             >
-              {medicalFacts[currentFactIndex]}
+              {facts[currentFactIndex]}
             </motion.p>
           </AnimatePresence>
-        </div>
+        </motion.div>
 
-        {/* Progress Section */}
-        <div className="p-8 space-y-8">
-          {/* Progress Bar */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium text-gray-600">Progress</span>
-              <span className="font-bold text-emerald-600">{Math.round(progress)}%</span>
-            </div>
-            <div className="relative h-3 bg-gray-100 rounded-full overflow-hidden">
-              <motion.div 
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500 to-violet-500 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.5 }}
-              />
-              <div className="absolute inset-0 shimmer opacity-30" />
-            </div>
-          </div>
-
-          {/* Steps Timeline */}
-          <div className="flex justify-between relative">
-            <div className="absolute top-5 left-0 right-0 h-0.5 bg-gray-200" />
-            {steps.map((step) => (
-              <div key={step.label} className="flex flex-col items-center relative z-10">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 ${
-                  step.completed
-                    ? "bg-gradient-to-br from-emerald-500 to-violet-500 text-white shadow-lg"
-                    : "bg-white border-2 border-gray-300 text-gray-400"
-                }`}>
-                  <step.icon className="w-5 h-5" />
-                </div>
-                <span className={`mt-2 text-xs font-medium ${
-                  step.completed ? "text-emerald-600" : "text-gray-400"
-                }`}>
-                  {step.label}
+        {/* MAIN CARD */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white rounded-3xl border-2 border-gray-200 shadow-2xl overflow-hidden"
+        >
+          {/* PROGRESS SECTION */}
+          <div className="p-10 space-y-8">
+            {/* Progress Bar */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-semibold text-gray-700">Progress</span>
+                <span className="text-3xl font-bold text-emerald-600">
+                  {Math.round(progress)}%
                 </span>
               </div>
-            ))}
+              
+              <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden">
+                <motion.div
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500 via-teal-500 to-violet-500 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+                {/* Shimmer effect */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30"
+                  animate={{ x: ['-100%', '200%'] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                  style={{ width: '50%' }}
+                />
+              </div>
+            </div>
+
+            {/* STEPS TIMELINE */}
+            <div className="flex justify-between items-center relative pt-4">
+              {/* Connection line */}
+              <div className="absolute top-9 left-0 right-0 h-1 bg-gray-200 rounded-full" />
+              
+              {steps.map((step, index) => (
+                <div key={step.label} className="flex flex-col items-center relative z-10">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: index * 0.2 }}
+                    className={`
+                      w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-all duration-500
+                      ${step.completed 
+                        ? 'bg-gradient-to-br from-emerald-500 to-violet-500 text-white shadow-lg scale-110' 
+                        : 'bg-white border-4 border-gray-200 text-gray-400'
+                      }
+                    `}
+                  >
+                    {step.completed ? (
+                      <CheckCircle className="w-7 h-7" />
+                    ) : (
+                      <div className="w-3 h-3 rounded-full bg-gray-300" />
+                    )}
+                  </motion.div>
+                  <span className={`
+                    text-sm font-semibold transition-colors
+                    ${step.completed ? 'text-emerald-600' : 'text-gray-400'}
+                  `}>
+                    {step.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* QUEUE INFO */}
+            {queuePosition && queuePosition > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border-2 border-blue-200"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Queue Position</p>
+                    <p className="text-3xl font-bold text-blue-600">#{queuePosition}</p>
+                  </div>
+                  {estimatedTime && (
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-gray-600 mb-1">Estimated Wait</p>
+                      <p className="text-2xl font-bold text-blue-600">{estimatedTime}</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* PRO TIP */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+              className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border-2 border-amber-200"
+            >
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-white rounded-xl shadow-sm">
+                  <Sparkles className="w-6 h-6 text-amber-500" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Pro Tip</h3>
+                  <p className="text-gray-700">
+                    Reports are automatically saved. You can safely close this page and return later to view your completed report in the Reports section.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
           </div>
 
-          {/* Queue Info */}
-          {queuePosition && queuePosition > 0 && (
-            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-xl border border-blue-200">
-              <div>
-                <p className="text-sm font-medium text-gray-900">Queue Position</p>
-                <p className="text-xs text-gray-600">You&apos;re #{queuePosition} in line</p>
-              </div>
-              {estimatedTime && (
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-blue-600">{estimatedTime}</p>
-                  <p className="text-xs text-gray-600">estimated wait</p>
-                </div>
-              )}
+          {/* JOB ID FOOTER */}
+          {jobId && (
+            <div className="bg-gray-50 px-10 py-4 border-t-2 border-gray-100">
+              <p className="text-sm text-gray-500 font-mono">
+                Job ID: {jobId}
+              </p>
             </div>
           )}
-
-          {/* Pro Tip */}
-          <div className="p-4 bg-gray-50 rounded-xl">
-            <div className="flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium text-gray-900 mb-1">Pro Tip</p>
-                <p className="text-sm text-gray-600">
-                  Reports are automatically saved. You can safely close this page and return later to view your report.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
+        </motion.div>
+      </div>
     </div>
   )
 }
