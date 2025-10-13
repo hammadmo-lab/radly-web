@@ -26,6 +26,18 @@ export interface GenerateResponseDTO {
     impression: string;
     recommendations?: string;
   };
+  patient?: {
+    name?: string;
+    mrn?: string;
+    age?: number;
+    dob?: string;
+    sex?: string;
+    history?: string;
+  };
+  signature?: {
+    name?: string;
+    date?: string;
+  };
   ui_banner: string;
   template_id: string;
   provider: string;

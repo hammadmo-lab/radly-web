@@ -3,6 +3,7 @@
 
 import { createSupabaseBrowser } from "@/utils/supabase/browser";
 import { JobDoneResult, PatientBlock } from "@/lib/types";
+import { Signature } from "@/types/report";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 const CLIENT_KEY = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY!;
@@ -36,6 +37,7 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
  * Export a report to DOCX format
  * @param report - The report data to export
  * @param patient - Optional patient data to include
+ * @param signature - Optional signature data to include
  * @param includeIdentifiers - Whether to include patient identifiers in the export
  * @param filename - The filename for the exported document
  * @returns Promise with export response containing download URL
@@ -43,6 +45,7 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
 export async function exportReportDocx(
   report: JobDoneResult["report"],
   patient: PatientBlock,
+  signature: Signature | undefined,
   includeIdentifiers: boolean,
   filename: string
 ): Promise<{
@@ -69,6 +72,10 @@ export async function exportReportDocx(
         dob: patient.dob,
         history: patient.history,
       },
+      signature: signature ? {
+        name: signature.name,
+        date: signature.date,
+      } : null,
       include_identifiers: includeIdentifiers,
       filename: filename,
     }),
