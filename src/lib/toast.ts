@@ -161,7 +161,6 @@ export const toastMessages = {
   reportExported: (format: string) => showToast.success(
     `Report exported as ${format.toUpperCase()}`,
     {
-      icon: <Download className="w-5 h-5 text-success" />,
       description: "The file has been downloaded to your device.",
       duration: 4000
     }
@@ -170,7 +169,6 @@ export const toastMessages = {
   reportShared: () => showToast.success(
     "Report shared successfully",
     {
-      icon: <Share className="w-5 h-5 text-success" />,
       description: "The report link has been copied to your clipboard.",
       duration: 3000
     }
@@ -179,7 +177,6 @@ export const toastMessages = {
   reportCopied: () => showToast.success(
     "Report copied to clipboard",
     {
-      icon: <Copy className="w-5 h-5 text-success" />,
       description: "You can now paste the report content elsewhere.",
       duration: 3000
     }
@@ -214,7 +211,6 @@ export const toastMessages = {
   formSaved: () => showToast.success(
     "Form saved automatically",
     {
-      icon: <CheckCircle2 className="w-5 h-5 text-success" />,
       description: "Your progress has been saved.",
       duration: 2000
     }
