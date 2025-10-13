@@ -1,8 +1,9 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Lightbulb, Users } from 'lucide-react'
+import { Lightbulb, Users, Clock, Zap, Brain, FileText, CheckCircle, Sparkles } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
 type Props = {
   visible: boolean
@@ -16,7 +17,7 @@ type Props = {
 
 function pad(n: number) { return n < 10 ? `0${n}` : `${n}` }
 
-// Fun medical facts to entertain users while waiting
+// Enhanced medical facts with better formatting
 const loadingFacts = [
   "Did you know? X-rays were discovered by accident in 1895 by Wilhelm Röntgen.",
   "Fun fact: The human body glows! We emit biophotons, but they're too weak to see.",
@@ -37,12 +38,12 @@ const loadingFacts = [
 
 // Enhanced loading states with icons and descriptions
 const loadingStates = [
-  { icon: "🔍", text: "Analyzing findings...", duration: 2000 },
-  { icon: "🧠", text: "Consulting AI radiology expert...", duration: 3000 },
-  { icon: "📝", text: "Drafting impression...", duration: 2500 },
-  { icon: "✨", text: "Polishing professional language...", duration: 2000 },
-  { icon: "🎯", text: "Ensuring clinical accuracy...", duration: 2500 },
-  { icon: "📋", text: "Formatting your report...", duration: 1500 }
+  { icon: Brain, text: "Analyzing findings...", description: "Our AI is carefully reviewing your clinical data" },
+  { icon: Zap, text: "Consulting AI radiology expert...", description: "Advanced algorithms are processing your case" },
+  { icon: FileText, text: "Drafting impression...", description: "Creating a professional medical report" },
+  { icon: Sparkles, text: "Polishing professional language...", description: "Ensuring clinical accuracy and clarity" },
+  { icon: CheckCircle, text: "Ensuring clinical accuracy...", description: "Final quality checks and validation" },
+  { icon: FileText, text: "Formatting your report...", description: "Preparing the final document" }
 ]
 
 export default function GenerateLoading({
@@ -109,129 +110,156 @@ export default function GenerateLoading({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 bg-gradient-to-br from-primary/5 to-accent/5 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/10 backdrop-blur-lg"
       role="dialog"
       aria-live="polite"
       aria-label="Generating report"
     >
-      {/* Animated medical icon */}
+      {/* Main content container */}
       <motion.div
-        animate={{
-          rotate: [0, 360],
-          scale: [1, 1.1, 1]
-        }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        className="text-6xl mb-6"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-2xl mx-auto"
       >
-        {currentState.icon}
-      </motion.div>
+        {/* Header with animated icon */}
+        <div className="text-center mb-8">
+          <motion.div
+            animate={{
+              rotate: [0, 360],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="relative inline-block mb-6"
+          >
+            {/* Gradient glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full blur-xl opacity-50" />
+            <div className="relative w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-2xl">
+              <currentState.icon className="w-10 h-10 text-white" />
+            </div>
+          </motion.div>
 
-      {/* Progress bar with glow effect */}
-      <div className="w-full max-w-md mb-8">
-        <div className="relative h-2 bg-muted rounded-full overflow-hidden">
-          <motion.div
-            className="absolute h-full bg-gradient-to-r from-accent to-primary rounded-full"
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          />
-          <motion.div
-            className="absolute h-full w-20 bg-white/30 blur-sm rounded-full"
-            animate={{ x: [-80, 400] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          />
+          <h2 className="text-3xl font-bold text-gradient mb-2">
+            Generating Your Report
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Our AI is working hard to create your medical report
+          </p>
         </div>
-        <p className="text-center mt-2 text-sm text-muted-foreground">
-          {progress}% complete
-        </p>
-      </div>
 
-      {/* Current state with animation */}
-      <motion.p
-        key={currentState.text}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        className="text-xl font-medium text-foreground mb-8"
-      >
-        {currentState.text}
-      </motion.p>
+        {/* Progress section */}
+        <Card className="mb-8 border-2 border-primary/20 shadow-xl">
+          <CardContent className="p-6">
+            {/* Current state */}
+            <motion.div
+              key={currentStateIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center mb-6"
+            >
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <currentState.icon className="w-6 h-6 text-primary" />
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  {currentState.text}
+                </h3>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {currentState.description}
+              </p>
+            </motion.div>
 
-      {/* Fun fact card */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="max-w-lg mb-6"
-      >
-        <Card className="border-2 border-accent/20 bg-card/80 backdrop-blur">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Lightbulb className="w-5 h-5 text-accent" />
-              While you wait...
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground leading-relaxed">
-              {currentFact}
-            </p>
+            {/* Enhanced progress bar */}
+            <div className="mb-4">
+              <div className="relative h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <motion.div
+                  className="absolute h-full bg-gradient-primary rounded-full shadow-lg"
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+                {/* Shimmer effect */}
+                <motion.div
+                  className="absolute h-full w-20 bg-white/40 blur-sm rounded-full"
+                  animate={{ x: [-80, 400] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                />
+              </div>
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-sm font-medium text-primary">
+                  {progress}% complete
+                </span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {time} elapsed
+                </span>
+              </div>
+            </div>
+
+            {/* Status indicators */}
+            <div className="flex items-center justify-center gap-6 text-sm">
+              {queuePosition > 0 && (
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                  <Users className="w-4 h-4" />
+                  <span>Position: {queuePosition}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                <Clock className="w-4 h-4" />
+                <span>Est: {estimatedTime}s</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
-      </motion.div>
 
-      {/* Queue position and time info */}
-      <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
-        {queuePosition > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-center gap-2"
-          >
-            <Users className="w-4 h-4" />
-            Position in queue: {queuePosition}
-          </motion.div>
-        )}
-        
+        {/* Fun fact card */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex items-center gap-2"
-        >
-          <span aria-label="Elapsed time">{time}</span>
-          <span>•</span>
-          <span>Estimated: {estimatedTime}s</span>
-        </motion.div>
-      </div>
-
-      {/* Cancel button */}
-      {onCancel && (
-        <motion.div
+          key={currentFactIndex}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-6"
+          exit={{ opacity: 0, y: -20 }}
+          className="mb-8"
         >
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-lg border px-4 py-2 text-sm text-muted-foreground hover:bg-muted transition-colors"
-          >
-            Cancel Generation
-          </button>
+          <Card className="border-2 border-secondary/20 bg-gradient-subtle shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2 text-secondary">
+                <Lightbulb className="w-5 h-5" />
+                Pro Tip
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                {currentFact}
+              </p>
+            </CardContent>
+          </Card>
         </motion.div>
-      )}
 
-      {/* Hint text */}
-      {hint && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-4 text-sm text-muted-foreground text-center max-w-md"
-        >
-          {hint}
-        </motion.p>
-      )}
+        {/* Action buttons */}
+        <div className="flex justify-center gap-4">
+          {onCancel && (
+            <Button
+              variant="outline"
+              onClick={onCancel}
+              className="px-6"
+            >
+              Cancel Generation
+            </Button>
+          )}
+        </div>
+
+        {/* Hint text */}
+        {hint && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-6 text-sm text-gray-600 dark:text-gray-400 text-center max-w-md mx-auto"
+          >
+            {hint}
+          </motion.p>
+        )}
+      </motion.div>
     </motion.div>
   )
 }
