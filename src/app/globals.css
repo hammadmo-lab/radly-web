@@ -3,60 +3,59 @@
 /* 1) Design tokens as CSS variables (brand) */
 @layer base {
   :root {
-    /* Primary Colors */
-    --primary: 210 100% 50%;           /* #0066FF - Medical Blue */
-    --primary-dark: 210 100% 25%;      /* #0A2540 - Deep Blue */
-    --primary-foreground: 0 0% 100%;   /* White text on primary */
+    /* PRIMARY - Emerald Green (Medical, Modern) */
+    --primary: 160 84% 39%;              /* #10B981 */
+    --primary-hover: 160 84% 35%;
+    --primary-foreground: 0 0% 100%;
     
-    /* Secondary Colors */
-    --secondary: 172 82% 40%;          /* #14B8A6 - Soft Teal */
+    /* SECONDARY - Purple (Premium) */
+    --secondary: 262 83% 58%;            /* #8B5CF6 */
+    --secondary-hover: 262 83% 48%;
     --secondary-foreground: 0 0% 100%;
     
-    /* Accent */
-    --accent: 210 100% 50%;            /* #0066FF */
-    --accent-foreground: 0 0% 100%;
+    /* BACKGROUNDS - LIGHT & BRIGHT */
+    --background: 0 0% 100%;             /* Pure White */
+    --surface: 210 20% 98%;              /* Very light gray */
+    --card: 0 0% 100%;
+    --card-hover: 210 20% 98%;
+    --card-border: 214 32% 91%;
     
-    /* Neutrals - Enhanced Gray Scale */
-    --background: 210 40% 98%;         /* #F8FAFC - Very light blue-gray */
-    --foreground: 222 47% 11%;         /* #0F172A - Almost black */
+    /* TEXT - DARK & READABLE */
+    --foreground: 222 47% 11%;           /* Almost Black */
+    --foreground-secondary: 215 16% 47%; /* Medium gray */
+    --foreground-muted: 215 20% 65%;
     
-    --muted: 210 40% 96%;              /* #F1F5F9 */
-    --muted-foreground: 215 16% 47%;   /* #64748B */
+    /* SEMANTIC COLORS */
+    --success: 142 76% 36%;
+    --warning: 25 95% 53%;
+    --error: 0 84% 60%;
+    --info: 199 89% 48%;
     
-    --card: 0 0% 100%;                 /* White */
-    --card-foreground: 222 47% 11%;
-    
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    
-    --border: 214 32% 91%;             /* #E2E8F0 */
+    /* BORDERS */
+    --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 210 100% 50%;
+    --ring: 160 84% 39%;
     
-    /* Semantic Colors */
-    --success: 142 71% 45%;            /* #10B981 - Green */
-    --success-foreground: 0 0% 100%;
-    
-    --warning: 38 92% 50%;             /* #F59E0B - Orange */
-    --warning-foreground: 0 0% 100%;
-    
-    --error: 0 84% 60%;                /* #EF4444 - Red */
-    --error-foreground: 0 0% 100%;
-    
-    --info: 217 91% 60%;               /* #3B82F6 - Blue */
-    --info-foreground: 0 0% 100%;
-    
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    
-    /* Shadows */
-    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    /* SHADOWS - Modern & Soft */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
     
-    /* Border Radius */
-    --radius: 0.75rem;                 /* 12px - More modern */
+    /* RADIUS */
+    --radius: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    
+    /* Legacy compatibility */
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+    --muted: 210 20% 98%;
+    --muted-foreground: 215 16% 47%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
   }
 
   .dark {
@@ -156,6 +155,8 @@
     @apply bg-background text-foreground antialiased;
     /* Prevent zoom on iOS */
     -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
 
@@ -747,10 +748,91 @@
       font-size: 14px;
     }
 
-    /* Mobile-optimized info */
-    .info-mobile {
-      color: hsl(var(--info));
-      font-size: 14px;
-    }
+  /* Mobile-optimized info */
+  .info-mobile {
+    color: hsl(var(--info));
+    font-size: 14px;
   }
+  }
+}
+
+/* MODERN UTILITIES */
+.text-gradient-brand {
+  background: linear-gradient(135deg, #10B981 0%, #8B5CF6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.card-modern {
+  background: white;
+  border: 1px solid hsl(var(--card-border));
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.card-modern:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.card-interactive {
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.card-interactive:hover {
+  border-color: hsl(var(--primary));
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
+}
+
+.btn-primary {
+  background: hsl(var(--primary));
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: hsl(var(--primary-hover));
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* ANIMATIONS */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 40px hsl(var(--primary) / 0.5);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    to right,
+    hsl(var(--surface)) 0%,
+    white 50%,
+    hsl(var(--surface)) 100%
+  );
+  background-size: 1000px 100%;
 }

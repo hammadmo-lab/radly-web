@@ -5,14 +5,16 @@ import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
   BookTemplate, 
-  BarChart3, 
   Settings, 
   LogOut, 
   Menu, 
   X,
   User as UserIcon,
   Bell,
-  ChevronDown
+  ChevronDown,
+  Activity,
+  Plus,
+  FileText
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { 
@@ -59,9 +61,9 @@ export function MobileNav({ user, onSignOut }: MobileNavProps) {
   const pathname = usePathname()
 
   const navItems = [
+    { href: '/app/dashboard', icon: Activity, label: 'Dashboard' },
     { href: '/app/templates', icon: BookTemplate, label: 'Templates' },
-    { href: '/app/reports', icon: BarChart3, label: 'Reports' },
-    { href: '/app/settings', icon: Settings, label: 'Settings' },
+    { href: '/app/reports', icon: FileText, label: 'Reports' },
   ]
 
   return (
@@ -102,10 +104,10 @@ export function MobileNav({ user, onSignOut }: MobileNavProps) {
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <BookTemplate className="w-5 h-5 text-primary-foreground" />
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-lg flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xl font-bold text-primary">Radly</span>
+                <span className="text-xl font-bold text-gradient-brand">Radly</span>
               </div>
               <Button
                 variant="ghost"
@@ -171,26 +173,26 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
   const router = useRouter()
 
   const navItems = [
+    { href: '/app/dashboard', icon: Activity, label: 'Dashboard' },
     { href: '/app/templates', icon: BookTemplate, label: 'Templates' },
-    { href: '/app/reports', icon: BarChart3, label: 'Reports' },
-    { href: '/app/settings', icon: Settings, label: 'Settings' },
+    { href: '/app/reports', icon: FileText, label: 'Reports' },
   ]
 
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-white/80 dark:bg-gray-900/80 border-b border-gray-200/50 dark:border-gray-800/50 shadow-sm">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         {/* Enhanced Logo with gradient and animation */}
-        <Link href="/app/templates" className="flex items-center gap-3 group">
+        <Link href="/app/dashboard" className="flex items-center gap-3 group">
           <div className="relative">
             {/* Gradient glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-xl blur-sm opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-xl blur-sm opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
             {/* Logo container */}
-            <div className="relative w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
-              <BookTemplate className="w-6 h-6 text-white" />
+            <div className="relative w-10 h-10 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-xl flex items-center justify-center shadow-lg">
+              <FileText className="w-6 h-6 text-white" />
             </div>
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-bold text-gradient">
+            <span className="text-2xl font-bold text-gradient-brand">
               Radly
             </span>
             <span className="text-xs text-muted-foreground hidden sm:block">
@@ -232,6 +234,15 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
 
         {/* User Menu and Actions */}
         <div className="flex items-center gap-3">
+          {/* New Report Button */}
+          <Button 
+            className="btn-primary"
+            onClick={() => router.push('/app/generate')}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            New Report
+          </Button>
+
           {/* Notification Bell (placeholder) */}
           <Button 
             variant="ghost" 
@@ -300,9 +311,9 @@ interface BottomNavProps {
 
 export function BottomNav({ pathname }: BottomNavProps) {
   const navItems = [
+    { href: '/app/dashboard', icon: Activity, label: 'Home' },
     { href: '/app/templates', icon: BookTemplate, label: 'Templates' },
-    { href: '/app/reports', icon: BarChart3, label: 'Reports' },
-    { href: '/app/settings', icon: Settings, label: 'Settings' },
+    { href: '/app/reports', icon: FileText, label: 'Reports' },
   ]
 
   return (

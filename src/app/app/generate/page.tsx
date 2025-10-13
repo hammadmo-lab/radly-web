@@ -12,15 +12,13 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { StepProgress } from '@/components/features/generate/StepProgress'
 import { CollapsibleFormSection } from '@/components/features/generate/CollapsibleFormSection'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
 import { httpGet } from '@/lib/http'
 import { enqueueJob } from '@/lib/jobs'
 import { buildSigninWithNext } from '@/lib/redirect'
 import { toast } from 'sonner'
-import { ArrowLeft, User, AlertCircle, FileText, Stethoscope, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react'
-import Link from 'next/link'
+import { ArrowLeft, User, AlertCircle, FileText, Stethoscope, CheckCircle, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
 
 export const dynamic = 'force-dynamic';
 
@@ -199,38 +197,81 @@ export default function GeneratePage() {
 
 
 
+  const steps = [
+    { id: 1, name: 'Template', icon: FileText },
+    { id: 2, name: 'Patient Info', icon: User },
+    { id: 3, name: 'Clinical Data', icon: Stethoscope },
+    { id: 4, name: 'Review', icon: Eye },
+  ]
+
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-24 md:pb-8">
+    <div className="max-w-5xl mx-auto space-y-6 pb-24 md:pb-8">
       {/* Header */}
-      <div className="flex items-center space-x-4">
-        <Link href="/app/templates">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Templates
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Generate Report</h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Using template: {(template as { templateTitle?: string })?.templateTitle || "(Untitled Template)"}
-          </p>
-        </div>
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          onClick={() => router.push('/app/dashboard')}
+          className="gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Button>
+        <h1 className="text-3xl font-bold text-gray-900">Generate Report</h1>
+        <div className="w-24" /> {/* Spacer */}
       </div>
 
-      {/* Progress Stepper */}
-      <StepProgress 
-        currentStep={currentStep} 
-        onStepClick={setCurrentStep}
-      />
+      {/* Clean Step Indicator */}
+      <Card className="bg-white border-2 border-gray-100">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between relative">
+            {/* Progress line */}
+            <div className="absolute top-6 left-0 right-0 h-0.5 bg-gray-200 hidden sm:block">
+              <motion.div 
+                className="h-full bg-gradient-to-r from-emerald-500 to-violet-500"
+                animate={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+
+            {/* Steps */}
+            <div className="flex items-center justify-between w-full relative z-10">
+              {steps.map((step) => {
+                const isActive = currentStep === step.id
+                const isCompleted = currentStep > step.id
+                return (
+                  <div key={step.id} className="flex flex-col items-center gap-2">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                      isActive || isCompleted
+                        ? "bg-gradient-to-br from-emerald-500 to-violet-500 text-white shadow-lg"
+                        : "bg-white border-2 border-gray-300 text-gray-400"
+                    }`}>
+                      {isCompleted ? (
+                        <CheckCircle className="w-6 h-6" />
+                      ) : (
+                        <step.icon className="w-6 h-6" />
+                      )}
+                    </div>
+                    <span className={`text-sm font-medium text-center ${
+                      isActive || isCompleted ? "text-emerald-600" : "text-gray-500"
+                    }`}>
+                      {step.name}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Error Display */}
       {error && (
-        <div className="bg-error/10 border border-error/20 rounded-lg p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-center space-x-2">
-            <AlertCircle className="w-5 h-5 text-error" />
+            <AlertCircle className="w-5 h-5 text-red-600" />
             <div>
-              <h3 className="text-sm font-medium text-error">Error</h3>
-              <p className="text-sm text-error/80">{error}</p>
+              <h3 className="text-sm font-medium text-red-900">Error</h3>
+              <p className="text-sm text-red-700">{error}</p>
             </div>
           </div>
         </div>
@@ -248,7 +289,7 @@ export default function GeneratePage() {
           >
             {/* Step 1: Template Selection */}
             {currentStep === 1 && (
-              <Card>
+              <Card className="bg-white border-2 border-gray-100">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <FileText className="w-5 h-5" />
@@ -259,11 +300,11 @@ export default function GeneratePage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                    <h3 className="font-semibold text-primary">
+                  <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                    <h3 className="font-semibold text-emerald-700">
                       {(template as { templateTitle?: string })?.templateTitle || "(Untitled Template)"}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-sm text-gray-600 mt-1">
                       Template ID: {templateId}
                     </p>
                   </div>
@@ -275,13 +316,17 @@ export default function GeneratePage() {
             {currentStep === 2 && (
               <div className="space-y-6">
                 {/* Patient Data Toggle */}
-                <div className="flex items-center justify-between rounded-xl border p-4">
-                  <div>
-                    <Label className="font-medium">Include patient data in report</Label>
-                    <p className="text-sm text-muted-foreground">Toggle to include name/age/sex/MRN/history in the generated report and DOCX.</p>
-                  </div>
-                  <Switch checked={includePatient} onCheckedChange={(v) => setValue('includePatient', v)} />
-                </div>
+                <Card className="bg-white border-2 border-gray-100">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="font-medium text-gray-900">Include patient data in report</Label>
+                        <p className="text-sm text-gray-600">Toggle to include name/age/sex/MRN/history in the generated report and DOCX.</p>
+                      </div>
+                      <Switch checked={includePatient} onCheckedChange={(v) => setValue('includePatient', v)} />
+                    </div>
+                  </CardContent>
+                </Card>
 
                 <CollapsibleFormSection
                   id="patient-info"
@@ -344,54 +389,60 @@ export default function GeneratePage() {
 
             {/* Step 3: Clinical Data */}
             {currentStep === 3 && (
-              <CollapsibleFormSection
-                id="clinical-data"
-                title="Clinical Information"
-                description="Provide the clinical details for the report"
-                icon={Stethoscope}
-                defaultOpen={true}
-              >
-                <div className="space-y-4">
+              <Card className="bg-white border-2 border-gray-100">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Stethoscope className="w-5 h-5" />
+                    <span>Clinical Information</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Provide the clinical details for the report
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="indication">Indication / Clinical history (required)</Label>
+                    <Label htmlFor="indication" className="text-gray-900">Indication / Clinical history (required)</Label>
                     <Textarea
                       id="indication"
                       {...register('indication')}
                       placeholder="Reason for study..."
                       rows={3}
+                      className="border-gray-300 focus:border-emerald-500"
                     />
                     {errors.indication && (
-                      <p className="text-sm text-error">{errors.indication.message}</p>
+                      <p className="text-sm text-red-600">{errors.indication.message}</p>
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="findings">Findings (required)</Label>
+                    <Label htmlFor="findings" className="text-gray-900">Findings (required)</Label>
                     <Textarea
                       id="findings"
                       {...register('findings')}
                       placeholder="- Bullet 1\n- Bullet 2\nor free text..."
                       rows={6}
+                      className="border-gray-300 focus:border-emerald-500"
                     />
                     {errors.findings && (
-                      <p className="text-sm text-error">{errors.findings.message}</p>
+                      <p className="text-sm text-red-600">{errors.findings.message}</p>
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="technique">Technique (optional)</Label>
+                    <Label htmlFor="technique" className="text-gray-900">Technique (optional)</Label>
                     <Input
                       id="technique"
                       {...register('technique')}
                       placeholder="Portal venous phase..."
+                      className="border-gray-300 focus:border-emerald-500"
                     />
                   </div>
-                </div>
-              </CollapsibleFormSection>
+                </CardContent>
+              </Card>
             )}
 
             {/* Step 4: Review */}
             {currentStep === 4 && (
               <div className="space-y-6">
-                <Card>
+                <Card className="bg-white border-2 border-gray-100">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <CheckCircle className="w-5 h-5" />
@@ -404,27 +455,29 @@ export default function GeneratePage() {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="signature.name">Signature Name</Label>
+                        <Label htmlFor="signature.name" className="text-gray-900">Signature Name</Label>
                         <Input
                           id="signature.name"
                           {...register('signature.name')}
                           placeholder="Dr. Jane Smith"
+                          className="border-gray-300 focus:border-emerald-500"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="signature.date">Date</Label>
+                        <Label htmlFor="signature.date" className="text-gray-900">Date</Label>
                         <Input
                           id="signature.date"
                           {...register('signature.date')}
                           placeholder={new Date().toLocaleDateString()}
+                          className="border-gray-300 focus:border-emerald-500"
                         />
                       </div>
                     </div>
                     
                     {/* Summary */}
-                    <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <h4 className="font-semibold mb-2">Report Summary</h4>
-                      <div className="text-sm space-y-1">
+                    <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                      <h4 className="font-semibold mb-2 text-gray-900">Report Summary</h4>
+                      <div className="text-sm space-y-1 text-gray-700">
                         <p><strong>Template:</strong> {(template as { templateTitle?: string })?.templateTitle || "(Untitled Template)"}</p>
                         <p><strong>Patient Data:</strong> {includePatient ? 'Included' : 'Not included'}</p>
                         <p><strong>Indication:</strong> {watch('indication') || 'Not provided'}</p>
@@ -445,7 +498,7 @@ export default function GeneratePage() {
             variant="outline"
             onClick={handlePrevious}
             disabled={currentStep === 1}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 border-2"
           >
             <ChevronLeft className="w-4 h-4" />
             Previous
@@ -456,7 +509,7 @@ export default function GeneratePage() {
               <Button
                 type="button"
                 onClick={handleNext}
-                className="flex items-center gap-2"
+                className="btn-primary flex items-center gap-2"
               >
                 Next
                 <ChevronRight className="w-4 h-4" />
@@ -465,7 +518,7 @@ export default function GeneratePage() {
               <Button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="flex items-center gap-2"
+                className="btn-primary flex items-center gap-2"
               >
                 {isSubmitting ? 'Generating...' : 'Generate Report'}
               </Button>

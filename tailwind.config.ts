@@ -25,11 +25,12 @@ const config: Config = {
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
+          hover: "hsl(var(--primary-hover))",
           foreground: "hsl(var(--primary-foreground))",
-          dark: "hsl(var(--primary-dark))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
+          hover: "hsl(var(--secondary-hover))",
           foreground: "hsl(var(--secondary-foreground))",
         },
         accent: {
@@ -59,7 +60,10 @@ const config: Config = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+          hover: "hsl(var(--card-hover))",
+          border: "hsl(var(--card-border))",
         },
+        surface: "hsl(var(--surface))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -79,6 +83,7 @@ const config: Config = {
         "fade-in": "fade-in 0.5s ease-out",
         "slide-up": "slide-up 0.3s ease-out",
         "scale-in": "scale-in 0.2s ease-out",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
       keyframes: {
         "accordion-down": {
@@ -104,6 +109,10 @@ const config: Config = {
         "scale-in": {
           "0%": { transform: "scale(0.95)", opacity: "0" },
           "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        "pulse-glow": {
+          "0%, 100%": { opacity: "1", boxShadow: "0 0 20px hsl(var(--primary) / 0.3)" },
+          "50%": { opacity: "0.8", boxShadow: "0 0 40px hsl(var(--primary) / 0.5)" },
         },
       },
     },
