@@ -2,9 +2,8 @@
 
 import { useAuth } from '@/components/auth-provider'
 import { AuthGuard } from '@/components/auth-guard'
-import { Button } from '@/components/ui/button'
-import { FileText, Settings, LogOut, BookTemplate, BarChart3 } from 'lucide-react'
-import Link from 'next/link'
+import { DesktopNav, MobileNav, BottomNav } from '@/components/layout/Navigation'
+import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { isTestMode } from '@/lib/test-mode'
@@ -16,6 +15,7 @@ export default function AppLayout({
 }) {
   const { user, signOut } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
   const testMode = isTestMode()
 
   const handleSignOut = async () => {
@@ -39,64 +39,25 @@ export default function AppLayout({
         )}
         
         {/* Header */}
-        <header className="bg-background border-b">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-8">
-                <Link href="/app/templates" className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-primary-foreground" />
-                  </div>
-                  <span className="text-xl font-bold text-primary">Radly</span>
-                </Link>
-
-                <nav className="hidden md:flex space-x-6">
-                  <Link
-                    href="/app/templates"
-                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <BookTemplate className="w-4 h-4" />
-                    <span>Templates</span>
-                  </Link>
-                  <Link
-                    href="/app/reports"
-                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <BarChart3 className="w-4 h-4" />
-                    <span>Reports</span>
-                  </Link>
-                  <Link
-                    href="/app/settings"
-                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <Settings className="w-4 h-4" />
-                    <span>Settings</span>
-                  </Link>
-                </nav>
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-muted-foreground">
-                  {testMode ? 'test@radly.test' : user?.email}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSignOut}
-                  className="flex items-center space-x-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out</span>
-                </Button>
-              </div>
+        <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container mx-auto px-4">
+            <div className="flex h-16 items-center justify-between">
+              {/* Desktop Navigation */}
+              <DesktopNav user={testMode ? { email: 'test@radly.test' } : user} onSignOut={handleSignOut} />
+              
+              {/* Mobile Navigation */}
+              <MobileNav user={testMode ? { email: 'test@radly.test' } : user} onSignOut={handleSignOut} />
             </div>
           </div>
         </header>
 
         {/* Main Content */}
-        <main className="container max-w-6xl mx-auto px-4 py-8">
+        <main className="container max-w-6xl mx-auto px-4 py-8 pb-20 md:pb-8">
           {children}
         </main>
+
+        {/* Bottom Navigation for Mobile */}
+        <BottomNav pathname={pathname} />
       </div>
     </AuthGuard>
   )
