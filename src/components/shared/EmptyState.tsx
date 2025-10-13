@@ -1,6 +1,6 @@
 'use client'
 import { motion } from 'framer-motion'
-import { Plus, BookTemplate, FileText, BarChart3, Settings, Search } from 'lucide-react'
+import { Plus, BookTemplate, FileText, Settings, Search } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'

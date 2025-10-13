@@ -1,6 +1,6 @@
 'use client'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Home, RefreshCw, AlertTriangle, Search, Bug } from 'lucide-react'
+import { ArrowLeft, Home, RefreshCw, AlertTriangle, Bug } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'

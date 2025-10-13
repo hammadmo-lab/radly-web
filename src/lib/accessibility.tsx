@@ -2,16 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
-  Keyboard, 
-  Search, 
-  Plus, 
-  Settings, 
-  Home,
-  ArrowLeft,
-  ArrowRight,
-  Escape,
-  Enter,
-  Space
+  Keyboard
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'

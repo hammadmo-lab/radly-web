@@ -1,7 +1,7 @@
 'use client'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Loader2, Lightbulb, Users, CheckCircle2, AlertCircle, Brain, FileText, Sparkles, Target, Clipboard } from 'lucide-react'
+import { Lightbulb, Users } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 type Props = {
@@ -48,7 +48,6 @@ const loadingStates = [
 export default function GenerateLoading({
   visible,
   status = 'queued',
-  title = 'Generating your report',
   hint,
   onCancel,
   queuePosition = 0,
@@ -59,7 +58,6 @@ export default function GenerateLoading({
   const [currentFactIndex, setCurrentFactIndex] = useState(0)
   const [progress, setProgress] = useState(0)
   const intervalRef = useRef<number | null>(null)
-  const prefersReducedMotion = useReducedMotion()
 
   useEffect(() => {
     if (!visible) return
