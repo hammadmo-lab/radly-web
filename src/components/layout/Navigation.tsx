@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
   BookTemplate, 
@@ -10,9 +10,20 @@ import {
   LogOut, 
   Menu, 
   X,
-  User
+  User as UserIcon,
+  Bell,
+  ChevronDown
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 
 interface NavLinkProps {
@@ -123,7 +134,7 @@ export function MobileNav({ user, onSignOut }: MobileNavProps) {
             <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-muted-foreground" />
+                  <UserIcon className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">
@@ -157,6 +168,7 @@ interface DesktopNavProps {
 
 export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
   const pathname = usePathname()
+  const router = useRouter()
 
   const navItems = [
     { href: '/app/templates', icon: BookTemplate, label: 'Templates' },
@@ -165,44 +177,120 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
   ]
 
   return (
-    <div className="hidden md:flex items-center justify-between w-full">
-      {/* Logo */}
-      <Link href="/app/templates" className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-          <BookTemplate className="w-5 h-5 text-primary-foreground" />
+    <header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-white/80 dark:bg-gray-900/80 border-b border-gray-200/50 dark:border-gray-800/50 shadow-sm">
+      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+        {/* Enhanced Logo with gradient and animation */}
+        <Link href="/app/templates" className="flex items-center gap-3 group">
+          <div className="relative">
+            {/* Gradient glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-xl blur-sm opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
+            {/* Logo container */}
+            <div className="relative w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
+              <BookTemplate className="w-6 h-6 text-white" />
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xl font-bold text-gradient">
+              Radly
+            </span>
+            <span className="text-xs text-muted-foreground hidden sm:block">
+              Medical Reporting
+            </span>
+          </div>
+        </Link>
+
+        {/* Navigation Links with animated underline */}
+        <nav className="hidden md:flex items-center space-x-1">
+          {navItems.map((item) => {
+            const isActive = pathname.startsWith(item.href)
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "relative px-4 py-2 rounded-lg transition-all duration-200",
+                  "flex items-center gap-2 text-sm font-medium",
+                  isActive
+                    ? "text-primary bg-primary/10"
+                    : "text-gray-600 hover:text-primary hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                )}
+              >
+                <item.icon className="w-4 h-4" />
+                <span>{item.label}</span>
+                {/* Animated underline for active state */}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNavTab"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+              </Link>
+            )
+          })}
+        </nav>
+
+        {/* User Menu and Actions */}
+        <div className="flex items-center gap-3">
+          {/* Notification Bell (placeholder) */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="relative hidden sm:flex"
+            title="Notifications"
+          >
+            <Bell className="w-5 h-5" />
+            {/* Notification badge */}
+            <span className="absolute top-1 right-1 w-2 h-2 bg-error rounded-full" />
+          </Button>
+
+          {/* User Dropdown Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="flex items-center gap-2 h-10 px-3"
+              >
+                <Avatar className="w-8 h-8">
+                  <AvatarFallback className="bg-primary text-white text-sm font-semibold">
+                    {user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden lg:block text-sm font-medium">
+                  {user?.email?.split('@')[0] || 'User'}
+                </span>
+                <ChevronDown className="w-4 h-4 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    {user?.email?.split('@')[0] || 'User'}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user?.email || 'user@example.com'}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => router.push('/app/settings')}>
+                <Settings className="w-4 h-4 mr-2" />
+                <span>Settings</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={onSignOut}
+                className="text-error focus:text-error focus:bg-error/10"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                <span>Sign Out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <span className="text-xl font-bold text-primary">Radly</span>
-      </Link>
-
-      {/* Navigation */}
-      <nav className="flex space-x-6">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.href}
-            href={item.href}
-            icon={item.icon}
-            label={item.label}
-            isActive={pathname.startsWith(item.href)}
-          />
-        ))}
-      </nav>
-
-      {/* User info and sign out */}
-      <div className="flex items-center space-x-4">
-        <span className="text-sm text-muted-foreground">
-          {user?.email || 'test@radly.test'}
-        </span>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onSignOut}
-          className="flex items-center space-x-2"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>Sign Out</span>
-        </Button>
       </div>
-    </div>
+    </header>
   )
 }
 
@@ -218,29 +306,52 @@ export function BottomNav({ pathname }: BottomNavProps) {
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-card border-t border-border z-40">
-      <div className="flex justify-around py-2">
+    <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-gray-200/50 dark:border-gray-800/50 z-40 safe-area-inset-bottom shadow-lg">
+      <div className="flex justify-around items-center h-16 px-2">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href)
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={cn(
-                "flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 min-h-[44px] min-w-[44px] justify-center",
-                "hover:bg-accent/10",
-                isActive && "bg-accent/10 text-accent"
-              )}
+              className="flex flex-col items-center justify-center gap-1 flex-1 h-full relative group"
             >
-              <item.icon className={cn("w-5 h-5", isActive && "text-accent")} />
-              <span className="text-xs font-medium">{item.label}</span>
+              {/* Top indicator for active state */}
               {isActive && (
                 <motion.div
-                  layoutId="activeTab"
-                  className="absolute bottom-0 left-1/2 w-8 h-1 bg-accent rounded-t-full -translate-x-1/2"
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  layoutId="mobileActiveTab"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-full"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
+              
+              {/* Icon container with scale animation */}
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                className={cn(
+                  "p-2 rounded-xl transition-all duration-200",
+                  isActive 
+                    ? "bg-primary/10" 
+                    : "group-active:bg-gray-100 dark:group-active:bg-gray-800"
+                )}
+              >
+                <item.icon 
+                  className={cn(
+                    "w-6 h-6 transition-colors",
+                    isActive ? "text-primary" : "text-gray-500 dark:text-gray-400"
+                  )} 
+                />
+              </motion.div>
+              
+              {/* Label */}
+              <span className={cn(
+                "text-xs font-medium transition-colors",
+                isActive 
+                  ? "text-primary" 
+                  : "text-gray-500 dark:text-gray-400"
+              )}>
+                {item.label}
+              </span>
             </Link>
           )
         })}

@@ -1,21 +1,37 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { TemplateCard } from '@/components/features/templates/TemplateCard'
+import { TemplateFilters } from '@/components/features/templates/TemplateFilters'
+import { TemplateCardSkeleton } from '@/components/loading/TemplateCardSkeleton'
+import { EmptyState } from '@/components/shared/EmptyState'
 import { fetchTemplates } from '@/lib/templates'
 import { httpGet } from '@/lib/http'
-import { Search, FileText, Plus, RefreshCw } from 'lucide-react'
 
 export const dynamic = 'force-dynamic';
 
-
 export default function TemplatesPage() {
-  const [searchTerm, setSearchTerm] = useState('')
+  const [filters, setFilters] = useState({
+    searchQuery: '',
+    modality: undefined as string | undefined,
+    bodySystem: undefined as string | undefined,
+  })
+
+  const handleFilterChange = (newFilters: {
+    searchQuery: string
+    modality?: string | undefined
+    bodySystem?: string | undefined
+  }) => {
+    setFilters({
+      searchQuery: newFilters.searchQuery,
+      modality: newFilters.modality,
+      bodySystem: newFilters.bodySystem,
+    })
+  }
   const router = useRouter()
 
   const { data: templates, isLoading, error, refetch } = useQuery({
@@ -31,138 +47,103 @@ export default function TemplatesPage() {
     },
   })
 
-  // Null-safe filtering with useMemo
-  const filteredTemplates = useMemo(() => {
-    const q = (searchTerm || '').trim().toLowerCase()
-    if (!q) return templates ?? []
+  // Filter templates based on search and filters
+  const filteredTemplates = templates?.filter((template) => {
+    const matchesSearch = !filters.searchQuery || 
+      template.title?.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+      template.modality?.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+      template.anatomy?.toLowerCase().includes(filters.searchQuery.toLowerCase())
     
-    return (templates ?? []).filter(t => 
-      (t.title || '').toLowerCase().includes(q) ||
-      (t.modality || '').toLowerCase().includes(q) ||
-      (t.anatomy || '').toLowerCase().includes(q)
-    )
-  }, [templates, searchTerm])
-
-  const handleUseTemplate = (templateId: string) => {
-    router.push(`/app/generate?template=${encodeURIComponent(templateId)}`)
-  }
+    const matchesModality = !filters.modality || 
+      template.modality?.toLowerCase() === filters.modality.toLowerCase()
+    
+    const matchesBodySystem = !filters.bodySystem || 
+      template.anatomy?.toLowerCase() === filters.bodySystem.toLowerCase()
+    
+    return matchesSearch && matchesModality && matchesBodySystem
+  })
 
   if (error) {
     return (
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="space-y-8 pb-24 md:pb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Templates</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              Templates
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
               Choose from our collection of medical report templates
             </p>
           </div>
         </div>
         
-        <div className="text-center py-12">
-          <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">
-            Couldn&apos;t load templates
-          </h3>
-          <p className="text-muted-foreground mb-6">
-            There was an error loading the templates. Please try again.
-          </p>
-          <Button onClick={() => refetch()} variant="default" className="flex items-center space-x-2">
-            <RefreshCw className="w-4 h-4" />
-            <span>Retry</span>
-          </Button>
-        </div>
+        <EmptyState
+          type="error"
+          title="Couldn't load templates"
+          description="There was an error loading the templates. Please try again."
+          action={{
+            label: "Retry",
+            onClick: () => refetch()
+          }}
+        />
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-24 md:pb-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Templates</h1>
-          <p className="text-muted-foreground mt-2">
-            Choose from our collection of medical report templates
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            Templates
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Select a template to generate your medical report
           </p>
         </div>
-        <Link href="/app/generate">
-          <Button variant="default" className="flex items-center space-x-2">
-            <Plus className="w-4 h-4" />
-            <span>New Report</span>
-          </Button>
-        </Link>
+        <Button 
+          size="lg"
+          className="shadow-lg hover:shadow-xl transition-shadow"
+          onClick={() => router.push('/app/generate')}
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          New Report
+        </Button>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-        <Input
-          placeholder="Search templates..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
+      {/* Filters */}
+      <TemplateFilters onFilterChange={handleFilterChange} />
 
       {/* Templates Grid */}
       {isLoading ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-4 bg-muted rounded w-3/4"></div>
-                <div className="h-3 bg-muted rounded w-1/2"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="h-3 bg-muted rounded"></div>
-                  <div className="h-3 bg-muted rounded w-5/6"></div>
-                </div>
-              </CardContent>
-            </Card>
+            <TemplateCardSkeleton key={i} />
           ))}
         </div>
-      ) : filteredTemplates.length === 0 ? (
-        <div className="text-center py-12">
-          <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">
-            {searchTerm ? 'No templates found' : 'No templates available'}
-          </h3>
-          <p className="text-muted-foreground">
-            {searchTerm 
-              ? 'Try adjusting your search terms'
-              : 'Templates will appear here once they are available'
-            }
-          </p>
+      ) : filteredTemplates && filteredTemplates.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredTemplates.map((template) => (
+            <TemplateCard 
+              key={template.id} 
+              template={{
+                template_id: template.id,
+                title: template.title,
+                modality: template.modality || undefined,
+                body_system: template.anatomy || undefined,
+                description: undefined, // template.description doesn't exist on TemplateListItem
+                updated_at: template.updatedAt || undefined
+              }} 
+            />
+          ))}
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTemplates.map((template) => (
-            <Card key={template.id} className="hover:bg-muted/60 transition border-border">
-              <CardHeader>
-                <CardTitle className="text-lg">{template.title}</CardTitle>
-                <CardDescription className="text-sm text-accent font-medium">
-                  {template.modality && template.anatomy ? `${template.modality} • ${template.anatomy}` : template.modality || template.anatomy || ''}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">
-                    {template.updatedAt ? `Updated ${new Date(template.updatedAt).toLocaleDateString()}` : "Updated Unknown"}
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="default"
-                    onClick={() => handleUseTemplate(template.id)}
-                  >
-                    Use Template
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <EmptyState
+          type="search"
+          title="No templates found"
+          description="Try adjusting your search or filters to find what you're looking for."
+        />
       )}
     </div>
   )
