@@ -221,6 +221,7 @@ export default function JobDetailPage() {
   const parsed = JobResultSchema.parse(result);
   const resultReport: StrictReport = parsed.report;
   const resultPatient: Patient = parsed.patient ?? {};
+  const resultSignature: Signature | undefined = parsed.signature;
   
   return (
     <div className="py-8">
@@ -242,7 +243,11 @@ export default function JobDetailPage() {
         </Button>
       </div>
       
-      <ReportRenderer report={resultReport} patient={resultPatient} />
+      <ReportRenderer 
+        report={resultReport} 
+        patient={resultPatient} 
+        signature={resultSignature}
+      />
     </div>
   );
 }
