@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 export const PatientSchema = z.object({
-  name: z.string().optional(),
-  mrn: z.string().optional(),
-  age: z.number().optional(),
-  dob: z.string().optional(),
-  sex: z.string().optional(),
-  history: z.string().optional(),
+  name: z.string().nullable().optional().transform(val => val ?? undefined),
+  mrn: z.string().nullable().optional().transform(val => val ?? undefined),
+  age: z.number().nullable().optional().transform(val => val ?? undefined),
+  dob: z.string().nullable().optional().transform(val => val ?? undefined),
+  sex: z.string().nullable().optional().transform(val => val ?? undefined),
+  history: z.string().nullable().optional().transform(val => val ?? undefined),
 });
 
 export type Patient = z.infer<typeof PatientSchema>;
