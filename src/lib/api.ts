@@ -2,6 +2,7 @@
 "use client";
 
 import { createSupabaseBrowser } from "@/utils/supabase/browser";
+import { JobDoneResult, PatientBlock } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 const CLIENT_KEY = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY!;
@@ -29,4 +30,54 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   }
 
   return res;
+}
+
+/**
+ * Export a report to DOCX format
+ * @param report - The report data to export
+ * @param patient - Optional patient data to include
+ * @param includeIdentifiers - Whether to include patient identifiers in the export
+ * @param filename - The filename for the exported document
+ * @returns Promise with export response containing download URL
+ */
+export async function exportReportDocx(
+  report: JobDoneResult["report"],
+  patient: PatientBlock,
+  includeIdentifiers: boolean,
+  filename: string
+): Promise<{
+  url: string;
+  public_url?: string;
+  size: number;
+  expires_in: number;
+}> {
+  const response = await apiFetch("/export/docx/link", {
+    method: "POST",
+    body: JSON.stringify({
+      report: {
+        title: report.title,
+        technique: report.technique,
+        findings: report.findings,
+        impression: report.impression,
+        recommendations: report.recommendations,
+      },
+      patient: {
+        name: patient.name,
+        age: patient.age,
+        sex: patient.sex,
+        mrn: patient.mrn,
+        dob: patient.dob,
+        history: patient.history,
+      },
+      include_identifiers: includeIdentifiers,
+      filename: filename,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "Unknown error");
+    throw new Error(`Export failed: ${response.status} ${errorText}`);
+  }
+
+  return response.json();
 }

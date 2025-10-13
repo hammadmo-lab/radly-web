@@ -6,8 +6,10 @@ import { getJob, getQueueStats, JobStatusResponse } from "@/lib/jobs";
 import { JobResultSchema, StrictReport, Patient } from "@/types/report";
 import ReportRenderer from "@/components/ReportRenderer";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Download } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { exportReportDocx } from "@/lib/api";
+import { toast } from "sonner";
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +22,7 @@ export default function JobDetailPage() {
   const [queueDepth, setQueueDepth] = useState<number | null>(null);
   const [running, setRunning] = useState<number | null>(null);
   const [progress, setProgress] = useState<number>(10);
+  const [isExporting, setIsExporting] = useState(false);
 
   const statusTimer = useRef<number | null>(null);
   const statsTimer = useRef<number | null>(null);
@@ -116,6 +119,59 @@ export default function JobDetailPage() {
     }
   }, [jobStatus]);
 
+  // Export handler
+  const handleExportDocx = async () => {
+    if (!jobStatus?.result) return;
+    
+    setIsExporting(true);
+    try {
+      const parsed = JobResultSchema.parse(jobStatus.result);
+      const resultReport: StrictReport = parsed.report;
+      const resultPatient: Patient = parsed.patient ?? {};
+      
+      // Determine if patient data should be included
+      const hasPatientData = Boolean(resultPatient && (
+        resultPatient.name || 
+        resultPatient.age !== undefined || 
+        resultPatient.sex || 
+        resultPatient.mrn || 
+        resultPatient.dob || 
+        resultPatient.history
+      ));
+      
+      // Generate filename
+      const filename = resultReport.title 
+        ? `${resultReport.title.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')}.docx`
+        : 'radiology_report.docx';
+      
+      const exportResult = await exportReportDocx(
+        resultReport,
+        resultPatient,
+        hasPatientData, // include identifiers if patient data exists
+        filename
+      );
+      
+      // Use public_url if available, otherwise use presigned URL
+      const downloadUrl = exportResult.public_url || exportResult.url;
+      
+      // Trigger download
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('Report exported successfully!');
+    } catch (error) {
+      console.error('Export error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to export report';
+      toast.error(errorMessage);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   // Error UI
   if (err || jobStatus?.status === "error") {
     return (
@@ -166,6 +222,24 @@ export default function JobDetailPage() {
   
   return (
     <div className="py-8">
+      {/* Export Button */}
+      <div className="max-w-3xl mx-auto mb-6 flex justify-end">
+        <Button
+          onClick={handleExportDocx}
+          disabled={isExporting}
+          variant="outline"
+          className="flex items-center gap-2"
+          aria-label="Download report as DOCX"
+        >
+          {isExporting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
+          {isExporting ? 'Exporting...' : 'Download DOCX'}
+        </Button>
+      </div>
+      
       <ReportRenderer report={resultReport} patient={resultPatient} />
     </div>
   );
