@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getJob, getQueueStats, JobStatusResponse } from "@/lib/jobs";
-import { JobResultSchema, StrictReport, Patient } from "@/types/report";
+import { JobResultSchema, StrictReport, Patient, Signature } from "@/types/report";
 import ReportRenderer from "@/components/ReportRenderer";
 import { Button } from "@/components/ui/button";
 import { Loader2, Download } from "lucide-react";
@@ -128,6 +128,7 @@ export default function JobDetailPage() {
       const parsed = JobResultSchema.parse(jobStatus.result);
       const resultReport: StrictReport = parsed.report;
       const resultPatient: Patient = parsed.patient ?? {};
+      const resultSignature: Signature | undefined = parsed.signature;
       
       // Determine if patient data should be included
       const hasPatientData = Boolean(resultPatient && (
@@ -147,6 +148,7 @@ export default function JobDetailPage() {
       const exportResult = await exportReportDocx(
         resultReport,
         resultPatient,
+        resultSignature, // ✅ PASS SIGNATURE TO EXPORT API
         hasPatientData, // include identifiers if patient data exists
         filename
       );
