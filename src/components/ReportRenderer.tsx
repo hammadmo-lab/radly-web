@@ -2,10 +2,12 @@
 
 import { motion, type Variants, type Transition } from "framer-motion"
 import { JobDoneResult, PatientBlock } from "@/lib/types"
+import { Signature } from "@/types/report"
 
 interface ReportRendererProps {
   report: JobDoneResult["report"]
   patient?: PatientBlock
+  signature?: Signature
   className?: string
 }
 
@@ -34,7 +36,7 @@ export function PatientHeader({ patient }: { patient?: PatientBlock }) {
   )
 }
 
-export default function ReportRenderer({ report, patient, className = "" }: ReportRendererProps) {
+export default function ReportRenderer({ report, patient, signature, className = "" }: ReportRendererProps) {
   if (!report) {
     return (
       <div className="max-w-3xl mx-auto bg-white shadow-md p-6 rounded-2xl">
@@ -134,6 +136,27 @@ export default function ReportRenderer({ report, patient, className = "" }: Repo
             <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
               {report.recommendations}
             </div>
+          </div>
+        </motion.section>
+      )}
+
+      {/* Signature Section */}
+      {signature && (signature.name || signature.date) && (
+        <motion.section
+          className="mt-8 pt-6 border-t border-gray-200"
+          variants={itemVariants}
+        >
+          <div className="flex flex-col items-end space-y-2">
+            {signature.name && (
+              <p className="text-sm italic text-gray-700">
+                <span className="font-medium">Signed:</span> {signature.name}
+              </p>
+            )}
+            {signature.date && (
+              <p className="text-sm italic text-gray-700">
+                <span className="font-medium">Date:</span> {signature.date}
+              </p>
+            )}
           </div>
         </motion.section>
       )}
