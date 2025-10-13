@@ -1,6 +1,6 @@
 // src/types/jobs.ts
 
-export type JobStatusType = 'queued' | 'running' | 'completed' | 'error' | 'unknown';
+export type JobStatusType = 'queued' | 'running' | 'done' | 'error' | 'unknown';
 
 export interface EnqueueResponse {
   job_id: string;
@@ -44,7 +44,7 @@ export interface JobStatusResponse {
 export interface RecentJobRow {
   id: string;
   name: string;
-  status: 'queued' | 'running' | 'completed' | 'error';
+  status: 'queued' | 'running' | 'done' | 'error';
   owner_id: string;
   created_at: string;
   started_at?: string | null;
