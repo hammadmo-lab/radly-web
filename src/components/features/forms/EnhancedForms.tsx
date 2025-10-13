@@ -62,7 +62,7 @@ export function FormField({
   const [isDirty, setIsDirty] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved' | 'error'>('saved')
-  const timeoutRef = useRef<NodeJS.Timeout>()
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const hasError = !!error
   const isValid = isDirty && !hasError && value.length > 0
@@ -104,12 +104,11 @@ export function FormField({
   }
 
   const handleBlur = () => {
-    setIsFocused(false)
     onBlur?.()
   }
 
   const handleFocus = () => {
-    setIsFocused(true)
+    // Focus handling can be added here if needed
   }
 
   const InputComponent = type === 'textarea' ? Textarea : Input
