@@ -6,7 +6,6 @@ export const patientSchema = z.object({
   age: z.preprocess((v) => (v === '' || v === undefined ? undefined : Number(v)), z.number().int().positive().max(130).optional()),
   dob: z.string().trim().optional(), // leave string; backend accepts string
   sex: z.string().trim().optional(),
-  history: z.string().trim().optional(),
 })
 
 export const signatureSchema = z.object({

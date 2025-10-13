@@ -77,7 +77,7 @@ export default function GeneratePage() {
     defaultValues: {
       templateId: templateId || '',
       includePatient: false,
-      patient: { name: '', mrn: '', age: undefined, dob: '', sex: '', history: '' },
+      patient: { name: '', mrn: '', age: undefined, dob: '', sex: '' },
       indication: '',
       findings: '',
       technique: '',
@@ -118,7 +118,6 @@ export default function GeneratePage() {
             age: data.patient.age ?? undefined,
             dob: data.patient.dob || undefined,
             sex: data.patient.sex || undefined,
-            history: data.patient.history || undefined,
           }
         : {} // empty object -> backend treats as "no patient block"
 
@@ -278,15 +277,6 @@ export default function GeneratePage() {
                 id="patient.sex"
                 {...register('patient.sex')}
                 placeholder="Male/Female"
-              />
-            </div>
-            <div className="md:col-span-2 space-y-2">
-              <Label htmlFor="patient.history">Patient History (optional)</Label>
-              <Textarea
-                id="patient.history"
-                rows={3}
-                {...register('patient.history')}
-                placeholder="Relevant past history..."
               />
             </div>
           </CardContent>
