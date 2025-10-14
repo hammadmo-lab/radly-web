@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,10 +17,10 @@ import { UserProfile } from '@/types'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  User, Settings, Shield, Wifi, Bell, Palette, 
+  User, Settings, Wifi, Palette, 
   Save, CheckCircle, AlertCircle, Clock, 
-  Zap, Eye, EyeOff, Download, Upload,
-  Activity, TrendingUp, Globe, Lock
+  Eye, Download, Upload,
+  Activity, Lock
 } from 'lucide-react'
 
 export const dynamic = 'force-dynamic';
@@ -97,7 +97,7 @@ export default function SettingsPage() {
     testConnectivity()
   }, [])
 
-  const handleSaveSettings = async (silent = false) => {
+  const handleSaveSettings = useCallback(async (silent = false) => {
     if (!user) return
 
     setIsSaving(true)
@@ -129,7 +129,7 @@ export default function SettingsPage() {
     } finally {
       setIsSaving(false)
     }
-  }
+  }, [user, defaultSignatureName, defaultDateFormat])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -434,7 +434,6 @@ export default function SettingsPage() {
                   </div>
                   <Progress 
                     value={connectivityStatus === 'connected' ? 100 : 0} 
-                    className="h-2"
                   />
                 </div>
               </div>
