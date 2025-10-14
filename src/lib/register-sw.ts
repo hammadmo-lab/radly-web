@@ -16,6 +16,8 @@ export function registerServiceWorker() {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   // New content is available, notify user
+                  console.log('New version available! Refresh to update.')
+                  // Show a less intrusive notification instead of confirm dialog
                   if (confirm('New version available! Reload to update?')) {
                     window.location.reload()
                   }
