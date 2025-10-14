@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radly-v1'
+const CACHE_VERSION = 'radly-v2'
 const STATIC_CACHE = [
   '/',
   '/manifest.json',
@@ -15,8 +15,9 @@ const STATIC_CACHE = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
+  console.log('[SW] Installing version:', CACHE_VERSION)
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
+    caches.open(CACHE_VERSION).then((cache) => {
       return cache.addAll(STATIC_CACHE)
     })
   )
@@ -25,11 +26,13 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
+  console.log('[SW] Activating version:', CACHE_VERSION)
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName !== CACHE_VERSION) {
+            console.log('[SW] Deleting old cache:', cacheName)
             return caches.delete(cacheName)
           }
         })
@@ -47,6 +50,9 @@ self.addEventListener('fetch', (event) => {
   // Skip API requests (always fresh)
   if (event.request.url.includes('/api/')) return
   
+  // Skip Supabase requests (authentication)
+  if (event.request.url.includes('.supabase.co')) return
+  
   // Skip external requests
   if (!event.request.url.startsWith(self.location.origin)) return
   
@@ -56,7 +62,15 @@ self.addEventListener('fetch', (event) => {
         return response
       }
       
-      return fetch(event.request).then((response) => {
+      return fetch(event.request, {
+        redirect: 'follow',        // CRITICAL: Allow redirects
+        credentials: 'same-origin'  // Maintain credentials for auth
+      }).then((response) => {
+        // Add check for redirect responses
+        if (response.type === 'opaqueredirect') {
+          return response
+        }
+        
         // Don't cache non-successful responses
         if (!response || response.status !== 200) {
           return response
@@ -70,11 +84,15 @@ self.addEventListener('fetch', (event) => {
         // Clone response for caching
         const responseToCache = response.clone()
         
-        caches.open(CACHE_NAME).then((cache) => {
+        caches.open(CACHE_VERSION).then((cache) => {
           cache.put(event.request, responseToCache)
         })
         
         return response
+      }).catch((error) => {
+        console.error('[SW] Fetch error:', error)
+        // Return a fallback response or re-throw the error
+        throw error
       })
     })
   )
