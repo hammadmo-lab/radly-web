@@ -17,7 +17,7 @@ function SignInContent() {
   const origin =
     typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || ''
 
-  // Get the next parameter or default to /app/templates
+  // Get the next parameter or default to /app/dashboard
   const next = sanitizeNext(searchParams.get('next'))
 
   async function signInWithGoogle() {

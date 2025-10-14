@@ -27,7 +27,7 @@ export function KeyboardShortcuts({ onClose }: KeyboardShortcutsProps) {
     {
       key: 'G + H',
       description: 'Go to Home',
-      action: () => router.push('/app/templates'),
+      action: () => router.push('/app/dashboard'),
       category: 'navigation'
     },
     {
@@ -245,7 +245,7 @@ export function useKeyboardShortcuts() {
       if (!isCtrlOrCmd && !isShift) {
         switch (key) {
           case 'h':
-            router.push('/app/templates')
+            router.push('/app/dashboard')
             break
           case 't':
             router.push('/app/templates')

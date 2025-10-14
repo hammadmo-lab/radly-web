@@ -36,19 +36,19 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Already authed -> visiting /signin ==> go to next or templates
+  // Already authed -> visiting /signin ==> go to next or dashboard
   if (wantsSignin && session) {
     const url = req.nextUrl.clone();
-    const next = req.nextUrl.searchParams.get('next') || '/app/templates';
+    const next = req.nextUrl.searchParams.get('next') || '/app/dashboard';
     url.pathname = next;
     url.search = '';
     return NextResponse.redirect(url);
   }
 
-  // Root redirect: if authed, land on templates
+  // Root redirect: if authed, land on dashboard
   if (isRoot && session) {
     const url = req.nextUrl.clone();
-    url.pathname = '/app/templates';
+    url.pathname = '/app/dashboard';
     return NextResponse.redirect(url);
   }
 
