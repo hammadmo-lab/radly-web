@@ -21,7 +21,6 @@ export default function JobDetailPage() {
   const [err, setErr] = useState<string | null>(null);
   const [queueDepth, setQueueDepth] = useState<number | null>(null);
   const [running, setRunning] = useState<number | null>(null);
-  const [progress, setProgress] = useState<number>(10);
   const [isExporting, setIsExporting] = useState(false);
 
   const statusTimer = useRef<number | null>(null);
@@ -91,33 +90,6 @@ export default function JobDetailPage() {
     };
   }, [id, router]);
 
-  // Progress computation
-  useEffect(() => {
-    if (!jobStatus) return;
-
-    // queued: 10% → 35%, show queue info
-    if (jobStatus.status === "queued") {
-      setProgress((prev) => (prev < 35 ? Math.min(35, Math.max(10, prev + 3)) : prev));
-      return;
-    }
-
-    // running: ramp from 35% to 95% over ~30–60s
-    if (jobStatus.status === "running") {
-      const started = startedAtMs.current ?? Date.now();
-      const elapsed = (Date.now() - started) / 1000; // seconds
-      // ease to 95% over ~45s
-      const pct = 35 + Math.min(60, elapsed) * (60 / 45); // ~+1.33%/s
-      setProgress(Math.min(95, pct));
-      return;
-    }
-
-    if (jobStatus.status === "done") {
-      setProgress(100);
-    }
-    if (jobStatus.status === "error") {
-      setProgress(0);
-    }
-  }, [jobStatus]);
 
   // Export handler
   const handleExportDocx = async () => {

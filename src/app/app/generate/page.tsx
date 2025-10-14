@@ -592,7 +592,7 @@ export default function GeneratePage() {
                         <div>
                           <h4 className="font-bold text-emerald-900">Ready to Generate</h4>
                           <p className="text-sm text-emerald-700">
-                            Review your information above and click the "Generate Report" button below to create your report.
+                            Review your information above and click the &quot;Generate Report&quot; button below to create your report.
                           </p>
                         </div>
                       </div>

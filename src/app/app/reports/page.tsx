@@ -8,6 +8,15 @@ import type { RecentJobRow } from '@/lib/jobs';
 import { getRecentJobs, getJob } from '@/lib/jobs';
 import { createSupabaseBrowser } from "@/utils/supabase/browser";
 
+// Interface for localStorage job format
+interface LocalStorageJob {
+  job_id: string;
+  status: string;
+  template_id?: string;
+  title?: string;
+  created_at?: number;
+}
+
 export const dynamic = 'force-dynamic';
 
 export default function ReportsPage() {
@@ -41,7 +50,7 @@ export default function ReportsPage() {
           // Fallback to localStorage for recent jobs
           const localJobs = JSON.parse(localStorage.getItem('radly_recent_jobs_local') || '[]');
           // Convert localStorage format to RecentJobRow format
-          const formattedJobs: RecentJobRow[] = localJobs.map((job: any) => ({
+          const formattedJobs: RecentJobRow[] = localJobs.map((job: LocalStorageJob) => ({
             job_id: job.job_id,
             status: job.status || 'queued',
             template_id: job.template_id || job.title || '—'
@@ -70,7 +79,7 @@ export default function ReportsPage() {
   const updateJobStatus = useCallback(async (jobId: string, newStatus: string) => {
     try {
       const localJobs = JSON.parse(localStorage.getItem('radly_recent_jobs_local') || '[]');
-      const updatedJobs = localJobs.map((job: any) => 
+      const updatedJobs = localJobs.map((job: LocalStorageJob) => 
         job.job_id === jobId ? { ...job, status: newStatus } : job
       );
       localStorage.setItem('radly_recent_jobs_local', JSON.stringify(updatedJobs));
