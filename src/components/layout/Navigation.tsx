@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { useSafeClickHandler } from '@/hooks/useButtonResponsiveness'
 import { 
   BookTemplate, 
   Settings, 
@@ -171,6 +172,10 @@ interface DesktopNavProps {
 export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
   const pathname = usePathname()
   const router = useRouter()
+  
+  const handleNewReport = useSafeClickHandler(() => {
+    router.push('/app/templates')
+  })
 
   const navItems = [
     { href: '/app/dashboard', icon: Activity, label: 'Dashboard' },
@@ -237,7 +242,7 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
           {/* New Report Button */}
           <Button 
             className="btn-primary"
-            onClick={() => router.push('/app/templates')}
+            onClick={handleNewReport}
           >
             <Plus className="w-4 h-4 mr-2" />
             New Report

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getJob, getQueueStats, JobStatusResponse } from "@/lib/jobs";
 import { JobResultSchema, StrictReport, Patient, Signature } from "@/types/report";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Download } from "lucide-react";
 import { exportReportDocx } from "@/lib/api";
 import { toast } from "sonner";
+import { useSafeInterval, useSafeClickHandler } from "@/hooks/useButtonResponsiveness";
 
 export const dynamic = 'force-dynamic';
 
@@ -23,76 +24,48 @@ export default function JobDetailPage() {
   const [running, setRunning] = useState<number | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
-  const statusTimer = useRef<number | null>(null);
-  const statsTimer = useRef<number | null>(null);
   const startedAtMs = useRef<number | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  // Safe interval for status updates
+  useSafeInterval(async () => {
+    try {
+      const s = await getJob(id);
+      setJobStatus(s);
 
-    async function tickStatus() {
-      try {
-        const s = await getJob(id);
-        if (cancelled) return;
-        setJobStatus(s);
-
-        if (s.status === "running" && !startedAtMs.current) {
-          startedAtMs.current = Date.now();
-        }
-        if (s.status === "done" || s.status === "error") {
-          if (statusTimer.current) window.clearInterval(statusTimer.current);
-          statusTimer.current = null;
-        }
-      } catch (e: unknown) {
-        if (cancelled) return;
-        const errorMessage = e instanceof Error ? e.message : "Failed to fetch job status";
-        setErr(errorMessage);
-        
-        // If unauthenticated, redirect to login
-        if (errorMessage.includes('401')) {
-          router.push('/login');
-          return;
-        }
-        
-        if (statusTimer.current) window.clearInterval(statusTimer.current);
-        statusTimer.current = null;
+      if (s.status === "running" && !startedAtMs.current) {
+        startedAtMs.current = Date.now();
+      }
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "Failed to fetch job status";
+      setErr(errorMessage);
+      
+      // If unauthenticated, redirect to login
+      if (errorMessage.includes('401')) {
+        router.push('/login');
+        return;
       }
     }
+  }, 2000, { immediate: true });
 
-    async function tickStats() {
-      try {
-        const qs = await getQueueStats();
-        if (cancelled) return;
-        setQueueDepth(qs.queue_depth);
-        setRunning(qs.jobs_running);
-      } catch (e: unknown) {
-        // If unauthenticated, redirect to login
-        if (e instanceof Error && e.message.includes('401')) {
-          router.push('/login');
-          return;
-        }
-        // ignore other transient stats errors
+  // Safe interval for stats updates
+  useSafeInterval(async () => {
+    try {
+      const qs = await getQueueStats();
+      setQueueDepth(qs.queue_depth);
+      setRunning(qs.jobs_running);
+    } catch (e: unknown) {
+      // If unauthenticated, redirect to login
+      if (e instanceof Error && e.message.includes('401')) {
+        router.push('/login');
+        return;
       }
+      // ignore other transient stats errors
     }
-
-    // kick off
-    tickStatus();
-    tickStats();
-    statusTimer.current = window.setInterval(tickStatus, 2000);
-    statsTimer.current = window.setInterval(tickStats, 4000);
-
-    return () => {
-      cancelled = true;
-      if (statusTimer.current) window.clearInterval(statusTimer.current);
-      if (statsTimer.current) window.clearInterval(statsTimer.current);
-      statusTimer.current = null;
-      statsTimer.current = null;
-    };
-  }, [id, router]);
+  }, 4000, { immediate: true });
 
 
-  // Export handler
-  const handleExportDocx = async () => {
+  // Export handler with safe click handling
+  const handleExportDocx = useSafeClickHandler(async () => {
     if (!jobStatus?.result) return;
     
     setIsExporting(true);
@@ -144,7 +117,7 @@ export default function JobDetailPage() {
     } finally {
       setIsExporting(false);
     }
-  };
+  });
 
   // Error UI
   if (err || jobStatus?.status === "error") {

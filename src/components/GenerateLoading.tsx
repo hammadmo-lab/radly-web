@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, CheckCircle, Loader2 } from 'lucide-react'
+import { useSafeInterval } from '@/hooks/useButtonResponsiveness'
 
 interface GenerateLoadingProps {
   jobId?: string
@@ -22,25 +23,17 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime }: Generat
     "✨ Finalizing report structure...",
   ]
 
-  useEffect(() => {
-    // Simulate progress
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 95) return prev
-        return prev + Math.random() * 5
-      })
-    }, 800)
+  // Safe intervals for progress and facts
+  useSafeInterval(() => {
+    setProgress(prev => {
+      if (prev >= 95) return prev
+      return prev + Math.random() * 5
+    })
+  }, 800)
 
-    // Rotate facts
-    const factInterval = setInterval(() => {
-      setCurrentFactIndex(prev => (prev + 1) % facts.length)
-    }, 3000)
-
-    return () => {
-      clearInterval(interval)
-      clearInterval(factInterval)
-    }
-  }, [facts.length])
+  useSafeInterval(() => {
+    setCurrentFactIndex(prev => (prev + 1) % facts.length)
+  }, 3000)
 
   const steps = [
     { label: 'Received', completed: true },
