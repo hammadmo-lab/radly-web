@@ -99,10 +99,10 @@ export function MobileNav({ user, onSignOut }: MobileNavProps) {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="relative w-80 max-w-[85vw] h-full bg-card border-r shadow-xl"
+            className="relative w-80 max-w-[85vw] h-full bg-gradient-to-b from-emerald-50 via-white to-violet-50 border-r border-emerald-200/50 shadow-xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b">
+            <div className="flex items-center justify-between p-4 border-b border-emerald-200/50">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-lg flex items-center justify-center">
                   <FileText className="w-5 h-5 text-white" />
@@ -133,7 +133,7 @@ export function MobileNav({ user, onSignOut }: MobileNavProps) {
             </nav>
 
             {/* User info and sign out */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
+            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-emerald-200/50">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                   <UserIcon className="w-4 h-4 text-muted-foreground" />
@@ -179,7 +179,7 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-white/80 dark:bg-gray-900/80 border-b border-gray-200/50 dark:border-gray-800/50 shadow-sm">
+    <header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-gradient-to-r from-emerald-50 via-white to-violet-50 border-b border-emerald-200/50 shadow-sm">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         {/* Enhanced Logo with gradient and animation */}
         <Link href="/app/dashboard" className="flex items-center gap-3 group">
@@ -317,7 +317,7 @@ export function BottomNav({ pathname }: BottomNavProps) {
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-gray-200/50 dark:border-gray-800/50 z-40 safe-area-inset-bottom shadow-lg">
+    <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-gradient-to-r from-emerald-50/95 via-white/95 to-violet-50/95 backdrop-blur-lg border-t border-emerald-200/50 z-40 safe-area-inset-bottom shadow-lg">
       <div className="flex justify-around items-center h-16 px-2">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href)
