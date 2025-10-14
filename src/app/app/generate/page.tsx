@@ -18,6 +18,7 @@ import { enqueueJob } from '@/lib/jobs'
 import { buildSigninWithNext } from '@/lib/redirect'
 import { toast } from 'sonner'
 import { ArrowLeft, User, AlertCircle, FileText, Stethoscope, CheckCircle, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
+import { useAuthToken } from '@/hooks/useAuthToken';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +41,7 @@ function resolveTemplateId(searchParams: URLSearchParams | Record<string, string
 export default function GeneratePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { userId } = useAuthToken();
   const templateId = resolveTemplateId(searchParams);
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -185,17 +187,20 @@ export default function GeneratePage() {
       
       console.debug('Job enqueued with ID:', jobId)
       
-      // Add optimistic row to localStorage
+      // Add optimistic row to localStorage with user-specific key
       try {
-        const local = JSON.parse(localStorage.getItem('radly_recent_jobs_local') || '[]')
-        local.unshift({
-          job_id: jobId,
-          status: 'queued',
-          template_id: payload.templateId,
-          title: 'Generating…',
-          created_at: Date.now()
-        })
-        localStorage.setItem('radly_recent_jobs_local', JSON.stringify(local))
+        if (userId) {
+          const userJobsKey = `radly_recent_jobs_local_${userId}`;
+          const local = JSON.parse(localStorage.getItem(userJobsKey) || '[]')
+          local.unshift({
+            job_id: jobId,
+            status: 'queued',
+            template_id: payload.templateId,
+            title: 'Generating…',
+            created_at: Date.now()
+          })
+          localStorage.setItem(userJobsKey, JSON.stringify(local))
+        }
       } catch (e) {
         console.warn('Failed to update localStorage:', e)
       }
