@@ -237,7 +237,7 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
           {/* New Report Button */}
           <Button 
             className="btn-primary"
-            onClick={() => router.push('/app/generate')}
+            onClick={() => router.push('/app/templates')}
           >
             <Plus className="w-4 h-4 mr-2" />
             New Report
