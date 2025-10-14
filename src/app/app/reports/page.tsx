@@ -5,7 +5,7 @@ import { Loader2, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getJob } from '@/lib/jobs';
-import { getRecentReportsClient, type RecentReportRow } from '@/lib/reports';
+import type { RecentJobRow } from '@/lib/jobs';
 import { createSupabaseBrowser } from "@/utils/supabase/browser";
 
 // Interface for localStorage job format
@@ -22,7 +22,7 @@ export const dynamic = 'force-dynamic';
 export default function ReportsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [rows, setRows] = useState<RecentReportRow[]>([]);
+  const [rows, setRows] = useState<RecentJobRow[]>([]);
   const [err, setErr] = useState<string | null>(null);
 
   // Authentication guard
@@ -39,43 +39,34 @@ export default function ReportsPage() {
     try {
       setLoading(true);
       setErr(null);
-      const reports = await getRecentReportsClient(50);
-      setRows(reports);
+      
+      // Since /v1/jobs/recent doesn't exist, we'll use localStorage as the primary source
+      // and try to get recent jobs from there
+      const localJobs = JSON.parse(localStorage.getItem('radly_recent_jobs_local') || '[]');
+      
+      if (localJobs.length > 0) {
+        // Convert localStorage format to RecentJobRow format
+        const formattedJobs: RecentJobRow[] = localJobs.map((job: LocalStorageJob) => ({
+          job_id: job.job_id,
+          status: job.status || 'queued',
+          template_id: job.template_id || job.title || '—'
+        }));
+        setRows(formattedJobs);
+        setErr(null);
+      } else {
+        // If no localStorage data, show empty state
+        setRows([]);
+        setErr(null);
+      }
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Failed to load reports';
-      
-      // If Supabase reports table doesn't exist or is empty, fallback to localStorage
-      if (message.includes('404') || /reports/i.test(message)) {
-        try {
-          // Fallback to localStorage for recent jobs
-          const localJobs = JSON.parse(localStorage.getItem('radly_recent_jobs_local') || '[]');
-          // Convert localStorage format to RecentReportRow format
-          const formattedJobs: RecentReportRow[] = localJobs.map((job: LocalStorageJob) => ({
-            job_id: job.job_id,
-            status: (job.status || 'queued') as RecentReportRow['status'],
-            template_id: job.template_id || job.title || '—',
-            doc_url: null,
-            created_at: job.created_at ? new Date(job.created_at).toISOString() : new Date().toISOString()
-          }));
-          setRows(formattedJobs);
-          setErr(null);
-        } catch (localError) {
-          console.warn('Failed to load from localStorage:', localError);
-          setRows([]);
-          setErr(null);
-        }
-      } else {
-        setErr(message);
-      }
-      
-      if (message.toLowerCase().includes('401')) {
-        router.push('/login');
-        return;
-      }
+      console.warn('Failed to load reports:', message);
+      setRows([]);
+      setErr(null);
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, []);
 
   // Function to update job status in localStorage
   const updateJobStatus = useCallback(async (jobId: string, newStatus: string) => {
@@ -89,7 +80,7 @@ export default function ReportsPage() {
       // Update the current rows state
       setRows(prevRows => 
         prevRows.map(row => 
-          row.job_id === jobId ? { ...row, status: newStatus as RecentReportRow['status'] } : row
+          row.job_id === jobId ? { ...row, status: newStatus } : row
         )
       );
     } catch (error) {
@@ -101,13 +92,15 @@ export default function ReportsPage() {
     load();
   }, [load]);
 
-  // Periodically update status of queued jobs
+  // Periodically update status of queued/running jobs
   useEffect(() => {
     const interval = setInterval(async () => {
-      const queuedJobs = rows.filter(row => row.status === 'queued');
+      const queuedOrRunningJobs = rows.filter(row => 
+        row.status === 'queued' || row.status === 'running'
+      );
       
-      if (queuedJobs.length > 0) {
-        for (const job of queuedJobs) {
+      if (queuedOrRunningJobs.length > 0) {
+        for (const job of queuedOrRunningJobs) {
           try {
             const jobStatus = await getJob(job.job_id);
             if (jobStatus.status !== job.status) {
@@ -174,22 +167,17 @@ export default function ReportsPage() {
               <div className="text-sm text-muted-foreground mt-1">
                 Status: <span className={`font-medium ${
                   r.status === 'done' ? 'text-green-600' : 
+                  r.status === 'running' ? 'text-blue-600' : 
                   r.status === 'error' ? 'text-red-600' : 
                   'text-yellow-600'
                 }`}>
                   {r.status === 'done' ? 'Completed' : 
+                   r.status === 'running' ? 'Generating' : 
                    r.status === 'error' ? 'Failed' : 
                    'Queued'}
                 </span>
               </div>
-              <div className="text-xs text-gray-500 mt-1">
-                Job ID: {r.job_id}
-                {r.created_at && (
-                  <span className="ml-2">
-                    • Created: {new Date(r.created_at).toLocaleDateString()}
-                  </span>
-                )}
-              </div>
+              <div className="text-xs text-gray-500 mt-1">Job ID: {r.job_id}</div>
             </div>
             <div className="flex items-center gap-3">
               <Link href={`/app/report/${r.job_id}`} className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
