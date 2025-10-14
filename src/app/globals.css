@@ -1,56 +1,63 @@
 @import "tailwindcss";
 
-/* MANDATORY RADICAL REDESIGN - EXACT COLOR SYSTEM */
+/* RADLY BRAND IDENTITY - NEW COLOR SYSTEM */
 @layer base {
   :root {
-    /* PRIMARY - Emerald Green */
-    --primary: #10B981;
-    --primary-light: #34D399;
-    --primary-dark: #059669;
+    /* PRIMARY - Deep Navy */
+    --primary: #0B1220;
+    --primary-light: #1E293B;
+    --primary-dark: #020617;
     
-    /* SECONDARY - Vibrant Purple */
-    --secondary: #8B5CF6;
-    --secondary-light: #A78BFA;
-    --secondary-dark: #7C3AED;
+    /* SECONDARY - Primary Green */
+    --secondary: #22C55E;
+    --secondary-light: #4ADE80;
+    --secondary-dark: #16A34A;
     
-    /* BACKGROUNDS - ALWAYS LIGHT */
+    /* ACCENT - Teal */
+    --accent-teal: #14B8A6;
+    --accent-teal-light: #5EEAD4;
+    --accent-teal-dark: #0F766E;
+    
+    /* ACCENT - Purple */
+    --accent-purple: #7C3AED;
+    --accent-purple-light: #A78BFA;
+    --accent-purple-dark: #5B21B6;
+    
+    /* BACKGROUNDS - Soft Light */
     --bg-white: #FFFFFF;
-    --bg-gray-50: #F9FAFB;
-    --bg-gray-100: #F3F4F6;
+    --bg-soft-light: #F8FAFC;
+    --bg-gray-50: #F1F5F9;
+    --bg-gray-100: #E2E8F0;
     
-    /* TEXT - ALWAYS DARK FOR READABILITY */
-    --text-black: #111827;
-    --text-gray-900: #1F2937;
-    --text-gray-600: #4B5563;
-    --text-gray-400: #9CA3AF;
+    /* TEXT - Dark for readability */
+    --text-black: #0B1220;
+    --text-gray-900: #1E293B;
+    --text-gray-600: #475569;
+    --text-gray-400: #94A3B8;
     
     /* BORDERS */
-    --border-gray: #E5E7EB;
-    
-    /* NEVER USE THESE - FORBIDDEN */
-    --NO-NAVY-BLUE: FORBIDDEN;
-    --NO-DARK-BACKGROUNDS: FORBIDDEN;
+    --border-gray: #E2E8F0;
     
     /* Legacy compatibility - MAPPED TO NEW COLORS */
-    --primary-hover: #059669;
+    --primary-hover: #1E293B;
     --primary-foreground: #FFFFFF;
-    --secondary-hover: #7C3AED;
+    --secondary-hover: #16A34A;
     --secondary-foreground: #FFFFFF;
     --background: #FFFFFF;
-    --surface: #F9FAFB;
+    --surface: #F8FAFC;
     --card: #FFFFFF;
-    --card-hover: #F9FAFB;
-    --card-border: #E5E7EB;
-    --foreground: #111827;
-    --foreground-secondary: #4B5563;
-    --foreground-muted: #9CA3AF;
-    --success: #10B981;
+    --card-hover: #F8FAFC;
+    --card-border: #E2E8F0;
+    --foreground: #0B1220;
+    --foreground-secondary: #475569;
+    --foreground-muted: #94A3B8;
+    --success: #22C55E;
     --warning: #F59E0B;
     --error: #EF4444;
-    --info: #3B82F6;
-    --border: #E5E7EB;
-    --input: #E5E7EB;
-    --ring: #10B981;
+    --info: #14B8A6;
+    --border: #E2E8F0;
+    --input: #E2E8F0;
+    --ring: #22C55E;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
@@ -58,23 +65,31 @@
     --radius: 0.75rem;
     --radius-lg: 1rem;
     --radius-xl: 1.5rem;
-    --accent: #10B981;
+    --accent: #22C55E;
     --accent-foreground: #FFFFFF;
-    --muted: #F9FAFB;
-    --muted-foreground: #4B5563;
+    --muted: #F8FAFC;
+    --muted-foreground: #475569;
     --popover: #FFFFFF;
     --popover-foreground: #111827;
     --destructive: #EF4444;
     --destructive-foreground: #FFFFFF;
   }
 
-  /* GRADIENT UTILITIES */
-  .gradient-emerald-purple {
-    background: linear-gradient(135deg, #10B981 0%, #8B5CF6 100%);
+  /* GRADIENT UTILITIES - NEW BRAND PALETTE */
+  .gradient-green-purple {
+    background: linear-gradient(135deg, #22C55E 0%, #7C3AED 100%);
   }
 
-  .gradient-text {
-    background: linear-gradient(135deg, #10B981 0%, #8B5CF6 100%);
+  .gradient-green-teal {
+    background: linear-gradient(135deg, #22C55E 0%, #14B8A6 100%);
+  }
+
+  .gradient-teal-purple {
+    background: linear-gradient(135deg, #14B8A6 0%, #7C3AED 100%);
+  }
+
+  .gradient-text-brand {
+    background: linear-gradient(135deg, #22C55E 0%, #7C3AED 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -735,12 +750,24 @@
   }
 }
 
-/* MODERN UTILITIES */
+/* RADLY BRAND UTILITIES */
 .text-gradient-brand {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  background: linear-gradient(135deg, #22C55E 0%, #7C3AED 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.bg-gradient-brand {
+  background: linear-gradient(135deg, #22C55E 0%, #7C3AED 100%);
+}
+
+.bg-gradient-subtle-brand {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(124, 58, 237, 0.05) 100%);
+}
+
+.bg-gradient-hero {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(20, 184, 166, 0.1) 50%, rgba(124, 58, 237, 0.1) 100%);
 }
 
 .card-modern {

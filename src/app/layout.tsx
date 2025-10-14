@@ -16,6 +16,10 @@ export const metadata: Metadata = {
   title: "Radly - Medical Report Generation",
   description: "AI-powered medical report generation platform",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/icon-192.png",
+  },
 };
 
 export default function RootLayout({
