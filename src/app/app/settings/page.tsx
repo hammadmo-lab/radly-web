@@ -63,40 +63,6 @@ export default function SettingsPage() {
     }
   }, [profile])
 
-  // Auto-save functionality
-  useEffect(() => {
-    if (!autoSave || !hasUnsavedChanges) return
-
-    const timeoutId = setTimeout(() => {
-      handleSaveSettings(true) // Silent save
-    }, 2000)
-
-    return () => clearTimeout(timeoutId)
-  }, [defaultSignatureName, defaultDateFormat, autoSave, hasUnsavedChanges])
-
-  // Track changes
-  useEffect(() => {
-    const hasChanges = 
-      defaultSignatureName !== (profile?.default_signature_name || '') ||
-      defaultDateFormat !== (profile?.default_signature_date_format || 'MM/DD/YYYY')
-    
-    setHasUnsavedChanges(hasChanges)
-  }, [defaultSignatureName, defaultDateFormat, profile])
-
-  // Test connectivity
-  useEffect(() => {
-    const testConnectivity = async () => {
-      try {
-        await httpGet('/v1/health')
-        setConnectivityStatus('connected')
-      } catch {
-        setConnectivityStatus('error')
-      }
-    }
-
-    testConnectivity()
-  }, [])
-
   const handleSaveSettings = useCallback(async (silent = false) => {
     if (!user) return
 
@@ -130,6 +96,40 @@ export default function SettingsPage() {
       setIsSaving(false)
     }
   }, [user, defaultSignatureName, defaultDateFormat])
+
+  // Auto-save functionality
+  useEffect(() => {
+    if (!autoSave || !hasUnsavedChanges) return
+
+    const timeoutId = setTimeout(() => {
+      handleSaveSettings(true) // Silent save
+    }, 2000)
+
+    return () => clearTimeout(timeoutId)
+  }, [defaultSignatureName, defaultDateFormat, autoSave, hasUnsavedChanges, handleSaveSettings])
+
+  // Track changes
+  useEffect(() => {
+    const hasChanges = 
+      defaultSignatureName !== (profile?.default_signature_name || '') ||
+      defaultDateFormat !== (profile?.default_signature_date_format || 'MM/DD/YYYY')
+    
+    setHasUnsavedChanges(hasChanges)
+  }, [defaultSignatureName, defaultDateFormat, profile])
+
+  // Test connectivity
+  useEffect(() => {
+    const testConnectivity = async () => {
+      try {
+        await httpGet('/v1/health')
+        setConnectivityStatus('connected')
+      } catch {
+        setConnectivityStatus('error')
+      }
+    }
+
+    testConnectivity()
+  }, [])
 
   const getStatusColor = (status: string) => {
     switch (status) {

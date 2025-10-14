@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Zap, Shield, Users, Upload, Brain, CheckCircle, Star, ArrowRight, Clock, Target, Layout } from "lucide-react";
+import { Zap, Shield, Users, Upload, Brain, CheckCircle, Star, ArrowRight, Clock, Target, Layout } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase";
 
 export const dynamic = 'force-dynamic';
@@ -273,8 +273,8 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  "Radly has revolutionized our reporting process. What used to take hours 
-                  now takes minutes, and the accuracy is outstanding."
+                  &ldquo;Radly has revolutionized our reporting process. What used to take hours 
+                  now takes minutes, and the accuracy is outstanding.&rdquo;
                 </p>
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-gradient-brand rounded-full flex items-center justify-center mr-4">
@@ -296,8 +296,8 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  "The team collaboration features are fantastic. We can now maintain 
-                  consistency across all our reports and templates."
+                  &ldquo;The team collaboration features are fantastic. We can now maintain 
+                  consistency across all our reports and templates.&rdquo;
                 </p>
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-gradient-teal-purple rounded-full flex items-center justify-center mr-4">
@@ -319,8 +319,8 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  "The HIPAA compliance gives us peace of mind. We can focus on patient care 
-                  knowing our data is secure."
+                  &ldquo;The HIPAA compliance gives us peace of mind. We can focus on patient care 
+                  knowing our data is secure.&rdquo;
                 </p>
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-gradient-green-teal rounded-full flex items-center justify-center mr-4">

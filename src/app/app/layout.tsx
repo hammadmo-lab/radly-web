@@ -4,7 +4,6 @@ import { useAuth } from '@/components/auth-provider'
 import { AuthGuard } from '@/components/auth-guard'
 import { DesktopNav, MobileNav, BottomNav } from '@/components/layout/Navigation'
 import { usePathname } from 'next/navigation'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { isTestMode } from '@/lib/test-mode'
 
@@ -14,7 +13,6 @@ export default function AppLayout({
   children: React.ReactNode
 }) {
   const { user, signOut } = useAuth()
-  const router = useRouter()
   const pathname = usePathname()
   const testMode = isTestMode()
 
