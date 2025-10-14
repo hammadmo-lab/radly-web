@@ -16,8 +16,18 @@ export default function Home() {
   const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
-    const supabase = getSupabaseClient();
-    supabase.auth.getSession().then(({ data }) => setAuthed(!!data.session));
+    const checkAuth = async () => {
+      try {
+        const supabase = getSupabaseClient();
+        const { data } = await supabase.auth.getSession();
+        setAuthed(!!data.session);
+      } catch (error) {
+        console.warn('Auth check failed:', error);
+        setAuthed(false);
+      }
+    };
+    
+    checkAuth();
   }, []);
 
   function goToApp() {
