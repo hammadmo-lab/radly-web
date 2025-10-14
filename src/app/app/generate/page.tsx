@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -44,6 +44,7 @@ export default function GeneratePage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [intentionalSubmit, setIntentionalSubmit] = useState(false)
 
   const { data: template } = useQuery({
     queryKey: ['template', templateId],
@@ -72,9 +73,11 @@ export default function GeneratePage() {
     handleSubmit,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, isValid, isSubmitting: formIsSubmitting },
   } = useForm<GenerateFormValues>({
     resolver: zodResolver(generateFormSchema),
+    mode: 'onSubmit', // Only validate on submit, not on change
+    reValidateMode: 'onSubmit', // Only re-validate on submit
     defaultValues: {
       templateId: templateId || '',
       includePatient: false,
@@ -88,17 +91,38 @@ export default function GeneratePage() {
     },
   })
 
+  // Debug: Track form state changes
+  useEffect(() => {
+    console.log('Form state changed:', { isValid, formIsSubmitting, currentStep });
+  }, [isValid, formIsSubmitting, currentStep]);
+
   const includePatient = watch('includePatient')
 
+  // Debug: Track step changes
+  useEffect(() => {
+    console.log('Step changed to:', currentStep);
+    // Reset intentional submit flag when step changes
+    setIntentionalSubmit(false);
+    if (currentStep === 4) {
+      console.log('Reached step 4 - checking if form submission is triggered');
+    }
+  }, [currentStep]);
+
   const handleNext = () => {
+    console.log('handleNext called, currentStep:', currentStep);
     if (currentStep < 4) {
-      setCurrentStep(currentStep + 1)
+      const newStep = currentStep + 1;
+      console.log('Setting step to:', newStep);
+      setCurrentStep(newStep);
     }
   }
 
   const handlePrevious = () => {
+    console.log('handlePrevious called, currentStep:', currentStep);
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
+      const newStep = currentStep - 1;
+      console.log('Setting step to:', newStep);
+      setCurrentStep(newStep);
     }
   }
 
@@ -119,6 +143,14 @@ export default function GeneratePage() {
 
 
   const onSubmit = async (data: GenerateFormValues) => {
+    console.log('Form submitted!', { currentStep, data, intentionalSubmit });
+    
+    // Prevent submission if not on step 4 or not intentional
+    if (currentStep !== 4 || !intentionalSubmit) {
+      console.log('Preventing submission - not on step 4 or not intentional:', { currentStep, intentionalSubmit });
+      return;
+    }
+    
     setIsSubmitting(true)
     setError(null)
     
@@ -277,7 +309,17 @@ export default function GeneratePage() {
       )}
 
       {/* Step Content */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form 
+        onSubmit={handleSubmit(onSubmit)} 
+        className="space-y-6"
+        onKeyDown={(e) => {
+          // Prevent form submission on Enter key unless it's the submit button
+          if (e.key === 'Enter' && e.target !== e.currentTarget.querySelector('button[type="submit"]')) {
+            e.preventDefault();
+            console.log('Prevented Enter key form submission');
+          }
+        }}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
@@ -507,6 +549,12 @@ export default function GeneratePage() {
                           {...register('signature.name')}
                           placeholder="Dr. Jane Smith"
                           className="border-2 border-gray-200 focus:border-emerald-500"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              console.log('Prevented Enter key submission in signature name');
+                            }
+                          }}
                         />
                       </div>
                       <div className="space-y-2">
@@ -516,6 +564,12 @@ export default function GeneratePage() {
                           {...register('signature.date')}
                           placeholder={new Date().toLocaleDateString()}
                           className="border-2 border-gray-200 focus:border-emerald-500"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              console.log('Prevented Enter key submission in signature date');
+                            }
+                          }}
                         />
                       </div>
                     </div>
@@ -528,6 +582,19 @@ export default function GeneratePage() {
                         <p><strong>Patient Data:</strong> {includePatient ? 'Included' : 'Not included'}</p>
                         <p><strong>Indication:</strong> {watch('indication') || 'Not provided'}</p>
                         <p><strong>Findings:</strong> {watch('findings') ? `${watch('findings').length} characters` : 'Not provided'}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Ready to Generate Notice */}
+                    <div className="mt-6 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="w-6 h-6 text-emerald-600" />
+                        <div>
+                          <h4 className="font-bold text-emerald-900">Ready to Generate</h4>
+                          <p className="text-sm text-emerald-700">
+                            Review your information above and click the "Generate Report" button below to create your report.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -565,6 +632,10 @@ export default function GeneratePage() {
                 type="submit" 
                 disabled={isSubmitting}
                 className="btn-primary flex items-center gap-2"
+                onClick={() => {
+                  console.log('Generate Report button clicked - setting intentional submit');
+                  setIntentionalSubmit(true);
+                }}
               >
                 {isSubmitting ? 'Generating...' : 'Generate Report'}
               </Button>
