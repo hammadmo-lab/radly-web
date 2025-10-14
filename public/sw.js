@@ -1,25 +1,33 @@
 const CACHE_VERSION = 'radly-v2'
+
+// Essential files only - will cache other resources on-demand
 const STATIC_CACHE = [
   '/',
   '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/brand/radly.svg',
-  '/file.svg',
-  '/globe.svg',
-  '/next.svg',
-  '/vercel.svg',
-  '/window.svg',
-  // Add other static assets that should be cached
 ]
 
-// Install event - cache static assets
+// Install event - cache only essential assets
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing version:', CACHE_VERSION)
   event.waitUntil(
-    caches.open(CACHE_VERSION).then((cache) => {
-      return cache.addAll(STATIC_CACHE)
-    })
+    caches.open(CACHE_VERSION)
+      .then((cache) => {
+        // Cache files individually to prevent one failure from breaking everything
+        return Promise.allSettled(
+          STATIC_CACHE.map(url => 
+            cache.add(url).catch(err => {
+              console.warn('[SW] Failed to cache:', url, err)
+              return null
+            })
+          )
+        )
+      })
+      .then(() => {
+        console.log('[SW] Installation complete')
+      })
+      .catch(err => {
+        console.error('[SW] Installation failed:', err)
+      })
   )
   self.skipWaiting()
 })
@@ -57,27 +65,38 @@ self.addEventListener('fetch', (event) => {
   if (!event.request.url.startsWith(self.location.origin)) return
   
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      if (response) {
-        return response
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        console.log('[SW] Serving from cache:', event.request.url)
+        return cachedResponse
       }
       
+      // CRITICAL FIX: Add redirect: 'follow' to handle redirects properly
       return fetch(event.request, {
-        redirect: 'follow',        // CRITICAL: Allow redirects
-        credentials: 'same-origin'  // Maintain credentials for auth
+        redirect: 'follow',
+        credentials: 'same-origin'
       }).then((response) => {
-        // Add check for redirect responses
-        if (response.type === 'opaqueredirect') {
+        // Don't cache non-successful responses
+        if (!response || response.status !== 200) {
+          console.log('[SW] Not caching non-200 response:', event.request.url, response?.status)
           return response
         }
         
-        // Don't cache non-successful responses
-        if (!response || response.status !== 200) {
+        // Don't cache redirects
+        if (response.type === 'opaqueredirect') {
+          console.log('[SW] Not caching redirect:', event.request.url)
           return response
         }
         
         // Don't cache HTML pages (they should always be fresh)
-        if (response.headers.get('content-type')?.includes('text/html')) {
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('text/html')) {
+          console.log('[SW] Not caching HTML:', event.request.url)
+          return response
+        }
+        
+        // Only cache same-origin responses
+        if (response.type !== 'basic' && response.type !== 'cors') {
           return response
         }
         
@@ -85,15 +104,31 @@ self.addEventListener('fetch', (event) => {
         const responseToCache = response.clone()
         
         caches.open(CACHE_VERSION).then((cache) => {
-          cache.put(event.request, responseToCache)
+          console.log('[SW] Caching new resource:', event.request.url)
+          cache.put(event.request, responseToCache).catch(err => {
+            console.warn('[SW] Failed to cache resource:', event.request.url, err)
+          })
         })
         
         return response
       }).catch((error) => {
-        console.error('[SW] Fetch error:', error)
-        // Return a fallback response or re-throw the error
-        throw error
+        console.error('[SW] Fetch failed:', event.request.url, error)
+        // Try to return cached response if network fails
+        return caches.match(event.request).then(cachedResponse => {
+          if (cachedResponse) {
+            console.log('[SW] Serving stale cache due to network error:', event.request.url)
+            return cachedResponse
+          }
+          throw error
+        })
       })
     })
   )
+})
+
+// Listen for messages from clients
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
 })
