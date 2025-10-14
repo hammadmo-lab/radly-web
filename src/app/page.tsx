@@ -15,6 +15,7 @@ export default function Home() {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [authed, setAuthed] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -25,6 +26,8 @@ export default function Home() {
       } catch (error) {
         console.warn('Auth check failed:', error);
         setAuthed(false);
+      } finally {
+        setAuthChecked(true);
       }
     };
     
@@ -93,9 +96,9 @@ export default function Home() {
                 size="lg"
                 className="bg-secondary hover:bg-secondary-dark text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
                 onClick={goToApp}
-                disabled={busy}
+                disabled={busy || !authChecked}
               >
-                {busy ? "Loading…" : "Start Generating Reports"}
+                {busy ? "Loading…" : !authChecked ? "Checking..." : "Start Generating Reports"}
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               <Button
@@ -357,9 +360,9 @@ export default function Home() {
             size="lg"
             className="bg-white text-secondary hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
             onClick={goToApp}
-            disabled={busy}
+            disabled={busy || !authChecked}
           >
-            {busy ? "Loading…" : "Get Started Today"}
+            {busy ? "Loading…" : !authChecked ? "Checking..." : "Get Started Today"}
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
         </div>

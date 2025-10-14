@@ -55,6 +55,6 @@ export function getSupabaseClient() {
         signOut: async () => ({ error: null }),
         onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
       },
-    } as ReturnType<typeof createBrowserClient>
+    } as unknown as ReturnType<typeof createBrowserClient>
   }
 }
