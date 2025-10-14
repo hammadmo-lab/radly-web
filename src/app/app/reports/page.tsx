@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import type { RecentJobRow } from '@/lib/jobs';
-import { getRecentJobs, getJob } from '@/lib/jobs';
+import { getJob } from '@/lib/jobs';
+import { getRecentReportsClient, type RecentReportRow } from '@/lib/reports';
 import { createSupabaseBrowser } from "@/utils/supabase/browser";
 
 // Interface for localStorage job format
@@ -22,7 +22,7 @@ export const dynamic = 'force-dynamic';
 export default function ReportsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [rows, setRows] = useState<RecentJobRow[]>([]);
+  const [rows, setRows] = useState<RecentReportRow[]>([]);
   const [err, setErr] = useState<string | null>(null);
 
   // Authentication guard
@@ -39,21 +39,23 @@ export default function ReportsPage() {
     try {
       setLoading(true);
       setErr(null);
-      const jobs = await getRecentJobs(50);
-      setRows(jobs);
+      const reports = await getRecentReportsClient(50);
+      setRows(reports);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Failed to load reports';
       
-      // If backend doesn't have /v1/jobs/recent yet, fallback to localStorage
-      if (message.includes('404') || /jobs\/recent/i.test(message)) {
+      // If Supabase reports table doesn't exist or is empty, fallback to localStorage
+      if (message.includes('404') || /reports/i.test(message)) {
         try {
           // Fallback to localStorage for recent jobs
           const localJobs = JSON.parse(localStorage.getItem('radly_recent_jobs_local') || '[]');
-          // Convert localStorage format to RecentJobRow format
-          const formattedJobs: RecentJobRow[] = localJobs.map((job: LocalStorageJob) => ({
+          // Convert localStorage format to RecentReportRow format
+          const formattedJobs: RecentReportRow[] = localJobs.map((job: LocalStorageJob) => ({
             job_id: job.job_id,
-            status: job.status || 'queued',
-            template_id: job.template_id || job.title || '—'
+            status: (job.status || 'queued') as RecentReportRow['status'],
+            template_id: job.template_id || job.title || '—',
+            doc_url: null,
+            created_at: job.created_at ? new Date(job.created_at).toISOString() : new Date().toISOString()
           }));
           setRows(formattedJobs);
           setErr(null);
@@ -87,7 +89,7 @@ export default function ReportsPage() {
       // Update the current rows state
       setRows(prevRows => 
         prevRows.map(row => 
-          row.job_id === jobId ? { ...row, status: newStatus } : row
+          row.job_id === jobId ? { ...row, status: newStatus as RecentReportRow['status'] } : row
         )
       );
     } catch (error) {
@@ -99,15 +101,13 @@ export default function ReportsPage() {
     load();
   }, [load]);
 
-  // Periodically update status of queued/running jobs
+  // Periodically update status of queued jobs
   useEffect(() => {
     const interval = setInterval(async () => {
-      const queuedOrRunningJobs = rows.filter(row => 
-        row.status === 'queued' || row.status === 'running'
-      );
+      const queuedJobs = rows.filter(row => row.status === 'queued');
       
-      if (queuedOrRunningJobs.length > 0) {
-        for (const job of queuedOrRunningJobs) {
+      if (queuedJobs.length > 0) {
+        for (const job of queuedJobs) {
           try {
             const jobStatus = await getJob(job.job_id);
             if (jobStatus.status !== job.status) {
@@ -174,17 +174,22 @@ export default function ReportsPage() {
               <div className="text-sm text-muted-foreground mt-1">
                 Status: <span className={`font-medium ${
                   r.status === 'done' ? 'text-green-600' : 
-                  r.status === 'running' ? 'text-blue-600' : 
                   r.status === 'error' ? 'text-red-600' : 
                   'text-yellow-600'
                 }`}>
                   {r.status === 'done' ? 'Completed' : 
-                   r.status === 'running' ? 'Generating' : 
                    r.status === 'error' ? 'Failed' : 
                    'Queued'}
                 </span>
               </div>
-              <div className="text-xs text-gray-500 mt-1">Job ID: {r.job_id}</div>
+              <div className="text-xs text-gray-500 mt-1">
+                Job ID: {r.job_id}
+                {r.created_at && (
+                  <span className="ml-2">
+                    • Created: {new Date(r.created_at).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Link href={`/app/report/${r.job_id}`} className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
