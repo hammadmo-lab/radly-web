@@ -5,9 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import { getJob, getQueueStats, JobStatusResponse } from "@/lib/jobs";
 import { JobResultSchema, StrictReport, Patient, Signature } from "@/types/report";
 import ReportRenderer from "@/components/ReportRenderer";
+import { GenerateLoading } from "@/components/GenerateLoading";
 import { Button } from "@/components/ui/button";
 import { Loader2, Download } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 import { exportReportDocx } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -193,24 +193,17 @@ export default function JobDetailPage() {
     const jobsAhead =
       queueDepth != null && running != null ? Math.max(0, queueDepth - running) : null;
 
+    // Format estimated time based on queue position
+    const estimatedTime = jobsAhead != null && jobsAhead > 0 
+      ? `${Math.ceil(jobsAhead * 2)} min` // Rough estimate: 2 minutes per job
+      : null;
+
     return (
-      <div className="max-w-2xl mx-auto py-12 space-y-4">
-        <div className="flex items-center gap-3">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-          <div className="text-sm text-muted-foreground">
-            {jobStatus?.status === "running" ? "Generating your report…" : "Queued… waiting to start"}
-          </div>
-        </div>
-        <Progress value={progress} />
-        <div className="text-xs text-muted-foreground">
-          {jobsAhead != null
-            ? `Queue: ~${jobsAhead} job${jobsAhead === 1 ? "" : "s"} ahead`
-            : "Fetching queue status…"}
-        </div>
-        <div className="text-xs text-muted-foreground">
-          Status: {jobStatus?.status ?? "checking"} • Job ID: {id}
-        </div>
-      </div>
+      <GenerateLoading 
+        jobId={id}
+        queuePosition={jobsAhead}
+        estimatedTime={estimatedTime}
+      />
     );
   }
 
