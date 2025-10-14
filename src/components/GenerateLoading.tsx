@@ -168,7 +168,7 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime }: Generat
             </div>
 
             {/* QUEUE INFO */}
-            {queuePosition && queuePosition > 0 && (
+            {(queuePosition !== null && queuePosition !== undefined && queuePosition > 0) ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -187,7 +187,7 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime }: Generat
                   )}
                 </div>
               </motion.div>
-            )}
+            ) : null}
 
             {/* PRO TIP */}
             <motion.div
