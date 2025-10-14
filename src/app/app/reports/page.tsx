@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { getJob } from '@/lib/jobs';
 import type { RecentJobRow } from '@/lib/jobs';
 import { createSupabaseBrowser } from "@/utils/supabase/browser";
+import { useAuthToken } from '@/hooks/useAuthToken';
 
 // Interface for localStorage job format
 interface LocalStorageJob {
@@ -21,6 +22,7 @@ export const dynamic = 'force-dynamic';
 
 export default function ReportsPage() {
   const router = useRouter();
+  const { userId } = useAuthToken();
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<RecentJobRow[]>([]);
   const [err, setErr] = useState<string | null>(null);
@@ -35,14 +37,35 @@ export default function ReportsPage() {
     });
   }, [router]);
 
+  // Helper function to get user-specific localStorage key
+  const getUserJobsKey = useCallback(() => {
+    if (!userId) return null;
+    return `radly_recent_jobs_local_${userId}`;
+  }, [userId]);
+
   const load = useCallback(async () => {
     try {
       setLoading(true);
       setErr(null);
       
+      // Don't load if no user ID
+      if (!userId) {
+        setRows([]);
+        setErr(null);
+        return;
+      }
+      
+      // Get user-specific localStorage key
+      const userJobsKey = getUserJobsKey();
+      if (!userJobsKey) {
+        setRows([]);
+        setErr(null);
+        return;
+      }
+      
       // Since /v1/jobs/recent doesn't exist, we'll use localStorage as the primary source
       // and try to get recent jobs from there
-      const localJobs = JSON.parse(localStorage.getItem('radly_recent_jobs_local') || '[]');
+      const localJobs = JSON.parse(localStorage.getItem(userJobsKey) || '[]');
       
       if (localJobs.length > 0) {
         // Convert localStorage format to RecentJobRow format
@@ -66,16 +89,19 @@ export default function ReportsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userId, getUserJobsKey]);
 
   // Function to update job status in localStorage
   const updateJobStatus = useCallback(async (jobId: string, newStatus: string) => {
     try {
-      const localJobs = JSON.parse(localStorage.getItem('radly_recent_jobs_local') || '[]');
+      const userJobsKey = getUserJobsKey();
+      if (!userJobsKey) return;
+      
+      const localJobs = JSON.parse(localStorage.getItem(userJobsKey) || '[]');
       const updatedJobs = localJobs.map((job: LocalStorageJob) => 
         job.job_id === jobId ? { ...job, status: newStatus } : job
       );
-      localStorage.setItem('radly_recent_jobs_local', JSON.stringify(updatedJobs));
+      localStorage.setItem(userJobsKey, JSON.stringify(updatedJobs));
       
       // Update the current rows state
       setRows(prevRows => 
@@ -86,7 +112,7 @@ export default function ReportsPage() {
     } catch (error) {
       console.warn('Failed to update job status in localStorage:', error);
     }
-  }, []);
+  }, [getUserJobsKey]);
 
   useEffect(() => {
     load();
