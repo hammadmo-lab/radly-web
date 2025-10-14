@@ -22,7 +22,7 @@ export default function AppLayout({
     try {
       await signOut()
       toast.success('Signed out successfully')
-      router.push('/')
+      window.location.href = 'https://radly.app'
     } catch {
       toast.error('Failed to sign out')
     }
