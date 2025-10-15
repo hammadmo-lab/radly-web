@@ -24,6 +24,18 @@ export default function TemplatesPage() {
   const [selectedModality, setSelectedModality] = useState<string | null>(null)
   const [selectedAnatomy, setSelectedAnatomy] = useState<string | null>(null)
 
+  // Clear selected anatomy when modality changes
+  const handleModalityChange = (modality: string | null) => {
+    setSelectedModality(modality)
+    // Clear anatomy selection if it's not available for the new modality
+    if (modality && selectedAnatomy) {
+      const availableAnatomies = templates?.filter(t => t.modality === modality).map(t => t.anatomy) || []
+      if (!availableAnatomies.includes(selectedAnatomy)) {
+        setSelectedAnatomy(null)
+      }
+    }
+  }
+
   const { data: templates } = useQuery({
     queryKey: ['templates'],
     queryFn: async () => await fetchTemplates(httpGet),
@@ -38,14 +50,17 @@ export default function TemplatesPage() {
     
     templates.forEach(template => {
       if (template.modality) modalitySet.add(template.modality)
-      if (template.anatomy) anatomySet.add(template.anatomy)
+      // Only add anatomy if no modality is selected, or if it matches the selected modality
+      if (template.anatomy && (!selectedModality || template.modality === selectedModality)) {
+        anatomySet.add(template.anatomy)
+      }
     })
     
     return {
       modalities: Array.from(modalitySet).sort(),
       anatomies: Array.from(anatomySet).sort()
     }
-  }, [templates])
+  }, [templates, selectedModality])
 
   // Filter templates based on search query and selected filters
   const filteredTemplates = useMemo(() => {
@@ -124,14 +139,14 @@ export default function TemplatesPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuItem onClick={() => setSelectedModality(null)}>
+                <DropdownMenuItem onClick={() => handleModalityChange(null)}>
                   <X className="w-4 h-4 mr-2" />
                   Clear Filter
                 </DropdownMenuItem>
                 {modalities.map((modality) => (
                   <DropdownMenuItem 
                     key={modality}
-                    onClick={() => setSelectedModality(modality)}
+                    onClick={() => handleModalityChange(modality)}
                     className={selectedModality === modality ? 'bg-emerald-50' : ''}
                   >
                     {modality}
@@ -146,10 +161,16 @@ export default function TemplatesPage() {
                   variant="outline" 
                   className={`border-2 h-11 rounded-lg hover:border-emerald-500 w-full sm:w-auto ${
                     selectedAnatomy ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'
-                  }`}
+                  } ${!selectedModality ? 'opacity-60' : ''}`}
+                  disabled={!selectedModality}
                 >
                   <Filter className="w-4 h-4 mr-2" />
                   Body System
+                  {!selectedModality && (
+                    <span className="ml-2 px-2 py-0.5 bg-gray-400 text-white text-xs rounded-full">
+                      Select modality first
+                    </span>
+                  )}
                   {selectedAnatomy && (
                     <span className="ml-2 px-2 py-0.5 bg-emerald-500 text-white text-xs rounded-full">
                       {selectedAnatomy}
@@ -196,7 +217,7 @@ export default function TemplatesPage() {
                   variant="outline" 
                   onClick={() => {
                     setSearchQuery('')
-                    setSelectedModality(null)
+                    handleModalityChange(null)
                     setSelectedAnatomy(null)
                   }}
                   className="mt-4"
