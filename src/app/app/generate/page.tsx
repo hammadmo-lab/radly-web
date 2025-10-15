@@ -19,6 +19,9 @@ import { buildSigninWithNext } from '@/lib/redirect'
 import { toast } from 'sonner'
 import { ArrowLeft, User, AlertCircle, FileText, Stethoscope, CheckCircle, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
 import { useAuthToken } from '@/hooks/useAuthToken';
+import { useAuth } from '@/components/auth-provider';
+import { getSupabaseClient } from '@/lib/supabase';
+import { UserProfile } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +45,7 @@ export default function GeneratePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { userId } = useAuthToken();
+  const { user } = useAuth();
   const templateId = resolveTemplateId(searchParams);
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -70,6 +74,24 @@ export default function GeneratePage() {
     enabled: !!templateId,
   })
 
+  // Fetch user profile for defaults
+  const { data: profile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user) return null
+      const supabase = getSupabaseClient()
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (error) throw error
+      return data as UserProfile
+    },
+    enabled: !!user,
+  })
+
   const {
     register,
     handleSubmit,
@@ -88,10 +110,34 @@ export default function GeneratePage() {
       findings: '',
       technique: '',
       signature: {
-        date: new Date().toLocaleDateString(),
+        name: profile?.default_signature_name || '',
+        date: profile?.default_signature_date_format 
+          ? new Date().toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: '2-digit', 
+              day: '2-digit' 
+            }).replace(/\//g, profile.default_signature_date_format.includes('/') ? '/' : '-')
+          : new Date().toLocaleDateString(),
       },
     },
   })
+
+  // Update form defaults when profile loads
+  useEffect(() => {
+    if (profile) {
+      if (profile.default_signature_name) {
+        setValue('signature.name', profile.default_signature_name);
+      }
+      if (profile.default_signature_date_format) {
+        const formattedDate = new Date().toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit' 
+        }).replace(/\//g, profile.default_signature_date_format.includes('/') ? '/' : '-');
+        setValue('signature.date', formattedDate);
+      }
+    }
+  }, [profile, setValue]);
 
   // Debug: Track form state changes
   useEffect(() => {
