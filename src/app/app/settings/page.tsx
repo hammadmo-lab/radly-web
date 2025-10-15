@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { useAuth } from '@/components/auth-provider'
 import { getSupabaseClient } from '@/lib/supabase'
-import { httpGet } from '@/lib/http'
 import { UserProfile } from '@/types'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -121,8 +120,12 @@ export default function SettingsPage() {
   useEffect(() => {
     const testConnectivity = async () => {
       try {
-        await httpGet('/v1/health')
-        setConnectivityStatus('connected')
+        const response = await fetch('/api/health')
+        if (response.ok) {
+          setConnectivityStatus('connected')
+        } else {
+          setConnectivityStatus('error')
+        }
       } catch {
         setConnectivityStatus('error')
       }
@@ -476,10 +479,46 @@ export default function SettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="font-medium text-blue-900 mb-2">Advanced Settings Overview</h4>
+                    <p className="text-sm text-blue-700">
+                      These settings are designed for power users who need additional control over their data and preferences.
+                    </p>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Data Export</Label>
-                    <Button variant="outline" className="w-full">
+                    <p className="text-xs text-gray-500 mb-2">
+                      Download your profile data, settings, and preferences as a JSON file for backup or migration purposes.
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => {
+                        const exportData = {
+                          profile: profile,
+                          settings: {
+                            defaultSignatureName,
+                            defaultDateFormat,
+                            autoSave,
+                            notifications,
+                            darkMode
+                          },
+                          exportedAt: new Date().toISOString()
+                        };
+                        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `radly-settings-${new Date().toISOString().split('T')[0]}.json`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        toast.success('Settings exported successfully!');
+                      }}
+                    >
                       <Download className="w-4 h-4 mr-2" />
                       Export Profile Data
                     </Button>
@@ -487,7 +526,40 @@ export default function SettingsPage() {
                   
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Data Import</Label>
-                    <Button variant="outline" className="w-full">
+                    <p className="text-xs text-gray-500 mb-2">
+                      Import previously exported settings to restore your configuration or migrate from another account.
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = '.json';
+                        input.onchange = async (e) => {
+                          const file = (e.target as HTMLInputElement).files?.[0];
+                          if (file) {
+                            try {
+                              const text = await file.text();
+                              const data = JSON.parse(text);
+                              if (data.settings) {
+                                setDefaultSignatureName(data.settings.defaultSignatureName || '');
+                                setDefaultDateFormat(data.settings.defaultDateFormat || 'MM/DD/YYYY');
+                                setAutoSave(data.settings.autoSave ?? true);
+                                setNotifications(data.settings.notifications ?? true);
+                                setDarkMode(data.settings.darkMode ?? false);
+                                toast.success('Settings imported successfully!');
+                              } else {
+                                toast.error('Invalid settings file format');
+                              }
+                            } catch {
+                              toast.error('Failed to parse settings file');
+                            }
+                          }
+                        };
+                        input.click();
+                      }}
+                    >
                       <Upload className="w-4 h-4 mr-2" />
                       Import Settings
                     </Button>
@@ -498,9 +570,24 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <Label className="text-sm font-medium">Reset to Defaults</Label>
-                      <p className="text-xs text-gray-500">Reset all settings to their default values</p>
+                      <p className="text-xs text-gray-500">
+                        Reset all settings to their default values. This action cannot be undone.
+                      </p>
                     </div>
-                    <Button variant="destructive" size="sm">
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={() => {
+                        if (confirm('Are you sure you want to reset all settings to defaults? This action cannot be undone.')) {
+                          setDefaultSignatureName('');
+                          setDefaultDateFormat('MM/DD/YYYY');
+                          setAutoSave(true);
+                          setNotifications(true);
+                          setDarkMode(false);
+                          toast.success('Settings reset to defaults');
+                        }
+                      }}
+                    >
                       Reset All
                     </Button>
                   </div>
