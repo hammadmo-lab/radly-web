@@ -97,6 +97,7 @@ export default function GeneratePage() {
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors, isValid, isSubmitting: formIsSubmitting },
   } = useForm<GenerateFormValues>({
     resolver: zodResolver(generateFormSchema),
@@ -110,14 +111,8 @@ export default function GeneratePage() {
       findings: '',
       technique: '',
       signature: {
-        name: profile?.default_signature_name || '',
-        date: profile?.default_signature_date_format 
-          ? new Date().toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: '2-digit', 
-              day: '2-digit' 
-            }).replace(/\//g, profile.default_signature_date_format.includes('/') ? '/' : '-')
-          : new Date().toLocaleDateString(),
+        name: '',
+        date: new Date().toLocaleDateString(),
       },
     },
   })
@@ -125,19 +120,28 @@ export default function GeneratePage() {
   // Update form defaults when profile loads
   useEffect(() => {
     if (profile) {
-      if (profile.default_signature_name) {
-        setValue('signature.name', profile.default_signature_name);
-      }
-      if (profile.default_signature_date_format) {
-        const formattedDate = new Date().toLocaleDateString('en-US', { 
-          year: 'numeric', 
-          month: '2-digit', 
-          day: '2-digit' 
-        }).replace(/\//g, profile.default_signature_date_format.includes('/') ? '/' : '-');
-        setValue('signature.date', formattedDate);
-      }
+      const formattedDate = profile.default_signature_date_format 
+        ? new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit' 
+          }).replace(/\//g, profile.default_signature_date_format.includes('/') ? '/' : '-')
+        : new Date().toLocaleDateString();
+
+      reset({
+        templateId: templateId || '',
+        includePatient: false,
+        patient: { name: '', mrn: '', age: undefined, dob: '', sex: '' },
+        indication: '',
+        findings: '',
+        technique: '',
+        signature: {
+          name: profile.default_signature_name || '',
+          date: formattedDate,
+        },
+      });
     }
-  }, [profile, setValue]);
+  }, [profile, reset, templateId]);
 
   // Debug: Track form state changes
   useEffect(() => {

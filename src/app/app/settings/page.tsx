@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -26,6 +26,7 @@ export const dynamic = 'force-dynamic';
 
 export default function SettingsPage() {
   const { user } = useAuth()
+  const queryClient = useQueryClient()
   const [defaultSignatureName, setDefaultSignatureName] = useState('')
   const [defaultDateFormat, setDefaultDateFormat] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -81,6 +82,9 @@ export default function SettingsPage() {
 
       if (error) throw error
       
+      // Invalidate and refetch profile data
+      await queryClient.invalidateQueries({ queryKey: ['profile', user.id] })
+      
       setLastSaved(new Date())
       setHasUnsavedChanges(false)
       
@@ -94,7 +98,7 @@ export default function SettingsPage() {
     } finally {
       setIsSaving(false)
     }
-  }, [user, defaultSignatureName, defaultDateFormat])
+  }, [user, defaultSignatureName, defaultDateFormat, queryClient])
 
   // Auto-save functionality
   useEffect(() => {
