@@ -8,6 +8,7 @@ export type TemplateListItem = {
   modality?: string | null;
   anatomy?: string | null;
   version?: string | number | null;
+  description?: string | null;
 };
 
 function pick<T, K extends keyof T>(o: T | undefined | null, ...keys: K[]): Partial<T> {
@@ -29,7 +30,7 @@ export function normalizeTemplateListItem(raw: Record<string, unknown>): Templat
     raw?.updatedAt ?? raw?.updated_at ?? raw?.modified_at ?? raw?.modifiedAt ?? raw?.version_updated ?? raw?.created_at ?? raw?.createdAt ?? null;
 
   // Pass through some optional metadata if present
-  const meta = pick(raw, "modality", "anatomy", "version");
+  const meta = pick(raw, "modality", "anatomy", "version", "description");
 
   return {
     id,

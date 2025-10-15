@@ -43,7 +43,7 @@ export default function AppLayout({
         <MobileNav user={testMode ? { email: 'test@radly.test' } : user} onSignOut={handleSignOut} />
 
         {/* Main Content */}
-        <main className="container max-w-6xl mx-auto px-4 py-8 pb-20 md:pb-8">
+        <main className="container max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-20 md:pb-8">
           {children}
         </main>
 
