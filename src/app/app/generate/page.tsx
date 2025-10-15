@@ -241,7 +241,7 @@ export default function GeneratePage() {
   ]
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-24 md:pb-8">
+    <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 pb-24 md:pb-8 px-4 sm:px-0">
       {/* Header */}
       <div className="flex items-center justify-between">
         <Button
@@ -252,13 +252,13 @@ export default function GeneratePage() {
           <ArrowLeft className="w-4 h-4" />
           Back
         </Button>
-        <h1 className="text-3xl font-bold text-gray-900">Generate Report</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Generate Report</h1>
         <div className="w-24" /> {/* Spacer */}
       </div>
 
       {/* Clean Step Indicator */}
       <Card className="bg-white border-2 border-gray-100">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-center justify-between relative">
             {/* Progress line */}
             <div className="absolute top-6 left-0 right-0 h-0.5 bg-gray-200 hidden sm:block">
@@ -275,19 +275,19 @@ export default function GeneratePage() {
                 const isActive = currentStep === step.id
                 const isCompleted = currentStep > step.id
                 return (
-                  <div key={step.id} className="flex flex-col items-center gap-2">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                  <div key={step.id} className="flex flex-col items-center gap-1 sm:gap-2">
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all ${
                       isActive || isCompleted
                         ? "bg-gradient-to-br from-emerald-500 to-violet-500 text-white shadow-lg"
                         : "bg-white border-2 border-gray-300 text-gray-400"
                     }`}>
                       {isCompleted ? (
-                        <CheckCircle className="w-6 h-6" />
+                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                       ) : (
-                        <step.icon className="w-6 h-6" />
+                        <step.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                       )}
                     </div>
-                    <span className={`text-sm font-medium text-center ${
+                    <span className={`text-xs sm:text-sm font-medium text-center ${
                       isActive || isCompleted ? "text-emerald-600" : "text-gray-500"
                     }`}>
                       {step.name}
@@ -350,8 +350,8 @@ export default function GeneratePage() {
                 </div>
 
                 {/* Content */}
-                <div className="p-6">
-                  <div className="p-6 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200">
+                <div className="p-4 sm:p-6">
+                  <div className="p-4 sm:p-6 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200">
                     <h3 className="font-bold text-emerald-700 text-xl mb-2">
                       {(template as { templateTitle?: string })?.templateTitle || "(Untitled Template)"}
                     </h3>
@@ -384,7 +384,7 @@ export default function GeneratePage() {
                   </div>
 
                   {/* Form Fields */}
-                  <div className="p-6">
+                  <div className="p-4 sm:p-6">
                     <div className="flex items-center justify-between">
                       <div>
                         <Label className="font-medium text-gray-900">Include patient data in report</Label>
@@ -411,7 +411,7 @@ export default function GeneratePage() {
                   </div>
 
                   {/* Form Fields */}
-                  <div className="p-6">
+                  <div className="p-4 sm:p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="patient.name" className="text-gray-900 font-medium">Patient Name</Label>
@@ -487,7 +487,7 @@ export default function GeneratePage() {
                 </div>
 
                 {/* Form Fields */}
-                <div className="p-6 space-y-6">
+                <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="indication" className="text-gray-900 font-medium">Indication / Clinical history (required)</Label>
                     <Textarea
@@ -545,7 +545,7 @@ export default function GeneratePage() {
                   </div>
 
                   {/* Form Fields */}
-                  <div className="p-6 space-y-6">
+                  <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="signature.name" className="text-gray-900 font-medium">Signature Name</Label>

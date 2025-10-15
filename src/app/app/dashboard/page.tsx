@@ -18,7 +18,7 @@ export default function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-50 via-white to-violet-50 p-12 border-2 border-gray-100"
+        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-50 via-white to-violet-50 p-6 sm:p-8 lg:p-12 border-2 border-gray-100"
       >
         <div className="flex items-center gap-3 mb-4">
           <Sparkles className="w-8 h-8 text-primary animate-pulse" />
@@ -27,21 +27,21 @@ export default function DashboardPage() {
           </span>
         </div>
         
-        <h1 className="text-5xl font-bold mb-4">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
           <span className="text-gradient-brand">Generate Reports</span>
           <br />
           <span className="text-gray-900">With AI Speed</span>
         </h1>
         
-        <p className="text-xl text-gray-600 max-w-2xl mb-8">
+        <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mb-6 sm:mb-8">
           Create professional medical reports in seconds. Choose a template, enter patient data, and let AI handle the rest.
         </p>
 
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <Button
             size="lg"
-            className="btn-primary h-14 px-8 text-lg"
-            onClick={() => router.push('/app/generate')}
+            className="btn-primary h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg w-full sm:w-auto"
+            onClick={() => router.push('/app/templates')}
           >
             <Plus className="w-5 h-5 mr-2" />
             Generate New Report
@@ -49,7 +49,7 @@ export default function DashboardPage() {
           <Button
             size="lg"
             variant="outline"
-            className="h-14 px-8 text-lg border-2"
+            className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg border-2 w-full sm:w-auto"
             onClick={() => router.push('/app/templates')}
           >
             <BookTemplate className="w-5 h-5 mr-2" />
@@ -103,7 +103,7 @@ export default function DashboardPage() {
               icon: Plus,
               title: 'Generate New Report',
               description: 'Create a medical report from template',
-              href: '/app/generate',
+              href: '/app/templates',
               gradient: 'from-emerald-500 to-teal-500',
             },
             {
