@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { AlertCircle, Calendar, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
@@ -35,14 +36,6 @@ export default function UsageWidget() {
     queryFn: () => httpGet<UsageData>('/v1/subscription/usage'),
     refetchInterval: 60000, // Refetch every minute
     enabled: mounted && isAuthed, // Only fetch when authenticated
-    // Debug: Log when data changes
-    onSuccess: (data) => {
-      console.log('📊 UsageWidget: Data updated:', {
-        reportsUsed: data.subscription.reports_used,
-        reportsLimit: data.subscription.reports_limit,
-        reportsRemaining: data.subscription.reports_remaining
-      })
-    },
     retry: (failureCount, error) => {
       console.log('🔄 UsageWidget: Retry attempt', failureCount, error)
       // Don't retry on authentication errors (401, 403)
@@ -56,6 +49,17 @@ export default function UsageWidget() {
       return failureCount < 3
     },
   })
+
+  // Debug: Log when data changes
+  useEffect(() => {
+    if (usage) {
+      console.log('📊 UsageWidget: Data updated:', {
+        reportsUsed: usage.subscription.reports_used,
+        reportsLimit: usage.subscription.reports_limit,
+        reportsRemaining: usage.subscription.reports_remaining
+      })
+    }
+  }, [usage])
 
   if (isLoading) {
     return (
@@ -79,10 +83,6 @@ export default function UsageWidget() {
             <p className="text-sm text-muted-foreground">
               Unable to load usage information
             </p>
-            {/* Debug info */}
-            <div className="text-xs text-gray-500 bg-gray-100 p-2 rounded">
-              Debug: mounted={mounted ? 'true' : 'false'}, isAuthed={isAuthed ? 'true' : 'false'}
-            </div>
             <div className="space-y-2">
               {!isAuthed ? (
                 <>
