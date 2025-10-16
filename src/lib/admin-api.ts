@@ -149,4 +149,31 @@ export class AdminApiClient {
 
     return response.json()
   }
+
+  async getUserEmails(userIds: string[]): Promise<Record<string, string>> {
+    if (!userIds || userIds.length === 0) {
+      return {}
+    }
+
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/v1/admin/users/emails`,
+        {
+          method: 'POST',
+          headers: this.getHeaders(),
+          body: JSON.stringify(userIds),
+        }
+      )
+
+      if (!response.ok) {
+        console.error('Failed to fetch user emails:', response.status)
+        return {}
+      }
+
+      return await response.json()
+    } catch (error) {
+      console.error('Error fetching user emails:', error)
+      return {}
+    }
+  }
 }
