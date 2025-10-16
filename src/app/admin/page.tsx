@@ -11,7 +11,16 @@ import {
   LogOut,
   Shield
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { AdminGuard } from '@/components/admin/AdminGuard'
+import { StatCard } from '@/components/admin/StatCard'
+import { SubscriptionTable } from '@/components/admin/SubscriptionTable'
+import { AdminErrorBoundary } from '@/components/admin/AdminErrorBoundary'
 import { ConnectionStatus } from '@/components/admin/ConnectionStatus'
+import { useAdminAuth } from '@/components/admin/AdminAuthProvider'
+import { useSubscriptions, useRevenueAnalytics } from '@/hooks/useAdminData'
+import { SubscriptionListParams } from '@/types/admin'
+import { toast } from 'sonner'
 
 export default function AdminDashboard() {
   const router = useRouter()
