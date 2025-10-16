@@ -1,7 +1,6 @@
 export interface Subscription {
   subscription_id: string
   user_id: string
-  email: string
   tier_name: string
   tier_display_name: string
   region: string
@@ -15,6 +14,7 @@ export interface Subscription {
   payment_provider: string
   created_at: string
   updated_at: string
+  cancelled_at: string | null
 }
 
 export interface SubscriptionListParams {
@@ -30,8 +30,20 @@ export interface SubscriptionListParams {
 
 export interface SubscriptionListResponse {
   total: number
+  limit: number
+  offset: number
+  has_more: boolean
+  filters: {
+    status?: string
+    tier?: string
+    region?: string
+    search?: string
+  }
+  sorting: {
+    sort_by: string
+    sort_order: string
+  }
   subscriptions: Subscription[]
-  status_filter: string
 }
 
 export interface UserSubscriptionResponse {
@@ -43,25 +55,11 @@ export interface UserSubscriptionResponse {
 export interface UserSubscriptionDetails {
   user: {
     user_id: string
-    email: string
-    created_at: string
+    email?: string  // Optional since it's from Supabase
+    created_at?: string
   } | null
-  subscription: {
-    subscription_id: string
-    user_id: string
-    tier_name: string
-    tier_display_name: string
-    status: string
-    reports_used_current_period: number
-    reports_limit: number
-    period_start: string
-    period_end: string
-    price_paid: number
-    currency: string
-    payment_provider: string
-    created_at: string
-    updated_at: string
-  } | null
+  subscription: Subscription | null
+  note?: string  // "User details available via Supabase API"
 }
 
 export interface ActivateSubscriptionData {

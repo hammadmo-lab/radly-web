@@ -42,7 +42,7 @@ export function ConnectionStatus({
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
 
-      const response = await fetch(`${baseUrl}/api/v1/health`, {
+      const response = await fetch(`${baseUrl}/health`, {
         method: 'GET',
         signal: controller.signal,
         headers: {
@@ -297,7 +297,7 @@ export function useConnectionStatus(baseUrl?: string) {
     const checkHealth = async () => {
       try {
         setIsChecking(true)
-        const response = await fetch(`${baseUrl || process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'}/api/v1/health`)
+        const response = await fetch(`${baseUrl || process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'}/health`)
         setIsConnected(response.ok)
       } catch {
         setIsConnected(false)

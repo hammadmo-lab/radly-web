@@ -31,6 +31,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Subscription } from '@/types/admin'
 import { UsageProgressBar } from './UsageProgressBar'
 
@@ -45,7 +46,7 @@ interface SubscriptionTableProps {
   onFilterChange: (key: string, value: string) => void
   onRefresh: () => void
   onExport: () => void
-  onViewUser: (email: string) => void
+  onViewUser: (userId: string) => void
 }
 
 export function SubscriptionTable({
@@ -124,7 +125,7 @@ export function SubscriptionTable({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Search by email or user ID..."
+              placeholder="Search by user ID..."
               value={searchValue}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-10"
@@ -196,7 +197,7 @@ export function SubscriptionTable({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Email</TableHead>
+                    <TableHead>User ID</TableHead>
                     <TableHead>Tier</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Usage</TableHead>
@@ -215,7 +216,18 @@ export function SubscriptionTable({
                       className="hover:bg-gray-50"
                     >
                       <TableCell className="font-medium">
-                        {subscription.email}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="font-mono text-xs cursor-help">
+                                {subscription.user_id ? subscription.user_id.substring(0, 8) + '...' : 'N/A'}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="font-mono text-xs">{subscription.user_id}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </TableCell>
                       <TableCell>
                         {getTierBadge(subscription.tier_name)}
@@ -239,8 +251,8 @@ export function SubscriptionTable({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => onViewUser(subscription.email)}
-                          disabled={!subscription.email || subscription.email === 'No email found'}
+                          onClick={() => onViewUser(subscription.user_id)}
+                          disabled={!subscription.user_id}
                         >
                           <Eye className="w-4 h-4 mr-2" />
                           View Details
