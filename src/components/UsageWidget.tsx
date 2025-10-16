@@ -30,16 +30,32 @@ interface UsageData {
 export default function UsageWidget() {
   const { isAuthed, mounted } = useAuthSession()
   
+  // Debug: Log authentication status
+  console.log('🔍 UsageWidget Auth Status:', { mounted, isAuthed })
+  
   const { data: usage, isLoading, error } = useQuery({
     queryKey: ['subscription-usage'],
-    queryFn: () => httpGet<UsageData>('/v1/subscription/usage'),
+    queryFn: async () => {
+      console.log('🔍 UsageWidget: Fetching usage data...')
+      console.log('🔍 Auth status:', { mounted, isAuthed })
+      try {
+        const result = await httpGet<UsageData>('/v1/subscription/usage')
+        console.log('✅ UsageWidget: Successfully fetched usage data:', result)
+        return result
+      } catch (err) {
+        console.error('❌ UsageWidget: Failed to fetch usage data:', err)
+        throw err
+      }
+    },
     refetchInterval: 60000, // Refetch every minute
     enabled: mounted && isAuthed, // Only fetch when authenticated
     retry: (failureCount, error) => {
+      console.log('🔄 UsageWidget: Retry attempt', failureCount, error)
       // Don't retry on authentication errors (401, 403)
       if (error && typeof error === 'object' && 'status' in error) {
         const status = (error as { status: number }).status
         if (status === 401 || status === 403) {
+          console.log('🚫 UsageWidget: Not retrying auth error:', status)
           return false
         }
       }
@@ -69,6 +85,10 @@ export default function UsageWidget() {
             <p className="text-sm text-muted-foreground">
               Unable to load usage information
             </p>
+            {/* Debug info */}
+            <div className="text-xs text-gray-500 bg-gray-100 p-2 rounded">
+              Debug: mounted={mounted ? 'true' : 'false'}, isAuthed={isAuthed ? 'true' : 'false'}
+            </div>
             <div className="space-y-2">
               {!isAuthed ? (
                 <>
