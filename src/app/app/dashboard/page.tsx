@@ -8,12 +8,22 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import UsageWidget from '@/components/UsageWidget'
 
 export default function DashboardPage() {
   const router = useRouter()
 
   return (
     <div className="space-y-8 pb-24 md:pb-8">
+      {/* USAGE WIDGET - Top Section */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-md mx-auto lg:mx-0 lg:max-w-none"
+      >
+        <UsageWidget />
+      </motion.div>
+
       {/* HERO SECTION - Modern & Welcoming */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
