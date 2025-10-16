@@ -40,6 +40,30 @@ export interface UserSubscriptionResponse {
   subscription: Subscription
 }
 
+export interface UserSubscriptionDetails {
+  user: {
+    user_id: string
+    email: string
+    created_at: string
+  } | null
+  subscription: {
+    subscription_id: string
+    user_id: string
+    tier_name: string
+    tier_display_name: string
+    status: string
+    reports_used_current_period: number
+    reports_limit: number
+    period_start: string
+    period_end: string
+    price_paid: number
+    currency: string
+    payment_provider: string
+    created_at: string
+    updated_at: string
+  } | null
+}
+
 export interface ActivateSubscriptionData {
   user_email: string
   tier_name: string
