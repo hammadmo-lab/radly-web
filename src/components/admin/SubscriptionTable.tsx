@@ -132,24 +132,24 @@ export function SubscriptionTable({
           </div>
           
           <div className="flex gap-2">
-            <Select onValueChange={(value) => onFilterChange('status', value)}>
+            <Select onValueChange={(value) => onFilterChange('status', value === 'all' ? '' : value)}>
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
                 <SelectItem value="expired">Expired</SelectItem>
               </SelectContent>
             </Select>
 
-            <Select onValueChange={(value) => onFilterChange('tier', value)}>
+            <Select onValueChange={(value) => onFilterChange('tier', value === 'all' ? '' : value)}>
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Tier" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Tiers</SelectItem>
+                <SelectItem value="all">All Tiers</SelectItem>
                 <SelectItem value="free">Free</SelectItem>
                 <SelectItem value="starter">Starter</SelectItem>
                 <SelectItem value="professional">Professional</SelectItem>
@@ -157,12 +157,12 @@ export function SubscriptionTable({
               </SelectContent>
             </Select>
 
-            <Select onValueChange={(value) => onFilterChange('region', value)}>
+            <Select onValueChange={(value) => onFilterChange('region', value === 'all' ? '' : value)}>
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Region" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Regions</SelectItem>
+                <SelectItem value="all">All Regions</SelectItem>
                 <SelectItem value="egypt">Egypt</SelectItem>
                 <SelectItem value="international">International</SelectItem>
               </SelectContent>
