@@ -16,6 +16,7 @@ import { AdminGuard } from '@/components/admin/AdminGuard'
 import { ChangeTierDialog } from '@/components/admin/ChangeTierDialog'
 import { useUserSubscription } from '@/hooks/useAdminData'
 import { useAdminAuth } from '@/components/admin/AdminAuthProvider'
+import { useUserEmails } from '@/hooks/useUserEmails'
 import { toast } from 'sonner'
 
 export default function UserDetailsPage() {
@@ -26,6 +27,8 @@ export default function UserDetailsPage() {
   
   const userId = params.userId as string
   const { data, isLoading, error } = useUserSubscription(userId)
+  const { data: emailMap } = useUserEmails([userId])
+  const userEmail = emailMap?.[userId]
 
   const handleBack = () => {
     router.push('/admin')
@@ -188,19 +191,22 @@ export default function UserDetailsPage() {
             {/* User ID Card */}
             <div className="border rounded-lg p-6">
               <h2 className="font-semibold mb-3">User Information</h2>
-              <div className="space-y-2">
+              <div className="space-y-3">
+                {/* Email */}
+                {userEmail && userEmail.includes('@') && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Email:</span>
+                    <span className="font-medium">{userEmail}</span>
+                  </div>
+                )}
+                
+                {/* User ID */}
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">User ID:</span>
-                  <code className="text-sm bg-muted px-2 py-1 rounded">
+                  <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
                     {userId}
                   </code>
                 </div>
-                <Alert>
-                  <AlertDescription className="text-sm">
-                    📧 Email addresses are stored in Supabase Auth and require separate API access.
-                    This admin panel currently only shows subscription data.
-                  </AlertDescription>
-                </Alert>
               </div>
             </div>
             

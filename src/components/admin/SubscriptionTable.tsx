@@ -34,6 +34,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Subscription } from '@/types/admin'
 import { UsageProgressBar } from './UsageProgressBar'
+import { useUserEmails } from '@/hooks/useUserEmails'
 
 interface SubscriptionTableProps {
   subscriptions: Subscription[]
@@ -63,6 +64,12 @@ export function SubscriptionTable({
   onViewUser,
 }: SubscriptionTableProps) {
   const [searchValue, setSearchValue] = useState('')
+
+  // Extract all user IDs from subscriptions
+  const userIds = subscriptions?.map(s => s.user_id).filter(Boolean) || []
+
+  // Fetch emails for all users
+  const { data: emailMap, isLoading: emailsLoading } = useUserEmails(userIds)
 
   const handleSearch = (value: string) => {
     setSearchValue(value)
@@ -125,7 +132,7 @@ export function SubscriptionTable({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Search by user ID..."
+              placeholder="Search by email or user ID..."
               value={searchValue}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-10"
@@ -197,7 +204,7 @@ export function SubscriptionTable({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>User ID</TableHead>
+                    <TableHead>User</TableHead>
                     <TableHead>Tier</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Usage</TableHead>
@@ -216,18 +223,29 @@ export function SubscriptionTable({
                       className="hover:bg-gray-50"
                     >
                       <TableCell className="font-medium">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="font-mono text-xs cursor-help">
-                                {subscription.user_id ? subscription.user_id.substring(0, 8) + '...' : 'N/A'}
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="font-mono text-xs">{subscription.user_id}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <div className="space-y-1 min-w-[200px]">
+                          {/* Email */}
+                          <div className="text-sm font-medium truncate">
+                            {emailsLoading ? (
+                              <span className="text-muted-foreground animate-pulse">
+                                Loading email...
+                              </span>
+                            ) : emailMap?.[subscription.user_id] && emailMap[subscription.user_id].includes('@') ? (
+                              <span title={emailMap[subscription.user_id]}>
+                                {emailMap[subscription.user_id]}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">
+                                {emailMap?.[subscription.user_id] || 'Email unavailable'}
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* User ID (shortened) */}
+                          <div className="text-xs text-muted-foreground font-mono" title={subscription.user_id}>
+                            ID: {subscription.user_id ? subscription.user_id.substring(0, 8) + '...' : 'N/A'}
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
                         {getTierBadge(subscription.tier_name)}

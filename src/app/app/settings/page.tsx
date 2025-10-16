@@ -124,7 +124,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const testConnectivity = async () => {
       try {
-        const response = await fetch('/api/health')
+        const response = await fetch('/health')
         if (response.ok) {
           setConnectivityStatus('connected')
         } else {
