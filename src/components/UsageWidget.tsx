@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { AlertCircle, Calendar } from 'lucide-react'
+import { AlertCircle, Calendar, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 import { httpGet } from '@/lib/http'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -30,25 +30,19 @@ interface UsageData {
 export default function UsageWidget() {
   const { isAuthed, mounted } = useAuthSession()
   
-  // Debug: Log authentication status
-  console.log('🔍 UsageWidget Auth Status:', { mounted, isAuthed })
-  
-  const { data: usage, isLoading, error } = useQuery({
+  const { data: usage, isLoading, error, refetch } = useQuery({
     queryKey: ['subscription-usage'],
-    queryFn: async () => {
-      console.log('🔍 UsageWidget: Fetching usage data...')
-      console.log('🔍 Auth status:', { mounted, isAuthed })
-      try {
-        const result = await httpGet<UsageData>('/v1/subscription/usage')
-        console.log('✅ UsageWidget: Successfully fetched usage data:', result)
-        return result
-      } catch (err) {
-        console.error('❌ UsageWidget: Failed to fetch usage data:', err)
-        throw err
-      }
-    },
+    queryFn: () => httpGet<UsageData>('/v1/subscription/usage'),
     refetchInterval: 60000, // Refetch every minute
     enabled: mounted && isAuthed, // Only fetch when authenticated
+    // Debug: Log when data changes
+    onSuccess: (data) => {
+      console.log('📊 UsageWidget: Data updated:', {
+        reportsUsed: data.subscription.reports_used,
+        reportsLimit: data.subscription.reports_limit,
+        reportsRemaining: data.subscription.reports_remaining
+      })
+    },
     retry: (failureCount, error) => {
       console.log('🔄 UsageWidget: Retry attempt', failureCount, error)
       // Don't retry on authentication errors (401, 403)
@@ -104,13 +98,20 @@ export default function UsageWidget() {
               ) : (
                 <>
                   <p className="text-xs text-muted-foreground">
-                    There was an error loading your subscription data. Please try refreshing the page.
+                    Authentication error: Token validation failed. Please try signing out and signing back in.
                   </p>
-                  <Link href="/pricing">
-                    <Button variant="outline" size="sm">
-                      View Pricing Plans
-                    </Button>
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link href="/auth/signin">
+                      <Button variant="outline" size="sm">
+                        Sign In Again
+                      </Button>
+                    </Link>
+                    <Link href="/pricing">
+                      <Button variant="outline" size="sm">
+                        View Pricing Plans
+                      </Button>
+                    </Link>
+                  </div>
                 </>
               )}
             </div>
@@ -141,11 +142,23 @@ export default function UsageWidget() {
               </CardDescription>
             )}
           </div>
-          <Link href="/pricing">
-            <Button variant="ghost" size="sm">
-              Manage
+          <div className="flex gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => {
+                console.log('🔄 Manual refresh triggered')
+                refetch()
+              }}
+            >
+              <RefreshCw className="w-4 h-4" />
             </Button>
-          </Link>
+            <Link href="/pricing">
+              <Button variant="ghost" size="sm">
+                Manage
+              </Button>
+            </Link>
+          </div>
         </div>
       </CardHeader>
 
