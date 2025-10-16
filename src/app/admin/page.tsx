@@ -9,7 +9,8 @@ import {
   TrendingUp, 
   Calendar,
   LogOut,
-  Shield
+  Shield,
+  AlertCircle
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AdminGuard } from '@/components/admin/AdminGuard'
@@ -20,6 +21,7 @@ import { ConnectionStatus } from '@/components/admin/ConnectionStatus'
 import { useAdminAuth } from '@/components/admin/AdminAuthProvider'
 import { useSubscriptions, useRevenueAnalytics } from '@/hooks/useAdminData'
 import { SubscriptionListParams } from '@/types/admin'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { toast } from 'sonner'
 
 export default function AdminDashboard() {
@@ -43,6 +45,9 @@ export default function AdminDashboard() {
     isLoading: revenueLoading,
     error: revenueError 
   } = useRevenueAnalytics(30)
+
+  // Check if there are any errors
+  const hasErrors = subscriptionsError || revenueError
 
   const handleSearch = useCallback((search: string) => {
     setFilters(prev => ({ ...prev, search, offset: 0 }))
@@ -97,6 +102,17 @@ export default function AdminDashboard() {
     }
   }, [revenueError])
 
+  // Safe revenue formatting function
+  const formatRevenue = (amount: number | null | undefined): string => {
+    if (amount === null || amount === undefined || isNaN(amount)) {
+      return '$0'
+    }
+    return `$${amount.toLocaleString('en-US', { 
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0 
+    })}`
+  }
+
   const stats = [
     {
       title: 'Total Subscriptions',
@@ -114,9 +130,9 @@ export default function AdminDashboard() {
     },
     {
       title: 'Monthly Revenue',
-      value: revenueLoading ? '...' : revenueAnalytics ? `$${revenueAnalytics.mrr.toLocaleString()}` : '$0',
+      value: revenueLoading ? '...' : formatRevenue(revenueAnalytics?.total_revenue),
       icon: DollarSign,
-      description: 'Monthly recurring revenue',
+      description: 'This month',
       isLoading: revenueLoading,
     },
     {
@@ -163,6 +179,29 @@ export default function AdminDashboard() {
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Error Banner */}
+          {hasErrors && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Connection Error</AlertTitle>
+              <AlertDescription>
+                {subscriptionsError 
+                  ? `Failed to load subscriptions: ${subscriptionsError.message}` 
+                  : `Failed to load revenue data: ${revenueError?.message}`}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="ml-4"
+                  onClick={() => {
+                    refetchSubscriptions()
+                  }}
+                >
+                  Retry
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Stats Grid */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -188,19 +227,44 @@ export default function AdminDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.3 }}
           >
-            <SubscriptionTable
-              subscriptions={subscriptionsData?.subscriptions || []}
-              isLoading={subscriptionsLoading}
-              total={subscriptionsData?.total || 0}
-              currentPage={currentPage}
-              pageSize={filters.limit || 10}
-              onPageChange={handlePageChange}
-              onSearch={handleSearch}
-              onFilterChange={handleFilterChange}
-              onRefresh={handleRefresh}
-              onExport={handleExport}
-              onViewUser={handleViewUser}
-            />
+            {subscriptionsLoading ? (
+              <div className="mt-6 p-8 text-center">
+                <div className="text-lg font-medium text-gray-600">Loading subscriptions...</div>
+                <div className="text-sm text-gray-500 mt-2">Please wait while we fetch the data</div>
+              </div>
+            ) : subscriptionsError ? (
+              <div className="mt-6">
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error Loading Subscriptions</AlertTitle>
+                  <AlertDescription>
+                    {subscriptionsError.message}
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="ml-4"
+                      onClick={() => refetchSubscriptions()}
+                    >
+                      Retry
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              </div>
+            ) : (
+              <SubscriptionTable
+                subscriptions={subscriptionsData?.subscriptions || []}
+                isLoading={subscriptionsLoading}
+                total={subscriptionsData?.total || 0}
+                currentPage={currentPage}
+                pageSize={filters.limit || 10}
+                onPageChange={handlePageChange}
+                onSearch={handleSearch}
+                onFilterChange={handleFilterChange}
+                onRefresh={handleRefresh}
+                onExport={handleExport}
+                onViewUser={handleViewUser}
+              />
+            )}
           </motion.div>
         </main>
         </div>
