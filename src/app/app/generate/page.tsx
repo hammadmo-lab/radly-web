@@ -25,6 +25,14 @@ import { UserProfile } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
+// Usage data interface
+interface UsageData {
+  subscription: {
+    reports_used: number;
+    reports_limit: number;
+  };
+}
+
 // Defensive template ID resolver to handle typos and legacy links
 function resolveTemplateId(searchParams: URLSearchParams | Record<string, string | string[] | undefined>) {
   const get = (k: string) => {
@@ -89,6 +97,13 @@ export default function GeneratePage() {
       if (error) throw error
       return data as UserProfile
     },
+    enabled: !!user,
+  })
+
+  // Fetch usage data to check limits
+  const { data: usage } = useQuery({
+    queryKey: ['subscription-usage'],
+    queryFn: () => httpGet<UsageData>('/v1/subscription/usage'),
     enabled: !!user,
   })
 
@@ -201,6 +216,13 @@ export default function GeneratePage() {
     if (currentStep !== 4 || !intentionalSubmit) {
       console.log('Preventing submission - not on step 4 or not intentional:', { currentStep, intentionalSubmit });
       return;
+    }
+
+    // Check usage limit before generating report
+    if (usage?.subscription && usage.subscription.reports_used >= usage.subscription.reports_limit) {
+      setError('You have reached your monthly report limit. Please upgrade your plan or wait for the next billing cycle.')
+      toast.error('Usage limit reached. Please upgrade to continue generating reports.')
+      return
     }
     
     setIsSubmitting(true)
@@ -361,6 +383,41 @@ export default function GeneratePage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Usage Limit Warning */}
+      {usage?.subscription && usage.subscription.reports_used >= usage.subscription.reports_limit && (
+        <Card className="bg-red-50 border-red-200">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-red-900 mb-1">Monthly Limit Reached</h3>
+                <p className="text-sm text-red-700 mb-3">
+                  You have used {usage.subscription.reports_used} of {usage.subscription.reports_limit} reports this month. 
+                  Please upgrade your plan to continue generating reports.
+                </p>
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    onClick={() => router.push('/pricing')}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    Upgrade Plan
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => router.push('/app/dashboard')}
+                    className="border-red-300 text-red-700 hover:bg-red-50"
+                  >
+                    Back to Dashboard
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Step Content */}
@@ -685,7 +742,7 @@ export default function GeneratePage() {
             ) : (
               <Button 
                 type="submit" 
-                disabled={isSubmitting}
+                disabled={isSubmitting || (usage?.subscription && usage.subscription.reports_used >= usage.subscription.reports_limit)}
                 className="btn-primary flex items-center gap-2"
                 onClick={() => {
                   console.log('Generate Report button clicked - setting intentional submit');
