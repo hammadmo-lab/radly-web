@@ -15,7 +15,8 @@ import {
   ChevronDown,
   Activity,
   Plus,
-  FileText
+  FileText,
+  Shield
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { 
@@ -28,6 +29,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
+import { useAdminAuth } from '@/components/admin/AdminAuthProvider'
 
 interface NavLinkProps {
   href: string
@@ -60,12 +62,22 @@ interface MobileNavProps {
 export function MobileNav({ user, onSignOut }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
+  const { isAuthenticated: isAdmin } = useAdminAuth()
 
   const navItems = [
     { href: '/app/dashboard', icon: Activity, label: 'Dashboard' },
     { href: '/app/templates', icon: BookTemplate, label: 'Templates' },
     { href: '/app/reports', icon: FileText, label: 'Reports' },
   ]
+
+  // Add admin link if user is admin
+  if (isAdmin) {
+    navItems.push({
+      href: '/admin',
+      icon: Shield,
+      label: 'Admin',
+    })
+  }
 
   return (
     <>
@@ -172,6 +184,7 @@ interface DesktopNavProps {
 export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const { isAuthenticated: isAdmin } = useAdminAuth()
   
   const handleNewReport = useSafeClickHandler(() => {
     router.push('/app/templates')
@@ -182,6 +195,15 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
     { href: '/app/templates', icon: BookTemplate, label: 'Templates' },
     { href: '/app/reports', icon: FileText, label: 'Reports' },
   ]
+
+  // Add admin link if user is admin
+  if (isAdmin) {
+    navItems.push({
+      href: '/admin',
+      icon: Shield,
+      label: 'Admin',
+    })
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-gradient-to-r from-emerald-50 via-white to-violet-50 border-b border-emerald-200/50 shadow-sm">
@@ -315,11 +337,22 @@ interface BottomNavProps {
 }
 
 export function BottomNav({ pathname }: BottomNavProps) {
+  const { isAuthenticated: isAdmin } = useAdminAuth()
+  
   const navItems = [
     { href: '/app/dashboard', icon: Activity, label: 'Home' },
     { href: '/app/templates', icon: BookTemplate, label: 'Templates' },
     { href: '/app/reports', icon: FileText, label: 'Reports' },
   ]
+
+  // Add admin link if user is admin
+  if (isAdmin) {
+    navItems.push({
+      href: '/admin',
+      icon: Shield,
+      label: 'Admin',
+    })
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-gradient-to-r from-emerald-50/95 via-white/95 to-violet-50/95 backdrop-blur-lg border-t border-emerald-200/50 z-40 safe-area-inset-bottom shadow-lg">
