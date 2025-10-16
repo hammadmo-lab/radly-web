@@ -80,6 +80,12 @@ export default function AdminDashboard() {
   }, [])
 
   const handleViewUser = useCallback((email: string) => {
+    if (!email || email === 'No email found') {
+      toast.error('Cannot view user: email not available')
+      return
+    }
+    
+    console.log('Viewing user:', email)
     router.push(`/admin/users/${encodeURIComponent(email)}`)
   }, [router])
 

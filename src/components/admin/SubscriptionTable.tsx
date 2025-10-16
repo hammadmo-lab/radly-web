@@ -240,6 +240,7 @@ export function SubscriptionTable({
                           variant="ghost"
                           size="sm"
                           onClick={() => onViewUser(subscription.email)}
+                          disabled={!subscription.email || subscription.email === 'No email found'}
                         >
                           <Eye className="w-4 h-4 mr-2" />
                           View Details
