@@ -21,7 +21,7 @@ export class AdminApiClient {
   private getHeaders() {
     return {
       'Content-Type': 'application/json',
-      'x-admin-key': this.credentials.adminKey,
+      'x-client-key': this.credentials.adminKey,
       'Authorization': `Bearer ${this.credentials.apiKey}`,
     }
   }
@@ -41,6 +41,7 @@ export class AdminApiClient {
     const response = await fetch(`${this.baseUrl}/v1/admin/subscriptions/list?${searchParams}`, {
       method: 'GET',
       headers: this.getHeaders(),
+      credentials: 'include',
     })
 
     if (!response.ok) {
@@ -55,6 +56,7 @@ export class AdminApiClient {
     const response = await fetch(`${this.baseUrl}/v1/admin/subscriptions/user/${encodeURIComponent(email)}`, {
       method: 'GET',
       headers: this.getHeaders(),
+      credentials: 'include',
     })
 
     if (!response.ok) {
@@ -70,6 +72,7 @@ export class AdminApiClient {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
+      credentials: 'include',
     })
 
     if (!response.ok) {
@@ -85,6 +88,7 @@ export class AdminApiClient {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
+      credentials: 'include',
     })
 
     if (!response.ok) {
@@ -99,6 +103,7 @@ export class AdminApiClient {
     const response = await fetch(`${this.baseUrl}/v1/admin/analytics/usage?days=${days}`, {
       method: 'GET',
       headers: this.getHeaders(),
+      credentials: 'include',
     })
 
     if (!response.ok) {
@@ -113,6 +118,7 @@ export class AdminApiClient {
     const response = await fetch(`${this.baseUrl}/v1/admin/analytics/revenue?days=${days}`, {
       method: 'GET',
       headers: this.getHeaders(),
+      credentials: 'include',
     })
 
     if (!response.ok) {
