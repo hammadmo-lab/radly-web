@@ -7,6 +7,7 @@ import { httpGet } from '@/lib/http'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
+import { useAuthSession } from '@/hooks/useAuthSession'
 
 interface UsageData {
   subscription: {
@@ -27,10 +28,23 @@ interface UsageData {
 }
 
 export default function UsageWidget() {
+  const { isAuthed, mounted } = useAuthSession()
+  
   const { data: usage, isLoading, error } = useQuery({
     queryKey: ['subscription-usage'],
     queryFn: () => httpGet<UsageData>('/v1/subscription/usage'),
     refetchInterval: 60000, // Refetch every minute
+    enabled: mounted && isAuthed, // Only fetch when authenticated
+    retry: (failureCount, error) => {
+      // Don't retry on authentication errors (401, 403)
+      if (error && typeof error === 'object' && 'status' in error) {
+        const status = (error as { status: number }).status
+        if (status === 401 || status === 403) {
+          return false
+        }
+      }
+      return failureCount < 3
+    },
   })
 
   if (isLoading) {
@@ -51,9 +65,36 @@ export default function UsageWidget() {
     return (
       <Card>
         <CardContent className="pt-6">
-          <p className="text-sm text-muted-foreground">
-            Unable to load usage information
-          </p>
+          <div className="text-center space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Unable to load usage information
+            </p>
+            <div className="space-y-2">
+              {!isAuthed ? (
+                <>
+                  <p className="text-xs text-muted-foreground">
+                    Please sign in to view your subscription details.
+                  </p>
+                  <Link href="/auth/signin">
+                    <Button variant="outline" size="sm">
+                      Sign In
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <p className="text-xs text-muted-foreground">
+                    There was an error loading your subscription data. Please try refreshing the page.
+                  </p>
+                  <Link href="/pricing">
+                    <Button variant="outline" size="sm">
+                      View Pricing Plans
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
     )
