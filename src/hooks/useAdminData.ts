@@ -34,17 +34,17 @@ export function useSubscriptions(params: SubscriptionListParams) {
   })
 }
 
-export function useUserSubscription(email: string) {
+export function useUserSubscription(userId: string) {
   const { adminKey, apiKey } = useAdminAuth()
   
   return useQuery({
-    queryKey: ['admin', 'subscription', email],
+    queryKey: ['admin', 'subscription', 'user-id', userId],
     queryFn: async () => {
       if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
       const client = new AdminApiClient({ adminKey, apiKey })
-      return client.getUserSubscription(email)
+      return client.getUserSubscription(userId)
     },
-    enabled: Boolean(adminKey && apiKey && email),
+    enabled: Boolean(adminKey && apiKey && userId),
     staleTime: 2 * 60 * 1000, // 2 minutes
     retry: (failureCount, error) => {
       // Don't retry for 4xx errors (client errors)
@@ -70,7 +70,7 @@ export function useActivateSubscription() {
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'subscriptions'] })
-      queryClient.invalidateQueries({ queryKey: ['admin', 'subscription', variables.user_email] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'subscription', 'user-id', variables.user_email] })
       toast.success(`Successfully upgraded ${variables.user_email}`)
     },
     onError: (error: Error) => {
@@ -111,7 +111,7 @@ export function useCancelSubscription() {
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'subscriptions'] })
-      queryClient.invalidateQueries({ queryKey: ['admin', 'subscription', variables.user_email] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'subscription', 'user-id', variables.user_email] })
       toast.success(`Successfully cancelled subscription for ${variables.user_email}`)
     },
     onError: (error: Error) => {

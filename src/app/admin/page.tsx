@@ -79,14 +79,14 @@ export default function AdminDashboard() {
     toast.info('CSV export feature coming soon')
   }, [])
 
-  const handleViewUser = useCallback((email: string) => {
-    if (!email || email === 'No email found') {
-      toast.error('Cannot view user: email not available')
+  const handleViewUser = useCallback((userId: string) => {
+    if (!userId) {
+      toast.error('Cannot view user: user ID not available')
       return
     }
     
-    console.log('Viewing user:', email)
-    router.push(`/admin/users/${encodeURIComponent(email)}`)
+    console.log('Viewing user:', userId)
+    router.push(`/admin/users/${userId}`)
   }, [router])
 
   const handleLogout = useCallback(() => {

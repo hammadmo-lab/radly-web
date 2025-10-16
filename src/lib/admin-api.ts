@@ -68,8 +68,8 @@ export class AdminApiClient {
     return response.json()
   }
 
-  async getUserSubscription(email: string): Promise<UserSubscriptionResponse> {
-    const response = await fetch(`${this.baseUrl}/v1/admin/subscriptions/user/${encodeURIComponent(email)}`, {
+  async getUserSubscription(userId: string): Promise<UserSubscriptionResponse> {
+    const response = await fetch(`${this.baseUrl}/v1/admin/subscriptions/user-id/${userId}`, {
       method: 'GET',
       headers: this.getHeaders(),
       credentials: 'include',
