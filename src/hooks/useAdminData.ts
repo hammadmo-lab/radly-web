@@ -22,6 +22,15 @@ export function useSubscriptions(params: SubscriptionListParams) {
     },
     enabled: Boolean(adminKey && apiKey),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: (failureCount, error) => {
+      // Don't retry for 4xx errors (client errors)
+      if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
+        return false
+      }
+      // Retry up to 2 times for other errors
+      return failureCount < 2
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   })
 }
 
@@ -37,6 +46,15 @@ export function useUserSubscription(email: string) {
     },
     enabled: Boolean(adminKey && apiKey && email),
     staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: (failureCount, error) => {
+      // Don't retry for 4xx errors (client errors)
+      if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
+        return false
+      }
+      // Retry up to 2 times for other errors
+      return failureCount < 2
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   })
 }
 
@@ -56,8 +74,28 @@ export function useActivateSubscription() {
       toast.success(`Successfully upgraded ${variables.user_email}`)
     },
     onError: (error: Error) => {
-      toast.error(`Failed to upgrade subscription: ${error.message}`)
+      // Show user-friendly error messages based on error content
+      if (error.message.includes('401')) {
+        toast.error('Authentication failed. Please check your admin credentials.')
+      } else if (error.message.includes('403')) {
+        toast.error('Access forbidden. You do not have permission to perform this action.')
+      } else if (error.message.includes('404')) {
+        toast.error('User not found. Please check the email address.')
+      } else if (error.message.includes('503')) {
+        toast.error('Service temporarily unavailable. Please try again later.')
+      } else {
+        toast.error(`Failed to upgrade subscription: ${error.message}`)
+      }
     },
+    retry: (failureCount, error) => {
+      // Don't retry for 4xx errors (client errors)
+      if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
+        return false
+      }
+      // Retry up to 2 times for other errors
+      return failureCount < 2
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   })
 }
 
@@ -77,8 +115,28 @@ export function useCancelSubscription() {
       toast.success(`Successfully cancelled subscription for ${variables.user_email}`)
     },
     onError: (error: Error) => {
-      toast.error(`Failed to cancel subscription: ${error.message}`)
+      // Show user-friendly error messages based on error content
+      if (error.message.includes('401')) {
+        toast.error('Authentication failed. Please check your admin credentials.')
+      } else if (error.message.includes('403')) {
+        toast.error('Access forbidden. You do not have permission to perform this action.')
+      } else if (error.message.includes('404')) {
+        toast.error('User not found. Please check the email address.')
+      } else if (error.message.includes('503')) {
+        toast.error('Service temporarily unavailable. Please try again later.')
+      } else {
+        toast.error(`Failed to cancel subscription: ${error.message}`)
+      }
     },
+    retry: (failureCount, error) => {
+      // Don't retry for 4xx errors (client errors)
+      if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
+        return false
+      }
+      // Retry up to 2 times for other errors
+      return failureCount < 2
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   })
 }
 
@@ -94,6 +152,16 @@ export function useUsageAnalytics(days: number = 30) {
     },
     enabled: Boolean(adminKey && apiKey),
     staleTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false, // Don't refetch analytics on window focus
+    retry: (failureCount, error) => {
+      // Don't retry for 4xx errors (client errors)
+      if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
+        return false
+      }
+      // Retry up to 2 times for other errors
+      return failureCount < 2
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   })
 }
 
@@ -109,5 +177,15 @@ export function useRevenueAnalytics(days: number = 30) {
     },
     enabled: Boolean(adminKey && apiKey),
     staleTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false, // Don't refetch analytics on window focus
+    retry: (failureCount, error) => {
+      // Don't retry for 4xx errors (client errors)
+      if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
+        return false
+      }
+      // Retry up to 2 times for other errors
+      return failureCount < 2
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   })
 }

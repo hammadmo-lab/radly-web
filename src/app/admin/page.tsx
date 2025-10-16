@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
@@ -11,14 +11,7 @@ import {
   LogOut,
   Shield
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { AdminGuard } from '@/components/admin/AdminGuard'
-import { StatCard } from '@/components/admin/StatCard'
-import { SubscriptionTable } from '@/components/admin/SubscriptionTable'
-import { useAdminAuth } from '@/components/admin/AdminAuthProvider'
-import { useSubscriptions, useRevenueAnalytics } from '@/hooks/useAdminData'
-import { SubscriptionListParams } from '@/types/admin'
-import { toast } from 'sonner'
+import { ConnectionStatus } from '@/components/admin/ConnectionStatus'
 
 export default function AdminDashboard() {
   const router = useRouter()
@@ -30,8 +23,17 @@ export default function AdminDashboard() {
   })
   const [currentPage, setCurrentPage] = useState(1)
 
-  const { data: subscriptionsData, isLoading: subscriptionsLoading, refetch: refetchSubscriptions } = useSubscriptions(filters)
-  const { data: revenueAnalytics } = useRevenueAnalytics(30)
+  const { 
+    data: subscriptionsData, 
+    isLoading: subscriptionsLoading, 
+    error: subscriptionsError,
+    refetch: refetchSubscriptions 
+  } = useSubscriptions(filters)
+  const { 
+    data: revenueAnalytics, 
+    isLoading: revenueLoading,
+    error: revenueError 
+  } = useRevenueAnalytics(30)
 
   const handleSearch = useCallback((search: string) => {
     setFilters(prev => ({ ...prev, search, offset: 0 }))
@@ -73,36 +75,57 @@ export default function AdminDashboard() {
     toast.success('Logged out successfully')
   }, [logout, router])
 
+  // Handle errors with toast notifications
+  useEffect(() => {
+    if (subscriptionsError) {
+      toast.error(`Failed to load subscriptions: ${subscriptionsError.message}`)
+    }
+  }, [subscriptionsError])
+
+  useEffect(() => {
+    if (revenueError) {
+      toast.error(`Failed to load revenue analytics: ${revenueError.message}`)
+    }
+  }, [revenueError])
+
   const stats = [
     {
       title: 'Total Subscriptions',
-      value: subscriptionsData?.total || 0,
+      value: subscriptionsLoading ? '...' : subscriptionsData?.total || 0,
       icon: Users,
       description: 'All time subscriptions',
+      isLoading: subscriptionsLoading,
     },
     {
       title: 'Active Subscriptions',
-      value: subscriptionsData?.subscriptions?.filter(s => s.status === 'active').length || 0,
+      value: subscriptionsLoading ? '...' : subscriptionsData?.subscriptions?.filter(s => s.status === 'active').length || 0,
       icon: TrendingUp,
       description: 'Currently active',
+      isLoading: subscriptionsLoading,
     },
     {
       title: 'Monthly Revenue',
-      value: revenueAnalytics ? `$${revenueAnalytics.mrr.toLocaleString()}` : '$0',
+      value: revenueLoading ? '...' : revenueAnalytics ? `$${revenueAnalytics.mrr.toLocaleString()}` : '$0',
       icon: DollarSign,
       description: 'Monthly recurring revenue',
+      isLoading: revenueLoading,
     },
     {
       title: 'New Users (7 days)',
       value: '12', // TODO: Get from analytics
       icon: Calendar,
       description: 'New signups this week',
+      isLoading: false,
     },
   ]
 
   return (
     <AdminGuard>
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-violet-50">
+      <AdminErrorBoundary>
+        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-violet-50">
+        {/* Connection Status Banner */}
+        <ConnectionStatus />
+        
         {/* Header */}
         <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -171,7 +194,8 @@ export default function AdminDashboard() {
             />
           </motion.div>
         </main>
-      </div>
+        </div>
+      </AdminErrorBoundary>
     </AdminGuard>
   )
 }

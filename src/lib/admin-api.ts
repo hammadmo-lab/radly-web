@@ -21,8 +21,23 @@ export class AdminApiClient {
   private getHeaders() {
     return {
       'Content-Type': 'application/json',
-      'x-client-key': this.credentials.adminKey,
+      'x-admin-key': this.credentials.adminKey,
       'Authorization': `Bearer ${this.credentials.apiKey}`,
+    }
+  }
+
+  private getErrorMessage(status: number, errorText: string): string {
+    switch (status) {
+      case 401:
+        return 'Authentication failed. Please check your admin credentials.'
+      case 403:
+        return 'Access forbidden. You do not have permission to perform this action.'
+      case 404:
+        return 'Endpoint not found. The requested resource does not exist.'
+      case 503:
+        return 'Service temporarily unavailable. Please try again later.'
+      default:
+        return `Request failed with status ${status}: ${errorText}`
     }
   }
 
@@ -46,7 +61,8 @@ export class AdminApiClient {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'Unknown error')
-      throw new Error(`Failed to fetch subscriptions: ${response.status} ${errorText}`)
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
     }
 
     return response.json()
@@ -61,7 +77,8 @@ export class AdminApiClient {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'Unknown error')
-      throw new Error(`Failed to fetch user subscription: ${response.status} ${errorText}`)
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
     }
 
     return response.json()
@@ -77,7 +94,8 @@ export class AdminApiClient {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'Unknown error')
-      throw new Error(`Failed to activate subscription: ${response.status} ${errorText}`)
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
     }
 
     return response.json()
@@ -93,7 +111,8 @@ export class AdminApiClient {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'Unknown error')
-      throw new Error(`Failed to cancel subscription: ${response.status} ${errorText}`)
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
     }
 
     return response.json()
@@ -108,7 +127,8 @@ export class AdminApiClient {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'Unknown error')
-      throw new Error(`Failed to fetch usage analytics: ${response.status} ${errorText}`)
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
     }
 
     return response.json()
@@ -123,7 +143,8 @@ export class AdminApiClient {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'Unknown error')
-      throw new Error(`Failed to fetch revenue analytics: ${response.status} ${errorText}`)
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
     }
 
     return response.json()
