@@ -15,6 +15,8 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     const storedAdminKey = localStorage.getItem('admin_key')
     const storedApiKey = localStorage.getItem('api_key')
     
+    console.log('AdminAuthProvider: Loading from localStorage', { storedAdminKey: !!storedAdminKey, storedApiKey: !!storedApiKey })
+    
     if (storedAdminKey && storedApiKey) {
       setAdminKey(storedAdminKey)
       setApiKey(storedApiKey)
@@ -44,11 +46,15 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  const isAuthenticated = Boolean(adminKey && apiKey)
+  
+  console.log('AdminAuthProvider: Current state', { adminKey: !!adminKey, apiKey: !!apiKey, isAuthenticated })
+
   return (
     <AdminAuthContextInstance.Provider value={{
       adminKey,
       apiKey,
-      isAuthenticated: Boolean(adminKey && apiKey),
+      isAuthenticated,
       login,
       logout,
     }}>

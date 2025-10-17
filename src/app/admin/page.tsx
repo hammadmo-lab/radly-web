@@ -10,7 +10,8 @@ import {
   Calendar,
   LogOut,
   Shield,
-  AlertCircle
+  AlertCircle,
+  BarChart3
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AdminGuard } from '@/components/admin/AdminGuard'
@@ -171,14 +172,25 @@ export default function AdminDashboard() {
                 </div>
               </div>
               
-              <Button
-                variant="outline"
-                onClick={handleLogout}
-                className="flex items-center gap-2"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </Button>
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  onClick={() => router.push('/admin/metrics')}
+                  className="flex items-center gap-2"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  Metrics Dashboard
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={handleLogout}
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
+              </div>
             </div>
           </div>
         </header>

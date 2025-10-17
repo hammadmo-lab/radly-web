@@ -3,10 +3,11 @@
  * Main dashboard container component
  */
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Download, Clock } from 'lucide-react';
+import { RefreshCw, Download, Clock, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMetricsDashboard } from '@/hooks/useMetricsDashboard';
+import { useRouter } from 'next/navigation';
 import { OverviewCards } from './OverviewCards';
 import { JobStageChart } from './JobStageChart';
 import { LLMMetricsPanel } from './LLMMetricsPanel';
@@ -28,6 +29,7 @@ const TIME_RANGES = [
 export function MetricsDashboard() {
   const [timeRange, setTimeRange] = useState('5m');
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const router = useRouter();
 
   const { data, isLoading, error, refetch } = useMetricsDashboard(timeRange);
 
@@ -93,11 +95,21 @@ export function MetricsDashboard() {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Metrics Dashboard</h1>
-          <div className="flex items-center text-sm text-gray-600 mt-1">
-            <Clock className="h-4 w-4 mr-1" />
-            Last updated: {lastUpdated.toLocaleTimeString()}
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            onClick={() => router.push('/admin')}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Admin
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Metrics Dashboard</h1>
+            <div className="flex items-center text-sm text-gray-600 mt-1">
+              <Clock className="h-4 w-4 mr-1" />
+              Last updated: {lastUpdated.toLocaleTimeString()}
+            </div>
           </div>
         </div>
         
