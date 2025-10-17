@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { updateUserData } from '@/lib/user-data'
 import { getSupabaseClient } from '@/lib/supabase'
 import { toast } from 'sonner'
 import ReactMarkdown from 'react-markdown'
@@ -55,17 +56,9 @@ This is a placeholder. Please contact support if you need the complete terms.`)
         return
       }
 
-      const profileData = {
-        id: user.id,
+      await updateUserData(user.id, {
         accepted_terms_at: new Date().toISOString(),
-      };
-      const { error } = await supabase
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .from('profiles' as any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .upsert(profileData as any)
-
-      if (error) throw error
+      })
 
       toast.success('Terms accepted successfully!')
       router.push('/app/templates')
