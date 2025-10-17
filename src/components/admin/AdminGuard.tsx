@@ -13,10 +13,14 @@ export function AdminGuard({ children }: AdminGuardProps) {
   const router = useRouter()
 
   useEffect(() => {
+    console.log('AdminGuard: isAuthenticated =', isAuthenticated)
     if (!isAuthenticated) {
+      console.log('AdminGuard: Redirecting to /admin/login')
       router.push('/admin/login')
     }
   }, [isAuthenticated, router])
+
+  console.log('AdminGuard: Rendering, isAuthenticated =', isAuthenticated)
 
   if (!isAuthenticated) {
     return (
