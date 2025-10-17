@@ -32,48 +32,20 @@ export interface UserDataResponse {
 export async function fetchUserData(userId: string): Promise<UserProfile> {
   try {
     const supabase = getSupabaseClient()
-    const session = await supabase.auth.getSession()
-    const token = session.data.session?.access_token
-
-    if (!token) {
-      throw new Error('No authentication token available')
-    }
-
-    const apiKey = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY
-    if (!apiKey) {
-      throw new Error('Client key not configured')
-    }
-
-    const apiBase = process.env.NEXT_PUBLIC_API_BASE
-    if (!apiBase) {
-      throw new Error('API base URL not configured')
-    }
-
-    const response = await fetch(`${apiBase}/v1/admin/subscriptions/user-id/${userId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'x-client-key': apiKey,
-        'Content-Type': 'application/json'
-      }
-    })
+    const { data: { user }, error } = await supabase.auth.getUser()
     
-    if (!response.ok) {
-      if (response.status === 404) {
-        // User has no subscription - return default profile
-        return createDefaultProfile(userId)
-      }
-      throw new Error(`Failed to fetch user data: ${response.statusText}`)
+    if (error || !user) {
+      throw new Error('User not found')
     }
     
-    const userData: UserDataResponse = await response.json()
     return {
       id: userId,
-      email: '', // Will be filled by caller
-      default_signature_name: userData.subscription?.default_signature_name || '',
-      default_signature_date_format: userData.subscription?.default_signature_date_format || 'MM/DD/YYYY',
-      accepted_terms_at: userData.subscription?.accepted_terms_at,
-      subscription: userData.subscription,
-      updated_at: userData.subscription?.updated_at || new Date().toISOString()
+      email: user.email || '',
+      default_signature_name: user.user_metadata?.default_signature_name || '',
+      default_signature_date_format: user.user_metadata?.default_signature_date_format || 'MM/DD/YYYY',
+      accepted_terms_at: user.user_metadata?.accepted_terms_at,
+      subscription: null, // Not using subscription data for now
+      updated_at: user.updated_at || new Date().toISOString()
     }
   } catch (error) {
     console.error('Error fetching user data:', error)
@@ -89,90 +61,24 @@ export async function updateUserData(
   userId: string, 
   updates: Partial<Pick<UserProfile, 'default_signature_name' | 'default_signature_date_format' | 'accepted_terms_at'>>
 ): Promise<void> {
-  const supabase = getSupabaseClient()
-  const session = await supabase.auth.getSession()
-  const token = session.data.session?.access_token
-
-  if (!token) {
-    throw new Error('No authentication token available')
-  }
-
-  const apiKey = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY
-  if (!apiKey) {
-    throw new Error('Client key not configured')
-  }
-
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE
-  if (!apiBase) {
-    throw new Error('API base URL not configured')
-  }
-
-  const response = await fetch(`${apiBase}/v1/admin/subscriptions/user-id/${userId}`, {
-    method: 'PATCH',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'x-api-key': apiKey,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(updates)
-  })
-
-  if (!response.ok) {
-    if (response.status === 404) {
-      // User has no subscription - create one with updates
-      await createUserSubscription(userId, updates)
-    } else {
-      throw new Error(`Failed to update user data: ${response.statusText}`)
-    }
-  }
-}
-
-/**
- * Create a new user subscription with initial data
- */
-async function createUserSubscription(
-  userId: string, 
-  initialData: Partial<Pick<UserProfile, 'default_signature_name' | 'default_signature_date_format' | 'accepted_terms_at'>>
-): Promise<void> {
-  const supabase = getSupabaseClient()
-  const session = await supabase.auth.getSession()
-  const token = session.data.session?.access_token
-
-  if (!token) {
-    throw new Error('No authentication token available')
-  }
-
-  const user = session.data.session?.user
-  if (!user?.email) {
-    throw new Error('User email not available')
-  }
-
-  const apiKey = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY
-  if (!apiKey) {
-    throw new Error('Client key not configured')
-  }
-
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE
-  if (!apiBase) {
-    throw new Error('API base URL not configured')
-  }
-
-  const createResponse = await fetch(`${apiBase}/v1/admin/subscriptions/activate`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'x-api-key': apiKey,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      user_email: user.email,
-      tier: 'free',
-      ...initialData
+  try {
+    const supabase = getSupabaseClient()
+    
+    // Update user metadata in Supabase
+    const { error } = await supabase.auth.updateUser({
+      data: {
+        default_signature_name: updates.default_signature_name,
+        default_signature_date_format: updates.default_signature_date_format,
+        accepted_terms_at: updates.accepted_terms_at,
+      }
     })
-  })
-  
-  if (!createResponse.ok) {
-    throw new Error(`Failed to create subscription: ${createResponse.statusText}`)
+
+    if (error) {
+      throw new Error(`Failed to update user data: ${error.message}`)
+    }
+  } catch (error) {
+    console.error('Error updating user data:', error)
+    throw error
   }
 }
 

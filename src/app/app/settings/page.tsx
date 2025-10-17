@@ -126,7 +126,7 @@ export default function SettingsPage() {
           return
         }
         
-        const response = await fetch(`${apiBase}/v1/health`, {
+        const response = await fetch(`${apiBase}/health`, {
           headers: {
             'X-Request-Id': crypto.randomUUID(),
             'Content-Type': 'application/json',
