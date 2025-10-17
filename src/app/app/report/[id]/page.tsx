@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getJob, getQueueStats, JobStatusResponse } from "@/lib/jobs";
-import { JobResultSchema, StrictReport, Patient, Signature } from "@/types/report";
+import { JobResultSchema, StrictReport, Patient, Signature, JobResult } from "@/types/report";
 import ReportRenderer from "@/components/ReportRenderer";
 import { GenerateLoading } from "@/components/GenerateLoading";
 import { Button } from "@/components/ui/button";
@@ -155,10 +155,41 @@ export default function JobDetailPage() {
   }
 
   // Done → render the report
-  const result = jobStatus.result!;
+  const result = jobStatus.result;
   
-  // Parse & type the payload
-  const parsed = JobResultSchema.parse(result);
+  // Validate that we have a result
+  if (!result) {
+    return (
+      <div className="max-w-3xl mx-auto py-16 text-center space-y-4">
+        <p className="text-red-600 font-medium">Report generation failed.</p>
+        <p className="text-sm text-muted-foreground">No result data available</p>
+        <div className="flex gap-2 justify-center">
+          <Button onClick={() => router.push("/app/templates")}>Back to Templates</Button>
+          <Button variant="outline" onClick={() => router.refresh()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
+  
+  // Parse & type the payload with error handling
+  let parsed: JobResult;
+  try {
+    parsed = JobResultSchema.parse(result);
+  } catch (error) {
+    console.error('Failed to parse job result:', error);
+    console.error('Raw result data:', result);
+    return (
+      <div className="max-w-3xl mx-auto py-16 text-center space-y-4">
+        <p className="text-red-600 font-medium">Report generation failed.</p>
+        <p className="text-sm text-muted-foreground">Invalid report data format</p>
+        <div className="flex gap-2 justify-center">
+          <Button onClick={() => router.push("/app/templates")}>Back to Templates</Button>
+          <Button variant="outline" onClick={() => router.refresh()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
+  
   const resultReport: StrictReport = parsed.report;
   const resultPatient: Patient = parsed.patient ?? {};
   const resultSignature: Signature | undefined = parsed.signature;
