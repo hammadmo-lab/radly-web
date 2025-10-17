@@ -9,19 +9,21 @@ export interface UserProfile {
   default_signature_name?: string
   default_signature_date_format?: string
   accepted_terms_at?: string
-  subscription?: any
+  subscription?: UserSubscription | null
   updated_at?: string
+}
+
+export interface UserSubscription {
+  default_signature_name?: string
+  default_signature_date_format?: string
+  accepted_terms_at?: string
+  updated_at?: string
+  [key: string]: unknown
 }
 
 export interface UserDataResponse {
   user_id: string
-  subscription?: {
-    default_signature_name?: string
-    default_signature_date_format?: string
-    accepted_terms_at?: string
-    updated_at?: string
-    [key: string]: any
-  }
+  subscription?: UserSubscription
 }
 
 /**
@@ -37,10 +39,15 @@ export async function fetchUserData(userId: string): Promise<UserProfile> {
       throw new Error('No authentication token available')
     }
 
+    const apiKey = process.env.NEXT_PUBLIC_RADLY_API_KEY
+    if (!apiKey) {
+      throw new Error('API key not configured')
+    }
+
     const response = await fetch(`/v1/admin/subscriptions/user-id/${userId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
-        'x-api-key': process.env.NEXT_PUBLIC_RADLY_API_KEY,
+        'x-api-key': apiKey,
         'Content-Type': 'application/json'
       }
     })
@@ -85,11 +92,16 @@ export async function updateUserData(
     throw new Error('No authentication token available')
   }
 
+  const apiKey = process.env.NEXT_PUBLIC_RADLY_API_KEY
+  if (!apiKey) {
+    throw new Error('API key not configured')
+  }
+
   const response = await fetch(`/v1/admin/subscriptions/user-id/${userId}`, {
     method: 'PATCH',
     headers: {
       'Authorization': `Bearer ${token}`,
-      'x-api-key': process.env.NEXT_PUBLIC_RADLY_API_KEY,
+      'x-api-key': apiKey,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(updates)
@@ -125,11 +137,16 @@ async function createUserSubscription(
     throw new Error('User email not available')
   }
 
+  const apiKey = process.env.NEXT_PUBLIC_RADLY_API_KEY
+  if (!apiKey) {
+    throw new Error('API key not configured')
+  }
+
   const createResponse = await fetch('/v1/admin/subscriptions/activate', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
-      'x-api-key': process.env.NEXT_PUBLIC_RADLY_API_KEY,
+      'x-api-key': apiKey,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
