@@ -22,6 +22,7 @@ import { useAuthToken } from '@/hooks/useAuthToken';
 import { useAuth } from '@/components/auth-provider';
 import { getSupabaseClient } from '@/lib/supabase';
 import { UserProfile } from '@/types';
+import { fetchUserData, userDataQueryConfig } from '@/lib/user-data';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,17 +88,14 @@ export default function GeneratePage() {
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) return null
-      const supabase = getSupabaseClient()
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
-      if (error) throw error
-      return data as UserProfile
+      const userProfile = await fetchUserData(user.id)
+      return {
+        ...userProfile,
+        email: user.email || ''
+      }
     },
     enabled: !!user,
+    ...userDataQueryConfig
   })
 
   // Fetch usage data to check limits

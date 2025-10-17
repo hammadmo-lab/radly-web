@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress'
 import { useAuth } from '@/components/auth-provider'
 import { getSupabaseClient } from '@/lib/supabase'
 import { UserProfile } from '@/types'
+import { fetchUserData, updateUserData, userDataQueryConfig } from '@/lib/user-data'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
@@ -42,17 +43,14 @@ export default function SettingsPage() {
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) return null
-      const supabase = getSupabaseClient()
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
-      if (error) throw error
-      return data as UserProfile
+      const userProfile = await fetchUserData(user.id)
+      return {
+        ...userProfile,
+        email: user.email || ''
+      }
     },
     enabled: !!user,
+    ...userDataQueryConfig
   })
 
   useEffect(() => {
@@ -68,19 +66,10 @@ export default function SettingsPage() {
 
     setIsSaving(true)
     try {
-      const supabase = getSupabaseClient()
-      const profileData = {
-        id: user.id,
+      await updateUserData(user.id, {
         default_signature_name: defaultSignatureName,
         default_signature_date_format: defaultDateFormat,
-      };
-      const { error } = await supabase
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .from('profiles' as any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .upsert(profileData as any)
-
-      if (error) throw error
+      })
       
       // Invalidate and refetch profile data
       await queryClient.invalidateQueries({ queryKey: ['profile', user.id] })
@@ -91,7 +80,8 @@ export default function SettingsPage() {
       if (!silent) {
         toast.success('Settings saved successfully!')
       }
-    } catch {
+    } catch (error) {
+      console.error('Error saving settings:', error)
       if (!silent) {
         toast.error('Failed to save settings')
       }
