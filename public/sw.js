@@ -1,134 +1,93 @@
-const CACHE_VERSION = 'radly-v2'
+/*
+  public/sw.js — Service worker with safe handling for OAuth callback redirects
+  - Bypasses /auth/callback and URLs with ?code=
+  - Follows redirects for navigation fetches
+  - Only caches 200 HTML responses
+  - Emits simple console logs for debugging
+*/
 
-// Essential files only - will cache other resources on-demand
-const STATIC_CACHE = [
-  '/',
-  '/manifest.json',
-]
+const APP_HTML_CACHE = 'radly-html-v1';
+const OFFLINE_PAGE = '/offline.html';
 
-// Install event - cache only essential assets
-self.addEventListener('install', (event) => {
-  console.log('[SW] Installing version:', CACHE_VERSION)
-  event.waitUntil(
-    caches.open(CACHE_VERSION)
-      .then((cache) => {
-        // Cache files individually to prevent one failure from breaking everything
-        return Promise.allSettled(
-          STATIC_CACHE.map(url => 
-            cache.add(url).catch(err => {
-              console.warn('[SW] Failed to cache:', url, err)
-              return null
-            })
-          )
-        )
-      })
-      .then(() => {
-        console.log('[SW] Installation complete')
-      })
-      .catch(err => {
-        console.error('[SW] Installation failed:', err)
-      })
-  )
-  self.skipWaiting()
-})
-
-// Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating version:', CACHE_VERSION)
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_VERSION) {
-            console.log('[SW] Deleting old cache:', cacheName)
-            return caches.delete(cacheName)
-          }
-        })
-      )
-    })
-  )
-  self.clients.claim()
-})
-
-// Fetch event - serve from cache, fallback to network
-self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') return
-  
-  // Skip API requests (always fresh)
-  if (event.request.url.includes('/api/')) return
-  
-  // Skip Supabase requests (authentication)
-  if (event.request.url.includes('.supabase.co')) return
-  
-  // Skip external requests
-  if (!event.request.url.startsWith(self.location.origin)) return
-  
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        console.log('[SW] Serving from cache:', event.request.url)
-        return cachedResponse
-      }
-      
-      // CRITICAL FIX: Add redirect: 'follow' to handle redirects properly
-      return fetch(event.request, {
-        redirect: 'follow',
-        credentials: 'same-origin'
-      }).then((response) => {
-        // Don't cache non-successful responses
-        if (!response || response.status !== 200) {
-          console.log('[SW] Not caching non-200 response:', event.request.url, response?.status)
-          return response
-        }
-        
-        // Don't cache redirects
-        if (response.type === 'opaqueredirect') {
-          console.log('[SW] Not caching redirect:', event.request.url)
-          return response
-        }
-        
-        // Don't cache HTML pages (they should always be fresh)
-        const contentType = response.headers.get('content-type')
-        if (contentType && contentType.includes('text/html')) {
-          console.log('[SW] Not caching HTML:', event.request.url)
-          return response
-        }
-        
-        // Only cache same-origin responses
-        if (response.type !== 'basic' && response.type !== 'cors') {
-          return response
-        }
-        
-        // Clone response for caching
-        const responseToCache = response.clone()
-        
-        caches.open(CACHE_VERSION).then((cache) => {
-          console.log('[SW] Caching new resource:', event.request.url)
-          cache.put(event.request, responseToCache).catch(err => {
-            console.warn('[SW] Failed to cache resource:', event.request.url, err)
-          })
-        })
-        
-        return response
-      }).catch((error) => {
-        console.error('[SW] Fetch failed:', event.request.url, error)
-        // Try to return cached response if network fails
-        return caches.match(event.request).then(cachedResponse => {
-          if (cachedResponse) {
-            console.log('[SW] Serving stale cache due to network error:', event.request.url)
-            return cachedResponse
-          }
-          throw error
-        })
-      })
-    })
-  )
-})
-
-// Listen for messages from clients
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting()
+// Utility to check if URL looks like OAuth callback
+function isAuthCallbackUrl(url) {
+  try {
+    const u = new URL(url);
+    // match path like /auth/callback and any query containing code=
+    if (u.pathname.startsWith('/auth/callback')) return true;
+    if (u.search && u.search.includes('code=')) return true;
+    return false;
+  } catch (e) {
+    return false;
   }
-})
+}
+
+self.addEventListener('install', (event) => {
+  // Skip waiting for faster deploys if desired (optional)
+  self.skipWaiting();
+  console.info('[SW] installed');
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(clients.claim());
+  console.info('[SW] activated');
+});
+
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  const url = req.url;
+
+  // Quick bypass: don't intercept OAuth callback navigation/fetches
+  if (isAuthCallbackUrl(url)) {
+    // Let the browser handle redirects for auth callback
+    // Do not call event.respondWith() so the request is handled normally.
+    console.debug('[SW] bypassing auth callback URL:', url);
+    return;
+  }
+
+  // Only special-case navigation requests (page loads)
+  if (req.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        // Explicitly follow redirects so we receive final navigated response (browser will also follow)
+        const resp = await fetch(req, { redirect: 'follow' });
+
+        // If the response is a redirect-like opaque redirect, return it - do not cache it
+        // (Some browsers return response.type === 'opaqueredirect' for cross-origin redirects)
+        if (resp.type === 'opaqueredirect' || (resp.status >= 300 && resp.status < 400)) {
+          console.debug('[SW] navigation response is a redirect (returning without caching)', resp.status, url);
+          return resp;
+        }
+
+        // Only cache successful HTML responses (200 + content-type text/html)
+        const contentType = resp.headers.get('content-type') || '';
+        if (resp.ok && contentType.includes('text/html')) {
+          try {
+            const cache = await caches.open(APP_HTML_CACHE);
+            // Put a cloned copy into cache
+            cache.put(req, resp.clone()).catch(err => {
+              console.warn('[SW] cache.put failed (non-fatal):', err);
+            });
+          } catch (cacheErr) {
+            console.warn('[SW] caching HTML failed:', cacheErr);
+          }
+        }
+
+        return resp;
+      } catch (err) {
+        console.warn('[SW] fetch for navigation failed, attempting offline fallback:', err);
+        // Fallback to cached index or offline page
+        const cache = await caches.open(APP_HTML_CACHE);
+        const cachedIndex = await cache.match('/');
+        if (cachedIndex) return cachedIndex;
+        const offline = await cache.match(OFFLINE_PAGE);
+        if (offline) return offline;
+        return new Response('Offline', { status: 503, statusText: 'Offline' });
+      }
+    })());
+    return;
+  }
+
+  // For non-navigation requests, keep default behavior (do not interfere)
+  // Optionally, you can implement runtime caching for assets here.
+});
