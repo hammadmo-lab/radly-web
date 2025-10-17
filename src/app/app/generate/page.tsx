@@ -20,8 +20,6 @@ import { toast } from 'sonner'
 import { ArrowLeft, User, AlertCircle, FileText, Stethoscope, CheckCircle, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
 import { useAuthToken } from '@/hooks/useAuthToken';
 import { useAuth } from '@/components/auth-provider';
-import { getSupabaseClient } from '@/lib/supabase';
-import { UserProfile } from '@/types';
 import { fetchUserData, userDataQueryConfig } from '@/lib/user-data';
 
 export const dynamic = 'force-dynamic';

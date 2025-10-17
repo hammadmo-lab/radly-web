@@ -11,8 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { useAuth } from '@/components/auth-provider'
-import { getSupabaseClient } from '@/lib/supabase'
-import { UserProfile } from '@/types'
 import { fetchUserData, updateUserData, userDataQueryConfig } from '@/lib/user-data'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
