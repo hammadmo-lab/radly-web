@@ -4,7 +4,7 @@ export const patientSchema = z.object({
   name: z.string().trim().optional(),
   mrn: z.string().trim().optional(),
   age: z.preprocess((v) => (v === '' || v === undefined ? undefined : Number(v)), z.number().int().positive().max(130)),
-  sex: z.boolean(),
+  sex: z.enum(['M', 'F', 'O']).optional(), // M = Male, F = Female, O = Other
 })
 
 export const signatureSchema = z.object({
@@ -19,7 +19,7 @@ export const generateFormSchema = z.object({
   indication: z.string().trim().min(1, 'Indication/history is required'),
   findings: z.string().trim().min(1, 'Findings are required'),
   technique: z.string().trim().optional(),
-  signature: signatureSchema.optional(),
+  signature: signatureSchema.default({ name: '', date: '' }),
 })
 
 export type GenerateFormValues = z.infer<typeof generateFormSchema>

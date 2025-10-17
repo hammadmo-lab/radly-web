@@ -112,7 +112,11 @@ test.describe('Report Generation Flow', () => {
       await page.getByLabel('Medical Record Number').fill(patient.mrn);
       await page.getByLabel('Age').fill(patient.age.toString());
       await page.getByLabel('Date of Birth').fill(patient.dob);
-      await page.getByLabel('Sex').fill(patient.sex);
+      
+      // Select sex from dropdown
+      await page.getByLabel('Sex').click();
+      await page.getByRole('option', { name: patient.sex === 'M' ? 'Male' : patient.sex === 'F' ? 'Female' : 'Other' }).click();
+      
       await page.getByLabel('Patient History (optional)').fill(patient.history);
       
       // Verify values are set
@@ -120,7 +124,7 @@ test.describe('Report Generation Flow', () => {
       await expect(page.getByLabel('Medical Record Number')).toHaveValue(patient.mrn);
       await expect(page.getByLabel('Age')).toHaveValue(patient.age.toString());
       await expect(page.getByLabel('Date of Birth')).toHaveValue(patient.dob);
-      await expect(page.getByLabel('Sex')).toHaveValue(patient.sex);
+      await expect(page.getByLabel('Sex')).toHaveText(patient.sex === 'M' ? 'Male' : patient.sex === 'F' ? 'Female' : 'Other');
       await expect(page.getByLabel('Patient History (optional)')).toHaveValue(patient.history);
     });
 
@@ -275,7 +279,10 @@ test.describe('Report Generation Flow', () => {
       await page.getByLabel('Patient Name').fill(patient.name);
       await page.getByLabel('Medical Record Number').fill(patient.mrn);
       await page.getByLabel('Age').fill(patient.age.toString());
-      await page.getByLabel('Sex').fill(patient.sex);
+      
+      // Select sex from dropdown
+      await page.getByLabel('Sex').click();
+      await page.getByRole('option', { name: patient.sex === 'M' ? 'Male' : patient.sex === 'F' ? 'Female' : 'Other' }).click();
       
       // Fill clinical information
       await page.getByLabel('Indication / Clinical history (required)').fill(clinical.indication);

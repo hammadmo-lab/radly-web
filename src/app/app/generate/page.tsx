@@ -11,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
 import { httpGet } from '@/lib/http'
 import { enqueueJob } from '@/lib/jobs'
@@ -117,7 +117,7 @@ export default function GeneratePage() {
     defaultValues: {
       templateId: templateId || '',
       includePatient: true,
-      patient: { name: '', mrn: '', age: undefined, sex: false },
+      patient: { name: '', mrn: '', age: undefined, sex: undefined },
       indication: '',
       findings: '',
       technique: '',
@@ -139,10 +139,16 @@ export default function GeneratePage() {
           }).replace(/\//g, profile.default_signature_date_format.includes('/') ? '/' : '-')
         : new Date().toLocaleDateString();
 
+      console.log('Setting form defaults from profile:', {
+        default_signature_name: profile.default_signature_name,
+        default_signature_date_format: profile.default_signature_date_format,
+        formattedDate
+      });
+
       reset({
         templateId: templateId || '',
         includePatient: true,
-        patient: { name: '', mrn: '', age: undefined, sex: false },
+        patient: { name: '', mrn: '', age: undefined, sex: undefined },
         indication: '',
         findings: '',
         technique: '',
@@ -229,7 +235,7 @@ export default function GeneratePage() {
         name: data.patient.name || undefined,
         mrn: data.patient.mrn || undefined,
         age: data.patient.age ?? undefined,
-        sex: data.patient.sex ? 'M' : 'F', // Convert boolean to string: true = Male, false = Female
+        sex: data.patient.sex || undefined, // Now using string directly
       }
 
       // Build payload for enqueueJob - flattened structure
@@ -513,15 +519,20 @@ export default function GeneratePage() {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="patient.sex" className="text-gray-900 font-medium">Sex (required)</Label>
-                      <div className="flex items-center justify-between p-3 border-2 border-gray-200 rounded-md bg-white">
-                        <span className="text-sm text-gray-700">Female</span>
-                        <Switch 
-                          checked={watch('patient.sex')} 
-                          onCheckedChange={(v) => setValue('patient.sex', v)} 
-                        />
-                        <span className="text-sm text-gray-700">Male</span>
-                      </div>
+                      <Label htmlFor="patient.sex" className="text-gray-900 font-medium">Sex</Label>
+                      <Select 
+                        value={watch('patient.sex') || ''} 
+                        onValueChange={(value) => setValue('patient.sex', value as 'M' | 'F' | 'O')}
+                      >
+                        <SelectTrigger className="border-2 border-gray-200 focus:border-emerald-500">
+                          <SelectValue placeholder="Select sex" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="M">Male</SelectItem>
+                          <SelectItem value="F">Female</SelectItem>
+                          <SelectItem value="O">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
                       {errors.patient?.sex && (
                         <p className="text-sm text-red-600">{errors.patient.sex.message}</p>
                       )}
@@ -622,6 +633,9 @@ export default function GeneratePage() {
                             }
                           }}
                         />
+                        {errors.signature?.name && (
+                          <p className="text-red-500 text-sm">{errors.signature.name.message}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="signature.date" className="text-gray-900 font-medium">Date</Label>
@@ -637,6 +651,9 @@ export default function GeneratePage() {
                             }
                           }}
                         />
+                        {errors.signature?.date && (
+                          <p className="text-red-500 text-sm">{errors.signature.date.message}</p>
+                        )}
                       </div>
                     </div>
                     

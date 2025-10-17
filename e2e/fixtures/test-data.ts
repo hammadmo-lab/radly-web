@@ -35,7 +35,7 @@ export const TEST_PATIENTS = [
     mrn: 'MRN123456',
     age: 45,
     dob: '01/01/1980',
-    sex: 'Male',
+    sex: 'M',
     history: 'Patient presents with chest pain and shortness of breath.',
   },
   {
@@ -43,7 +43,7 @@ export const TEST_PATIENTS = [
     mrn: 'MRN789012',
     age: 32,
     dob: '05/15/1992',
-    sex: 'Female',
+    sex: 'F',
     history: 'Follow-up for previous imaging findings.',
   },
   {
@@ -51,7 +51,7 @@ export const TEST_PATIENTS = [
     mrn: 'MRN345678',
     age: 67,
     dob: '12/03/1957',
-    sex: 'Male',
+    sex: 'M',
     history: 'Screening mammography.',
   },
 ] as const;

@@ -62,6 +62,12 @@ export default function SettingsPage() {
   const handleSaveSettings = useCallback(async (silent = false) => {
     if (!user) return
 
+    console.log('Saving settings:', {
+      userId: user.id,
+      defaultSignatureName,
+      defaultDateFormat
+    });
+
     setIsSaving(true)
     try {
       await updateUserData(user.id, {
@@ -75,13 +81,15 @@ export default function SettingsPage() {
       setLastSaved(new Date())
       setHasUnsavedChanges(false)
       
+      console.log('Settings saved successfully');
+      
       if (!silent) {
         toast.success('Settings saved successfully!')
       }
     } catch (error) {
       console.error('Error saving settings:', error)
       if (!silent) {
-        toast.error('Failed to save settings')
+        toast.error(`Failed to save settings: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     } finally {
       setIsSaving(false)
@@ -112,9 +120,16 @@ export default function SettingsPage() {
   useEffect(() => {
     const testConnectivity = async () => {
       try {
-        const response = await fetch('/health', {
+        const apiBase = process.env.NEXT_PUBLIC_API_BASE
+        if (!apiBase) {
+          setConnectivityStatus('error')
+          return
+        }
+        
+        const response = await fetch(`${apiBase}/v1/health`, {
           headers: {
             'X-Request-Id': crypto.randomUUID(),
+            'Content-Type': 'application/json',
           },
         })
         if (response.ok) {
