@@ -1,7 +1,25 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { fetchLLMMetrics } from '@/lib/admin-metrics';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 interface MetricData {
   provider: string;
@@ -36,46 +54,55 @@ export default function Page() {
 
   const label = (d: MetricData) => `${d.provider || 'unknown'}:${d.model || 'unknown'}`;
 
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          maxRotation: 45,
+          minRotation: 0,
+        },
+      },
+    },
+  };
+
+  const createChartData = (data: MetricData[], color: string) => ({
+    labels: data.map(label),
+    datasets: [
+      {
+        data: data.map(d => d.value),
+        backgroundColor: color,
+        borderColor: color,
+        borderWidth: 1,
+      },
+    ],
+  });
+
   return (
     <div style={{ padding: 20 }}>
       <h1>Admin — LLM Metrics</h1>
       {err && <div style={{ color: 'crimson' }}>{err}</div>}
       {loading && <div>Loading...</div>}
 
-      <section style={{ height: 300 }}>
+      <section style={{ height: 300, marginBottom: 20 }}>
         <h3>Requests per 5m</h3>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={rate}>
-            <XAxis dataKey={(d: MetricData) => label(d)} />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#4f46e5" />
-          </BarChart>
-        </ResponsiveContainer>
+        <Bar data={createChartData(rate, '#4f46e5')} options={chartOptions} />
       </section>
 
-      <section style={{ height: 220 }}>
+      <section style={{ height: 220, marginBottom: 20 }}>
         <h3>Tokens (last 1h)</h3>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={tokens}>
-            <XAxis dataKey={(d: MetricData) => label(d)} />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#059669" />
-          </BarChart>
-        </ResponsiveContainer>
+        <Bar data={createChartData(tokens, '#059669')} options={chartOptions} />
       </section>
 
       <section style={{ height: 180 }}>
         <h3>Errors (last 1h)</h3>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={errors}>
-            <XAxis dataKey={(d: MetricData) => label(d)} />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#ef4444" />
-          </BarChart>
-        </ResponsiveContainer>
+        <Bar data={createChartData(errors, '#ef4444')} options={chartOptions} />
       </section>
     </div>
   );
