@@ -28,9 +28,9 @@ interface MetricData {
 }
 
 export default function Page() {
-  const [rate, setRate] = useState<MetricData[]>([]);
-  const [tokens, setTokens] = useState<MetricData[]>([]);
-  const [errors, setErrors] = useState<MetricData[]>([]);
+  const [requestsData, setRequestsData] = useState<MetricData[]>([]);
+  const [tokensData, setTokensData] = useState<MetricData[]>([]);
+  const [errorsData, setErrorsData] = useState<MetricData[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -38,9 +38,23 @@ export default function Page() {
     setLoading(true); setErr(null);
     try {
       const data = await fetchLLMMetrics();
-      setRate(data.by_rate || []);
-      setTokens(data.by_tokens || []);
-      setErrors(data.by_errors || []);
+      
+      // Use absolute counts by default, fallback to rates when they have meaningful values
+      const displayRequests = data.by_rate?.some((r: MetricData) => r.value > 0) 
+        ? data.by_rate 
+        : data.by_absolute?.requests || [];
+      
+      const displayTokens = data.by_tokens?.some((t: MetricData) => t.value > 0) 
+        ? data.by_tokens 
+        : data.by_absolute?.tokens || [];
+      
+      const displayErrors = data.by_errors?.some((e: MetricData) => e.value > 0) 
+        ? data.by_errors 
+        : data.by_absolute?.errors || [];
+      
+      setRequestsData(displayRequests);
+      setTokensData(displayTokens);
+      setErrorsData(displayErrors);
     } catch (e: unknown) {
       setErr(String((e as Error)?.message || e));
     } finally { setLoading(false); }
@@ -91,18 +105,18 @@ export default function Page() {
       {loading && <div>Loading...</div>}
 
       <section style={{ height: 300, marginBottom: 20 }}>
-        <h3>Requests per 5m</h3>
-        <Bar data={createChartData(rate, '#4f46e5')} options={chartOptions} />
+        <h3>Total Requests</h3>
+        <Bar data={createChartData(requestsData, '#4f46e5')} options={chartOptions} />
       </section>
 
       <section style={{ height: 220, marginBottom: 20 }}>
-        <h3>Tokens (last 1h)</h3>
-        <Bar data={createChartData(tokens, '#059669')} options={chartOptions} />
+        <h3>Total Tokens Used</h3>
+        <Bar data={createChartData(tokensData, '#059669')} options={chartOptions} />
       </section>
 
       <section style={{ height: 180 }}>
-        <h3>Errors (last 1h)</h3>
-        <Bar data={createChartData(errors, '#ef4444')} options={chartOptions} />
+        <h3>Total Errors</h3>
+        <Bar data={createChartData(errorsData, '#ef4444')} options={chartOptions} />
       </section>
     </div>
   );
