@@ -39,15 +39,20 @@ export async function fetchUserData(userId: string): Promise<UserProfile> {
       throw new Error('No authentication token available')
     }
 
-    const apiKey = process.env.NEXT_PUBLIC_RADLY_API_KEY
+    const apiKey = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY
     if (!apiKey) {
-      throw new Error('API key not configured')
+      throw new Error('Client key not configured')
     }
 
-    const response = await fetch(`/v1/admin/subscriptions/user-id/${userId}`, {
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE
+    if (!apiBase) {
+      throw new Error('API base URL not configured')
+    }
+
+    const response = await fetch(`${apiBase}/v1/admin/subscriptions/user-id/${userId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
-        'x-api-key': apiKey,
+        'x-client-key': apiKey,
         'Content-Type': 'application/json'
       }
     })
@@ -92,12 +97,17 @@ export async function updateUserData(
     throw new Error('No authentication token available')
   }
 
-  const apiKey = process.env.NEXT_PUBLIC_RADLY_API_KEY
+  const apiKey = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY
   if (!apiKey) {
-    throw new Error('API key not configured')
+    throw new Error('Client key not configured')
   }
 
-  const response = await fetch(`/v1/admin/subscriptions/user-id/${userId}`, {
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE
+  if (!apiBase) {
+    throw new Error('API base URL not configured')
+  }
+
+  const response = await fetch(`${apiBase}/v1/admin/subscriptions/user-id/${userId}`, {
     method: 'PATCH',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -137,12 +147,17 @@ async function createUserSubscription(
     throw new Error('User email not available')
   }
 
-  const apiKey = process.env.NEXT_PUBLIC_RADLY_API_KEY
+  const apiKey = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY
   if (!apiKey) {
-    throw new Error('API key not configured')
+    throw new Error('Client key not configured')
   }
 
-  const createResponse = await fetch('/v1/admin/subscriptions/activate', {
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE
+  if (!apiBase) {
+    throw new Error('API base URL not configured')
+  }
+
+  const createResponse = await fetch(`${apiBase}/v1/admin/subscriptions/activate`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,

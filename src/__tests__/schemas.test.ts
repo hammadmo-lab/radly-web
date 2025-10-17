@@ -37,13 +37,24 @@ describe('Zod Schemas', () => {
       expect(result.success).toBe(false)
     })
 
-    it('should accept any sex value as string', () => {
-      const patientWithSex = {
-        sex: 'Invalid'
-      }
+    it('should accept valid sex values', () => {
+      const validSexValues = ['M', 'F', 'O']
+      
+      validSexValues.forEach(sex => {
+        const patientWithSex = { sex }
+        const result = patientSchema.safeParse(patientWithSex)
+        expect(result.success).toBe(true)
+      })
+    })
 
-      const result = patientSchema.safeParse(patientWithSex)
-      expect(result.success).toBe(true)
+    it('should reject invalid sex values', () => {
+      const invalidSexValues = ['Invalid', 'X', 'Male', 'Female']
+      
+      invalidSexValues.forEach(sex => {
+        const patientWithSex = { sex }
+        const result = patientSchema.safeParse(patientWithSex)
+        expect(result.success).toBe(false)
+      })
     })
   })
 

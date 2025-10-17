@@ -9,7 +9,7 @@ export const TEST_DATA = {
     mrn: 'MRN123456',
     age: 45,
     dob: '01/01/1980',
-    sex: 'Male',
+    sex: 'M',
     history: 'Patient presents with chest pain and shortness of breath.',
   },
   clinical: {
