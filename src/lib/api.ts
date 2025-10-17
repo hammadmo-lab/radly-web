@@ -7,6 +7,7 @@ import { Signature } from "@/types/report";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 const CLIENT_KEY = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY!;
+const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY!;
 
 export async function apiFetch(path: string, init: RequestInit = {}) {
   const supabase = createSupabaseBrowser();
@@ -17,6 +18,12 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   if (!headers.has("content-type")) headers.set("content-type", "application/json");
   headers.set("x-client-key", CLIENT_KEY);
   headers.set("X-Request-Id", crypto.randomUUID());
+  
+  // Add admin key for admin endpoints
+  if (path.startsWith('/admin/')) {
+    headers.set("x-admin-key", ADMIN_KEY);
+  }
+  
   if (token) headers.set("authorization", `Bearer ${token}`);
 
   const res = await fetch(`${API_BASE}/v1${path}`, {
