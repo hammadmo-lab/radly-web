@@ -16,6 +16,7 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   const headers = new Headers(init.headers || {});
   if (!headers.has("content-type")) headers.set("content-type", "application/json");
   headers.set("x-client-key", CLIENT_KEY);
+  headers.set("X-Request-Id", crypto.randomUUID());
   if (token) headers.set("authorization", `Bearer ${token}`);
 
   const res = await fetch(`${API_BASE}/v1${path}`, {

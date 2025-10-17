@@ -48,6 +48,7 @@ export default function AdminLoginPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Request-Id': crypto.randomUUID(),
         },
         body: JSON.stringify({
           username,

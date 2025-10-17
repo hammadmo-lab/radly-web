@@ -37,6 +37,7 @@ export async function edgeFetch<T = unknown>(
     headers: {
       'Content-Type': 'application/json',
       'x-client-key': CLIENT_KEY,
+      'X-Request-Id': crypto.randomUUID(),
       ...authHeader,
       ...(init.headers as Record<string, string>),
     },
