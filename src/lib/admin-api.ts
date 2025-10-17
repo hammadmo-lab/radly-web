@@ -23,6 +23,7 @@ export class AdminApiClient {
       'Content-Type': 'application/json',
       'x-admin-key': this.credentials.adminKey,
       'Authorization': `Bearer ${this.credentials.apiKey}`,
+      'X-Request-Id': crypto.randomUUID(),
     }
   }
 

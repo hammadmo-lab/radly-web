@@ -20,7 +20,11 @@ export default function TermsPage() {
 
   useEffect(() => {
     // Fetch terms content
-    fetch('/content/terms.md')
+    fetch('/content/terms.md', {
+      headers: {
+        'X-Request-Id': crypto.randomUUID(),
+      },
+    })
       .then(response => {
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`)

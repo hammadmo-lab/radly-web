@@ -124,7 +124,11 @@ export default function SettingsPage() {
   useEffect(() => {
     const testConnectivity = async () => {
       try {
-        const response = await fetch('/health')
+        const response = await fetch('/health', {
+          headers: {
+            'X-Request-Id': crypto.randomUUID(),
+          },
+        })
         if (response.ok) {
           setConnectivityStatus('connected')
         } else {

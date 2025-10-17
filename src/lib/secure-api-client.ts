@@ -38,6 +38,7 @@ export class SecureApiClient {
     // Build headers
     let requestHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
+      'X-Request-Id': crypto.randomUUID(),
       ...headers,
     }
 

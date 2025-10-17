@@ -47,6 +47,7 @@ export function ConnectionStatus({
         signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
+          'X-Request-Id': crypto.randomUUID(),
         },
       })
 
@@ -297,7 +298,11 @@ export function useConnectionStatus(baseUrl?: string) {
     const checkHealth = async () => {
       try {
         setIsChecking(true)
-        const response = await fetch(`${baseUrl || process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'}/health`)
+        const response = await fetch(`${baseUrl || process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'}/health`, {
+          headers: {
+            'X-Request-Id': crypto.randomUUID(),
+          },
+        })
         setIsConnected(response.ok)
       } catch {
         setIsConnected(false)

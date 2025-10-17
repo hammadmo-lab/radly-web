@@ -40,6 +40,7 @@ export async function httpGet<T = unknown>(path: string): Promise<T> {
   
   const headers: Record<string, string> = {
     'x-client-key': CLIENT_KEY,
+    'X-Request-Id': crypto.randomUUID(),
   };
   
   if (token) {
@@ -64,6 +65,7 @@ export async function httpPost<TBody, TResp = unknown>(path: string, body: TBody
   const headers: Record<string, string> = {
     'content-type': 'application/json',
     'x-client-key': CLIENT_KEY,
+    'X-Request-Id': crypto.randomUUID(),
   };
   
   if (token) {
@@ -85,6 +87,7 @@ export async function httpPut<TBody, TResp = unknown>(path: string, body: TBody)
   const headers: Record<string, string> = {
     'content-type': 'application/json',
     'x-client-key': CLIENT_KEY,
+    'X-Request-Id': crypto.randomUUID(),
   };
   
   if (token) {
