@@ -1,7 +1,8 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { AdminAuthContext } from '@/types/admin'
+import { toast } from 'sonner'
 
 const AdminAuthContextInstance = createContext<AdminAuthContext | undefined>(undefined)
 
@@ -27,12 +28,21 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('api_key', newApiKey)
   }
 
-  const logout = () => {
-    setAdminKey(null)
-    setApiKey(null)
-    localStorage.removeItem('admin_key')
-    localStorage.removeItem('api_key')
-  }
+  const logout = useCallback(() => {
+    console.log('Admin logout called')
+    
+    try {
+      setAdminKey(null)
+      setApiKey(null)
+      localStorage.removeItem('admin_key')
+      localStorage.removeItem('api_key')
+      // Don't remove username if "remember me" was checked
+      
+      toast.success('Logged out successfully')
+    } catch (error) {
+      console.error('Error during logout:', error)
+    }
+  }, [])
 
   return (
     <AdminAuthContextInstance.Provider value={{

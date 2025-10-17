@@ -1,180 +1,177 @@
-"use client"
+'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { motion } from 'framer-motion'
-import { Eye, EyeOff, Shield, Lock } from 'lucide-react'
+import { useAdminAuth } from '@/components/admin/AdminAuthProvider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAdminAuth } from '@/components/admin/AdminAuthProvider'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Shield, Loader2, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
-const loginSchema = z.object({
-  adminKey: z.string().min(1, 'Admin key is required'),
-  apiKey: z.string().min(1, 'API key is required'),
-})
-
-type LoginFormData = z.infer<typeof loginSchema>
-
 export default function AdminLoginPage() {
-  const [showAdminKey, setShowAdminKey] = useState(false)
-  const [showApiKey, setShowApiKey] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const { login } = useAdminAuth()
   const router = useRouter()
+  const { login } = useAdminAuth()
+  
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-  })
+  // Load saved username on component mount
+  useEffect(() => {
+    const savedUsername = localStorage.getItem('admin_username')
+    if (savedUsername) {
+      setUsername(savedUsername)
+      setRememberMe(true)
+    }
+  }, [])
 
-  const onSubmit = async (data: LoginFormData) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    
+    if (!username || !password) {
+      setError('Please enter both username and password')
+      return
+    }
+
     setIsLoading(true)
+
     try {
-      // In a real implementation, you would validate credentials with the server
-      // For now, we'll just store them and redirect
-      login(data.adminKey, data.apiKey)
-      toast.success('Successfully logged in')
+      // Call the backend login endpoint
+      const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'https://edge.radly.app'
+      const response = await fetch(`${apiBase}/v1/admin/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: 'Login failed' }))
+        throw new Error(errorData.detail || 'Invalid credentials')
+      }
+
+      const data = await response.json()
+      
+      // Store the returned keys
+      login(data.admin_key, data.api_key)
+      
+      // Handle remember me functionality
+      if (rememberMe) {
+        localStorage.setItem('admin_username', username)
+      } else {
+        localStorage.removeItem('admin_username')
+      }
+      
+      toast.success('Login successful!')
       router.push('/admin')
-    } catch {
-      toast.error('Invalid credentials. Please try again.')
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Login failed'
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-violet-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
-        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-          <CardHeader className="text-center space-y-4">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-2xl flex items-center justify-center"
+    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <div className="flex items-center justify-center mb-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10">
+              <Shield className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold text-center">
+            Admin Login
+          </CardTitle>
+          <CardDescription className="text-center">
+            Enter your credentials to access the admin dashboard
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                disabled={isLoading}
+                autoComplete="username"
+                autoFocus
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+                autoComplete="current-password"
+              />
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="remember"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="rounded"
+                aria-label="Remember username"
+              />
+              <Label htmlFor="remember" className="text-sm font-normal">
+                Remember username
+              </Label>
+            </div>
+            
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading}
             >
-              <Shield className="w-8 h-8 text-white" />
-            </motion.div>
-            <div>
-              <CardTitle className="text-2xl font-bold text-gray-900">
-                Admin Access
-              </CardTitle>
-              <CardDescription className="text-gray-600 mt-2">
-                Enter your admin credentials to access the dashboard
-              </CardDescription>
-            </div>
-          </CardHeader>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Logging in...
+                </>
+              ) : (
+                'Login'
+              )}
+            </Button>
+          </form>
           
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="adminKey" className="text-sm font-medium text-gray-700">
-                  Admin API Key
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="adminKey"
-                    type={showAdminKey ? 'text' : 'password'}
-                    placeholder="Enter admin API key"
-                    className="pr-10"
-                    {...register('adminKey')}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowAdminKey(!showAdminKey)}
-                  >
-                    {showAdminKey ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
-                    )}
-                  </Button>
-                </div>
-                {errors.adminKey && (
-                  <p className="text-sm text-red-600">{errors.adminKey.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="apiKey" className="text-sm font-medium text-gray-700">
-                  API Key
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="apiKey"
-                    type={showApiKey ? 'text' : 'password'}
-                    placeholder="Enter API key"
-                    className="pr-10"
-                    {...register('apiKey')}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowApiKey(!showApiKey)}
-                  >
-                    {showApiKey ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
-                    )}
-                  </Button>
-                </div>
-                {errors.apiKey && (
-                  <p className="text-sm text-red-600">{errors.apiKey.message}</p>
-                )}
-              </div>
-
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-emerald-500 to-violet-500 hover:from-emerald-600 hover:to-violet-600 text-white font-medium py-2.5"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Signing In...
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Lock className="w-4 h-4" />
-                      Sign In
-                    </div>
-                  )}
-                </Button>
-              </motion.div>
-            </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-xs text-gray-500">
-                Secure admin access for Radly platform management
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+          <div className="mt-4 text-center text-sm text-muted-foreground">
+            <p>Authorized personnel only</p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
