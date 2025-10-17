@@ -22,7 +22,6 @@ export default function JobDetailPage() {
   const [err, setErr] = useState<string | null>(null);
   const [queueDepth, setQueueDepth] = useState<number | null>(null);
   const [running, setRunning] = useState<number | null>(null);
-  const [showCompletion, setShowCompletion] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
   const startedAtMs = useRef<number | null>(null);
@@ -37,13 +36,6 @@ export default function JobDetailPage() {
         startedAtMs.current = Date.now();
       }
 
-      // Show completion screen for 2 seconds when job is done
-      if (s.status === "done" && !showCompletion) {
-        setShowCompletion(true);
-        setTimeout(() => {
-          setShowCompletion(false);
-        }, 2000);
-      }
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : "Failed to fetch job status";
       setErr(errorMessage);
@@ -143,7 +135,7 @@ export default function JobDetailPage() {
   }
 
   // Loading / Polling UI
-  if (!jobStatus || jobStatus.status !== "done" || showCompletion) {
+  if (!jobStatus || jobStatus.status !== "done") {
     const jobsAhead =
       queueDepth != null && running != null ? Math.max(0, queueDepth - running) : null;
 
