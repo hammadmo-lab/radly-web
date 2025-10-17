@@ -120,8 +120,8 @@ export default function GeneratePage() {
     reValidateMode: 'onSubmit', // Only re-validate on submit
     defaultValues: {
       templateId: templateId || '',
-      includePatient: false,
-      patient: { name: '', mrn: '', age: undefined, dob: '', sex: '' },
+      includePatient: true,
+      patient: { name: '', mrn: '', age: undefined, sex: false },
       indication: '',
       findings: '',
       technique: '',
@@ -145,8 +145,8 @@ export default function GeneratePage() {
 
       reset({
         templateId: templateId || '',
-        includePatient: false,
-        patient: { name: '', mrn: '', age: undefined, dob: '', sex: '' },
+        includePatient: true,
+        patient: { name: '', mrn: '', age: undefined, sex: false },
         indication: '',
         findings: '',
         technique: '',
@@ -163,7 +163,6 @@ export default function GeneratePage() {
     console.log('Form state changed:', { isValid, formIsSubmitting, currentStep });
   }, [isValid, formIsSubmitting, currentStep]);
 
-  const includePatient = watch('includePatient')
 
   // Debug: Track step changes
   useEffect(() => {
@@ -229,16 +228,13 @@ export default function GeneratePage() {
     setError(null)
     
     try {
-      // Build patient object based on includePatient toggle
-      const patient = data.includePatient
-        ? {
-            name: data.patient.name || undefined,
-            mrn: data.patient.mrn || undefined,
-            age: data.patient.age ?? undefined,
-            dob: data.patient.dob || undefined,
-            sex: data.patient.sex || undefined,
-          }
-        : {} // empty object -> backend treats as "no patient block"
+      // Build patient object (always included now)
+      const patient = {
+        name: data.patient.name || undefined,
+        mrn: data.patient.mrn || undefined,
+        age: data.patient.age ?? undefined,
+        sex: data.patient.sex ? 'M' : 'F', // Convert boolean to string: true = Male, false = Female
+      }
 
       // Build payload for enqueueJob - flattened structure
       const payload = {
@@ -247,7 +243,7 @@ export default function GeneratePage() {
         findings: data.findings,
         impression: data.indication, // mapping indication to impression
         technique: data.technique,
-        patient: data.includePatient ? patient : undefined,
+        patient: patient,
         signature: data.signature,
       }
 
@@ -472,105 +468,67 @@ export default function GeneratePage() {
 
             {/* Step 2: Patient Information */}
             {currentStep === 2 && (
-              <div className="space-y-6">
-                {/* Patient Data Toggle */}
-                <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden">
-                  {/* Header */}
-                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b-2 border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900">Patient Data Settings</h3>
-                        <p className="text-sm text-gray-600">Configure patient information inclusion</p>
-                      </div>
+              <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b-2 border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                      <User className="w-5 h-5 text-white" />
                     </div>
-                  </div>
-
-                  {/* Form Fields */}
-                  <div className="p-4 sm:p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="font-medium text-gray-900">Include patient data in report</Label>
-                        <p className="text-sm text-gray-600">Toggle to include name/age/sex/MRN/history in the generated report and DOCX.</p>
-                      </div>
-                      <Switch checked={includePatient} onCheckedChange={(v) => setValue('includePatient', v)} />
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">Patient Information</h3>
+                      <p className="text-sm text-gray-600">Provide patient details (age and sex are required)</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Patient Information Section */}
-                <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden">
-                  {/* Header */}
-                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b-2 border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                        <User className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900">Patient Information</h3>
-                        <p className="text-sm text-gray-600">Provide patient details if available</p>
-                      </div>
+                {/* Form Fields */}
+                <div className="p-4 sm:p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="patient.name" className="text-gray-900 font-medium">Patient Name (optional)</Label>
+                      <Input
+                        id="patient.name"
+                        {...register('patient.name')}
+                        placeholder="John Doe"
+                        className="border-2 border-gray-200 focus:border-emerald-500"
+                      />
                     </div>
-                  </div>
-
-                  {/* Form Fields */}
-                  <div className="p-4 sm:p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="patient.name" className="text-gray-900 font-medium">Patient Name</Label>
-                        <Input
-                          id="patient.name"
-                          {...register('patient.name')}
-                          placeholder="John Doe"
-                          disabled={!includePatient}
-                          className="border-2 border-gray-200 focus:border-emerald-500"
+                    <div className="space-y-2">
+                      <Label htmlFor="patient.mrn" className="text-gray-900 font-medium">Medical Record Number (optional)</Label>
+                      <Input
+                        id="patient.mrn"
+                        {...register('patient.mrn')}
+                        placeholder="MRN123456"
+                        className="border-2 border-gray-200 focus:border-emerald-500"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="patient.age" className="text-gray-900 font-medium">Age (required)</Label>
+                      <Input
+                        id="patient.age"
+                        type="number"
+                        {...register('patient.age', { valueAsNumber: true })}
+                        placeholder="45"
+                        className="border-2 border-gray-200 focus:border-emerald-500"
+                      />
+                      {errors.patient?.age && (
+                        <p className="text-sm text-red-600">{errors.patient.age.message}</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="patient.sex" className="text-gray-900 font-medium">Sex (required)</Label>
+                      <div className="flex items-center justify-between p-3 border-2 border-gray-200 rounded-md bg-white">
+                        <span className="text-sm text-gray-700">Female</span>
+                        <Switch 
+                          checked={watch('patient.sex')} 
+                          onCheckedChange={(v) => setValue('patient.sex', v)} 
                         />
+                        <span className="text-sm text-gray-700">Male</span>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="patient.mrn" className="text-gray-900 font-medium">Medical Record Number</Label>
-                        <Input
-                          id="patient.mrn"
-                          {...register('patient.mrn')}
-                          placeholder="MRN123456"
-                          disabled={!includePatient}
-                          className="border-2 border-gray-200 focus:border-emerald-500"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="patient.age" className="text-gray-900 font-medium">Age</Label>
-                        <Input
-                          id="patient.age"
-                          type="number"
-                          {...register('patient.age', { valueAsNumber: true })}
-                          placeholder="45"
-                          disabled={!includePatient}
-                          className="border-2 border-gray-200 focus:border-emerald-500"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="patient.dob" className="text-gray-900 font-medium">Date of Birth</Label>
-                        <Input
-                          id="patient.dob"
-                          {...register('patient.dob')}
-                          placeholder="01/01/1980"
-                          disabled={!includePatient}
-                          className="border-2 border-gray-200 focus:border-emerald-500"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="patient.sex" className="text-gray-900 font-medium">Sex</Label>
-                        <Input
-                          id="patient.sex"
-                          {...register('patient.sex')}
-                          placeholder="Male/Female"
-                          disabled={!includePatient}
-                          className="border-2 border-gray-200 focus:border-emerald-500"
-                        />
-                      </div>
+                      {errors.patient?.sex && (
+                        <p className="text-sm text-red-600">{errors.patient.sex.message}</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -691,7 +649,7 @@ export default function GeneratePage() {
                       <h4 className="font-bold mb-4 text-gray-900 text-lg">Report Summary</h4>
                       <div className="text-sm space-y-2 text-gray-700">
                         <p><strong>Template:</strong> {(template as { templateTitle?: string })?.templateTitle || "(Untitled Template)"}</p>
-                        <p><strong>Patient Data:</strong> {includePatient ? 'Included' : 'Not included'}</p>
+                        <p><strong>Patient Data:</strong> Included</p>
                         <p><strong>Indication:</strong> {watch('indication') || 'Not provided'}</p>
                         <p><strong>Findings:</strong> {watch('findings') ? `${watch('findings').length} characters` : 'Not provided'}</p>
                       </div>

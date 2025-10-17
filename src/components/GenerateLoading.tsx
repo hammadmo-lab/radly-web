@@ -1,17 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, CheckCircle, Loader2 } from 'lucide-react'
 import { useSafeInterval } from '@/hooks/useButtonResponsiveness'
+import { JobStatusResponse } from '@/lib/jobs'
 
 interface GenerateLoadingProps {
   jobId?: string
   queuePosition?: number | null
   estimatedTime?: string | null
+  jobStatus?: JobStatusResponse | null
 }
 
-export function GenerateLoading({ jobId, queuePosition, estimatedTime }: GenerateLoadingProps) {
+export function GenerateLoading({ jobId, queuePosition, estimatedTime, jobStatus }: GenerateLoadingProps) {
   const [progress, setProgress] = useState(0)
   const [currentFactIndex, setCurrentFactIndex] = useState(0)
 
@@ -23,23 +25,56 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime }: Generat
     "✨ Finalizing report structure...",
   ]
 
-  // Safe intervals for progress and facts
+  // Update progress based on actual job status
+  useEffect(() => {
+    if (!jobStatus) {
+      setProgress(0)
+      return
+    }
+
+    switch (jobStatus.status) {
+      case 'queued':
+        setProgress(5)
+        break
+      case 'running':
+        setProgress(25)
+        break
+      case 'done':
+        setProgress(100)
+        break
+      case 'error':
+        setProgress(0)
+        break
+      default:
+        setProgress(0)
+    }
+  }, [jobStatus])
+
+  // Safe intervals for progress animation and facts
   useSafeInterval(() => {
+    if (!jobStatus || jobStatus.status === 'done' || jobStatus.status === 'error') {
+      return
+    }
+    
     setProgress(prev => {
-      if (prev >= 95) return prev
-      return prev + Math.random() * 5
+      // Don't exceed the status-based progress
+      const maxProgress = jobStatus.status === 'queued' ? 20 : 
+                         jobStatus.status === 'running' ? 95 : prev
+      
+      if (prev >= maxProgress) return prev
+      return prev + Math.random() * 3
     })
-  }, 800)
+  }, 1000)
 
   useSafeInterval(() => {
     setCurrentFactIndex(prev => (prev + 1) % facts.length)
   }, 3000)
 
   const steps = [
-    { label: 'Received', completed: true },
-    { label: 'Processing', completed: progress > 30 },
-    { label: 'Generating', completed: progress > 60 },
-    { label: 'Finalizing', completed: progress > 90 },
+    { label: 'Received', completed: jobStatus?.status === 'queued' || jobStatus?.status === 'running' || jobStatus?.status === 'done' },
+    { label: 'Processing', completed: jobStatus?.status === 'running' || jobStatus?.status === 'done' },
+    { label: 'Generating', completed: jobStatus?.status === 'running' || jobStatus?.status === 'done' },
+    { label: 'Finalizing', completed: jobStatus?.status === 'done' },
   ]
 
   return (
@@ -73,7 +108,7 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime }: Generat
           </motion.div>
 
           <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            Generating Your Report
+            {jobStatus?.status === 'done' ? 'Report Generated!' : 'Generating Your Report'}
           </h1>
 
           {/* ROTATING FACTS */}
@@ -86,7 +121,7 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime }: Generat
               transition={{ duration: 0.5 }}
               className="text-2xl text-gray-600 font-medium"
             >
-              {facts[currentFactIndex]}
+              {jobStatus?.status === 'done' ? '✅ Report ready for viewing!' : facts[currentFactIndex]}
             </motion.p>
           </AnimatePresence>
         </motion.div>
