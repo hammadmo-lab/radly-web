@@ -101,6 +101,7 @@ export interface AdminAuthContext {
   adminKey: string | null
   apiKey: string | null
   isAuthenticated: boolean
+  isInitialized: boolean
   login: (adminKey: string, apiKey: string) => void
   logout: () => void
 }
