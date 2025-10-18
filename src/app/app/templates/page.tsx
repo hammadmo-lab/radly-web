@@ -7,7 +7,7 @@ import { Plus, Search, Filter, ChevronDown, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { httpGet } from '@/lib/http'
 import { fetchTemplates } from '@/lib/templates'
+import { TemplateCardSkeleton } from '@/components/loading/TemplateCardSkeleton'
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +37,7 @@ export default function TemplatesPage() {
     }
   }
 
-  const { data: templates } = useQuery({
+  const { data: templates, isLoading } = useQuery({
     queryKey: ['templates'],
     queryFn: async () => await fetchTemplates(httpGet),
   })
@@ -200,21 +201,26 @@ export default function TemplatesPage() {
 
         {/* TEMPLATE CARDS - MODERN DESIGN */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTemplates.length === 0 ? (
+          {isLoading ? (
+            // Show skeleton loaders while loading
+            Array.from({ length: 6 }).map((_, index) => (
+              <TemplateCardSkeleton key={index} />
+            ))
+          ) : filteredTemplates.length === 0 ? (
             <div className="col-span-full text-center py-12">
               <div className="text-gray-400 mb-4">
                 <Search className="w-12 h-12 mx-auto" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No templates found</h3>
               <p className="text-gray-600">
-                {searchQuery || selectedModality || selectedAnatomy 
+                {searchQuery || selectedModality || selectedAnatomy
                   ? 'Try adjusting your search or filters'
                   : 'No templates available'
                 }
               </p>
               {(searchQuery || selectedModality || selectedAnatomy) && (
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => {
                     setSearchQuery('')
                     handleModalityChange(null)

@@ -284,16 +284,44 @@ export default function GeneratePage() {
 
     } catch (err: unknown) {
       console.error('Generate error:', err)
-      
-      // Handle 401 errors with proper redirect to signin with next parameter
-      if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) {
-        toast.error('Session expired. Please sign in again.')
-        const current = window.location.pathname + window.location.search
-        window.location.href = buildSigninWithNext(current)
-        return
+
+      // Handle different error types with specific, actionable messages
+      let errorMessage = 'Failed to start report generation'
+
+      if (err && typeof err === 'object' && 'status' in err) {
+        const status = (err as { status: number }).status
+
+        if (status === 401) {
+          toast.error('Session expired. Please sign in again.')
+          const current = window.location.pathname + window.location.search
+          window.location.href = buildSigninWithNext(current)
+          return
+        } else if (status === 403) {
+          errorMessage = 'You don\'t have permission to generate reports. Please check your subscription.'
+        } else if (status === 429) {
+          errorMessage = 'Too many requests. Please wait a moment and try again.'
+        } else if (status === 404) {
+          errorMessage = 'Template not found. Please select a different template.'
+        } else if (status >= 500) {
+          errorMessage = 'Server error. Please try again in a few moments.'
+        }
       }
-      
-      const errorMessage = err instanceof Error ? err.message : 'Failed to start report generation'
+
+      // Check for quota errors in message
+      if (err instanceof Error && (err.message.includes('quota') || err.message.includes('limit'))) {
+        errorMessage = 'Monthly report limit reached. Please upgrade your plan to continue.'
+      }
+
+      // Check for network errors
+      if (err instanceof Error && (err.message.includes('fetch') || err.message.includes('network'))) {
+        errorMessage = 'Network error. Please check your connection and try again.'
+      }
+
+      // Fallback to error message if it's more specific
+      if (err instanceof Error && err.message && err.message.length > 10) {
+        errorMessage = err.message
+      }
+
       setError(errorMessage)
       toast.error(errorMessage)
     } finally {
@@ -346,15 +374,15 @@ export default function GeneratePage() {
                 const isCompleted = currentStep > step.id
                 return (
                   <div key={step.id} className="flex flex-col items-center gap-1 sm:gap-2">
-                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all ${
+                    <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all ${
                       isActive || isCompleted
                         ? "bg-gradient-to-br from-emerald-500 to-violet-500 text-white shadow-lg"
                         : "bg-white border-2 border-gray-300 text-gray-400"
                     }`}>
                       {isCompleted ? (
-                        <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7" />
                       ) : (
-                        <step.icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <step.icon className="w-6 h-6 sm:w-7 sm:h-7" />
                       )}
                     </div>
                     <span className={`text-xs sm:text-sm font-medium text-center ${
@@ -711,16 +739,16 @@ export default function GeneratePage() {
                 <ChevronRight className="w-4 h-4" />
               </Button>
             ) : (
-              <Button 
-                type="submit" 
-                disabled={isSubmitting || (usage?.subscription && usage.subscription.reports_used >= usage.subscription.reports_limit)}
+              <Button
+                type="submit"
+                disabled={isSubmitting || formIsSubmitting || (usage?.subscription && usage.subscription.reports_used >= usage.subscription.reports_limit)}
                 className="btn-primary flex items-center gap-2"
                 onClick={() => {
                   console.log('Generate Report button clicked - setting intentional submit');
                   setIntentionalSubmit(true);
                 }}
               >
-                {isSubmitting ? 'Generating...' : 'Generate Report'}
+                {isSubmitting || formIsSubmitting ? 'Generating...' : 'Generate Report'}
               </Button>
             )}
           </div>

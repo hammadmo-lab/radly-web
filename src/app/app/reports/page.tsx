@@ -27,6 +27,7 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<RecentJobRow[]>([]);
   const [err, setErr] = useState<string | null>(null);
+  const [pollingFailures, setPollingFailures] = useState(0);
 
   // Authentication guard
   useEffect(() => {
@@ -121,21 +122,29 @@ export default function ReportsPage() {
 
   // Use safe polling for job status updates with exponential backoff
   useJobStatusPolling(async () => {
-    const queuedOrRunningJobs = rows.filter(row => 
+    const queuedOrRunningJobs = rows.filter(row =>
       row.status === 'queued' || row.status === 'running'
     );
-    
+
     if (queuedOrRunningJobs.length > 0) {
+      let hasFailures = false;
       for (const job of queuedOrRunningJobs) {
         try {
           const jobStatus = await getJob(job.job_id);
           if (jobStatus.status !== job.status) {
             updateJobStatus(job.job_id, jobStatus.status);
           }
+          // Reset failure counter on successful fetch
+          setPollingFailures(0);
         } catch (error) {
-          // Ignore individual job fetch errors
+          hasFailures = true;
           console.debug('Failed to fetch job status:', error);
         }
+      }
+
+      // Increment failure counter if any job fetch failed
+      if (hasFailures) {
+        setPollingFailures(prev => prev + 1);
       }
     }
   }, { immediate: false });
@@ -182,6 +191,22 @@ export default function ReportsPage() {
           Refresh
         </Button>
       </div>
+
+      {/* Warning banner for polling failures */}
+      {pollingFailures >= 3 && (
+        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-start gap-3">
+            <div className="text-yellow-600 mt-0.5">⚠️</div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-yellow-900 mb-1">Status Updates Delayed</h3>
+              <p className="text-sm text-yellow-700">
+                We&apos;re having trouble fetching the latest job status. Your reports are still processing, but the status shown may be outdated. Try refreshing the page.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ul className="space-y-3">
         {rows.map((r) => (
           <li key={r.job_id} className="flex items-center justify-between rounded-lg border p-4 hover:bg-gray-50 transition-colors">
