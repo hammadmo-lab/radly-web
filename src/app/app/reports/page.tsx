@@ -8,6 +8,7 @@ import { getJob } from '@/lib/jobs';
 import type { RecentJobRow } from '@/lib/jobs';
 import { createSupabaseBrowser } from "@/utils/supabase/browser";
 import { useAuthToken } from '@/hooks/useAuthToken';
+import { useJobStatusPolling } from "@/hooks/useSafePolling";
 
 // Interface for localStorage job format
 interface LocalStorageJob {
@@ -118,30 +119,26 @@ export default function ReportsPage() {
     load();
   }, [load]);
 
-  // Periodically update status of queued/running jobs
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const queuedOrRunningJobs = rows.filter(row => 
-        row.status === 'queued' || row.status === 'running'
-      );
-      
-      if (queuedOrRunningJobs.length > 0) {
-        for (const job of queuedOrRunningJobs) {
-          try {
-            const jobStatus = await getJob(job.job_id);
-            if (jobStatus.status !== job.status) {
-              updateJobStatus(job.job_id, jobStatus.status);
-            }
-          } catch (error) {
-            // Ignore individual job fetch errors
-            console.debug('Failed to fetch job status:', error);
+  // Use safe polling for job status updates with exponential backoff
+  useJobStatusPolling(async () => {
+    const queuedOrRunningJobs = rows.filter(row => 
+      row.status === 'queued' || row.status === 'running'
+    );
+    
+    if (queuedOrRunningJobs.length > 0) {
+      for (const job of queuedOrRunningJobs) {
+        try {
+          const jobStatus = await getJob(job.job_id);
+          if (jobStatus.status !== job.status) {
+            updateJobStatus(job.job_id, jobStatus.status);
           }
+        } catch (error) {
+          // Ignore individual job fetch errors
+          console.debug('Failed to fetch job status:', error);
         }
       }
-    }, 5000); // Check every 5 seconds
-
-    return () => clearInterval(interval);
-  }, [rows, updateJobStatus]);
+    }
+  }, { immediate: false });
 
   if (loading) {
     return (
