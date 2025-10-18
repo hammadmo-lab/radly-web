@@ -9,25 +9,43 @@ const AdminAuthContextInstance = createContext<AdminAuthContext | undefined>(und
 export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [adminKey, setAdminKey] = useState<string | null>(null)
   const [apiKey, setApiKey] = useState<string | null>(null)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   useEffect(() => {
-    // Load from localStorage on mount
-    const storedAdminKey = localStorage.getItem('admin_key')
-    const storedApiKey = localStorage.getItem('api_key')
+    // Only run on client side
+    if (typeof window === 'undefined') return
     
-    console.log('AdminAuthProvider: Loading from localStorage', { storedAdminKey: !!storedAdminKey, storedApiKey: !!storedApiKey })
-    
-    if (storedAdminKey && storedApiKey) {
-      setAdminKey(storedAdminKey)
-      setApiKey(storedApiKey)
+    try {
+      // Load from localStorage on mount
+      const storedAdminKey = localStorage.getItem('admin_key')
+      const storedApiKey = localStorage.getItem('api_key')
+      
+      console.log('AdminAuthProvider: Loading from localStorage', { storedAdminKey: !!storedAdminKey, storedApiKey: !!storedApiKey })
+      
+      if (storedAdminKey && storedApiKey) {
+        setAdminKey(storedAdminKey)
+        setApiKey(storedApiKey)
+      }
+    } catch (error) {
+      console.error('Error loading from localStorage:', error)
+    } finally {
+      setIsInitialized(true)
     }
   }, [])
 
   const login = (newAdminKey: string, newApiKey: string) => {
     setAdminKey(newAdminKey)
     setApiKey(newApiKey)
-    localStorage.setItem('admin_key', newAdminKey)
-    localStorage.setItem('api_key', newApiKey)
+    
+    // Only set localStorage on client side
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('admin_key', newAdminKey)
+        localStorage.setItem('api_key', newApiKey)
+      } catch (error) {
+        console.error('Error saving to localStorage:', error)
+      }
+    }
   }
 
   const logout = useCallback(() => {
@@ -36,8 +54,12 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setAdminKey(null)
       setApiKey(null)
-      localStorage.removeItem('admin_key')
-      localStorage.removeItem('api_key')
+      
+      // Only remove from localStorage on client side
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('admin_key')
+        localStorage.removeItem('api_key')
+      }
       // Don't remove username if "remember me" was checked
       
       toast.success('Logged out successfully')
@@ -55,6 +77,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       adminKey,
       apiKey,
       isAuthenticated,
+      isInitialized,
       login,
       logout,
     }}>
