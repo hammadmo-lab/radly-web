@@ -74,7 +74,15 @@ export function MetricsDashboard() {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6">
         <div className="text-red-800 font-semibold mb-2">Error loading metrics</div>
-        <div className="text-red-600">{error.message}</div>
+        <div className="text-red-600 mb-4">
+          {error.message.includes('404') 
+            ? 'The metrics dashboard endpoint is not yet implemented on the backend. Please contact your administrator.'
+            : error.message
+          }
+        </div>
+        <div className="text-sm text-gray-600 mb-4">
+          <strong>Expected endpoint:</strong> <code>/v1/admin/metrics/dashboard</code>
+        </div>
         <Button onClick={handleRefresh} className="mt-4">
           <RefreshCw className="h-4 w-4 mr-2" />
           Retry

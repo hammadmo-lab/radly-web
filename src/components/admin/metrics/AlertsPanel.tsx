@@ -9,7 +9,7 @@ import { generateAlerts } from '@/lib/metrics-helpers';
 import { DashboardMetrics } from '@/lib/admin-metrics';
 
 interface AlertsPanelProps {
-  metrics: DashboardMetrics;
+  metrics: DashboardMetrics | undefined;
 }
 
 export function AlertsPanel({ metrics }: AlertsPanelProps) {
