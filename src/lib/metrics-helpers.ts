@@ -7,7 +7,10 @@ import { PrometheusResult, DashboardMetrics } from './admin-metrics';
 /**
  * Convert Prometheus query result to chart-friendly format
  */
-export function parsePrometheusResult(result: PrometheusResult) {
+export function parsePrometheusResult(result: PrometheusResult | undefined) {
+  if (!result || !result.data || !result.data.result) {
+    return [];
+  }
   return result.data.result.map(item => ({
     name: item.metric.stage || item.metric.provider || item.metric.category || 'unknown',
     value: parseFloat(item.value[1]),
@@ -112,12 +115,16 @@ export function calculateTrend(current: number, previous: number): 'up' | 'down'
 /**
  * Generate alert status based on metric values
  */
-export function generateAlerts(metrics: DashboardMetrics) {
+export function generateAlerts(metrics: DashboardMetrics | undefined) {
   const alerts: Array<{
     type: 'error' | 'warning' | 'info';
     message: string;
     metric: string;
   }> = [];
+
+  if (!metrics) {
+    return alerts;
+  }
 
   // Queue saturation > 80%
   const queueSaturation = parsePrometheusResult(metrics.queue_saturation)[0]?.value || 0;

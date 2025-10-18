@@ -19,10 +19,10 @@ interface OverviewCardsProps {
 }
 
 export function OverviewCards({ data }: OverviewCardsProps) {
-  const slaCompliance = parsePrometheusResult(data.sla_compliance || { data: { result: [] } })[0]?.value || 0;
-  const queueSaturation = parsePrometheusResult(data.queue_saturation || { data: { result: [] } })[0]?.value || 0;
-  const hourlyCost = parsePrometheusResult(data.llm_cost_hourly || { data: { result: [] } })[0]?.value || 0;
-  const errorRate = parsePrometheusResult(data.error_rate || { data: { result: [] } })[0]?.value || 0;
+  const slaCompliance = parsePrometheusResult(data.sla_compliance)[0]?.value || 0;
+  const queueSaturation = parsePrometheusResult(data.queue_saturation)[0]?.value || 0;
+  const hourlyCost = parsePrometheusResult(data.llm_cost_hourly)[0]?.value || 0;
+  const errorRate = parsePrometheusResult(data.error_rate)[0]?.value || 0;
 
   return (
     <ResponsiveGrid 
