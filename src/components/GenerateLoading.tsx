@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, CheckCircle, Loader2 } from 'lucide-react'
-import { useSafeInterval } from '@/hooks/useButtonResponsiveness'
+import { useSafePolling } from '@/hooks/useSafePolling'
 import { JobStatusResponse } from '@/lib/jobs'
 
 interface GenerateLoadingProps {
@@ -50,8 +50,8 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime, jobStatus
     }
   }, [jobStatus])
 
-  // Safe intervals for progress animation and facts
-  useSafeInterval(() => {
+  // Safe polling for progress animation
+  useSafePolling(() => {
     if (!jobStatus || jobStatus.status === 'done' || jobStatus.status === 'error') {
       return
     }
@@ -64,11 +64,21 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime, jobStatus
       if (prev >= maxProgress) return prev
       return prev + Math.random() * 3
     })
-  }, 1000)
+  }, { 
+    baseInterval: 1000, // Keep 1s for UI animation
+    maxInterval: 2000, // Max 2s for UI
+    pauseWhenHidden: false, // Don't pause UI animations
+    immediate: false 
+  })
 
-  useSafeInterval(() => {
+  useSafePolling(() => {
     setCurrentFactIndex(prev => (prev + 1) % facts.length)
-  }, 3000)
+  }, { 
+    baseInterval: 3000, // Keep 3s for fact rotation
+    maxInterval: 5000, // Max 5s for UI
+    pauseWhenHidden: false, // Don't pause UI animations
+    immediate: false 
+  })
 
   const steps = [
     { label: 'Received', completed: jobStatus?.status === 'queued' || jobStatus?.status === 'running' || jobStatus?.status === 'done' },

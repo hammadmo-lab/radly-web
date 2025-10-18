@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Download } from "lucide-react";
 import { exportReportDocx } from "@/lib/api";
 import { toast } from "sonner";
-import { useSafeInterval, useSafeClickHandler } from "@/hooks/useButtonResponsiveness";
+import { useSafeClickHandler } from "@/hooks/useButtonResponsiveness";
+import { useJobStatusPolling, useQueueStatsPolling } from "@/hooks/useSafePolling";
 
 export const dynamic = 'force-dynamic';
 
@@ -26,8 +27,8 @@ export default function JobDetailPage() {
 
   const startedAtMs = useRef<number | null>(null);
 
-  // Safe interval for status updates
-  useSafeInterval(async () => {
+  // Safe polling for job status updates with exponential backoff
+  useJobStatusPolling(async () => {
     try {
       const s = await getJob(id);
       setJobStatus(s);
@@ -46,10 +47,10 @@ export default function JobDetailPage() {
         return;
       }
     }
-  }, 2000, { immediate: true });
+  }, { immediate: true });
 
-  // Safe interval for stats updates
-  useSafeInterval(async () => {
+  // Safe polling for queue stats updates
+  useQueueStatsPolling(async () => {
     try {
       const qs = await getQueueStats();
       setQueueDepth(qs.queue_depth);
@@ -62,7 +63,7 @@ export default function JobDetailPage() {
       }
       // ignore other transient stats errors
     }
-  }, 4000, { immediate: true });
+  }, { immediate: true });
 
 
   // Export handler with safe click handling
