@@ -48,6 +48,8 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
  * @param signature - Optional signature data to include
  * @param includeIdentifiers - Whether to include patient identifiers in the export
  * @param filename - The filename for the exported document
+ * @param formattingProfileId - Optional formatting profile ID to apply custom formatting
+ * @param userId - Optional user ID for formatting profile lookup
  * @returns Promise with export response containing download URL
  */
 export async function exportReportDocx(
@@ -55,38 +57,50 @@ export async function exportReportDocx(
   patient: PatientBlock,
   signature: Signature | undefined,
   includeIdentifiers: boolean,
-  filename: string
+  filename: string,
+  formattingProfileId?: string | null,
+  userId?: string | null
 ): Promise<{
   url: string;
   public_url?: string;
   size: number;
   expires_in: number;
 }> {
+  const payload: Record<string, unknown> = {
+    report: {
+      title: report.title,
+      technique: report.technique,
+      findings: report.findings,
+      impression: report.impression,
+      recommendations: report.recommendations,
+    },
+    patient: {
+      name: patient.name,
+      age: patient.age,
+      sex: patient.sex,
+      mrn: patient.mrn,
+      dob: patient.dob,
+      history: patient.history,
+    },
+    signature: signature ? {
+      name: signature.name,
+      date: signature.date,
+    } : null,
+    include_identifiers: includeIdentifiers,
+    filename: filename,
+  };
+
+  // Add formatting profile if provided
+  if (formattingProfileId) {
+    payload.formatting_profile_id = formattingProfileId;
+  }
+  if (userId) {
+    payload.user_id = userId;
+  }
+
   const response = await apiFetch("/export/docx/link", {
     method: "POST",
-    body: JSON.stringify({
-      report: {
-        title: report.title,
-        technique: report.technique,
-        findings: report.findings,
-        impression: report.impression,
-        recommendations: report.recommendations,
-      },
-      patient: {
-        name: patient.name,
-        age: patient.age,
-        sex: patient.sex,
-        mrn: patient.mrn,
-        dob: patient.dob,
-        history: patient.history,
-      },
-      signature: signature ? {
-        name: signature.name,
-        date: signature.date,
-      } : null,
-      include_identifiers: includeIdentifiers,
-      filename: filename,
-    }),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
