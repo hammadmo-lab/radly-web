@@ -127,24 +127,31 @@ export default function ReportsPage() {
     );
 
     if (queuedOrRunningJobs.length > 0) {
+      // Fetch all job statuses in parallel instead of sequentially
+      const results = await Promise.allSettled(
+        queuedOrRunningJobs.map(job => getJob(job.job_id))
+      );
+
       let hasFailures = false;
-      for (const job of queuedOrRunningJobs) {
-        try {
-          const jobStatus = await getJob(job.job_id);
+      results.forEach((result, index) => {
+        const job = queuedOrRunningJobs[index];
+
+        if (result.status === 'fulfilled') {
+          const jobStatus = result.value;
           if (jobStatus.status !== job.status) {
             updateJobStatus(job.job_id, jobStatus.status);
           }
-          // Reset failure counter on successful fetch
-          setPollingFailures(0);
-        } catch (error) {
+        } else {
           hasFailures = true;
-          console.debug('Failed to fetch job status:', error);
+          console.debug('Failed to fetch job status:', result.reason);
         }
-      }
+      });
 
-      // Increment failure counter if any job fetch failed
+      // Reset or increment failure counter based on results
       if (hasFailures) {
         setPollingFailures(prev => prev + 1);
+      } else {
+        setPollingFailures(0);
       }
     }
   }, { immediate: false });

@@ -4,20 +4,43 @@ import { createBrowserSupabase } from '@/lib/supabase/client';
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE!;
 const CLIENT_KEY = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY!;
 
+// Token cache to avoid hitting Supabase on every request
+let cachedToken: string | null = null;
+let tokenExpiry: number = 0;
+
 async function getAuthToken(): Promise<string | null> {
   try {
+    const now = Date.now();
+
+    // Return cached token if still valid (5 minute buffer before expiry)
+    if (cachedToken && tokenExpiry > now + 5 * 60 * 1000) {
+      return cachedToken;
+    }
+
     const supabase = createBrowserSupabase();
     const { data: { session } } = await supabase.auth.getSession();
-    console.log('🔍 getAuthToken:', { 
-      hasSession: !!session, 
+
+    console.log('🔍 getAuthToken:', {
+      hasSession: !!session,
       hasToken: !!session?.access_token,
       tokenPreview: session?.access_token ? `${session.access_token.substring(0, 20)}...` : 'null'
     });
-    return session?.access_token || null;
+
+    // Cache the token and expiry
+    cachedToken = session?.access_token || null;
+    tokenExpiry = session?.expires_at ? session.expires_at * 1000 : 0;
+
+    return cachedToken;
   } catch (error) {
     console.error('Failed to get auth token:', error);
     return null;
   }
+}
+
+// Export function to clear token cache (useful for sign out)
+export function clearTokenCache(): void {
+  cachedToken = null;
+  tokenExpiry = 0;
 }
 
 async function handle<T>(res: Response): Promise<T> {

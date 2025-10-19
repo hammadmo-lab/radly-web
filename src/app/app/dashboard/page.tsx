@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
@@ -12,6 +13,14 @@ import UsageWidget from '@/components/UsageWidget'
 
 export default function DashboardPage() {
   const router = useRouter()
+
+  // Memoize stats array to prevent recreation on every render
+  const stats = useMemo(() => [
+    { label: 'Total Reports', value: '248', change: '+12 this week', icon: FileText, color: 'emerald' },
+    { label: 'Templates', value: '24', change: 'Active', icon: BookTemplate, color: 'violet' },
+    { label: 'Avg. Time', value: '32s', change: '8% faster', icon: Clock, color: 'blue' },
+    { label: 'This Month', value: '86', change: '+24% growth', icon: TrendingUp, color: 'cyan' },
+  ], [])
 
   return (
     <div className="space-y-8 pb-24 md:pb-8">
@@ -70,12 +79,7 @@ export default function DashboardPage() {
 
       {/* STATS GRID - Animated Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: 'Total Reports', value: '248', change: '+12 this week', icon: FileText, color: 'emerald' },
-          { label: 'Templates', value: '24', change: 'Active', icon: BookTemplate, color: 'violet' },
-          { label: 'Avg. Time', value: '32s', change: '8% faster', icon: Clock, color: 'blue' },
-          { label: 'This Month', value: '86', change: '+24% growth', icon: TrendingUp, color: 'cyan' },
-        ].map((stat) => (
+        {stats.map((stat) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, y: 20 }}
@@ -113,7 +117,7 @@ export default function DashboardPage() {
               icon: Plus,
               title: 'Generate New Report',
               description: 'Create a medical report from template',
-              href: '/app/templates',
+              href: '/app/generate',
               gradient: 'from-emerald-500 to-teal-500',
             },
             {
