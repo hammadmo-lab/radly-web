@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Lock, Sparkles, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useSubscriptionTier, type SubscriptionTier } from '@/hooks/useSubscription';
 
-export type SubscriptionTier = 'free' | 'starter' | 'professional' | 'premium';
+export type { SubscriptionTier };
 
 interface TierGateProps {
   /**
@@ -65,13 +66,17 @@ const tierFeatures: Record<SubscriptionTier, string[]> = {
 
 export function TierGate({
   requiredTiers,
-  currentTier = 'free', // Default to free tier for now
+  currentTier, // If not provided, will fetch from API
   featureName,
   children,
   upgradeMessage,
 }: TierGateProps) {
+  // Fetch current tier from API if not provided
+  const fetchedTier = useSubscriptionTier()
+  const activeTier = currentTier ?? fetchedTier
+
   // Check if user has access
-  const hasAccess = requiredTiers.includes(currentTier);
+  const hasAccess = requiredTiers.includes(activeTier);
 
   // If user has access, render children
   if (hasAccess) {
@@ -113,8 +118,8 @@ export function TierGate({
             </CardDescription>
 
             <div className="flex justify-center gap-2 mt-4">
-              <Badge className={tierColors[currentTier]}>
-                Current: {currentTier.charAt(0).toUpperCase() + currentTier.slice(1)}
+              <Badge className={tierColors[activeTier]}>
+                Current: {activeTier.charAt(0).toUpperCase() + activeTier.slice(1)}
               </Badge>
               <Badge className={tierColors[minRequiredTier]}>
                 <Sparkles className="w-3 h-3 mr-1" />
@@ -131,7 +136,7 @@ export function TierGate({
                   Your Plan
                 </h4>
                 <div className="space-y-2">
-                  {tierFeatures[currentTier].map((feature, index) => (
+                  {tierFeatures[activeTier].map((feature, index) => (
                     <div key={index} className="flex items-start gap-2 text-sm">
                       <Check className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-600">{feature}</span>

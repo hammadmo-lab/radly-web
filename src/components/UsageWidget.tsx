@@ -1,54 +1,17 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { AlertCircle, Calendar, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
-import { httpGet } from '@/lib/http'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useAuthSession } from '@/hooks/useAuthSession'
-
-interface UsageData {
-  subscription: {
-    tier: string
-    tier_display_name: string
-    reports_used: number
-    reports_limit: number
-    reports_remaining: number
-    period_end: string
-    price_monthly: number
-    currency: string
-    status: string
-  }
-  usage_stats: {
-    total_reports: number
-    avg_generation_time: number
-  }
-}
+import { useSubscription } from '@/hooks/useSubscription'
 
 export default function UsageWidget() {
-  const { isAuthed, mounted } = useAuthSession()
-  
-  const { data: usage, isLoading, error, refetch } = useQuery({
-    queryKey: ['subscription-usage'],
-    queryFn: () => httpGet<UsageData>('/v1/subscription/usage'),
-    refetchInterval: 60000, // Refetch every minute
-    enabled: mounted && isAuthed, // Only fetch when authenticated
-    retry: (failureCount, error) => {
-      console.log('🔄 UsageWidget: Retry attempt', failureCount, error)
-      // Don't retry on authentication errors (401, 403)
-      if (error && typeof error === 'object' && 'status' in error) {
-        const status = (error as { status: number }).status
-        if (status === 401 || status === 403) {
-          console.log('🚫 UsageWidget: Not retrying auth error:', status)
-          return false
-        }
-      }
-      return failureCount < 3
-    },
-  })
+  const { isAuthed } = useAuthSession()
+  const { data: usage, isLoading, error, refetch } = useSubscription()
 
   // Debug: Log when data changes
   useEffect(() => {
