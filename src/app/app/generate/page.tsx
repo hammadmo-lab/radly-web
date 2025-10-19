@@ -415,10 +415,26 @@ export default function GeneratePage() {
       {/* Clean Step Indicator */}
       <Card className="bg-white border-2 border-gray-100">
         <CardContent className="p-4 sm:p-6">
-          <div className="flex items-center justify-between relative">
+          {/* Mobile: Simplified progress dots */}
+          <div className="flex sm:hidden justify-center gap-2 mb-4">
+            {steps.map((step) => (
+              <motion.div
+                key={step.id}
+                className={`h-2 rounded-full transition-all ${
+                  currentStep >= step.id
+                    ? 'bg-gradient-to-r from-emerald-500 to-violet-500 w-8'
+                    : 'bg-gray-300 w-6'
+                }`}
+                layout
+              />
+            ))}
+          </div>
+
+          {/* Desktop: Full step indicator */}
+          <div className="hidden sm:flex items-center justify-between relative">
             {/* Progress line */}
-            <div className="absolute top-6 left-0 right-0 h-0.5 bg-gray-200 hidden sm:block">
-              <motion.div 
+            <div className="absolute top-6 left-0 right-0 h-0.5 bg-gray-200">
+              <motion.div
                 className="h-full bg-gradient-to-r from-emerald-500 to-violet-500"
                 animate={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
                 transition={{ duration: 0.3 }}
@@ -431,19 +447,19 @@ export default function GeneratePage() {
                 const isActive = currentStep === step.id
                 const isCompleted = currentStep > step.id
                 return (
-                  <div key={step.id} className="flex flex-col items-center gap-1 sm:gap-2">
-                    <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center transition-all ${
+                  <div key={step.id} className="flex flex-col items-center gap-2">
+                    <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all touch-target ${
                       isActive || isCompleted
                         ? "bg-gradient-to-br from-emerald-500 to-violet-500 text-white shadow-lg"
                         : "bg-white border-2 border-gray-300 text-gray-400"
                     }`}>
                       {isCompleted ? (
-                        <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7" />
+                        <CheckCircle className="w-7 h-7" />
                       ) : (
-                        <step.icon className="w-6 h-6 sm:w-7 sm:h-7" />
+                        <step.icon className="w-7 h-7" />
                       )}
                     </div>
-                    <span className={`text-xs sm:text-sm font-medium text-center ${
+                    <span className={`text-sm font-medium text-center ${
                       isActive || isCompleted ? "text-emerald-600" : "text-gray-500"
                     }`}>
                       {step.name}
@@ -615,18 +631,24 @@ export default function GeneratePage() {
                       <Label htmlFor="patient.name" className="text-gray-900 font-medium">Patient Name (optional)</Label>
                       <Input
                         id="patient.name"
+                        inputMode="text"
+                        autoCapitalize="words"
+                        autoComplete="name"
                         {...register('patient.name')}
                         placeholder="John Doe"
-                        className="border-2 border-gray-200 focus:border-emerald-500"
+                        className="border-2 border-gray-200 focus:border-emerald-500 input-mobile"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="patient.mrn" className="text-gray-900 font-medium">Medical Record Number (optional)</Label>
                       <Input
                         id="patient.mrn"
+                        inputMode="text"
+                        autoCapitalize="characters"
+                        autoCorrect="off"
                         {...register('patient.mrn')}
                         placeholder="MRN123456"
-                        className="border-2 border-gray-200 focus:border-emerald-500"
+                        className="border-2 border-gray-200 focus:border-emerald-500 input-mobile"
                       />
                     </div>
                     <div className="space-y-2">
@@ -634,9 +656,11 @@ export default function GeneratePage() {
                       <Input
                         id="patient.age"
                         type="number"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         {...register('patient.age', { valueAsNumber: true })}
                         placeholder="45"
-                        className="border-2 border-gray-200 focus:border-emerald-500"
+                        className="border-2 border-gray-200 focus:border-emerald-500 input-mobile"
                       />
                       {errors.patient?.age && (
                         <p className="text-sm text-red-600">{errors.patient.age.message}</p>
@@ -699,10 +723,12 @@ export default function GeneratePage() {
                       </div>
                       <Textarea
                         id="indication"
+                        inputMode="text"
+                        autoCapitalize="sentences"
                         {...register('indication')}
                         placeholder="Reason for study..."
                         rows={3}
-                        className="border-2 border-gray-200 focus:border-emerald-500"
+                        className="border-2 border-gray-200 focus:border-emerald-500 textarea-mobile"
                       />
                       {errors.indication && (
                         <p className="text-sm text-red-600">{errors.indication.message}</p>
@@ -722,10 +748,12 @@ export default function GeneratePage() {
                       </div>
                       <Textarea
                         id="findings"
+                        inputMode="text"
+                        autoCapitalize="sentences"
                         {...register('findings')}
                         placeholder="- Bullet 1\n- Bullet 2\nor free text..."
                         rows={6}
-                        className="border-2 border-gray-200 focus:border-emerald-500"
+                        className="border-2 border-gray-200 focus:border-emerald-500 textarea-mobile"
                       />
                       {errors.findings && (
                         <p className="text-sm text-red-600">{errors.findings.message}</p>
@@ -735,9 +763,11 @@ export default function GeneratePage() {
                       <Label htmlFor="technique" className="text-gray-900 font-medium">Technique (optional)</Label>
                       <Input
                         id="technique"
+                        inputMode="text"
+                        autoCapitalize="sentences"
                         {...register('technique')}
                         placeholder="Portal venous phase..."
-                        className="border-2 border-gray-200 focus:border-emerald-500"
+                        className="border-2 border-gray-200 focus:border-emerald-500 input-mobile"
                       />
                     </div>
                   </div>
@@ -833,17 +863,17 @@ export default function GeneratePage() {
           </motion.div>
         </AnimatePresence>
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between pt-6">
+        {/* Navigation - Sticky on mobile */}
+        <div className="sticky bottom-0 left-0 right-0 bg-white border-t md:static md:border-0 p-4 md:p-0 mt-6 flex items-center justify-between z-20 safe-bottom">
           <Button
             type="button"
             variant="outline"
             onClick={handlePrevious}
             disabled={currentStep === 1}
-            className="flex items-center gap-2 border-2"
+            className="flex items-center gap-2 border-2 touch-target btn-mobile"
           >
             <ChevronLeft className="w-4 h-4" />
-            Previous
+            <span className="hidden sm:inline">Previous</span>
           </Button>
 
           <div className="flex items-center gap-4">
@@ -851,16 +881,16 @@ export default function GeneratePage() {
               <Button
                 type="button"
                 onClick={handleNext}
-                className="btn-primary flex items-center gap-2"
+                className="btn-primary flex items-center gap-2 touch-target btn-mobile"
               >
-                Next
+                <span className="hidden sm:inline">Next</span>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             ) : (
               <Button
                 type="submit"
                 disabled={isSubmitting || formIsSubmitting || (usage?.subscription && usage.subscription.reports_used >= usage.subscription.reports_limit)}
-                className="btn-primary flex items-center gap-2"
+                className="btn-primary flex items-center gap-2 touch-target btn-mobile"
                 onClick={() => {
                   console.log('Generate Report button clicked - setting intentional submit');
                   setIntentionalSubmit(true);

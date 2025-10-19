@@ -43,12 +43,13 @@ const NavLink = ({ href, icon: Icon, label, isActive }: NavLinkProps) => {
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200",
+        "flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200",
+        "min-h-[44px] touch-manipulation",
         "hover:bg-accent/10 hover:text-accent",
         isActive && "bg-accent/10 text-accent font-medium border-l-2 border-accent"
       )}
     >
-      <Icon className={cn("w-4 h-4", isActive && "text-accent")} />
+      <Icon className={cn("w-5 h-5", isActive && "text-accent")} />
       <span className="hidden sm:inline">{label}</span>
     </Link>
   )
@@ -374,21 +375,22 @@ export function BottomNav({ pathname }: BottomNavProps) {
                 />
               )}
               
-              {/* Icon container with scale animation */}
+              {/* Icon container with scale animation and minimum touch target */}
               <motion.div
                 whileTap={{ scale: 0.9 }}
                 className={cn(
-                  "p-2 rounded-xl transition-all duration-200",
-                  isActive 
-                    ? "bg-primary/10" 
+                  "p-3 rounded-xl transition-all duration-200",
+                  "min-w-[44px] min-h-[44px] flex items-center justify-center",
+                  isActive
+                    ? "bg-primary/10"
                     : "group-active:bg-gray-100 dark:group-active:bg-gray-800"
                 )}
               >
-                <item.icon 
+                <item.icon
                   className={cn(
                     "w-6 h-6 transition-colors",
                     isActive ? "text-primary" : "text-gray-500 dark:text-gray-400"
-                  )} 
+                  )}
                 />
               </motion.div>
               
