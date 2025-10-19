@@ -1,7 +1,13 @@
 import { httpPost, httpGet } from '@/lib/http';
 import type { EnqueueInput } from '@/types/api';
 
-export type RecentJobRow = { job_id: string; status: string; template_id?: string };
+export type RecentJobRow = {
+  job_id: string;
+  status: string;
+  template_id?: string;
+  result?: Record<string, unknown>;
+  error?: string;
+};
 
 function toISO(d?: string | null): string | null {
   if (!d) return null;
@@ -54,7 +60,7 @@ export const getRecentJobs = (limit = 50) =>
   httpGet<RecentJobRow[]>(`/v1/jobs/recent?limit=${limit}`);
 
 export const getJob = (id: string) =>
-  httpGet<RecentJobRow>(`/v1/jobs/${encodeURIComponent(id)}`);
+  httpGet<JobStatusResponse>(`/v1/jobs/${encodeURIComponent(id)}`);
 
 export const getQueueStats = () =>
   httpGet<{ queue_depth: number; jobs_running: number }>('/v1/queue/stats');
