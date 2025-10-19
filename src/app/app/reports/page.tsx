@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Eye, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Eye, Search, ChevronLeft, ChevronRight, Plus, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getJob } from '@/lib/jobs';
@@ -11,6 +11,7 @@ import type { RecentJobRow } from '@/lib/jobs';
 import { createSupabaseBrowser } from "@/utils/supabase/browser";
 import { useAuthToken } from '@/hooks/useAuthToken';
 import { useJobStatusPolling } from "@/hooks/useSafePolling";
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 // Interface for localStorage job format
 interface LocalStorageJob {
@@ -227,13 +228,21 @@ export default function ReportsPage() {
 
   if (!rows.length) {
     return (
-      <div className="p-6 text-center space-y-4">
-        <div className="text-muted-foreground">
-          <p className="text-lg mb-2">No reports yet</p>
-          <p className="text-sm">Generate your first report to see it here</p>
+      <div className="p-6 text-center space-y-6">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+            <FileText className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <div className="text-muted-foreground">
+            <p className="text-lg font-semibold mb-2">No reports yet</p>
+            <p className="text-sm max-w-md mx-auto">
+              Your generated reports will appear here after generation completes. Start by selecting a template and generating your first report.
+            </p>
+          </div>
         </div>
-        <Button onClick={() => router.push('/app/templates')}>
-          Go to Templates
+        <Button onClick={() => router.push('/app/templates')} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Generate Your First Report
         </Button>
       </div>
     );
@@ -241,9 +250,12 @@ export default function ReportsPage() {
 
   return (
     <div className="p-6">
+      {/* Breadcrumb */}
+      <Breadcrumb items={[{ label: 'Reports' }]} />
+
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold">Your Recent Reports</h1>
-        <Button variant="outline" onClick={load} size="sm">
+        <Button variant="outline" onClick={load} size="sm" aria-label="Refresh reports list">
           Refresh
         </Button>
       </div>
@@ -251,7 +263,7 @@ export default function ReportsPage() {
       {/* Search and Sort Controls */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <Input
             placeholder="Search by job ID, template, or status..."
             value={searchQuery}
@@ -260,10 +272,11 @@ export default function ReportsPage() {
               setCurrentPage(1) // Reset to first page on search
             }}
             className="pl-9"
+            aria-label="Search reports"
           />
         </div>
         <Select value={sortBy} onValueChange={(value: 'newest' | 'oldest' | 'status') => setSortBy(value)}>
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]" aria-label="Sort reports">
             <SelectValue placeholder="Sort by..." />
           </SelectTrigger>
           <SelectContent>
@@ -338,8 +351,9 @@ export default function ReportsPage() {
               size="sm"
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
+              aria-label="Go to previous page"
             >
-              <ChevronLeft className="h-4 w-4 mr-1" />
+              <ChevronLeft className="h-4 w-4 mr-1" aria-hidden="true" />
               Previous
             </Button>
             <Button
@@ -347,9 +361,10 @@ export default function ReportsPage() {
               size="sm"
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
+              aria-label="Go to next page"
             >
               Next
-              <ChevronRight className="h-4 w-4 ml-1" />
+              <ChevronRight className="h-4 w-4 ml-1" aria-hidden="true" />
             </Button>
           </div>
         </div>
