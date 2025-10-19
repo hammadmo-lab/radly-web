@@ -12,15 +12,17 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
 import { httpGet } from '@/lib/http'
 import { enqueueJob } from '@/lib/jobs'
 import { buildSigninWithNext } from '@/lib/redirect'
 import { toast } from 'sonner'
-import { ArrowLeft, User, AlertCircle, FileText, Stethoscope, CheckCircle, ChevronLeft, ChevronRight, Eye } from 'lucide-react'
+import { ArrowLeft, User, AlertCircle, FileText, Stethoscope, CheckCircle, ChevronLeft, ChevronRight, Eye, RotateCcw } from 'lucide-react'
 import { useAuthToken } from '@/hooks/useAuthToken';
 import { useAuth } from '@/components/auth-provider';
 import { fetchUserData, userDataQueryConfig } from '@/lib/user-data';
+import { useFormDraft } from '@/hooks/useFormDraft';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,8 +114,8 @@ export default function GeneratePage() {
     formState: { errors, isValid, isSubmitting: formIsSubmitting },
   } = useForm<GenerateFormValues>({
     resolver: zodResolver(generateFormSchema),
-    mode: 'onSubmit', // Only validate on submit, not on change
-    reValidateMode: 'onSubmit', // Only re-validate on submit
+    mode: 'onBlur', // Validate on blur for earlier feedback
+    reValidateMode: 'onChange', // Re-validate on change after first blur
     defaultValues: {
       templateId: templateId || '',
       includePatient: true,
@@ -127,6 +129,27 @@ export default function GeneratePage() {
       },
     },
   })
+
+  // Auto-save form draft to localStorage
+  const { restoreDraft, clearDraft } = useFormDraft({
+    key: `generate-${templateId || 'default'}`,
+    watch,
+    setValue,
+    enabled: true,
+  })
+
+  // State for draft restoration
+  const [showDraftNotification, setShowDraftNotification] = useState(false)
+  const [draftData, setDraftData] = useState<Partial<GenerateFormValues> | null>(null)
+
+  // Check for draft on mount
+  useEffect(() => {
+    const draft = restoreDraft()
+    if (draft && draft.data) {
+      setDraftData(draft.data)
+      setShowDraftNotification(true)
+    }
+  }, [restoreDraft])
 
   // Update form defaults when profile loads
   useEffect(() => {
@@ -250,10 +273,13 @@ export default function GeneratePage() {
       }
 
       console.debug('Creating job with:', payload)
-      
+
       // Enqueue the job using new API helper
       const createResp = await enqueueJob(payload)
       const jobId = createResp.job_id
+
+      // Clear the draft after successful submission
+      clearDraft()
       
       console.debug('Job enqueued with ID:', jobId)
       
@@ -397,6 +423,44 @@ export default function GeneratePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Draft Restoration Notification */}
+      {showDraftNotification && draftData && (
+        <Alert className="bg-blue-50 border-blue-200">
+          <RotateCcw className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="flex items-center justify-between">
+            <span className="text-blue-900">
+              We found a saved draft from your previous session. Would you like to restore it?
+            </span>
+            <div className="flex gap-2 ml-4">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setShowDraftNotification(false)
+                  setDraftData(null)
+                  clearDraft()
+                }}
+              >
+                Discard
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  Object.entries(draftData).forEach(([key, value]) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    setValue(key as any, value, { shouldValidate: false })
+                  })
+                  setShowDraftNotification(false)
+                  toast.success('Draft restored successfully')
+                }}
+              >
+                Restore Draft
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Error Display */}
       {error && (
