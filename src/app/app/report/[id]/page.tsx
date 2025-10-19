@@ -14,6 +14,7 @@ import { useSafeClickHandler } from "@/hooks/useButtonResponsiveness";
 import { useJobStatusPolling, useQueueStatsPolling } from "@/hooks/useSafePolling";
 import { FormattingProfileSelector } from "@/components/formatting/FormattingProfileSelector";
 import { useAuth } from "@/components/auth-provider";
+import { useSubscriptionTier } from "@/hooks/useSubscription";
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,7 @@ export default function JobDetailPage() {
   const [selectedFormattingProfile, setSelectedFormattingProfile] = useState<string | null>(null);
 
   const { user } = useAuth();
+  const userTier = useSubscriptionTier();
 
   const startedAtMs = useRef<number | null>(null);
 
@@ -211,7 +213,7 @@ export default function JobDetailPage() {
             <FormattingProfileSelector
               value={selectedFormattingProfile}
               onChange={setSelectedFormattingProfile}
-              userTier="free" // TODO: Get from user subscription data
+              userTier={userTier}
             />
           </div>
           <Button
