@@ -1,7 +1,9 @@
 'use client';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Eye } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2, Eye, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getJob } from '@/lib/jobs';
@@ -28,6 +30,12 @@ export default function ReportsPage() {
   const [rows, setRows] = useState<RecentJobRow[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [pollingFailures, setPollingFailures] = useState(0);
+
+  // Pagination, search, and sort state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'status'>('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   // Authentication guard
   useEffect(() => {
@@ -156,6 +164,47 @@ export default function ReportsPage() {
     }
   }, { immediate: false });
 
+  // Filter, sort, and paginate rows
+  const { filteredAndSortedRows, totalPages, paginatedRows } = useMemo(() => {
+    // Filter by search query
+    const filtered = rows.filter(row => {
+      if (!searchQuery) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        row.job_id.toLowerCase().includes(query) ||
+        row.template_id?.toLowerCase().includes(query) ||
+        row.status.toLowerCase().includes(query)
+      );
+    });
+
+    // Sort
+    filtered.sort((a, b) => {
+      if (sortBy === 'newest') {
+        // Assume newer job_ids are higher (if UUID-based, this won't work perfectly)
+        return b.job_id.localeCompare(a.job_id);
+      } else if (sortBy === 'oldest') {
+        return a.job_id.localeCompare(b.job_id);
+      } else if (sortBy === 'status') {
+        const statusOrder = { 'running': 0, 'queued': 1, 'done': 2, 'error': 3 };
+        const aOrder = statusOrder[a.status as keyof typeof statusOrder] ?? 999;
+        const bOrder = statusOrder[b.status as keyof typeof statusOrder] ?? 999;
+        return aOrder - bOrder;
+      }
+      return 0;
+    });
+
+    // Paginate
+    const total = Math.ceil(filtered.length / itemsPerPage);
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const paginated = filtered.slice(startIdx, startIdx + itemsPerPage);
+
+    return {
+      filteredAndSortedRows: filtered,
+      totalPages: total,
+      paginatedRows: paginated,
+    };
+  }, [rows, searchQuery, sortBy, currentPage, itemsPerPage]);
+
   if (loading) {
     return (
       <div className="p-6 flex items-center gap-2 text-muted-foreground">
@@ -199,6 +248,39 @@ export default function ReportsPage() {
         </Button>
       </div>
 
+      {/* Search and Sort Controls */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by job ID, template, or status..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              setCurrentPage(1) // Reset to first page on search
+            }}
+            className="pl-9"
+          />
+        </div>
+        <Select value={sortBy} onValueChange={(value: 'newest' | 'oldest' | 'status') => setSortBy(value)}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Sort by..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">Newest First</SelectItem>
+            <SelectItem value="oldest">Oldest First</SelectItem>
+            <SelectItem value="status">By Status</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Results count */}
+      {searchQuery && (
+        <div className="mb-4 text-sm text-muted-foreground">
+          Found {filteredAndSortedRows.length} {filteredAndSortedRows.length === 1 ? 'report' : 'reports'}
+        </div>
+      )}
+
       {/* Warning banner for polling failures */}
       {pollingFailures >= 3 && (
         <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -215,7 +297,7 @@ export default function ReportsPage() {
       )}
 
       <ul className="space-y-3">
-        {rows.map((r) => (
+        {paginatedRows.map((r) => (
           <li key={r.job_id} className="flex items-center justify-between rounded-lg border p-4 hover:bg-gray-50 transition-colors">
             <div className="flex-1">
               <div className="font-medium text-gray-900">{r.template_id ?? 'Untitled Report'}</div>
@@ -243,6 +325,35 @@ export default function ReportsPage() {
           </li>
         ))}
       </ul>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-between border-t pt-4">
+          <div className="text-sm text-muted-foreground">
+            Page {currentPage} of {totalPages} ({filteredAndSortedRows.length} total {filteredAndSortedRows.length === 1 ? 'report' : 'reports'})
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
