@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Eye, Search, ChevronLeft, ChevronRight, Plus, FileText } from 'lucide-react';
+import { Eye, Search, ChevronLeft, ChevronRight, Plus, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getJob } from '@/lib/jobs';
@@ -12,6 +12,7 @@ import { createSupabaseBrowser } from "@/utils/supabase/browser";
 import { useAuthToken } from '@/hooks/useAuthToken';
 import { useJobStatusPolling } from "@/hooks/useSafePolling";
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Interface for localStorage job format
 interface LocalStorageJob {
@@ -208,9 +209,37 @@ export default function ReportsPage() {
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center gap-2 text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        Loading your recent jobs…
+      <div className="p-6">
+        {/* Breadcrumb skeleton */}
+        <Skeleton className="h-4 w-32 mb-4" />
+
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between mb-4">
+          <Skeleton className="h-7 w-48" />
+          <Skeleton className="h-9 w-20" />
+        </div>
+
+        {/* Search and sort controls skeleton */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <Skeleton className="h-10 flex-1" />
+          <Skeleton className="h-10 w-full sm:w-[180px]" />
+        </div>
+
+        {/* Report list skeleton */}
+        <ul className="space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <li key={i} className="rounded-lg border p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-5 w-64" />
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-3 w-72" />
+                </div>
+                <Skeleton className="h-9 w-32" />
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
     );
   }
