@@ -120,8 +120,8 @@ export function FormattingProfileSelector({
       </div>
 
       <Select
-        value={value || ''}
-        onValueChange={(val) => onChange(val === '' ? null : val)}
+        value={value || '__system_default__'}
+        onValueChange={(val) => onChange(val === '__system_default__' ? null : val)}
         disabled={disabled}
       >
         <SelectTrigger id="formatting-profile" className="border-2 focus:border-emerald-500">
@@ -129,7 +129,7 @@ export function FormattingProfileSelector({
         </SelectTrigger>
         <SelectContent>
           {/* System Default Option */}
-          <SelectItem value="">
+          <SelectItem value="__system_default__">
             <div className="flex items-center gap-2">
               <span>System Default</span>
             </div>
