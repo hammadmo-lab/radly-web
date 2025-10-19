@@ -14,12 +14,14 @@ import { useAuth } from '@/components/auth-provider'
 import { fetchUserData, updateUserData, userDataQueryConfig } from '@/lib/user-data'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  User, Settings, Wifi, Palette, 
-  Save, CheckCircle, AlertCircle, Clock, 
+import {
+  User, Settings, Wifi, Palette,
+  Save, CheckCircle, AlertCircle, Clock,
   Eye, Download, Upload,
-  Activity, Lock
+  Activity, Lock, FileText
 } from 'lucide-react'
+import { FormattingDashboard } from '@/components/formatting/FormattingDashboard'
+import { TierGate } from '@/components/formatting/TierGate'
 
 export const dynamic = 'force-dynamic';
 
@@ -608,6 +610,34 @@ export default function SettingsPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Custom Formatting Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="space-y-6"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+            <FileText className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold">Custom Report Formatting</h2>
+            <p className="text-gray-600">
+              Upload and manage DOCX templates for custom report formatting
+            </p>
+          </div>
+        </div>
+
+        <TierGate
+          requiredTiers={['professional', 'premium']}
+          currentTier="free"
+          featureName="Custom Report Formatting"
+        >
+          <FormattingDashboard />
+        </TierGate>
+      </motion.div>
     </div>
   )
 }
