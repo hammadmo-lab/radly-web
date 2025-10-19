@@ -50,6 +50,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const supabase = getSupabaseClient()
       await supabase.auth.signOut()
+
+      // Clear the token cache on sign out
+      const { clearTokenCache } = await import('@/lib/http')
+      clearTokenCache()
     } catch (error) {
       console.error('Error signing out:', error)
     }

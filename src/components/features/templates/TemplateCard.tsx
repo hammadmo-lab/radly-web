@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { formatDistanceToNow } from 'date-fns'
@@ -20,7 +21,7 @@ interface TemplateCardProps {
   }
 }
 
-export function TemplateCard({ template }: TemplateCardProps) {
+export const TemplateCard = memo(function TemplateCard({ template }: TemplateCardProps) {
   const router = useRouter()
   const templateName = template.title || template.name || 'Untitled Template'
   const updatedDate = template.updated_at 
@@ -109,4 +110,4 @@ export function TemplateCard({ template }: TemplateCardProps) {
       </Card>
     </motion.div>
   )
-}
+})

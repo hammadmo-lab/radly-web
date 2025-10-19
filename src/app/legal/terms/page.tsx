@@ -11,8 +11,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { FileText, CheckCircle } from 'lucide-react'
 
-export const dynamic = 'force-dynamic';
-
+// Terms page has dynamic user interactions but could use ISR
 export default function TermsPage() {
   const [termsContent, setTermsContent] = useState('')
   const [accepted, setAccepted] = useState(false)
