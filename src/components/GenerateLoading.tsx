@@ -1,10 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles, CheckCircle, Loader2 } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
+import { CheckCircle, Loader2 } from 'lucide-react'
 import { useSafePolling } from '@/hooks/useSafePolling'
 import { JobStatusResponse } from '@/lib/jobs'
+import { GenerationSteps } from './loading/GenerationSteps'
+import { MedicalTrivia } from './loading/MedicalTrivia'
+import { StatsDisplay } from './loading/StatsDisplay'
+import { ReportSkeleton } from './loading/ReportSkeleton'
+import { FloatingMedicalIcons } from './loading/FloatingMedicalIcons'
+import { triggerCelebration, isCelebrationEnabled } from '@/utils/celebration'
 
 interface GenerateLoadingProps {
   jobId?: string
@@ -15,15 +21,27 @@ interface GenerateLoadingProps {
 
 export function GenerateLoading({ jobId, queuePosition, estimatedTime, jobStatus }: GenerateLoadingProps) {
   const [progress, setProgress] = useState(0)
-  const [currentFactIndex, setCurrentFactIndex] = useState(0)
+  const startTimeRef = useRef<number | null>(null)
+  const celebrationTriggeredRef = useRef(false)
 
-  const facts = [
-    "🔬 Analyzing imaging parameters...",
-    "🧬 Processing anatomical landmarks...",
-    "⚡ Generating clinical observations...",
-    "📝 Formatting medical terminology...",
-    "✨ Finalizing report structure...",
-  ]
+  // Track start time for elapsed time calculation
+  useEffect(() => {
+    if (jobStatus?.status === 'running' && startTimeRef.current === null) {
+      startTimeRef.current = Date.now()
+    }
+  }, [jobStatus])
+
+  // Trigger celebration when report is done
+  useEffect(() => {
+    if (jobStatus?.status === 'done' && !celebrationTriggeredRef.current) {
+      celebrationTriggeredRef.current = true
+      if (isCelebrationEnabled()) {
+        setTimeout(() => {
+          triggerCelebration('success')
+        }, 500)
+      }
+    }
+  }, [jobStatus])
 
   // Update progress based on actual job status
   useEffect(() => {
@@ -71,69 +89,64 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime, jobStatus
     immediate: false 
   })
 
-  useSafePolling(() => {
-    setCurrentFactIndex(prev => (prev + 1) % facts.length)
-  }, { 
-    baseInterval: 3000, // Keep 3s for fact rotation
-    maxInterval: 5000, // Max 5s for UI
-    pauseWhenHidden: false, // Don't pause UI animations
-    immediate: false 
-  })
 
-  const steps = [
-    { label: 'Received', completed: jobStatus?.status === 'queued' || jobStatus?.status === 'running' || jobStatus?.status === 'done' },
-    { label: 'Processing', completed: jobStatus?.status === 'running' || jobStatus?.status === 'done' },
-    { label: 'Generating', completed: jobStatus?.status === 'running' || jobStatus?.status === 'done' },
-    { label: 'Finalizing', completed: jobStatus?.status === 'done' },
-  ]
+  // Calculate estimated remaining time
+  const estimatedSecondsRemaining = queuePosition && queuePosition > 0
+    ? queuePosition * 30 // Rough estimate: 30 seconds per job
+    : jobStatus?.status === 'running' ? 45 : undefined
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-violet-50 p-6">
-      <div className="w-full max-w-3xl">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-violet-50 p-4 sm:p-6 relative overflow-hidden">
+      {/* Floating Background Icons */}
+      <FloatingMedicalIcons />
+
+      <div className="w-full max-w-6xl relative z-10">
         {/* ANIMATED HEADER */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-8"
         >
           {/* ANIMATED ICON */}
           <motion.div
-            className="inline-flex p-8 rounded-full bg-gradient-to-br from-emerald-500 to-violet-500 shadow-2xl mb-6"
+            className="inline-flex p-6 sm:p-8 rounded-full bg-gradient-to-br from-emerald-500 to-violet-500 shadow-2xl mb-6"
             animate={{
-              scale: [1, 1.05, 1],
-              rotate: [0, 5, -5, 0],
+              scale: jobStatus?.status === 'done' ? 1 : [1, 1.05, 1],
+              rotate: jobStatus?.status === 'done' ? 0 : [0, 5, -5, 0],
             }}
             transition={{
               duration: 2,
-              repeat: Infinity,
+              repeat: jobStatus?.status === 'done' ? 0 : Infinity,
               ease: "easeInOut",
             }}
           >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            >
-              <Loader2 className="w-16 h-16 text-white" />
-            </motion.div>
+            {jobStatus?.status === 'done' ? (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200 }}
+              >
+                <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 text-white" />
+              </motion.div>
+            ) : (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 text-white" />
+              </motion.div>
+            )}
           </motion.div>
 
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            {jobStatus?.status === 'done' ? 'Report Generated!' : 'Generating Your Report'}
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            {jobStatus?.status === 'done' ? 'Report Generated! 🎉' : 'Generating Your Report'}
           </h1>
 
-          {/* ROTATING FACTS */}
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={currentFactIndex}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-              className="text-2xl text-gray-600 font-medium"
-            >
-              {jobStatus?.status === 'done' ? '✅ Report ready for viewing!' : facts[currentFactIndex]}
-            </motion.p>
-          </AnimatePresence>
+          <p className="text-lg sm:text-xl text-gray-600">
+            {jobStatus?.status === 'done'
+              ? 'Your medical report is ready for review'
+              : 'Please wait while we create your professional medical report'}
+          </p>
         </motion.div>
 
         {/* MAIN CARD */}
@@ -143,17 +156,29 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime, jobStatus
           className="bg-white rounded-3xl border-2 border-gray-200 shadow-2xl overflow-hidden"
         >
           {/* PROGRESS SECTION */}
-          <div className="p-10 space-y-8">
+          <div className="p-6 sm:p-8 lg:p-10 space-y-6 sm:space-y-8">
+            {/* Stats Display */}
+            <StatsDisplay
+              startTime={startTimeRef.current}
+              jobStatus={jobStatus?.status as 'queued' | 'running' | 'done' | 'error'}
+              estimatedSeconds={estimatedSecondsRemaining}
+            />
+
             {/* Progress Bar */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold text-gray-700">Progress</span>
-                <span className="text-3xl font-bold text-emerald-600">
+                <span className="text-base sm:text-lg font-semibold text-gray-700">Overall Progress</span>
+                <motion.span
+                  key={Math.round(progress)}
+                  initial={{ scale: 1.2 }}
+                  animate={{ scale: 1 }}
+                  className="text-2xl sm:text-3xl font-bold text-emerald-600"
+                >
                   {Math.round(progress)}%
-                </span>
+                </motion.span>
               </div>
-              
-              <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden">
+
+              <div className="relative h-3 sm:h-4 bg-gray-100 rounded-full overflow-hidden">
                 <motion.div
                   className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500 via-teal-500 to-violet-500 rounded-full"
                   initial={{ width: 0 }}
@@ -170,40 +195,22 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime, jobStatus
               </div>
             </div>
 
-            {/* STEPS TIMELINE */}
-            <div className="flex justify-between items-center relative pt-4">
-              {/* Connection line */}
-              <div className="absolute top-9 left-0 right-0 h-1 bg-gray-200 rounded-full" />
-              
-              {steps.map((step, index) => (
-                <div key={step.label} className="flex flex-col items-center relative z-10">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: index * 0.2 }}
-                    className={`
-                      w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-all duration-500
-                      ${step.completed 
-                        ? 'bg-gradient-to-br from-emerald-500 to-violet-500 text-white shadow-lg scale-110' 
-                        : 'bg-white border-4 border-gray-200 text-gray-400'
-                      }
-                    `}
-                  >
-                    {step.completed ? (
-                      <CheckCircle className="w-7 h-7" />
-                    ) : (
-                      <div className="w-3 h-3 rounded-full bg-gray-300" />
-                    )}
-                  </motion.div>
-                  <span className={`
-                    text-sm font-semibold transition-colors
-                    ${step.completed ? 'text-emerald-600' : 'text-gray-400'}
-                  `}>
-                    {step.label}
-                  </span>
-                </div>
-              ))}
+            {/* Generation Steps */}
+            <div className="space-y-3">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-800">Generation Progress</h3>
+              <GenerationSteps
+                currentProgress={progress}
+                jobStatus={jobStatus?.status as 'queued' | 'running' | 'done' | 'error'}
+              />
             </div>
+
+            {/* Report Preview Skeleton */}
+            {(jobStatus?.status === 'running' || progress > 30) && (
+              <div className="space-y-3">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800">Report Structure</h3>
+                <ReportSkeleton progress={progress} />
+              </div>
+            )}
 
             {/* QUEUE INFO */}
             {(queuePosition !== null && queuePosition !== undefined && queuePosition > 0) ? (
@@ -227,25 +234,11 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime, jobStatus
               </motion.div>
             ) : null}
 
-            {/* PRO TIP */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
-              className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border-2 border-amber-200"
-            >
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-white rounded-xl shadow-sm">
-                  <Sparkles className="w-6 h-6 text-amber-500" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">Pro Tip</h3>
-                  <p className="text-gray-700">
-                    Reports are automatically saved. You can safely close this page and return later to view your completed report in the Reports section.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
+            {/* Medical Trivia / Educational Content */}
+            <div className="space-y-3">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-800">Did You Know?</h3>
+              <MedicalTrivia rotationInterval={5000} />
+            </div>
           </div>
 
           {/* JOB ID FOOTER */}
