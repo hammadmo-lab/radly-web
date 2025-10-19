@@ -24,6 +24,9 @@ import { useAuth } from '@/components/auth-provider';
 import { fetchUserData, userDataQueryConfig } from '@/lib/user-data';
 import { useFormDraft } from '@/hooks/useFormDraft';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { HelpCircle } from 'lucide-react';
+import { celebrateSuccess } from '@/lib/confetti';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,7 +115,7 @@ export default function GeneratePage() {
     watch,
     setValue,
     reset,
-    formState: { errors, isValid, isSubmitting: formIsSubmitting },
+    formState: { errors, isValid, isDirty, isSubmitting: formIsSubmitting },
   } = useForm<GenerateFormValues>({
     resolver: zodResolver(generateFormSchema),
     mode: 'onBlur', // Validate on blur for earlier feedback
@@ -200,6 +203,22 @@ export default function GeneratePage() {
     }
   }, [currentStep]);
 
+  // Warn user before leaving page with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Only warn if form has unsaved changes and we haven't just submitted
+      if (isDirty && !formIsSubmitting) {
+        e.preventDefault()
+        // Modern browsers ignore custom messages, but we still need to set returnValue
+        e.returnValue = ''
+        return ''
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [isDirty, formIsSubmitting])
+
   const handleNext = () => {
     console.log('handleNext called, currentStep:', currentStep);
     if (currentStep < 4) {
@@ -281,9 +300,12 @@ export default function GeneratePage() {
 
       // Clear the draft after successful submission
       clearDraft()
-      
+
+      // Trigger success celebration
+      celebrateSuccess()
+
       console.debug('Job enqueued with ID:', jobId)
-      
+
       // Add optimistic row to localStorage with user-specific key
       try {
         if (userId) {
@@ -661,43 +683,65 @@ export default function GeneratePage() {
                 </div>
 
                 {/* Form Fields */}
-                <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="indication" className="text-gray-900 font-medium">Indication / Clinical history (required)</Label>
-                    <Textarea
-                      id="indication"
-                      {...register('indication')}
-                      placeholder="Reason for study..."
-                      rows={3}
-                      className="border-2 border-gray-200 focus:border-emerald-500"
-                    />
-                    {errors.indication && (
-                      <p className="text-sm text-red-600">{errors.indication.message}</p>
-                    )}
+                <TooltipProvider>
+                  <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="indication" className="text-gray-900 font-medium">Indication / Clinical history (required)</Label>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p>The clinical reason for ordering this study. Include relevant symptoms, prior diagnoses, or follow-up information.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <Textarea
+                        id="indication"
+                        {...register('indication')}
+                        placeholder="Reason for study..."
+                        rows={3}
+                        className="border-2 border-gray-200 focus:border-emerald-500"
+                      />
+                      {errors.indication && (
+                        <p className="text-sm text-red-600">{errors.indication.message}</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="findings" className="text-gray-900 font-medium">Findings (required)</Label>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p>Your radiological observations. Can be bulleted or free text. This will be organized into the findings section of the report.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <Textarea
+                        id="findings"
+                        {...register('findings')}
+                        placeholder="- Bullet 1\n- Bullet 2\nor free text..."
+                        rows={6}
+                        className="border-2 border-gray-200 focus:border-emerald-500"
+                      />
+                      {errors.findings && (
+                        <p className="text-sm text-red-600">{errors.findings.message}</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="technique" className="text-gray-900 font-medium">Technique (optional)</Label>
+                      <Input
+                        id="technique"
+                        {...register('technique')}
+                        placeholder="Portal venous phase..."
+                        className="border-2 border-gray-200 focus:border-emerald-500"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="findings" className="text-gray-900 font-medium">Findings (required)</Label>
-                    <Textarea
-                      id="findings"
-                      {...register('findings')}
-                      placeholder="- Bullet 1\n- Bullet 2\nor free text..."
-                      rows={6}
-                      className="border-2 border-gray-200 focus:border-emerald-500"
-                    />
-                    {errors.findings && (
-                      <p className="text-sm text-red-600">{errors.findings.message}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="technique" className="text-gray-900 font-medium">Technique (optional)</Label>
-                    <Input
-                      id="technique"
-                      {...register('technique')}
-                      placeholder="Portal venous phase..."
-                      className="border-2 border-gray-200 focus:border-emerald-500"
-                    />
-                  </div>
-                </div>
+                </TooltipProvider>
               </div>
             )}
 
