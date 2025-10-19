@@ -23,6 +23,7 @@ import { useAuthToken } from '@/hooks/useAuthToken';
 import { useAuth } from '@/components/auth-provider';
 import { fetchUserData, userDataQueryConfig } from '@/lib/user-data';
 import { useFormDraft } from '@/hooks/useFormDraft';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 
 export const dynamic = 'force-dynamic';
 
@@ -366,12 +367,21 @@ export default function GeneratePage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 pb-24 md:pb-8 px-4 sm:px-0">
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          { label: 'Templates', href: '/app/templates' },
+          { label: 'Generate Report' }
+        ]}
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <Button
           variant="ghost"
           onClick={() => router.push('/app/dashboard')}
           className="gap-2"
+          aria-label="Go back to dashboard"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
