@@ -22,12 +22,14 @@ import {
 } from 'lucide-react'
 import { FormattingDashboard } from '@/components/formatting/FormattingDashboard'
 import { TierGate } from '@/components/formatting/TierGate'
+import { useSubscriptionTier } from '@/hooks/useSubscription'
 
 export const dynamic = 'force-dynamic';
 
 export default function SettingsPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
+  const currentTier = useSubscriptionTier() // Fetch real subscription tier
   const [defaultSignatureName, setDefaultSignatureName] = useState('')
   const [defaultDateFormat, setDefaultDateFormat] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -632,7 +634,7 @@ export default function SettingsPage() {
 
         <TierGate
           requiredTiers={['professional', 'premium']}
-          currentTier="free"
+          currentTier={currentTier}
           featureName="Custom Report Formatting"
         >
           <FormattingDashboard />
