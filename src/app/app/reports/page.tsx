@@ -13,6 +13,8 @@ import { useAuthToken } from '@/hooks/useAuthToken';
 import { useJobStatusPolling } from "@/hooks/useSafePolling";
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PullToRefresh } from '@/components/shared/PullToRefresh';
+import { triggerHaptic } from '@/utils/haptics';
 
 // Interface for localStorage job format
 interface LocalStorageJob {
@@ -207,6 +209,12 @@ export default function ReportsPage() {
     };
   }, [rows, searchQuery, sortBy, currentPage, itemsPerPage]);
 
+  const handleRefresh = useCallback(async () => {
+    triggerHaptic('light');
+    await load();
+    triggerHaptic('success');
+  }, [load]);
+
   if (loading) {
     return (
       <div className="p-6">
@@ -278,16 +286,20 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="p-6">
-      {/* Breadcrumb */}
-      <Breadcrumb items={[{ label: 'Reports' }]} />
+    <PullToRefresh onRefresh={handleRefresh} enabled={!loading}>
+      <div className="p-4 sm:p-6">
+        {/* Breadcrumb */}
+        <Breadcrumb items={[{ label: 'Reports' }]} />
 
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold">Your Recent Reports</h1>
-        <Button variant="outline" onClick={load} size="sm" aria-label="Refresh reports list">
-          Refresh
-        </Button>
-      </div>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl sm:text-2xl font-semibold">Your Recent Reports</h1>
+          <Button variant="outline" onClick={() => {
+            triggerHaptic('light');
+            load();
+          }} size="sm" aria-label="Refresh reports list" className="touch-target">
+            Refresh
+          </Button>
+        </div>
 
       {/* Search and Sort Controls */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -340,28 +352,32 @@ export default function ReportsPage() {
 
       <ul className="space-y-3">
         {paginatedRows.map((r) => (
-          <li key={r.job_id} className="flex items-center justify-between rounded-lg border p-4 hover:bg-gray-50 transition-colors">
+          <li key={r.job_id} className="flex flex-col sm:flex-row sm:items-center justify-between rounded-lg border p-4 hover:bg-gray-50 transition-colors touch-manipulation gap-3 sm:gap-0">
             <div className="flex-1">
               <div className="font-medium text-gray-900">{r.template_id ?? 'Untitled Report'}</div>
               <div className="text-sm text-muted-foreground mt-1">
                 Status: <span className={`font-medium ${
-                  r.status === 'done' ? 'text-green-600' : 
-                  r.status === 'running' ? 'text-blue-600' : 
-                  r.status === 'error' ? 'text-red-600' : 
+                  r.status === 'done' ? 'text-green-600' :
+                  r.status === 'running' ? 'text-blue-600' :
+                  r.status === 'error' ? 'text-red-600' :
                   'text-yellow-600'
                 }`}>
-                  {r.status === 'done' ? 'Completed' : 
-                   r.status === 'running' ? 'Generating' : 
-                   r.status === 'error' ? 'Failed' : 
+                  {r.status === 'done' ? 'Completed' :
+                   r.status === 'running' ? 'Generating' :
+                   r.status === 'error' ? 'Failed' :
                    'Queued'}
                 </span>
               </div>
-              <div className="text-xs text-gray-500 mt-1">Job ID: {r.job_id}</div>
+              <div className="text-xs text-gray-500 mt-1 truncate">Job ID: {r.job_id}</div>
             </div>
             <div className="flex items-center gap-3">
-              <Link href={`/app/report/${r.job_id}`} className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+              <Link
+                href={`/app/report/${r.job_id}`}
+                className="inline-flex items-center justify-center gap-2 px-4 py-3 sm:px-3 sm:py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors touch-target w-full sm:w-auto"
+                onClick={() => triggerHaptic('light')}
+              >
                 <Eye className="h-4 w-4" />
-                View Report
+                <span>View Report</span>
               </Link>
             </div>
           </li>
@@ -398,6 +414,7 @@ export default function ReportsPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </PullToRefresh>
   );
 }

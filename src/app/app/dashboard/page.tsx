@@ -23,7 +23,7 @@ export default function DashboardPage() {
   ], [])
 
   return (
-    <div className="space-y-8 pb-24 md:pb-8">
+    <div className="space-y-8 pb-24 md:pb-8 px-4 sm:px-0">
       {/* USAGE WIDGET - Top Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -37,7 +37,7 @@ export default function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-50 via-white to-violet-50 p-6 sm:p-8 lg:p-12 border-2 border-gray-100"
+        className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-emerald-50 via-white to-violet-50 p-6 sm:p-8 lg:p-12 border-2 border-gray-100"
       >
         <div className="flex items-center gap-3 mb-4">
           <Sparkles className="w-8 h-8 text-primary animate-pulse" />
@@ -77,8 +77,8 @@ export default function DashboardPage() {
         </div>
       </motion.div>
 
-      {/* STATS GRID - Animated Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* STATS GRID - Animated Cards with mobile overflow protection */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {stats.map((stat) => (
           <motion.div
             key={stat.label}
@@ -86,7 +86,7 @@ export default function DashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ y: -4 }}
           >
-            <Card className="card-modern">
+            <Card className="card-modern touch-target">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className={`p-3 rounded-xl bg-${stat.color}-50`}>
@@ -111,7 +111,7 @@ export default function DashboardPage() {
           <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           {[
             {
               icon: Plus,
@@ -135,9 +135,9 @@ export default function DashboardPage() {
               gradient: 'from-blue-500 to-cyan-500',
             },
           ].map((action) => (
-            <Card 
+            <Card
               key={action.title}
-              className="card-interactive group"
+              className="card-interactive group touch-manipulation"
               onClick={() => router.push(action.href)}
             >
               <CardContent className="p-6">
