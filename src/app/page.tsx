@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Zap, Shield, CheckCircle, ArrowRight, Clock, Target, FileText, Download, AlertTriangle, X, ArrowDown, Sparkles, Lightbulb, PartyPopper, AlertCircle } from "lucide-react";
+import { Zap, Shield, CheckCircle, ArrowRight, Clock, Target, FileText, Download, AlertTriangle, X, ArrowDown, Sparkles, Lightbulb, PartyPopper, AlertCircle, Settings } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase";
 
 export const dynamic = 'force-dynamic';
@@ -205,7 +205,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-6">
             <Card className="text-center hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-200 rounded-2xl p-8 shadow-md">
               <CardHeader className="pb-4">
                 <div className="w-18 h-18 bg-gradient-to-br from-purple-500 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
@@ -219,6 +219,23 @@ export default function Home() {
               <CardContent>
                 <CardDescription className="text-gray-600 text-sm leading-relaxed max-w-64 mx-auto">
                   CT, MRI, X-ray, ultrasound templates pre-loaded. No lengthy prompts needed like ChatGPT.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-200 rounded-2xl p-8 shadow-md">
+              <CardHeader className="pb-4">
+                <div className="w-18 h-18 bg-gradient-to-br from-orange-500 to-orange-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <Settings className="w-9 h-9 text-white" />
+                </div>
+                <CardTitle className="text-xl font-bold text-gray-900 mb-3 relative">
+                  Save Your Preferences
+                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-orange-500 rounded-full"></div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-gray-600 text-sm leading-relaxed max-w-64 mx-auto">
+                  Customize templates with instructions like &quot;always mention lymphadenopathy&quot; and Radly remembers forever.
                 </CardDescription>
               </CardContent>
             </Card>

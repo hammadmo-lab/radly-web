@@ -21,7 +21,8 @@ import {
   ChevronUp,
   Sparkles,
   Target,
-  ArrowLeft
+  ArrowLeft,
+  Settings
 } from "lucide-react";
 import { InteractiveDemo } from "@/components/features/InteractiveDemo";
 
@@ -485,6 +486,108 @@ export default function InstructionsPage() {
         </div>
       </section>
 
+      {/* Power User Features Section */}
+      <section className="py-16 lg:py-20 bg-white border-t border-gray-200">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-50 to-orange-50 border border-purple-300 rounded-full text-sm font-semibold text-gray-700 mb-4 shadow-sm">
+                <Settings className="w-4 h-4 text-purple-600 mr-2" />
+                Power User Feature
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                Save Time with Custom Instructions
+              </h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Set your preferences once, and Radly remembers them forever
+              </p>
+            </div>
+
+            <Card className="border-2 border-purple-200 shadow-xl">
+              <CardContent className="p-8">
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <Settings className="w-6 h-6 text-purple-600" />
+                      How It Works
+                    </h3>
+                    <p className="text-gray-700 mb-6 leading-relaxed">
+                      Click the ⚙️ Settings icon on any template card to add custom instructions that apply automatically to all future reports with that template.
+                    </p>
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <CheckCircle className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Example:</span> &quot;Always include comparison with prior studies&quot;
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <CheckCircle className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Example:</span> &quot;Use metric measurements only&quot;
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <CheckCircle className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Example:</span> &quot;Always mention presence or absence of lymphadenopathy&quot;
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <CheckCircle className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Example:</span> &quot;Include Fleischner Society guidelines for nodules&quot;
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-purple-50 to-orange-50 rounded-xl p-6 border-2 border-purple-200">
+                    <div className="bg-white rounded-lg p-4 shadow-sm mb-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-gray-900">Chest CT Template</h4>
+                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <Settings className="w-4 h-4 text-purple-600" />
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 italic">
+                        &quot;Always include Fleischner recommendations and compare with prior studies&quot;
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <ArrowRight className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 mt-4">
+                      <div className="flex items-start gap-2 mb-2">
+                        <Sparkles className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-sm font-semibold text-green-900">Applied Automatically</p>
+                      </div>
+                      <p className="text-sm text-gray-700">
+                        Every future report with this template will include your custom instructions - no need to repeat yourself!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-purple-50 border-l-4 border-purple-500 p-4 rounded">
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold text-purple-700">Pro Tip:</span> Find the ⚙️ Settings icon on the top-right corner of each template card in the Templates page. Your instructions are saved per template and apply to all future generations.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Interactive Demo Section */}
       <section className="py-16 lg:py-20 bg-white">
         <div className="container mx-auto px-4">
@@ -576,11 +679,15 @@ export default function InstructionsPage() {
                   <ul className="space-y-3 text-gray-700">
                     <li className="flex items-start gap-2">
                       <span className="text-purple-600 mt-1">•</span>
+                      <span><strong>Click the ⚙️ Settings icon</strong> on templates to save custom instructions</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-600 mt-1">•</span>
                       <span>Bookmark frequently used templates for faster access</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-purple-600 mt-1">•</span>
-                      <span>Review the "Recent Reports" section to reuse similar cases</span>
+                      <span>Review the &quot;Recent Reports&quot; section to reuse similar cases</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-purple-600 mt-1">•</span>

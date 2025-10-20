@@ -206,6 +206,13 @@ Validated for clinical accuracy`;
                     This template follows Lung-RADS classification standards
                   </p>
                 </div>
+
+                <div className="bg-orange-50 border-l-4 border-orange-500 p-3 rounded">
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold text-orange-700">💡 Pro Tip:</span> In the real app, click the ⚙️ Settings icon on any template to add custom instructions like &quot;always mention lymphadenopathy&quot; - Radly will remember your preferences forever!
+                  </p>
+                </div>
+
                 <div className="flex justify-end">
                   <Button onClick={handleNext} className="bg-purple-600 hover:bg-purple-700">
                     Next: Patient Info
