@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { Plus, Search, Filter, ChevronDown, X } from 'lucide-react'
+import { Plus, Search, Filter, ChevronDown, X, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
@@ -16,6 +16,7 @@ import {
 import { httpGet } from '@/lib/http'
 import { fetchTemplates } from '@/lib/templates'
 import { TemplateCardSkeleton } from '@/components/loading/TemplateCardSkeleton'
+import { CustomizeTemplateModal } from '@/components/features/CustomizeTemplateModal'
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,8 @@ export default function TemplatesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedModality, setSelectedModality] = useState<string | null>(null)
   const [selectedAnatomy, setSelectedAnatomy] = useState<string | null>(null)
+  const [customizeModalOpen, setCustomizeModalOpen] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string } | null>(null)
 
   // Clear selected anatomy when modality changes
   const handleModalityChange = (modality: string | null) => {
@@ -234,54 +237,87 @@ export default function TemplatesPage() {
             </div>
           ) : (
             filteredTemplates.map((template) => (
-              <Card 
+              <Card
                 key={template.id}
-                className="group bg-white border-2 border-gray-200 rounded-2xl p-6 hover:border-emerald-500 hover:shadow-xl transition-all cursor-pointer hover:-translate-y-1"
-                onClick={() => router.push(`/app/generate?templateId=${template.id}`)}
+                className="group bg-white border-2 border-gray-200 rounded-2xl p-6 hover:border-emerald-500 hover:shadow-xl transition-all relative"
               >
-                {/* Icon */}
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-violet-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-
-                {/* Badges */}
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {template.modality && (
-                    <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      {template.modality}
-                    </div>
-                  )}
-                  {template.anatomy && (
-                    <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-200">
-                      {template.anatomy}
-                    </div>
-                  )}
-                </div>
-
-                {/* Title */}
-                <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
-                  {template.title || 'Untitled Template'}
-                </h3>
-
-                {/* Description */}
-                {template.description && (
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                    {template.description}
-                  </p>
-                )}
-
-                {/* Action */}
-                <Button 
-                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-lg h-11 group-hover:shadow-lg transition-all"
+                {/* Customize Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedTemplate({ id: template.id, name: template.title || 'Untitled Template' });
+                    setCustomizeModalOpen(true);
+                  }}
+                  className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg bg-white border-2 border-gray-200 hover:border-purple-500 hover:bg-purple-50 transition-all z-10"
+                  title="Customize template"
                 >
-                  Use Template
-                </Button>
+                  <Settings className="w-4 h-4 text-gray-600 hover:text-purple-600" />
+                </button>
+
+                <div
+                  className="cursor-pointer"
+                  onClick={() => router.push(`/app/generate?templateId=${template.id}`)}
+                >
+                  {/* Icon */}
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-violet-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+
+                  {/* Badges */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {template.modality && (
+                      <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        {template.modality}
+                      </div>
+                    )}
+                    {template.anatomy && (
+                      <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-200">
+                        {template.anatomy}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
+                    {template.title || 'Untitled Template'}
+                  </h3>
+
+                  {/* Description */}
+                  {template.description && (
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                      {template.description}
+                    </p>
+                  )}
+
+                  {/* Action */}
+                  <Button
+                    className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-lg h-11 group-hover:shadow-lg transition-all"
+                  >
+                    Use Template
+                  </Button>
+                </div>
               </Card>
             ))
           )}
         </div>
+
+        {/* Customize Template Modal */}
+        {selectedTemplate && (
+          <CustomizeTemplateModal
+            templateId={selectedTemplate.id}
+            templateName={selectedTemplate.name}
+            isOpen={customizeModalOpen}
+            onClose={() => {
+              setCustomizeModalOpen(false);
+              setSelectedTemplate(null);
+            }}
+            onSaved={() => {
+              // Optionally refetch templates or show indicator
+            }}
+          />
+        )}
       </div>
     </div>
   )
