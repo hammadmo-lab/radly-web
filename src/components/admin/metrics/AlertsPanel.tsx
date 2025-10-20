@@ -8,7 +8,6 @@ import { AlertCircle, AlertTriangle, Info, CheckCircle, ChevronDown, ChevronUp, 
 import { Button } from '@/components/ui/button';
 import { generateAlerts } from '@/lib/metrics-helpers';
 import { DashboardMetrics, Alert as MetricAlert } from '@/lib/admin-metrics';
-import { cn } from '@/lib/utils';
 
 interface AlertsPanelProps {
   metrics: DashboardMetrics | undefined;

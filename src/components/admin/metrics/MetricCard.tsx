@@ -3,7 +3,7 @@
  * Enhanced metric card component with trends, sparklines, and targets
  */
 import React from 'react';
-import { Info, HelpCircle } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TrendIndicator } from './TrendIndicator';
 import { SparklineChart } from './SparklineChart';
