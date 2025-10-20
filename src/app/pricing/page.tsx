@@ -21,6 +21,7 @@ export default function PricingPage() {
   const [tiers, setTiers] = useState<Tier[]>([])
   const [region, setRegion] = useState<'egypt' | 'international'>('egypt')
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   // Helper function to parse features JSON string
@@ -36,10 +37,12 @@ export default function PricingPage() {
   const fetchTiers = useCallback(async () => {
     try {
       setLoading(true)
+      setError(null)
       const data = await httpGet<Tier[]>(`/v1/subscription/tiers?region=${region}`)
       setTiers(data)
     } catch (error) {
       console.error('Failed to fetch tiers:', error)
+      setError('Unable to load pricing information. Please try again later.')
     } finally {
       setLoading(false)
     }
@@ -63,6 +66,23 @@ export default function PricingPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-muted-foreground">Loading pricing...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="max-w-md w-full text-center">
+          <div className="mb-4 text-red-500 text-5xl">⚠️</div>
+          <h2 className="text-2xl font-bold text-foreground mb-2">
+            Oops! Something went wrong
+          </h2>
+          <p className="text-muted-foreground mb-6">{error}</p>
+          <Button onClick={fetchTiers} variant="default">
+            Try Again
+          </Button>
+        </div>
       </div>
     )
   }
