@@ -101,13 +101,32 @@ export default function TemplatesPage() {
               Select a template to generate your medical report
             </p>
           </div>
-          <Button 
+          <Button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold px-6 h-12 rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105 w-full sm:w-auto"
           >
             <Plus className="w-5 h-5 mr-2" />
             New Report
           </Button>
+        </div>
+
+        {/* CUSTOM INSTRUCTIONS BANNER */}
+        <div className="bg-gradient-to-r from-orange-50 to-purple-50 border-2 border-orange-300 rounded-2xl p-4 sm:p-6 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-400 rounded-full flex items-center justify-center flex-shrink-0">
+              <Settings className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-gray-900 mb-1">
+                💡 Save Time with Custom Instructions
+              </h3>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                Click the <span className="inline-flex items-center mx-1 px-1.5 py-0.5 bg-white border border-gray-300 rounded">
+                  <Settings className="w-3 h-3 text-gray-600" />
+                </span> <span className="font-semibold">Settings</span> icon on any template to add your preferences (like &quot;always mention lymphadenopathy&quot;). Radly will remember them forever and apply them to every report you generate with that template!
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* SEARCH BAR - WHITE BACKGROUND, NOT DARK! */}
@@ -249,7 +268,7 @@ export default function TemplatesPage() {
                     setCustomizeModalOpen(true);
                   }}
                   className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg bg-white border-2 border-gray-200 hover:border-purple-500 hover:bg-purple-50 transition-all z-10"
-                  title="Customize template"
+                  title="Add custom instructions - Set your preferences and Radly will remember them!"
                 >
                   <Settings className="w-4 h-4 text-gray-600 hover:text-purple-600" />
                 </button>
