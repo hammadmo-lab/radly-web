@@ -177,4 +177,37 @@ export class AdminApiClient {
       return {}
     }
   }
+
+  async deleteUser(userId: string): Promise<{ success: boolean; message: string }> {
+    const response = await fetch(`${this.baseUrl}/v1/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+      credentials: 'include',
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error')
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
+    }
+
+    return response.json()
+  }
+
+  async changeTier(userId: string, tierName: string, region: string = 'egypt'): Promise<{ success: boolean; message: string }> {
+    const response = await fetch(`${this.baseUrl}/v1/admin/users/${userId}/tier`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ tier_name: tierName, region }),
+      credentials: 'include',
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error')
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
+    }
+
+    return response.json()
+  }
 }

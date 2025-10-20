@@ -167,7 +167,7 @@ export function useUsageAnalytics(days: number = 30) {
 
 export function useRevenueAnalytics(days: number = 30) {
   const { adminKey, apiKey } = useAdminAuth()
-  
+
   return useQuery({
     queryKey: ['admin', 'analytics', 'revenue', days],
     queryFn: async () => {
@@ -187,5 +187,70 @@ export function useRevenueAnalytics(days: number = 30) {
       return failureCount < 2
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+  })
+}
+
+export function useDeleteUser() {
+  const { adminKey, apiKey } = useAdminAuth()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
+      const client = new AdminApiClient({ adminKey, apiKey })
+      return client.deleteUser(userId)
+    },
+    onSuccess: (data, userId) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'subscriptions'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'subscription', 'user-id', userId] })
+      toast.success('User deleted successfully')
+    },
+    onError: (error: Error) => {
+      if (error.message.includes('401')) {
+        toast.error('Authentication failed. Please check your admin credentials.')
+      } else if (error.message.includes('403')) {
+        toast.error('Access forbidden. You do not have permission to delete users.')
+      } else if (error.message.includes('404')) {
+        toast.error('User not found.')
+      } else {
+        toast.error(`Failed to delete user: ${error.message}`)
+      }
+    },
+    retry: false, // Don't retry delete operations
+  })
+}
+
+export function useChangeTier() {
+  const { adminKey, apiKey } = useAdminAuth()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ userId, tierName, region }: { userId: string; tierName: string; region?: string }) => {
+      if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
+      const client = new AdminApiClient({ adminKey, apiKey })
+      return client.changeTier(userId, tierName, region)
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'subscriptions'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'subscription', 'user-id', variables.userId] })
+      toast.success(`Tier changed to ${variables.tierName} successfully`)
+    },
+    onError: (error: Error) => {
+      if (error.message.includes('401')) {
+        toast.error('Authentication failed. Please check your admin credentials.')
+      } else if (error.message.includes('403')) {
+        toast.error('Access forbidden. You do not have permission to change tiers.')
+      } else if (error.message.includes('404')) {
+        toast.error('User not found.')
+      } else {
+        toast.error(`Failed to change tier: ${error.message}`)
+      }
+    },
+    retry: (failureCount, error) => {
+      if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
+        return false
+      }
+      return failureCount < 2
+    },
   })
 }

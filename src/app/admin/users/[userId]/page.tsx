@@ -2,18 +2,21 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { 
-  ArrowLeft, 
+import {
+  ArrowLeft,
   AlertCircle,
   Copy,
-  LogOut
+  LogOut,
+  Trash2,
+  Settings
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AdminGuard } from '@/components/admin/AdminGuard'
-import { ChangeTierDialog } from '@/components/admin/ChangeTierDialog'
+import { DeleteUserDialog } from '@/components/admin/DeleteUserDialog'
+import { EnhancedChangeTierDialog } from '@/components/admin/EnhancedChangeTierDialog'
 import { useUserSubscription } from '@/hooks/useAdminData'
 import { useAdminAuth } from '@/components/admin/AdminAuthProvider'
 import { useUserEmails } from '@/hooks/useUserEmails'
@@ -24,7 +27,8 @@ export default function UserDetailsPage() {
   const router = useRouter()
   const { logout } = useAdminAuth()
   const [isChangeTierOpen, setIsChangeTierOpen] = useState(false)
-  
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+
   const userId = params.userId as string
   const { data, isLoading, error } = useUserSubscription(userId)
   const { data: emailMap } = useUserEmails([userId])
@@ -182,10 +186,29 @@ export default function UserDetailsPage() {
             {/* User ID Header */}
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold">User Details</h1>
-              <Button variant="outline" size="sm" onClick={copyUserId}>
-                <Copy className="h-4 w-4 mr-2" />
-                Copy ID
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={copyUserId}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy ID
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsChangeTierOpen(true)}
+                  disabled={!data?.subscription}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Change Tier
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setIsDeleteOpen(true)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete User
+                </Button>
+              </div>
             </div>
             
             {/* User ID Card */}
@@ -258,11 +281,20 @@ export default function UserDetailsPage() {
           </div>
         </main>
 
-        {/* Change Tier Dialog */}
-        <ChangeTierDialog
+        {/* Dialogs */}
+        <EnhancedChangeTierDialog
           isOpen={isChangeTierOpen}
           onClose={() => setIsChangeTierOpen(false)}
-          userEmail={userId}
+          userId={userId}
+          userEmail={userEmail}
+          currentTier={data?.subscription?.tier_name}
+        />
+
+        <DeleteUserDialog
+          isOpen={isDeleteOpen}
+          onClose={() => setIsDeleteOpen(false)}
+          userId={userId}
+          userEmail={userEmail}
         />
       </div>
     </AdminGuard>

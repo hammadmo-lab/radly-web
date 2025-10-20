@@ -41,11 +41,11 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Required for Next.js
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://static.cloudflareinsights.com", // Required for Next.js + Cloudflare
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-      `connect-src 'self' ${apiBase} https://*.supabase.co`,
+      `connect-src 'self' ${apiBase} https://*.supabase.co https://cloudflareinsights.com`,
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
