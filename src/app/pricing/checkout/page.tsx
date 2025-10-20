@@ -102,34 +102,24 @@ function CheckoutContent() {
                   Payment Instructions
                 </h2>
 
-                {/* Bank Transfer */}
+                {/* Instapay Transfer */}
                 <Card className="bg-muted/50">
                   <CardHeader>
-                    <CardTitle className="text-lg">Option 1: Bank Transfer</CardTitle>
+                    <CardTitle className="text-lg">Instapay Transfer</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div>
-                      <label className="text-sm text-muted-foreground">Bank Name</label>
-                      <div className="flex items-center justify-between bg-background rounded-md px-3 py-2 border mt-1">
-                        <span className="font-medium">Banque Misr</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyToClipboard('Banque Misr')}
-                        >
-                          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                        </Button>
-                      </div>
-                    </div>
+                    <p className="text-muted-foreground">
+                      Send payment via Instapay to the following username:
+                    </p>
 
                     <div>
-                      <label className="text-sm text-muted-foreground">Account Number</label>
+                      <label className="text-sm text-muted-foreground">Instapay Username</label>
                       <div className="flex items-center justify-between bg-background rounded-md px-3 py-2 border mt-1">
-                        <span className="font-medium font-mono">1234567890123456</span>
+                        <span className="font-medium text-lg">@hammadmo</span>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => copyToClipboard('1234567890123456')}
+                          onClick={() => copyToClipboard('@hammadmo')}
                         >
                           {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                         </Button>
@@ -150,40 +140,11 @@ function CheckoutContent() {
                       </div>
                     </div>
 
-                    <div>
-                      <label className="text-sm text-muted-foreground">Reference</label>
-                      <div className="bg-background rounded-md px-3 py-2 border mt-1">
-                        <span className="font-medium">Your email address</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Please include your registered email in the transfer reference
+                    <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mt-4">
+                      <p className="text-sm text-blue-900">
+                        <span className="font-semibold">💡 Important:</span> After completing the transfer, please take a screenshot of the transaction confirmation.
                       </p>
                     </div>
-                  </CardContent>
-                </Card>
-
-                {/* Fawry */}
-                <Card className="bg-muted/50">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Option 2: Fawry</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground mb-4">
-                      Visit any Fawry location and use this payment code:
-                    </p>
-                    <div className="flex items-center justify-between bg-background rounded-md px-4 py-3 border">
-                      <span className="text-2xl font-bold text-primary">12345678</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard('12345678')}
-                      >
-                        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      </Button>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-3">
-                      Amount to pay: <span className="font-semibold">{tierInfo.price_monthly} EGP</span>
-                    </p>
                   </CardContent>
                 </Card>
 
