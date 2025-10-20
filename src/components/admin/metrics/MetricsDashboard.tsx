@@ -17,6 +17,8 @@ import { DatabaseMetricsChart } from './DatabaseMetricsChart';
 import { AlertsPanel } from './AlertsPanel';
 import { UserMetricsPanel } from './UserMetricsPanel';
 import { MetricsLoading } from './MetricsLoading';
+import { StatusSummary } from './StatusSummary';
+import { generateAlerts } from '@/lib/metrics-helpers';
 
 const TIME_RANGES = [
   { value: '5m', label: 'Last 5 minutes' },
@@ -100,7 +102,7 @@ export function MetricsDashboard() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -120,7 +122,7 @@ export function MetricsDashboard() {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger className="w-48">
@@ -134,18 +136,24 @@ export function MetricsDashboard() {
               ))}
             </SelectContent>
           </Select>
-          
+
           <Button onClick={handleRefresh} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          
+
           <Button onClick={handleExport} variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
         </div>
       </div>
+
+      {/* Status Summary */}
+      <StatusSummary
+        alerts={generateAlerts(data)}
+        uptime={data.system_health?.uptime}
+      />
 
       {/* Overview Cards */}
       <OverviewCards data={data} />
