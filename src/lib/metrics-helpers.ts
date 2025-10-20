@@ -100,7 +100,7 @@ export function extractSparkline(
 
   // Take last N points
   const values = series.values.slice(-maxPoints);
-  return values.map(([_, value]) => parseFloat(value));
+  return values.map(([, value]) => parseFloat(value));
 }
 
 /**

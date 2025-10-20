@@ -68,8 +68,10 @@ export function UserMetricsPanel({ userJobSuccess, rateLimits }: UserMetricsPane
           title="Success Rate Trend"
           value="+2.3%"
           status="success"
-          trend="up"
+          change={2.3}
+          period="vs last hour"
           icon={<TrendingUp className="h-5 w-5" />}
+          description="Change in job success rate compared to previous period"
         />
       </div>
 

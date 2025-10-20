@@ -5,7 +5,7 @@
 import React, { useMemo } from 'react';
 import { MetricCard } from './MetricCard';
 import { ResponsiveGrid } from './ResponsiveGrid';
-import { Shield, Database, DollarSign, AlertTriangle, Clock, TrendingUp } from 'lucide-react';
+import { Shield, Database, DollarSign, AlertTriangle } from 'lucide-react';
 import {
   formatCost,
   formatPercentage,
