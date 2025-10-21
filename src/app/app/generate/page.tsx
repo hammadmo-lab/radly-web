@@ -27,6 +27,9 @@ import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { HelpCircle } from 'lucide-react';
 import { celebrateSuccess } from '@/lib/confetti';
+import { VoiceInput } from '@/components/VoiceInput';
+import { UpgradePromptModal } from '@/components/UpgradePromptModal';
+import type { SubscriptionTier } from '@/types/transcription';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,6 +67,11 @@ export default function GeneratePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [intentionalSubmit, setIntentionalSubmit] = useState(false)
+
+  // Voice dictation state
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [upgradeReason, setUpgradeReason] = useState<'trial_exhausted' | 'tier_blocked' | 'daily_limit'>('tier_blocked')
+  const [currentTier, setCurrentTier] = useState<SubscriptionTier>('free')
 
   const { data: template } = useQuery({
     queryKey: ['template', templateId],
@@ -758,6 +766,40 @@ export default function GeneratePage() {
                       {errors.findings && (
                         <p className="text-sm text-red-600">{errors.findings.message}</p>
                       )}
+
+                      {/* Voice Input Integration */}
+                      <VoiceInput
+                        onTranscript={(text) => {
+                          // Append transcribed text to existing findings
+                          const currentFindings = watch('findings') || '';
+                          const newFindings = currentFindings
+                            ? `${currentFindings} ${text}`
+                            : text;
+                          setValue('findings', newFindings, { shouldValidate: true });
+                        }}
+                        onError={(errorMsg) => {
+                          toast.error(errorMsg);
+
+                          // Check if we should show upgrade modal
+                          if (errorMsg.includes('trial') || errorMsg.includes('upgrade') || errorMsg.includes('Starter')) {
+                            // Determine upgrade reason from error message
+                            if (errorMsg.includes('trial')) {
+                              setUpgradeReason('trial_exhausted');
+                            } else if (errorMsg.includes('daily limit')) {
+                              setUpgradeReason('daily_limit');
+                            } else {
+                              setUpgradeReason('tier_blocked');
+                            }
+                            setShowUpgradeModal(true);
+                          }
+                        }}
+                        onUpgradeRequired={(tier) => {
+                          setCurrentTier(tier);
+                          setUpgradeReason('tier_blocked');
+                          setShowUpgradeModal(true);
+                        }}
+                        disabled={isSubmitting}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="technique" className="text-gray-900 font-medium">Technique (optional)</Label>
@@ -902,6 +944,18 @@ export default function GeneratePage() {
           </div>
         </div>
       </form>
+
+      {/* Upgrade Prompt Modal */}
+      <UpgradePromptModal
+        open={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        currentTier={currentTier}
+        reason={upgradeReason}
+        onUpgrade={() => {
+          setShowUpgradeModal(false);
+          router.push('/pricing');
+        }}
+      />
     </div>
   )
 }
