@@ -6,9 +6,24 @@ import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const BottomSheet = DialogPrimitive.Root;
-const BottomSheetTrigger = DialogPrimitive.Trigger;
+
+const BottomSheetTrigger = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Trigger>
+>((props, ref) => (
+  <DialogPrimitive.Trigger ref={ref} {...props} />
+));
+BottomSheetTrigger.displayName = DialogPrimitive.Trigger.displayName;
+
 const BottomSheetPortal = DialogPrimitive.Portal;
-const BottomSheetClose = DialogPrimitive.Close;
+
+const BottomSheetClose = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Close>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Close>
+>((props, ref) => (
+  <DialogPrimitive.Close ref={ref} {...props} />
+));
+BottomSheetClose.displayName = DialogPrimitive.Close.displayName;
 
 const BottomSheetOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
