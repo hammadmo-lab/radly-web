@@ -53,6 +53,7 @@ export function useVoiceRecording(
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const durationTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const chunkTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get API base URL from environment or use default
   const apiBase = options.apiBase || process.env.NEXT_PUBLIC_API_BASE || 'http://localhost';
@@ -79,11 +80,30 @@ export function useVoiceRecording(
     }
   }, []);
 
+  const startChunkTimer = useCallback(() => {
+    // Periodically request data from MediaRecorder to ensure chunks are sent
+    // even if the browser is buffering them
+    chunkTimerRef.current = setInterval(() => {
+      if (mediaRecorderRef.current?.state === 'recording') {
+        console.log('⏰ Forcing MediaRecorder to flush buffered data');
+        mediaRecorderRef.current.requestData();
+      }
+    }, 250); // Request data every 250ms
+  }, []);
+
+  const stopChunkTimer = useCallback(() => {
+    if (chunkTimerRef.current) {
+      clearInterval(chunkTimerRef.current);
+      chunkTimerRef.current = null;
+    }
+  }, []);
+
   const handleError = useCallback(
     (err: Error | string) => {
       const errorMessage = typeof err === 'string' ? err : err.message;
       setError(errorMessage);
       setState('error');
+      stopChunkTimer(); // Ensure chunk timer is stopped on error
 
       if (options.onError) {
         options.onError(typeof err === 'string' ? new Error(err) : err);
@@ -92,7 +112,7 @@ export function useVoiceRecording(
       stopRecording();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [options]
+    [options, stopChunkTimer]
   );
 
   const handleWebSocketMessage = useCallback(
@@ -240,9 +260,14 @@ export function useVoiceRecording(
                 recorderState: mediaRecorderRef.current?.state,
               });
               if (mediaRecorderRef.current?.state === 'inactive') {
-                console.log('🎙️ Starting MediaRecorder with 100ms timeslice...');
-                mediaRecorderRef.current.start(100); // Send chunks every 100ms for faster response
+                console.log('🎙️ Starting MediaRecorder with 250ms timeslice...');
+                // Start with 250ms timeslice - recommended for Deepgram
+                mediaRecorderRef.current.start(250);
                 console.log('✅ MediaRecorder.start() called, state:', mediaRecorderRef.current.state);
+
+                // Start timer to periodically request data to prevent buffering
+                startChunkTimer();
+                console.log('✅ Chunk timer started to prevent buffering');
               } else {
                 console.error('❌ Cannot start MediaRecorder, state:', mediaRecorderRef.current?.state);
               }
@@ -279,10 +304,11 @@ export function useVoiceRecording(
         handleError('Failed to start recording');
       }
     }
-  }, [session, apiBase, state, handleWebSocketMessage, handleError]);
+  }, [session, apiBase, state, handleWebSocketMessage, handleError, startChunkTimer]);
 
   const stopRecording = useCallback(() => {
     stopDurationTimer();
+    stopChunkTimer();
 
     // Stop media recorder
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
@@ -307,7 +333,7 @@ export function useVoiceRecording(
     }
 
     mediaRecorderRef.current = null;
-  }, [state, stopDurationTimer]);
+  }, [state, stopDurationTimer, stopChunkTimer]);
 
   const clearTranscript = useCallback(() => {
     setTranscript('');
