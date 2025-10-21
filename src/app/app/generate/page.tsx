@@ -722,7 +722,9 @@ export default function GeneratePage() {
                         <Label htmlFor="indication" className="text-gray-900 font-medium">Indication / Clinical history (required)</Label>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                            <button className="inline-flex items-center justify-center" type="button">
+                              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                            </button>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs">
                             <p>The clinical reason for ordering this study. Include relevant symptoms, prior diagnoses, or follow-up information.</p>
@@ -747,7 +749,9 @@ export default function GeneratePage() {
                         <Label htmlFor="findings" className="text-gray-900 font-medium">Findings (required)</Label>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                            <button className="inline-flex items-center justify-center" type="button">
+                              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                            </button>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs">
                             <p>Your radiological observations. Can be bulleted or free text. This will be organized into the findings section of the report.</p>
