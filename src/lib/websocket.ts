@@ -45,6 +45,8 @@ export class TranscriptionWebSocket {
 
       const url = `${wsUrl}/v1/transcribe/stream?token=${encodeURIComponent(this.config.token)}`;
 
+      console.log('🔌 Connecting to WebSocket:', wsUrl + '/v1/transcribe/stream');
+
       this.ws = new WebSocket(url);
 
       this.ws.onopen = () => {
@@ -61,11 +63,13 @@ export class TranscriptionWebSocket {
         }
       };
 
-      this.ws.onerror = () => {
+      this.ws.onerror = (event) => {
+        console.error('❌ WebSocket error:', event);
         this.config.onError(new Error('WebSocket connection error'));
       };
 
       this.ws.onclose = (event) => {
+        console.log('🔌 WebSocket closed:', event.code, event.reason);
         this.config.onClose(event.code, event.reason);
 
         // Handle specific close codes
