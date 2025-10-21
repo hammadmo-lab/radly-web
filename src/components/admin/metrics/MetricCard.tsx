@@ -85,7 +85,9 @@ export function MetricCard({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <HelpCircle className="h-3.5 w-3.5 text-gray-400 cursor-help" />
+                  <button className="inline-flex items-center justify-center" type="button">
+                    <HelpCircle className="h-3.5 w-3.5 text-gray-400 cursor-help" />
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
                   <p className="text-xs">{description}</p>

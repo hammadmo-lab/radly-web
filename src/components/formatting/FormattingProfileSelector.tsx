@@ -107,7 +107,9 @@ export function FormattingProfileSelector({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Info className="w-4 h-4 text-gray-400 cursor-help" />
+              <button className="inline-flex items-center justify-center" type="button">
+                <Info className="w-4 h-4 text-gray-400 cursor-help" />
+              </button>
             </TooltipTrigger>
             <TooltipContent className="max-w-xs">
               <p className="text-xs">
