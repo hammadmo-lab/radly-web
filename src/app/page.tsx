@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Zap, CheckCircle, ArrowRight, Clock, Shield, FileText, Download, Sparkles, Lightbulb, Settings, Mic, Brain, BarChart3, Lock, Cpu } from "lucide-react";
+import { Zap, CheckCircle, ArrowRight, Clock, Shield, FileText, Download, Sparkles, Lock, Cpu, TrendingUp, AlertCircle, Brain, BarChart3, Stethoscope } from "lucide-react";
 import { getSupabaseClient } from "@/lib/supabase";
 import { motion } from "framer-motion";
 
@@ -55,108 +55,114 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-slate-100">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 lg:py-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-blue-50 opacity-40"></div>
-        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-emerald-200 to-teal-200 rounded-full opacity-10 blur-3xl"></div>
-        <div className="absolute bottom-0 right-10 w-96 h-96 bg-gradient-to-tl from-blue-200 to-emerald-200 rounded-full opacity-10 blur-3xl"></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900">
+      {/* Hero Section - Premium & Eye-Catching */}
+      <section className="relative overflow-hidden pt-16 pb-20 lg:pt-24 lg:pb-32">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-emerald-500/30 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-1/3 left-0 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl opacity-20"></div>
+        </div>
 
-        <div className="relative container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Badge */}
+        {/* Glowing grid background */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent"></div>
+        </div>
+
+        <div className="relative container mx-auto px-4 text-center">
+          <div className="max-w-5xl mx-auto">
+            {/* Animated Badge */}
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center px-4 py-2 bg-emerald-50 border border-emerald-300 rounded-full text-sm font-semibold text-emerald-700 mb-6"
+              initial={{ opacity: 0, y: -30, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 border border-emerald-500/50 backdrop-blur-sm rounded-full text-sm font-bold text-emerald-300 mb-8"
             >
-              <Sparkles className="w-4 h-4 mr-2" />
-              AI-Powered Medical Reporting Assistant
+              <Sparkles className="w-5 h-5 animate-spin" />
+              RADIOLOGY'S AI REVOLUTION
+              <TrendingUp className="w-5 h-5" />
             </motion.div>
 
-            {/* Logo */}
+            {/* MASSIVE LOGO */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.7 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="mb-8"
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              className="mb-12 relative"
             >
-              <Image
-                src="/brand/Radly.png"
-                alt="Radly Logo"
-                width={400}
-                height={400}
-                className="w-40 h-40 mx-auto drop-shadow-lg"
-              />
+              <div className="relative inline-block">
+                <div className="absolute -inset-8 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500 rounded-full blur-2xl opacity-30 animate-pulse"></div>
+                <Image
+                  src="/brand/Radly.png"
+                  alt="Radly Logo"
+                  width={600}
+                  height={600}
+                  className="w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 mx-auto drop-shadow-2xl relative z-10 filter brightness-110"
+                />
+              </div>
             </motion.div>
 
-            {/* Headline */}
+            {/* Powerful Headline */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight"
+              transition={{ duration: 0.7, delay: 0.3 }}
+              className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight tracking-tight"
             >
-              Professional Medical Reports in{" "}
-              <span className="text-gradient-brand">Under 2 Minutes</span>
+              Reports That Radiologists{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-blue-400 to-emerald-400 animate-pulse">
+                Actually Love
+              </span>
             </motion.h1>
 
-            {/* Subheading */}
+            {/* Compelling Subheading */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-xl sm:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed"
+              transition={{ duration: 0.7, delay: 0.4 }}
+              className="text-lg sm:text-xl lg:text-2xl text-emerald-100 mb-4 max-w-4xl mx-auto leading-relaxed"
             >
-              Your AI assistant generates clinically accurate, professionally formatted radiology reports.
-              <span className="block mt-2 text-emerald-600 font-semibold">Save 60% time on report writing while maintaining clinical accuracy.</span>
+              Not another generic AI tool. Radly is <span className="font-bold text-emerald-300">purpose-built for radiology</span> — understanding
+              clinical nuances, maintaining accuracy, and delivering reports that radiologists trust.
             </motion.p>
 
-            {/* Stats Row */}
+            {/* Key Metric */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="grid grid-cols-3 gap-4 mb-12 max-w-2xl mx-auto"
+              transition={{ duration: 0.7, delay: 0.5 }}
+              className="flex items-center justify-center gap-3 mb-12"
             >
-              <div className="bg-white/70 backdrop-blur border border-emerald-100 rounded-lg p-4 shadow-sm">
-                <div className="text-3xl font-bold text-emerald-600 mb-1">60%</div>
-                <p className="text-xs text-gray-600 font-semibold">Time Saved</p>
-              </div>
-              <div className="bg-white/70 backdrop-blur border border-blue-100 rounded-lg p-4 shadow-sm">
-                <div className="text-3xl font-bold text-blue-600 mb-1">100%</div>
-                <p className="text-xs text-gray-600 font-semibold">Medically Accurate</p>
-              </div>
-              <div className="bg-white/70 backdrop-blur border border-purple-100 rounded-lg p-4 shadow-sm">
-                <div className="text-3xl font-bold text-purple-600 mb-1">&lt;2 min</div>
-                <p className="text-xs text-gray-600 font-semibold">Per Report</p>
+              <div className="flex items-center gap-2 px-6 py-3 bg-emerald-500/20 border border-emerald-400/50 rounded-full">
+                <Zap className="w-5 h-5 text-emerald-300 animate-pulse" />
+                <span className="text-emerald-100 font-semibold">Reports 60% faster than manual writing</span>
               </div>
             </motion.div>
 
-            {/* CTAs */}
+            {/* Premium CTAs */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
+              transition={{ duration: 0.7, delay: 0.6 }}
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-8 py-6 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-10 py-7 text-lg font-bold rounded-xl shadow-2xl hover:shadow-emerald-500/50 transition-all transform hover:scale-105"
                 onClick={goToApp}
                 disabled={busy || !authChecked}
               >
-                Start Free (5 Reports)
-                <ArrowRight className="ml-2 w-5 h-5" />
+                {busy ? "Loading…" : !authChecked ? "Checking..." : "Start Free Trial"}
+                <ArrowRight className="ml-3 w-6 h-6" />
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="border-2 border-gray-400 hover:border-emerald-600 hover:text-emerald-600 px-8 py-6 text-lg font-bold rounded-xl transition-all"
-                onClick={goToPricing}
+                className="border-2 border-emerald-400/50 text-emerald-100 hover:bg-emerald-500/10 hover:border-emerald-300 px-10 py-7 text-lg font-bold rounded-xl transition-all"
+                onClick={goToInstructions}
               >
-                View Pricing
+                See How It Works
               </Button>
             </motion.div>
 
@@ -164,311 +170,114 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="flex flex-wrap justify-center items-center gap-6 sm:gap-8 text-gray-600 mt-12 text-sm"
+              transition={{ duration: 0.7, delay: 0.7 }}
+              className="mt-12 flex flex-wrap justify-center gap-6 text-sm"
             >
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-600" />
-                <span className="font-semibold">No Credit Card</span>
+              <div className="flex items-center gap-2 text-emerald-200">
+                <CheckCircle className="w-5 h-5 text-emerald-400" />
+                <span className="font-semibold">5 Free Reports</span>
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-600" />
-                <span className="font-semibold">AI-Validated</span>
+              <div className="flex items-center gap-2 text-emerald-200">
+                <Shield className="w-5 h-5 text-emerald-400" />
+                <span className="font-semibold">HIPAA Compliant</span>
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-600" />
-                <span className="font-semibold">PACS Ready</span>
+              <div className="flex items-center gap-2 text-emerald-200">
+                <Brain className="w-5 h-5 text-emerald-400" />
+                <span className="font-semibold">Medically Trained AI</span>
               </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* How It Works - 3 Step Flow */}
-      <section className="py-20 lg:py-28 bg-white border-t border-gray-100">
+      {/* Radly vs ChatGPT/Claude Comparison */}
+      <section className="relative py-20 lg:py-28 bg-gradient-to-b from-slate-800 to-slate-900 border-t border-emerald-500/20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4"
             >
-              Simple 3-Step Workflow
+              Why Radly ≠ ChatGPT, Claude, or Generic AI
             </motion.h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              From template selection to professional report export
+            <p className="text-lg text-emerald-200 max-w-3xl mx-auto">
+              Radiologists need specialized tools, not general-purpose chatbots
             </p>
           </div>
 
-          <div className="max-w-5xl mx-auto">
-            <div className="grid md:grid-cols-3 gap-8">
-              {/* Step 1 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0 }}
-              >
-                <div className="bg-gradient-to-br from-emerald-50 to-white border-2 border-emerald-200 rounded-2xl p-8 text-center hover:shadow-lg transition-all">
-                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <FileText className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Select Template</h3>
-                  <p className="text-gray-600 mb-4">
-                    Choose from 100+ specialized medical templates organized by modality
-                  </p>
-                  <div className="inline-block px-3 py-1 bg-emerald-100 border border-emerald-300 rounded-full text-xs font-semibold text-emerald-700">
-                    ~5 seconds
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Step 2 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-              >
-                <div className="bg-gradient-to-br from-blue-50 to-white border-2 border-blue-200 rounded-2xl p-8 text-center hover:shadow-lg transition-all">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <Brain className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Add Your Findings</h3>
-                  <p className="text-gray-600 mb-4">
-                    Type or dictate your findings. Text input, voice, or both - your choice
-                  </p>
-                  <div className="inline-block px-3 py-1 bg-blue-100 border border-blue-300 rounded-full text-xs font-semibold text-blue-700">
-                    ~30-60 seconds
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Step 3 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-              >
-                <div className="bg-gradient-to-br from-purple-50 to-white border-2 border-purple-200 rounded-2xl p-8 text-center hover:shadow-lg transition-all">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <Download className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Export Report</h3>
-                  <p className="text-gray-600 mb-4">
-                    Get a professional DOCX ready for your PACS or EHR system
-                  </p>
-                  <div className="inline-block px-3 py-1 bg-purple-100 border border-purple-300 rounded-full text-xs font-semibold text-purple-700">
-                    Instant
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Key Features - What Makes Radly Special */}
-      <section className="py-20 lg:py-28 bg-gradient-to-b from-slate-50 to-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4"
-            >
-              Why Radiologists Choose Radly
-            </motion.h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Purpose-built for efficiency, accuracy, and compliance
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0 }}
-            >
-              <Card className="border border-gray-200 hover:shadow-xl transition-all h-full bg-white">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
-                    <Zap className="w-6 h-6 text-emerald-600" />
-                  </div>
-                  <CardTitle className="text-lg text-gray-900">AI-Powered</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-gray-600">
-                    Your AI assistant structures findings into professional language automatically
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-            >
-              <Card className="border border-gray-200 hover:shadow-xl transition-all h-full bg-white">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                    <Shield className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <CardTitle className="text-lg text-gray-900">Clinically Validated</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-gray-600">
-                    Built-in validators verify medical terminology and prevent hallucinations
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card className="border border-gray-200 hover:shadow-xl transition-all h-full bg-white">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                    <CheckCircle className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <CardTitle className="text-lg text-gray-900">Standards Compliant</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-gray-600">
-                    Reports automatically follow LI-RADS, BI-RADS, and Lung-RADS standards
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-            >
-              <Card className="border border-gray-200 hover:shadow-xl transition-all h-full bg-white">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-                    <Mic className="w-6 h-6 text-orange-600" />
-                  </div>
-                  <CardTitle className="text-lg text-gray-900">Voice Dictation</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-gray-600">
-                    Optional AI voice input powered by Deepgram with 99%+ accuracy
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
-            >
-              <Card className="border border-gray-200 hover:shadow-xl transition-all h-full bg-white">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                    <Lock className="w-6 h-6 text-green-600" />
-                  </div>
-                  <CardTitle className="text-lg text-gray-900">Secure & Private</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-gray-600">
-                    HIPAA-compliant with end-to-end encryption and secure data handling
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5 }}
-            >
-              <Card className="border border-gray-200 hover:shadow-xl transition-all h-full bg-white">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                    <Cpu className="w-6 h-6 text-red-600" />
-                  </div>
-                  <CardTitle className="text-lg text-gray-900">Multiple Input Methods</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-gray-600">
-                    Type, dictate, or combine both - your AI assistant adapts to your workflow
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Time Comparison */}
-      <section className="py-20 lg:py-28 bg-white border-t border-gray-100">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4"
-            >
-              Your Time Matters
-            </motion.h2>
-          </div>
-
-          <div className="max-w-5xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* ChatGPT/Claude Problems */}
               <motion.div
                 initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
               >
-                <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-8 text-center">
-                  <Clock className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Traditional Method</h3>
-                  <div className="text-4xl font-bold text-red-600 mb-4">~10 min</div>
-                  <ul className="space-y-2 text-gray-600 text-sm mb-4">
-                    <li>• Manual typing from notes</li>
-                    <li>• Formatting in Word</li>
-                    <li>• Proofreading</li>
-                    <li>• Risk of errors</li>
+                <div className="bg-gradient-to-br from-red-900/40 to-red-800/20 border-2 border-red-500/30 rounded-2xl p-8 backdrop-blur-sm">
+                  <div className="flex items-center gap-3 mb-6">
+                    <AlertCircle className="w-8 h-8 text-red-400" />
+                    <h3 className="text-2xl font-bold text-red-200">Generic AI Tools</h3>
+                  </div>
+                  <ul className="space-y-4 text-red-100">
+                    <li className="flex items-start gap-3">
+                      <span className="text-red-400 font-bold mt-1">✗</span>
+                      <span><strong>Hallucinations:</strong> Can generate plausible-sounding but false medical findings</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-red-400 font-bold mt-1">✗</span>
+                      <span><strong>No Clinical Training:</strong> Don't understand radiological standards (LI-RADS, BI-RADS)</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-red-400 font-bold mt-1">✗</span>
+                      <span><strong>Liability Risk:</strong> No validation framework for medical accuracy</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-red-400 font-bold mt-1">✗</span>
+                      <span><strong>Generic Templates:</strong> Not optimized for radiology workflows</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-red-400 font-bold mt-1">✗</span>
+                      <span><strong>Slow:</strong> Requires multiple rounds of prompt engineering</span>
+                    </li>
                   </ul>
                 </div>
               </motion.div>
 
+              {/* Radly Advantages */}
               <motion.div
                 initial={{ opacity: 0, x: 50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
               >
-                <div className="bg-gradient-to-br from-emerald-600 to-teal-600 text-white rounded-2xl p-8 text-center shadow-xl">
-                  <Sparkles className="w-12 h-12 text-emerald-100 mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold mb-2">Radly with Your AI Assistant</h3>
-                  <div className="text-5xl font-bold mb-4">⚡ &lt;2 min</div>
-                  <ul className="space-y-2 text-emerald-50 text-sm mb-6">
-                    <li>✓ Select template</li>
-                    <li>✓ Add findings (typing or voice)</li>
-                    <li>✓ AI structures & validates</li>
-                    <li>✓ Export PACS-ready DOCX</li>
-                  </ul>
-                  <div className="bg-emerald-700 rounded-lg p-3 text-sm font-bold">
-                    Save 14+ hours per month per radiologist
+                <div className="bg-gradient-to-br from-emerald-900/40 to-blue-800/20 border-2 border-emerald-500/50 rounded-2xl p-8 backdrop-blur-sm">
+                  <div className="flex items-center gap-3 mb-6">
+                    <CheckCircle className="w-8 h-8 text-emerald-400 animate-pulse" />
+                    <h3 className="text-2xl font-bold text-emerald-200">Radly (Purpose-Built)</h3>
                   </div>
+                  <ul className="space-y-4 text-emerald-100">
+                    <li className="flex items-start gap-3">
+                      <span className="text-emerald-400 font-bold mt-1">✓</span>
+                      <span><strong>Validated Accuracy:</strong> Built-in validators prevent hallucinations and verify medical terms</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-emerald-400 font-bold mt-1">✓</span>
+                      <span><strong>Radiology Trained:</strong> Understands clinical standards, terminology, and best practices</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-emerald-400 font-bold mt-1">✓</span>
+                      <span><strong>Zero Risk:</strong> Medical AI framework with compliance and audit trails</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-emerald-400 font-bold mt-1">✓</span>
+                      <span><strong>Specialized Templates:</strong> 100+ templates following clinical guidelines</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-emerald-400 font-bold mt-1">✓</span>
+                      <span><strong>Instant Reports:</strong> One-click generation with voice input option</span>
+                    </li>
+                  </ul>
                 </div>
               </motion.div>
             </div>
@@ -476,38 +285,187 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing Preview */}
-      <section className="py-20 lg:py-28 bg-gradient-to-b from-slate-50 to-white">
+      {/* Radiologist Benefits Section */}
+      <section className="relative py-20 lg:py-28 bg-gradient-to-b from-slate-900 to-emerald-900/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4"
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4"
             >
-              Simple, Transparent Pricing
+              What Radiologists Actually Gain
             </motion.h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-              Start free with 5 reports. Upgrade when you're ready.
+            <p className="text-lg text-emerald-200">
+              Real benefits that matter for your practice
             </p>
-            <Button
-              size="lg"
-              className="bg-emerald-600 hover:bg-emerald-700 px-8 py-3 text-lg font-bold rounded-lg"
-              onClick={goToPricing}
+          </div>
+
+          <div className="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Benefit 1 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0 }}
+              className="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 border border-emerald-500/30 rounded-2xl p-8 backdrop-blur-sm hover:border-emerald-400/60 hover:shadow-xl hover:shadow-emerald-500/10 transition-all"
             >
-              See All Plans
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
+              <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+                <Clock className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">Save 14+ Hours/Month</h3>
+              <p className="text-emerald-100">
+                Stop spending 10 minutes per report. Radly generates clinically accurate reports in under 2 minutes.
+              </p>
+              <div className="mt-4 text-3xl font-bold text-emerald-400">60% faster</div>
+            </motion.div>
+
+            {/* Benefit 2 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-2xl p-8 backdrop-blur-sm hover:border-blue-400/60 hover:shadow-xl hover:shadow-blue-500/10 transition-all"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+                <Shield className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">100% Clinically Validated</h3>
+              <p className="text-blue-100">
+                No more worrying about AI hallucinations. Every report is verified against medical standards.
+              </p>
+              <div className="mt-4 text-emerald-400 font-bold">Zero liability risk</div>
+            </motion.div>
+
+            {/* Benefit 3 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-2xl p-8 backdrop-blur-sm hover:border-purple-400/60 hover:shadow-xl hover:shadow-purple-500/10 transition-all"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+                <Brain className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">Radiology-Specific AI</h3>
+              <p className="text-purple-100">
+                Understands LI-RADS, BI-RADS, Lung-RADS. Trained specifically for radiological reporting.
+              </p>
+              <div className="mt-4 text-emerald-400 font-bold">+100 templates</div>
+            </motion.div>
+
+            {/* Benefit 4 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 rounded-2xl p-8 backdrop-blur-sm hover:border-emerald-400/60 hover:shadow-xl hover:shadow-emerald-500/10 transition-all"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+                <FileText className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">Professional Reports</h3>
+              <p className="text-emerald-100">
+                PACS-ready DOCX exports. Perfectly formatted, signature-ready, immediately usable.
+              </p>
+              <div className="mt-4 text-emerald-400 font-bold">One-click export</div>
+            </motion.div>
+
+            {/* Benefit 5 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/30 rounded-2xl p-8 backdrop-blur-sm hover:border-blue-400/60 hover:shadow-xl hover:shadow-blue-500/10 transition-all"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+                <Cpu className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">Multiple Input Methods</h3>
+              <p className="text-blue-100">
+                Type, voice dictate, or combine both. Your workflow, your choice.
+              </p>
+              <div className="mt-4 text-emerald-400 font-bold">Flexible & adaptable</div>
+            </motion.div>
+
+            {/* Benefit 6 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+              className="bg-gradient-to-br from-pink-500/10 to-red-500/10 border border-pink-500/30 rounded-2xl p-8 backdrop-blur-sm hover:border-pink-400/60 hover:shadow-xl hover:shadow-pink-500/10 transition-all"
+            >
+              <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-red-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+                <Lock className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-3">HIPAA Compliant</h3>
+              <p className="text-pink-100">
+                Enterprise-grade security. Your patient data stays protected with end-to-end encryption.
+              </p>
+              <div className="mt-4 text-emerald-400 font-bold">Banking-level security</div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="relative py-16 lg:py-24 bg-slate-800 border-t border-emerald-500/20">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <div className="text-4xl sm:text-5xl font-bold text-emerald-400 mb-2">100+</div>
+              <p className="text-sm sm:text-base text-emerald-200">Medical Templates</p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-center"
+            >
+              <div className="text-4xl sm:text-5xl font-bold text-blue-400 mb-2">&lt;2 min</div>
+              <p className="text-sm sm:text-base text-blue-200">Per Report</p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="text-center"
+            >
+              <div className="text-4xl sm:text-5xl font-bold text-purple-400 mb-2">99%+</div>
+              <p className="text-sm sm:text-base text-purple-200">Accuracy</p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="text-center"
+            >
+              <div className="text-4xl sm:text-5xl font-bold text-pink-400 mb-2">14+ hrs</div>
+              <p className="text-sm sm:text-base text-pink-200">Saved Monthly</p>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 lg:py-28 bg-gradient-brand text-white relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-10">
-          <div className="absolute top-10 left-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 w-48 h-48 bg-white rounded-full blur-3xl"></div>
+      <section className="relative py-20 lg:py-28 bg-gradient-to-br from-emerald-600 via-emerald-700 to-blue-800 overflow-hidden">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-white rounded-full blur-3xl"></div>
         </div>
 
         <div className="relative container mx-auto px-4 text-center">
@@ -515,18 +473,18 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-5xl sm:text-6xl font-bold mb-6 leading-tight"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
           >
-            Meet Your AI Assistant
+            Ready to Transform Your Practice?
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-lg sm:text-xl mb-10 opacity-90 max-w-2xl mx-auto"
+            className="text-xl text-emerald-50 mb-10 max-w-2xl mx-auto"
           >
-            Experience the future of medical reporting. Start with 5 free reports, no credit card required.
+            Join radiologists who are reclaiming their time and focusing on what matters: patient care.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -537,19 +495,30 @@ export default function Home() {
           >
             <Button
               size="lg"
-              className="bg-white text-emerald-600 hover:bg-gray-100 px-10 py-6 text-lg font-bold rounded-xl shadow-xl"
+              className="bg-white text-emerald-700 hover:bg-emerald-50 px-10 py-7 text-lg font-bold rounded-xl shadow-2xl"
               onClick={goToApp}
               disabled={busy || !authChecked}
             >
               Get Started Free
-              <ArrowRight className="ml-2 w-5 h-5" />
+              <ArrowRight className="ml-3 w-6 h-6" />
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-2 border-white text-white hover:bg-white hover:text-emerald-700 px-10 py-7 text-lg font-bold rounded-xl"
+              onClick={goToPricing}
+            >
+              See Pricing
             </Button>
           </motion.div>
+          <p className="text-emerald-100 text-sm mt-8">
+            No credit card required • 5 free reports • Cancel anytime
+          </p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t py-12">
+      <footer className="bg-slate-900 border-t border-emerald-500/20 py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center space-y-6">
             <Image
@@ -560,22 +529,22 @@ export default function Home() {
               className="w-15 h-15"
             />
             <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <Link href="/instructions" className="text-gray-600 hover:text-emerald-600 transition-colors font-medium">
+              <Link href="/instructions" className="text-emerald-300 hover:text-emerald-200 transition-colors font-medium">
                 How It Works
               </Link>
-              <Link href="/pricing" className="text-gray-600 hover:text-emerald-600 transition-colors font-medium">
+              <Link href="/pricing" className="text-emerald-300 hover:text-emerald-200 transition-colors font-medium">
                 Pricing
               </Link>
-              <Link href="/legal/terms" className="text-gray-600 hover:text-emerald-600 transition-colors">
+              <Link href="/legal/terms" className="text-emerald-400 hover:text-emerald-300 transition-colors">
                 Terms of Service
               </Link>
-              <Link href="/legal/privacy" className="text-gray-600 hover:text-emerald-600 transition-colors">
+              <Link href="/legal/privacy" className="text-emerald-400 hover:text-emerald-300 transition-colors">
                 Privacy Policy
               </Link>
             </div>
           </div>
-          <div className="text-center text-gray-500 text-sm mt-8">
-            <p>&copy; 2025 Radly. Your AI Assistant for Radiology Reports.</p>
+          <div className="text-center text-emerald-600 text-sm mt-8">
+            <p>&copy; 2025 Radly. Radiology's AI Revolution.</p>
           </div>
         </div>
       </footer>
