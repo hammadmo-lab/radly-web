@@ -82,13 +82,14 @@ export function useVoiceRecording(
 
   const startChunkTimer = useCallback(() => {
     // Periodically request data from MediaRecorder to ensure chunks are sent
-    // even if the browser is buffering them
+    // even if the browser is buffering them. We do this LESS frequently than
+    // the timeslice (every 1000ms vs 250ms) to avoid forcing empty chunks.
     chunkTimerRef.current = setInterval(() => {
       if (mediaRecorderRef.current?.state === 'recording') {
         console.log('⏰ Forcing MediaRecorder to flush buffered data');
         mediaRecorderRef.current.requestData();
       }
-    }, 250); // Request data every 250ms
+    }, 1000); // Request data every 1000ms (less frequent than timeslice)
   }, []);
 
   const stopChunkTimer = useCallback(() => {
@@ -195,6 +196,25 @@ export function useVoiceRecording(
 
       mediaStreamRef.current = stream;
 
+      // Verify audio tracks
+      const audioTracks = stream.getAudioTracks();
+      console.log('🎤 Audio tracks:', {
+        count: audioTracks.length,
+        enabled: audioTracks[0]?.enabled,
+        muted: audioTracks[0]?.muted,
+        readyState: audioTracks[0]?.readyState,
+        label: audioTracks[0]?.label,
+        settings: audioTracks[0]?.getSettings(),
+      });
+
+      if (audioTracks.length === 0) {
+        throw new Error('No audio tracks found in media stream');
+      }
+
+      if (!audioTracks[0]?.enabled || audioTracks[0]?.readyState !== 'live') {
+        throw new Error('Audio track is not enabled or not live');
+      }
+
       // Determine MIME type
       let mimeType = 'audio/webm';
       if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
@@ -205,27 +225,63 @@ export function useVoiceRecording(
         mimeType = 'audio/ogg;codecs=opus';
       }
 
+      console.log('🎙️ Selected MIME type:', mimeType, 'Supported:', MediaRecorder.isTypeSupported(mimeType));
+
       // Create MediaRecorder but don't start yet
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType,
       });
 
+      console.log('📼 MediaRecorder created:', {
+        state: mediaRecorder.state,
+        mimeType: mediaRecorder.mimeType,
+        audioBitsPerSecond: mediaRecorder.audioBitsPerSecond,
+      });
+
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (event) => {
+        const blobSize = event.data.size;
+        const blobType = event.data.type;
+
         console.log('🎵 Audio chunk available:', {
-          size: event.data.size,
-          type: event.data.type,
+          size: blobSize,
+          type: blobType,
+          isEmpty: blobSize === 0,
+          recorderState: mediaRecorderRef.current?.state,
           wsOpen: wsRef.current?.isOpen,
           wsConnecting: wsRef.current?.isConnecting,
           wsClosed: wsRef.current?.isClosed,
         });
 
+        // Log warning if blob is empty
+        if (blobSize === 0) {
+          console.warn('⚠️ Empty audio blob received! Possible causes:');
+          console.warn('   1. MediaRecorder started but no audio data captured yet');
+          console.warn('   2. Audio track is muted or disabled');
+          console.warn('   3. requestData() called too quickly after start()');
+          console.warn('   Current recorder state:', mediaRecorderRef.current?.state);
+
+          // Check if audio track is still active
+          if (mediaStreamRef.current) {
+            const tracks = mediaStreamRef.current.getAudioTracks();
+            console.warn('   Audio track status:', {
+              enabled: tracks[0]?.enabled,
+              muted: tracks[0]?.muted,
+              readyState: tracks[0]?.readyState,
+            });
+          }
+        }
+
         // Send all chunks, even empty ones, to keep Deepgram connection alive
         if (wsRef.current?.isOpen) {
-          console.log('📤 Sending audio chunk to WebSocket:', event.data.size, 'bytes');
-          wsRef.current.send(event.data);
-          console.log('✅ Audio chunk sent successfully');
+          if (blobSize > 0) {
+            console.log('📤 Sending audio chunk to WebSocket:', blobSize, 'bytes');
+            wsRef.current.send(event.data);
+            console.log('✅ Audio chunk sent successfully');
+          } else {
+            console.log('⏭️ Skipping empty audio chunk (0 bytes)');
+          }
         } else {
           console.error('❌ Cannot send audio: WebSocket is not open', {
             wsExists: !!wsRef.current,
@@ -262,12 +318,14 @@ export function useVoiceRecording(
               if (mediaRecorderRef.current?.state === 'inactive') {
                 console.log('🎙️ Starting MediaRecorder with 250ms timeslice...');
                 // Start with 250ms timeslice - recommended for Deepgram
+                // This will emit ondataavailable events naturally every 250ms with audio data
                 mediaRecorderRef.current.start(250);
-                console.log('✅ MediaRecorder.start() called, state:', mediaRecorderRef.current.state);
+                console.log('✅ MediaRecorder.start(250) called, state:', mediaRecorderRef.current.state);
 
-                // Start timer to periodically request data to prevent buffering
+                // Start timer to occasionally request data (every 1000ms) as a backup
+                // in case the browser doesn't respect the timeslice parameter
                 startChunkTimer();
-                console.log('✅ Chunk timer started to prevent buffering');
+                console.log('✅ Chunk timer started (1000ms interval) as backup');
               } else {
                 console.error('❌ Cannot start MediaRecorder, state:', mediaRecorderRef.current?.state);
               }
