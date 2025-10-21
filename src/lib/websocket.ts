@@ -69,7 +69,21 @@ export class TranscriptionWebSocket {
       };
 
       this.ws.onclose = (event) => {
-        console.log('🔌 WebSocket closed:', event.code, event.reason);
+        console.log('🔌 WebSocket closed:', {
+          code: event.code,
+          reason: event.reason,
+          wasClean: event.wasClean,
+        });
+
+        // Provide helpful error messages based on close code
+        if (event.code === 1006) {
+          console.error('❌ WebSocket failed to connect. This usually means:');
+          console.error('   1. Backend WebSocket endpoint is not accepting connections');
+          console.error('   2. CORS is blocking the WebSocket upgrade request');
+          console.error('   3. Backend is returning an HTTP error during handshake');
+          console.error('   4. SSL/TLS certificate issue');
+        }
+
         this.config.onClose(event.code, event.reason);
 
         // Handle specific close codes
