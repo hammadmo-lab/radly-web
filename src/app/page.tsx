@@ -80,7 +80,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 border border-emerald-500/50 backdrop-blur-sm rounded-full text-sm font-bold text-emerald-300 mb-8"
             >
               <Sparkles className="w-5 h-5 animate-spin" />
-              RADIOLOGY'S AI REVOLUTION
+              YOUR AI ASSISTANT FOR RADIOLOGY
               <TrendingUp className="w-5 h-5" />
             </motion.div>
 
@@ -110,9 +110,9 @@ export default function Home() {
               transition={{ duration: 0.7, delay: 0.3 }}
               className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight tracking-tight"
             >
-              Reports That Radiologists{" "}
+              Your AI Assistant Generates Reports{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-blue-400 to-emerald-400 animate-pulse">
-                Actually Love
+                Radiologists Love
               </span>
             </motion.h1>
 
@@ -178,8 +178,8 @@ export default function Home() {
                 <span className="font-semibold">5 Free Reports</span>
               </div>
               <div className="flex items-center gap-2 text-emerald-200">
-                <Shield className="w-5 h-5 text-emerald-400" />
-                <span className="font-semibold">HIPAA Compliant</span>
+                <Sparkles className="w-5 h-5 text-emerald-400" />
+                <span className="font-semibold">AI Assistant Powered</span>
               </div>
               <div className="flex items-center gap-2 text-emerald-200">
                 <Brain className="w-5 h-5 text-emerald-400" />
@@ -399,16 +399,16 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.5 }}
-              className="bg-gradient-to-br from-pink-500/10 to-red-500/10 border border-pink-500/30 rounded-2xl p-8 backdrop-blur-sm hover:border-pink-400/60 hover:shadow-xl hover:shadow-pink-500/10 transition-all"
+              className="bg-gradient-to-br from-orange-500/10 to-amber-500/10 border border-orange-500/30 rounded-2xl p-8 backdrop-blur-sm hover:border-orange-400/60 hover:shadow-xl hover:shadow-orange-500/10 transition-all"
             >
-              <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-red-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
-                <Lock className="w-7 h-7 text-white" />
+              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+                <Sparkles className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">HIPAA Compliant</h3>
-              <p className="text-pink-100">
-                Enterprise-grade security. Your patient data stays protected with end-to-end encryption.
+              <h3 className="text-2xl font-bold text-white mb-3">AI Assistant Powered</h3>
+              <p className="text-orange-100">
+                Intelligent tool designed to assist radiologists. Not a medical device—your assistant in report generation.
               </p>
-              <div className="mt-4 text-emerald-400 font-bold">Banking-level security</div>
+              <div className="mt-4 text-emerald-400 font-bold">Your digital teammate</div>
             </motion.div>
           </div>
         </div>
