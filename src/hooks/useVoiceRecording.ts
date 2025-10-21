@@ -173,15 +173,53 @@ export function useVoiceRecording(
 
       mediaStreamRef.current = stream;
 
+      // Determine MIME type
+      let mimeType = 'audio/webm';
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        mimeType = 'audio/webm;codecs=opus';
+      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+        mimeType = 'audio/webm';
+      } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
+        mimeType = 'audio/ogg;codecs=opus';
+      }
+
+      // Create MediaRecorder but don't start yet
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType,
+      });
+
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0 && wsRef.current?.isOpen) {
+          console.log('📤 Sending audio chunk:', event.data.size, 'bytes');
+          wsRef.current.send(event.data);
+        }
+      };
+
+      mediaRecorder.onerror = (event) => {
+        console.error('❌ MediaRecorder error:', event);
+        handleError('Recording error occurred');
+      };
+
       // Create WebSocket connection
       const ws = createTranscriptionWebSocket(
         apiBase,
         session.access_token,
         {
           onOpen: () => {
+            console.log('🔌 WebSocket opened, waiting for connection_established...');
             // Connection established, waiting for connection_established message
           },
-          onMessage: handleWebSocketMessage,
+          onMessage: (message) => {
+            handleWebSocketMessage(message);
+
+            // Start recording only after receiving connection_established
+            if (message.type === 'connection_established' && mediaRecorderRef.current?.state === 'inactive') {
+              console.log('🎤 Starting MediaRecorder...');
+              mediaRecorderRef.current.start(250); // Send chunks every 250ms
+            }
+          },
           onError: (err) => {
             handleError(err);
           },
@@ -200,36 +238,6 @@ export function useVoiceRecording(
 
       wsRef.current = ws;
       ws.connect();
-
-      // Determine MIME type
-      let mimeType = 'audio/webm';
-      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-        mimeType = 'audio/webm;codecs=opus';
-      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
-        mimeType = 'audio/webm';
-      } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
-        mimeType = 'audio/ogg;codecs=opus';
-      }
-
-      // Start recording
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType,
-      });
-
-      mediaRecorderRef.current = mediaRecorder;
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0 && wsRef.current?.isOpen) {
-          wsRef.current.send(event.data);
-        }
-      };
-
-      mediaRecorder.onerror = () => {
-        handleError('Recording error occurred');
-      };
-
-      // Start recording with chunks every 250ms
-      mediaRecorder.start(250);
     } catch (err) {
       if (err instanceof Error) {
         if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
