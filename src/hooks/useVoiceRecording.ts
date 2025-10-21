@@ -1,7 +1,7 @@
 // Voice recording hook with WebSocket streaming
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/components/auth-provider';
 import { createTranscriptionWebSocket, TranscriptionWebSocket } from '@/lib/websocket';
 import type {
   RecordingState,
