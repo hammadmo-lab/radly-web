@@ -158,8 +158,7 @@ export default function Home() {
               </Button>
               <Button
                 size="lg"
-                variant="outline"
-                className="border-2 border-emerald-400/50 text-emerald-100 hover:bg-emerald-500/10 hover:border-emerald-300 px-10 py-7 text-lg font-bold rounded-xl transition-all"
+                className="bg-white text-emerald-700 hover:bg-emerald-50 px-10 py-7 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
                 onClick={goToInstructions}
               >
                 See How It Works
