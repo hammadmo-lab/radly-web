@@ -197,15 +197,22 @@ export function useVoiceRecording(
           size: event.data.size,
           type: event.data.type,
           wsOpen: wsRef.current?.isOpen,
+          wsConnecting: wsRef.current?.isConnecting,
+          wsClosed: wsRef.current?.isClosed,
         });
-        if (event.data.size > 0 && wsRef.current?.isOpen) {
+
+        // Send all chunks, even empty ones, to keep Deepgram connection alive
+        if (wsRef.current?.isOpen) {
           console.log('📤 Sending audio chunk to WebSocket:', event.data.size, 'bytes');
           wsRef.current.send(event.data);
           console.log('✅ Audio chunk sent successfully');
-        } else if (event.data.size === 0) {
-          console.warn('⚠️ Audio chunk is empty (0 bytes)');
-        } else if (!wsRef.current?.isOpen) {
-          console.error('❌ Cannot send audio: WebSocket is not open');
+        } else {
+          console.error('❌ Cannot send audio: WebSocket is not open', {
+            wsExists: !!wsRef.current,
+            wsOpen: wsRef.current?.isOpen,
+            wsConnecting: wsRef.current?.isConnecting,
+            wsClosed: wsRef.current?.isClosed,
+          });
         }
       };
 
@@ -233,8 +240,8 @@ export function useVoiceRecording(
                 recorderState: mediaRecorderRef.current?.state,
               });
               if (mediaRecorderRef.current?.state === 'inactive') {
-                console.log('🎙️ Starting MediaRecorder with 250ms timeslice...');
-                mediaRecorderRef.current.start(250); // Send chunks every 250ms
+                console.log('🎙️ Starting MediaRecorder with 100ms timeslice...');
+                mediaRecorderRef.current.start(100); // Send chunks every 100ms for faster response
                 console.log('✅ MediaRecorder.start() called, state:', mediaRecorderRef.current.state);
               } else {
                 console.error('❌ Cannot start MediaRecorder, state:', mediaRecorderRef.current?.state);
