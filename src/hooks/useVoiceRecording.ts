@@ -62,6 +62,7 @@ export function useVoiceRecording(
     return () => {
       stopRecording();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const startDurationTimer = useCallback(() => {
@@ -90,6 +91,7 @@ export function useVoiceRecording(
 
       stopRecording();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [options]
   );
 

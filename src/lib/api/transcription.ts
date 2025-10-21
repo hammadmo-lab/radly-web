@@ -27,11 +27,12 @@ export async function transcribeFile(
     );
 
     return response.data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle specific error cases
-    if (error.response) {
-      const status = error.response.status;
-      const detail = error.response.data?.detail;
+    const err = error as { response?: { status: number; data?: { detail?: unknown } } };
+    if (err.response) {
+      const status = err.response.status;
+      const detail = err.response.data?.detail;
 
       if (status === 403) {
         // Tier restriction or trial exhausted
@@ -68,7 +69,7 @@ export async function transcribeFile(
 
     throw new TranscriptionError(
       'Failed to transcribe audio',
-      error.response?.data?.detail
+      err.response?.data?.detail
     );
   }
 }
@@ -104,9 +105,9 @@ export function getTranscriptionLimits(
 
 // Custom error classes
 export class TranscriptionError extends Error {
-  detail?: any;
+  detail?: unknown;
 
-  constructor(message: string, detail?: any) {
+  constructor(message: string, detail?: unknown) {
     super(message);
     this.name = 'TranscriptionError';
     this.detail = detail;
@@ -117,11 +118,11 @@ export class TranscriptionAccessError extends TranscriptionError {
   upgradeRequired: boolean;
   tier?: string;
 
-  constructor(message: string, detail?: any) {
+  constructor(message: string, detail?: Record<string, unknown>) {
     super(message, detail);
     this.name = 'TranscriptionAccessError';
-    this.upgradeRequired = detail?.upgrade_required || false;
-    this.tier = detail?.tier;
+    this.upgradeRequired = (detail?.upgrade_required as boolean) || false;
+    this.tier = detail?.tier as string | undefined;
   }
 }
 
@@ -130,37 +131,37 @@ export class TranscriptionRateLimitError extends TranscriptionError {
   limit?: number;
   resetInHours?: number;
 
-  constructor(message: string, detail?: any) {
+  constructor(message: string, detail?: Record<string, unknown>) {
     super(message, detail);
     this.name = 'TranscriptionRateLimitError';
-    this.used = detail?.used;
-    this.limit = detail?.limit;
-    this.resetInHours = detail?.reset_in_hours;
+    this.used = detail?.used as number | undefined;
+    this.limit = detail?.limit as number | undefined;
+    this.resetInHours = detail?.reset_in_hours as number | undefined;
   }
 }
 
 export class TranscriptionFileSizeError extends TranscriptionError {
   sizeMB?: number;
 
-  constructor(message: string, detail?: any) {
+  constructor(message: string, detail?: Record<string, unknown>) {
     super(message, detail);
     this.name = 'TranscriptionFileSizeError';
-    this.sizeMB = detail?.size_mb;
+    this.sizeMB = detail?.size_mb as number | undefined;
   }
 }
 
 export class TranscriptionFormatError extends TranscriptionError {
   received?: string;
 
-  constructor(message: string, detail?: any) {
+  constructor(message: string, detail?: Record<string, unknown>) {
     super(message, detail);
     this.name = 'TranscriptionFormatError';
-    this.received = detail?.received;
+    this.received = detail?.received as string | undefined;
   }
 }
 
 export class TranscriptionServiceError extends TranscriptionError {
-  constructor(message: string, detail?: any) {
+  constructor(message: string, detail?: unknown) {
     super(message, detail);
     this.name = 'TranscriptionServiceError';
   }
