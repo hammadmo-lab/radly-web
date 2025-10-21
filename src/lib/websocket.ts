@@ -38,14 +38,12 @@ export class TranscriptionWebSocket {
     this.isClosedManually = false;
 
     try {
-      // Convert https:// to wss:// and http:// to ws://
-      const wsUrl = this.config.url
-        .replace(/^https:/, 'wss:')
-        .replace(/^http:/, 'ws:');
-
+      // WebSocket connects directly to api.radly.app, bypassing the edge Worker
+      // HTTP API calls use edge.radly.app for security (client-key validation, rate limiting)
+      const wsUrl = 'wss://api.radly.app';
       const url = `${wsUrl}/v1/transcribe/stream?token=${encodeURIComponent(this.config.token)}`;
 
-      console.log('🔌 Connecting to WebSocket:', wsUrl + '/v1/transcribe/stream');
+      console.log('🔌 Connecting to WebSocket:', url);
 
       this.ws = new WebSocket(url);
 
