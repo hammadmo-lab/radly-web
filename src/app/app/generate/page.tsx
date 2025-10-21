@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -244,6 +244,40 @@ export default function GeneratePage() {
       setCurrentStep(newStep);
     }
   }
+
+  // Memoized callback for voice transcript to prevent React error #185
+  const handleVoiceTranscript = useCallback((text: string) => {
+    const currentFindings = watch('findings') || '';
+    const newFindings = currentFindings
+      ? `${currentFindings} ${text}`
+      : text;
+    setValue('findings', newFindings, { shouldValidate: true });
+  }, [watch, setValue]);
+
+  // Memoized callback for voice error handling
+  const handleVoiceError = useCallback((errorMsg: string) => {
+    toast.error(errorMsg);
+
+    // Check if we should show upgrade modal
+    if (errorMsg.includes('trial') || errorMsg.includes('upgrade') || errorMsg.includes('Starter')) {
+      // Determine upgrade reason from error message
+      if (errorMsg.includes('trial')) {
+        setUpgradeReason('trial_exhausted');
+      } else if (errorMsg.includes('daily limit')) {
+        setUpgradeReason('daily_limit');
+      } else {
+        setUpgradeReason('tier_blocked');
+      }
+      setShowUpgradeModal(true);
+    }
+  }, []);
+
+  // Memoized callback for upgrade required
+  const handleUpgradeRequired = useCallback((tier: SubscriptionTier) => {
+    setCurrentTier(tier);
+    setUpgradeReason('tier_blocked');
+    setShowUpgradeModal(true);
+  }, []);
 
   // Handle missing template ID gracefully
   if (!templateId) {
@@ -773,35 +807,9 @@ export default function GeneratePage() {
 
                       {/* Voice Input Integration */}
                       <VoiceInput
-                        onTranscript={(text) => {
-                          // Append transcribed text to existing findings
-                          const currentFindings = watch('findings') || '';
-                          const newFindings = currentFindings
-                            ? `${currentFindings} ${text}`
-                            : text;
-                          setValue('findings', newFindings, { shouldValidate: true });
-                        }}
-                        onError={(errorMsg) => {
-                          toast.error(errorMsg);
-
-                          // Check if we should show upgrade modal
-                          if (errorMsg.includes('trial') || errorMsg.includes('upgrade') || errorMsg.includes('Starter')) {
-                            // Determine upgrade reason from error message
-                            if (errorMsg.includes('trial')) {
-                              setUpgradeReason('trial_exhausted');
-                            } else if (errorMsg.includes('daily limit')) {
-                              setUpgradeReason('daily_limit');
-                            } else {
-                              setUpgradeReason('tier_blocked');
-                            }
-                            setShowUpgradeModal(true);
-                          }
-                        }}
-                        onUpgradeRequired={(tier) => {
-                          setCurrentTier(tier);
-                          setUpgradeReason('tier_blocked');
-                          setShowUpgradeModal(true);
-                        }}
+                        onTranscript={handleVoiceTranscript}
+                        onError={handleVoiceError}
+                        onUpgradeRequired={handleUpgradeRequired}
                         disabled={isSubmitting}
                       />
                     </div>
