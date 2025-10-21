@@ -504,8 +504,7 @@ export default function Home() {
             </Button>
             <Button
               size="lg"
-              variant="outline"
-              className="border-2 border-white text-white hover:bg-white hover:text-emerald-700 px-10 py-7 text-lg font-bold rounded-xl"
+              className="bg-white text-emerald-700 hover:bg-emerald-50 px-10 py-7 text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
               onClick={goToPricing}
             >
               See Pricing
