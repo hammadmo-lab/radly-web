@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createBrowserSupabase } from '@/lib/supabase/client'
 import { sanitizeNext } from '@/lib/redirect'
+import { storeAuthOrigin } from '@/lib/auth-origin'
 
 const allowMagic = process.env.NEXT_PUBLIC_ALLOW_MAGIC_LINK === '1'
 const allowGoogle = process.env.NEXT_PUBLIC_ALLOW_GOOGLE === '1'
@@ -15,34 +16,37 @@ function SignInContent() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // Always use window.location.origin when available (client-side)
-  // This ensures Vercel preview deployments work correctly
-  const origin =
-    typeof window !== 'undefined' && window.location?.origin
-      ? window.location.origin
-      : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-
   // Get the next parameter or default to /app/dashboard
   const next = sanitizeNext(searchParams.get('next'))
 
-  // Debug logging to see what's being used
-  console.log('🔍 Auth Debug:', {
-    windowOrigin: typeof window !== 'undefined' ? window.location?.origin : 'N/A',
-    envSiteUrl: process.env.NEXT_PUBLIC_SITE_URL,
-    selectedOrigin: origin,
-    redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
-    hasWindow: typeof window !== 'undefined',
-    hasLocationOrigin: typeof window !== 'undefined' && !!window.location?.origin
+  // IMPORTANT: Supabase has strict redirect URL matching and often overrides
+  // the redirectTo parameter. Instead, we:
+  // 1. Store current origin in a cookie before auth
+  // 2. Let Supabase redirect to its default callback URL
+  // 3. Callback handler reads the cookie and redirects to stored origin + next path
+  //
+  // This approach works reliably across localhost, Vercel preview, and production.
+
+  const callbackUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
+    : `/auth/callback?next=${encodeURIComponent(next)}`
+
+  console.log('🔐 Auth flow:', {
+    callbackUrl,
+    next,
+    strategy: 'Cookie-based origin storage'
   })
 
   async function signInWithGoogle() {
     setLoading(true)
     try {
+      // Store origin before redirecting to auth
+      storeAuthOrigin()
+
       await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
-          // Supports PKCE Authorization Code by default
+          redirectTo: callbackUrl,
         },
       })
     } finally {
@@ -53,10 +57,13 @@ function SignInContent() {
   async function signInWithApple() {
     setLoading(true)
     try {
+      // Store origin before redirecting to auth
+      storeAuthOrigin()
+
       await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
-          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+          redirectTo: callbackUrl,
         },
       })
     } finally {
@@ -69,10 +76,13 @@ function SignInContent() {
     if (!email) return
     setLoading(true)
     try {
+      // Store origin before sending magic link
+      storeAuthOrigin()
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+          emailRedirectTo: callbackUrl,
         },
       })
       if (error) {
