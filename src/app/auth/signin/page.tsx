@@ -14,8 +14,13 @@ function SignInContent() {
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Always use window.location.origin when available (client-side)
+  // This ensures Vercel preview deployments work correctly
   const origin =
-    typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || ''
+    typeof window !== 'undefined' && window.location?.origin
+      ? window.location.origin
+      : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
   // Get the next parameter or default to /app/dashboard
   const next = sanitizeNext(searchParams.get('next'))
