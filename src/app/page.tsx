@@ -56,41 +56,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-slate-100">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/brand/Radly.png"
-              alt="Radly"
-              width={40}
-              height={40}
-              className="w-10 h-10"
-            />
-            <span className="font-bold text-xl text-gray-900 hidden sm:inline">Radly</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/instructions" className="text-gray-600 hover:text-gray-900 font-medium transition-colors hidden sm:inline">
-              How It Works
-            </Link>
-            <Button
-              variant="outline"
-              className="border-gray-300 hover:border-emerald-500 hover:text-emerald-600"
-              onClick={goToPricing}
-            >
-              Pricing
-            </Button>
-            <Button
-              className="bg-emerald-600 hover:bg-emerald-700"
-              onClick={goToApp}
-              disabled={busy || !authChecked}
-            >
-              {busy ? "Loading…" : !authChecked ? "Checking..." : "Get Started"}
-            </Button>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 lg:py-32">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-blue-50 opacity-40"></div>
@@ -594,15 +559,18 @@ export default function Home() {
               height={60}
               className="w-15 h-15"
             />
-            <div className="flex space-x-8 text-sm">
+            <div className="flex flex-wrap justify-center gap-6 text-sm">
+              <Link href="/instructions" className="text-gray-600 hover:text-emerald-600 transition-colors font-medium">
+                How It Works
+              </Link>
+              <Link href="/pricing" className="text-gray-600 hover:text-emerald-600 transition-colors font-medium">
+                Pricing
+              </Link>
               <Link href="/legal/terms" className="text-gray-600 hover:text-emerald-600 transition-colors">
                 Terms of Service
               </Link>
               <Link href="/legal/privacy" className="text-gray-600 hover:text-emerald-600 transition-colors">
                 Privacy Policy
-              </Link>
-              <Link href="/instructions" className="text-gray-600 hover:text-emerald-600 transition-colors">
-                How It Works
               </Link>
             </div>
           </div>
