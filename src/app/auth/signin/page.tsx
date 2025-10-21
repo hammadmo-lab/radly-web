@@ -25,6 +25,16 @@ function SignInContent() {
   // Get the next parameter or default to /app/dashboard
   const next = sanitizeNext(searchParams.get('next'))
 
+  // Debug logging to see what's being used
+  console.log('🔍 Auth Debug:', {
+    windowOrigin: typeof window !== 'undefined' ? window.location?.origin : 'N/A',
+    envSiteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+    selectedOrigin: origin,
+    redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+    hasWindow: typeof window !== 'undefined',
+    hasLocationOrigin: typeof window !== 'undefined' && !!window.location?.origin
+  })
+
   async function signInWithGoogle() {
     setLoading(true)
     try {

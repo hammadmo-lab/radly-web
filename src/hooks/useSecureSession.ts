@@ -37,7 +37,8 @@ export function useSecureSession() {
   const logout = async () => {
     await AuthSecurity.secureLogout()
     setIsAuthenticated(false)
-    window.location.href = 'https://radly.app'
+    // Redirect to home page (works on any domain)
+    window.location.href = '/'
   }
 
   return {
