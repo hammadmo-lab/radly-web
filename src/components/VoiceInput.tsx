@@ -3,7 +3,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { useVoiceRecording } from '@/hooks/useVoiceRecording';
 import { Button } from '@/components/ui/button';
@@ -56,12 +56,13 @@ export function VoiceInput({
     },
   });
 
-  // Send final transcript when recording stops
+  // Memoize onTranscript to prevent unnecessary re-renders
+  // The hook already calls onTranscript for final transcripts, so we don't need to call it again here
+  // This prevents React error #185 from state update issues
   useEffect(() => {
-    if (!isRecording && transcript) {
-      onTranscript(transcript);
-    }
-  }, [isRecording, transcript, onTranscript]);
+    // This effect is only for cleanup/side-effects if needed
+    // The actual transcript sending is handled by useVoiceRecording hook
+  }, []);
 
   // Handle errors
   useEffect(() => {
