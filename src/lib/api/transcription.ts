@@ -4,7 +4,7 @@ import type {
   TranscriptionResponse,
   TranscriptionLimits,
 } from '@/types/transcription';
-import { httpClient } from '@/lib/http';
+import { httpPost } from '@/lib/http';
 
 /**
  * Upload an audio file for transcription (fallback method)
@@ -16,60 +16,63 @@ export async function transcribeFile(
   formData.append('file', file);
 
   try {
-    const response = await httpClient.post<TranscriptionResponse>(
+    const response = await httpPost<FormData, TranscriptionResponse>(
       '/v1/transcribe',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+      formData
     );
 
-    return response.data;
+    return response;
   } catch (error: unknown) {
-    // Handle specific error cases
-    const err = error as { response?: { status: number; data?: { detail?: unknown } } };
-    if (err.response) {
-      const status = err.response.status;
-      const detail = err.response.data?.detail;
+    // Handle specific error cases from ApiError
+    const apiError = error as { status?: number; body?: string };
+
+    if (apiError.status) {
+      const status = apiError.status;
+      let detail: Record<string, unknown> = {};
+
+      try {
+        detail = apiError.body ? JSON.parse(apiError.body) : {};
+      } catch {
+        // Body is not JSON
+      }
+
+      const errorDetail = (detail.detail as Record<string, unknown>) || {};
 
       if (status === 403) {
         // Tier restriction or trial exhausted
         throw new TranscriptionAccessError(
-          detail?.message || 'Access denied',
-          detail
+          (errorDetail.message as string) || 'Access denied',
+          errorDetail
         );
       } else if (status === 429) {
         // Rate limit exceeded
         throw new TranscriptionRateLimitError(
-          detail?.message || 'Rate limit exceeded',
-          detail
+          (errorDetail.message as string) || 'Rate limit exceeded',
+          errorDetail
         );
       } else if (status === 413) {
         // File too large
         throw new TranscriptionFileSizeError(
-          detail?.message || 'File too large',
-          detail
+          (errorDetail.message as string) || 'File too large',
+          errorDetail
         );
       } else if (status === 400) {
         // Invalid file format
         throw new TranscriptionFormatError(
-          detail?.message || 'Invalid file format',
-          detail
+          (errorDetail.message as string) || 'Invalid file format',
+          errorDetail
         );
       } else if (status === 503) {
         // Service not configured
         throw new TranscriptionServiceError(
-          detail?.message || 'Service unavailable',
-          detail
+          (errorDetail.message as string) || 'Service unavailable',
+          errorDetail
         );
       }
     }
 
     throw new TranscriptionError(
-      'Failed to transcribe audio',
-      err.response?.data?.detail
+      error instanceof Error ? error.message : 'Failed to transcribe audio'
     );
   }
 }
