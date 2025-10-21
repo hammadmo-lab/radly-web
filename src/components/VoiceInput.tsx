@@ -1,4 +1,5 @@
 // Voice Input Component for dictation
+// Fixed: React error #185 - ref forwarding issues resolved
 
 'use client';
 
