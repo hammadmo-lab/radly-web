@@ -98,7 +98,7 @@ export default function Home() {
                   alt="Radly Logo"
                   width={600}
                   height={600}
-                  className="w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 mx-auto drop-shadow-2xl relative z-10 filter brightness-110"
+                  className="w-80 h-80 sm:w-96 sm:h-96 lg:w-[28rem] lg:h-[28rem] mx-auto drop-shadow-2xl relative z-10 filter brightness-110"
                 />
               </div>
             </motion.div>
