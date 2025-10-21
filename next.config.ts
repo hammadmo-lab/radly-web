@@ -35,7 +35,7 @@ const securityHeaders = [
   },
   {
     key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()'
+    value: `camera=(), microphone=(self "https://edge.radly.app"), geolocation=(), interest-cohort=()`
   },
   {
     key: 'Content-Security-Policy',
@@ -45,7 +45,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-      `connect-src 'self' ${apiBase} https://*.supabase.co https://cloudflareinsights.com`,
+      `connect-src 'self' ${apiBase} wss://edge.radly.app https://edge.radly.app https://*.supabase.co https://cloudflareinsights.com wss:`,
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
