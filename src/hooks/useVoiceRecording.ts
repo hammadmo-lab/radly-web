@@ -97,8 +97,10 @@ export function useVoiceRecording(
 
   const handleWebSocketMessage = useCallback(
     (message: WebSocketMessage) => {
+      console.log('📨 Received WebSocket message:', message.type, message);
       switch (message.type) {
         case 'connection_established':
+          console.log('✅ Connection established, tier:', message.tier, 'max duration:', message.max_duration_seconds);
           setTier(message.tier);
           setMaxDuration(message.max_duration_seconds);
           setState('recording');
@@ -191,9 +193,19 @@ export function useVoiceRecording(
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (event) => {
+        console.log('🎵 Audio chunk available:', {
+          size: event.data.size,
+          type: event.data.type,
+          wsOpen: wsRef.current?.isOpen,
+        });
         if (event.data.size > 0 && wsRef.current?.isOpen) {
-          console.log('📤 Sending audio chunk:', event.data.size, 'bytes');
+          console.log('📤 Sending audio chunk to WebSocket:', event.data.size, 'bytes');
           wsRef.current.send(event.data);
+          console.log('✅ Audio chunk sent successfully');
+        } else if (event.data.size === 0) {
+          console.warn('⚠️ Audio chunk is empty (0 bytes)');
+        } else if (!wsRef.current?.isOpen) {
+          console.error('❌ Cannot send audio: WebSocket is not open');
         }
       };
 
@@ -215,9 +227,18 @@ export function useVoiceRecording(
             handleWebSocketMessage(message);
 
             // Start recording only after receiving connection_established
-            if (message.type === 'connection_established' && mediaRecorderRef.current?.state === 'inactive') {
-              console.log('🎤 Starting MediaRecorder...');
-              mediaRecorderRef.current.start(250); // Send chunks every 250ms
+            if (message.type === 'connection_established') {
+              console.log('🎤 Attempting to start MediaRecorder...', {
+                recorderExists: !!mediaRecorderRef.current,
+                recorderState: mediaRecorderRef.current?.state,
+              });
+              if (mediaRecorderRef.current?.state === 'inactive') {
+                console.log('🎙️ Starting MediaRecorder with 250ms timeslice...');
+                mediaRecorderRef.current.start(250); // Send chunks every 250ms
+                console.log('✅ MediaRecorder.start() called, state:', mediaRecorderRef.current.state);
+              } else {
+                console.error('❌ Cannot start MediaRecorder, state:', mediaRecorderRef.current?.state);
+              }
             }
           },
           onError: (err) => {
