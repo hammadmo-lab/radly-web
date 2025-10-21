@@ -4,7 +4,6 @@
 
 import { Mic, AlertTriangle, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import type { SubscriptionTier } from '@/types/transcription';
 import { TIER_CONFIGS } from '@/types/transcription';
@@ -88,15 +87,17 @@ export function TranscriptionLimitBanner({
           </AlertDescription>
 
           {/* Progress bar */}
-          <Progress
-            value={Math.min(percentage, 100)}
-            className={cn(
-              'h-2',
-              isDanger && '[&>div]:bg-destructive',
-              isWarning && '[&>div]:bg-yellow-500',
-              isInfo && '[&>div]:bg-primary'
-            )}
-          />
+          <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
+            <div
+              className={cn(
+                'h-full rounded-full transition-all duration-500',
+                isDanger && 'bg-destructive',
+                isWarning && 'bg-yellow-500',
+                isInfo && 'bg-primary'
+              )}
+              style={{ width: `${Math.min(percentage, 100)}%` }}
+            />
+          </div>
 
           {/* Additional info */}
           <div className="flex items-center gap-1 text-xs text-muted-foreground">

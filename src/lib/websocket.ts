@@ -56,7 +56,7 @@ export class TranscriptionWebSocket {
         try {
           const message: WebSocketMessage = JSON.parse(event.data);
           this.config.onMessage(message);
-        } catch (error) {
+        } catch {
           this.config.onError(new Error('Failed to parse WebSocket message'));
         }
       };
