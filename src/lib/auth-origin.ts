@@ -1,55 +1,71 @@
 /**
  * Auth Origin Storage
  *
- * Handles storing and retrieving the origin URL for multi-environment auth redirects.
- * Uses cookies so the origin is accessible server-side in the callback handler.
+ * Handles storing and retrieving the origin URL and destination path for multi-environment auth redirects.
+ * Uses cookies so the data is accessible server-side in the callback handler.
  */
 
 const AUTH_ORIGIN_COOKIE = 'auth_origin'
+const AUTH_NEXT_COOKIE = 'auth_next'
 const COOKIE_MAX_AGE = 600 // 10 minutes (enough time for auth flow)
 
 /**
- * Store the current origin before starting auth flow
+ * Store the current origin and next path before starting auth flow
  * This will be used by the callback handler to redirect back to the correct environment
  */
-export function storeAuthOrigin(): void {
+export function storeAuthOrigin(nextPath: string = '/app/dashboard'): void {
   if (typeof window === 'undefined') return
 
   const origin = window.location.origin
 
-  // Store in cookie (accessible server-side)
+  // Store origin and next path in separate cookies (accessible server-side)
   document.cookie = `${AUTH_ORIGIN_COOKIE}=${encodeURIComponent(origin)}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`
+  document.cookie = `${AUTH_NEXT_COOKIE}=${encodeURIComponent(nextPath)}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`
 
-  console.log('🔐 Stored auth origin:', origin)
+  console.log('🔐 Stored auth data:', { origin, nextPath })
 }
 
 /**
- * Get the stored origin from cookie
+ * Get the stored auth data from cookies
  * Used by the callback handler to determine where to redirect
  */
-export function getStoredAuthOrigin(cookieHeader?: string): string | null {
-  // Server-side: parse from cookie header
-  if (cookieHeader) {
-    const cookies = cookieHeader.split(';').map(c => c.trim())
-    const authCookie = cookies.find(c => c.startsWith(`${AUTH_ORIGIN_COOKIE}=`))
-    if (authCookie) {
-      const value = authCookie.split('=')[1]
-      return decodeURIComponent(value)
+export function getStoredAuthData(cookieHeader?: string): { origin: string | null; next: string | null } {
+  const getCookie = (name: string): string | null => {
+    // Server-side: parse from cookie header
+    if (cookieHeader) {
+      const cookies = cookieHeader.split(';').map(c => c.trim())
+      const cookie = cookies.find(c => c.startsWith(`${name}=`))
+      if (cookie) {
+        const value = cookie.split('=')[1]
+        return decodeURIComponent(value)
+      }
+      return null
     }
+
+    // Client-side: parse from document.cookie
+    if (typeof document !== 'undefined') {
+      const cookies = document.cookie.split(';').map(c => c.trim())
+      const cookie = cookies.find(c => c.startsWith(`${name}=`))
+      if (cookie) {
+        const value = cookie.split('=')[1]
+        return decodeURIComponent(value)
+      }
+    }
+
     return null
   }
 
-  // Client-side: parse from document.cookie
-  if (typeof document !== 'undefined') {
-    const cookies = document.cookie.split(';').map(c => c.trim())
-    const authCookie = cookies.find(c => c.startsWith(`${AUTH_ORIGIN_COOKIE}=`))
-    if (authCookie) {
-      const value = authCookie.split('=')[1]
-      return decodeURIComponent(value)
-    }
+  return {
+    origin: getCookie(AUTH_ORIGIN_COOKIE),
+    next: getCookie(AUTH_NEXT_COOKIE)
   }
+}
 
-  return null
+/**
+ * Get the stored origin from cookie (for backwards compatibility)
+ */
+export function getStoredAuthOrigin(cookieHeader?: string): string | null {
+  return getStoredAuthData(cookieHeader).origin
 }
 
 /**
