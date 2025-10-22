@@ -19,34 +19,36 @@ function SignInContent() {
   // Get the next parameter or default to /app/dashboard
   const next = sanitizeNext(searchParams.get('next'))
 
-  // IMPORTANT: Supabase has strict redirect URL matching and often overrides
-  // the redirectTo parameter. Instead, we:
-  // 1. Store current origin in a cookie before auth
-  // 2. Let Supabase redirect to its default callback URL
-  // 3. Callback handler reads the cookie and redirects to stored origin + next path
-  //
-  // This approach works reliably across localhost, Vercel preview, and production.
-
-  const callbackUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
-    : `/auth/callback?next=${encodeURIComponent(next)}`
+  // Build redirect URL for current environment
+  // IMPORTANT: This URL must exactly match one of the URLs in Supabase Dashboard
+  // → Authentication → URL Configuration → Additional Redirect URLs
+  const getRedirectUrl = () => {
+    if (typeof window === 'undefined') return 'http://localhost:3000/auth/callback'
+    return `${window.location.origin}/auth/callback`
+  }
 
   console.log('🔐 Auth flow:', {
-    callbackUrl,
+    currentOrigin: typeof window !== 'undefined' ? window.location.origin : 'N/A',
     next,
-    strategy: 'Cookie-based origin storage'
+    redirectUrl: getRedirectUrl()
   })
 
   async function signInWithGoogle() {
     setLoading(true)
     try {
-      // Store origin before redirecting to auth
-      storeAuthOrigin()
+      // Store next path in cookie (primary method)
+      storeAuthOrigin(next)
+
+      // Use base callback URL WITHOUT query parameters
+      // Supabase validates the base URL, not the query params
+      const redirectTo = getRedirectUrl()
+
+      console.log('🔐 Google OAuth redirect:', redirectTo, 'next:', next)
 
       await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: callbackUrl,
+          redirectTo, // Base URL only, next param stored in cookie
         },
       })
     } finally {
@@ -57,13 +59,19 @@ function SignInContent() {
   async function signInWithApple() {
     setLoading(true)
     try {
-      // Store origin before redirecting to auth
-      storeAuthOrigin()
+      // Store next path in cookie (primary method)
+      storeAuthOrigin(next)
+
+      // Use base callback URL WITHOUT query parameters
+      // Supabase validates the base URL, not the query params
+      const redirectTo = getRedirectUrl()
+
+      console.log('🔐 Apple OAuth redirect:', redirectTo, 'next:', next)
 
       await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
-          redirectTo: callbackUrl,
+          redirectTo, // Base URL only, next param stored in cookie
         },
       })
     } finally {
@@ -76,13 +84,23 @@ function SignInContent() {
     if (!email) return
     setLoading(true)
     try {
-      // Store origin before sending magic link
-      storeAuthOrigin()
+      // Store next path in cookie (primary method)
+      storeAuthOrigin(next)
+
+      // Use base callback URL WITHOUT query parameters
+      // Supabase validates the base URL, not the query params
+      const emailRedirectTo = getRedirectUrl()
+
+      console.log('🔐 Sending magic link:', {
+        email,
+        emailRedirectTo,
+        next
+      })
 
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: callbackUrl,
+          emailRedirectTo, // Base URL only, next param stored in cookie
         },
       })
       if (error) {
