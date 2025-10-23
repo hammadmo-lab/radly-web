@@ -18,12 +18,18 @@ export interface SubscriptionData {
   status: string
 }
 
+interface UsageStats {
+  total_reports?: number
+  avg_generation_time?: number | string | null
+  avg_generation_time_seconds?: number | string | null
+  average_generation_time_seconds?: number | string | null
+  average_generation_time?: number | string | null
+  [key: string]: unknown
+}
+
 interface UsageData {
   subscription: SubscriptionData
-  usage_stats: {
-    total_reports: number
-    avg_generation_time: number
-  }
+  usage_stats?: UsageStats | null
 }
 
 /**
