@@ -41,7 +41,12 @@ export function VoiceInput({
   } = useVoiceRecording({
     onTranscript: (text, isFinal) => {
       if (isFinal) {
-        onTranscript(text);
+        const invoke = () => onTranscript(text);
+        if (typeof queueMicrotask === 'function') {
+          queueMicrotask(invoke);
+        } else {
+          Promise.resolve().then(invoke);
+        }
       }
     },
     onError: (err) => {

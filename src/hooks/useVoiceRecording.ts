@@ -274,21 +274,31 @@ export function useVoiceRecording(
         }
 
         // Send all chunks, even empty ones, to keep Deepgram connection alive
-        if (wsRef.current?.isOpen) {
+        const ws = wsRef.current;
+        const recorderState = mediaRecorderRef.current?.state;
+
+        if (!ws || !ws.isOpen) {
+          if (recorderState === 'recording') {
+            console.error('❌ Cannot send audio: WebSocket is not open', {
+              wsExists: !!ws,
+              wsOpen: ws?.isOpen,
+              wsConnecting: ws?.isConnecting,
+              wsClosed: ws?.isClosed,
+            });
+          } else {
+            console.log('ℹ️ Skipping audio chunk because recording has stopped');
+          }
+          return;
+        }
+
+        if (ws.isOpen) {
           if (blobSize > 0) {
             console.log('📤 Sending audio chunk to WebSocket:', blobSize, 'bytes');
-            wsRef.current.send(event.data);
+            ws.send(event.data);
             console.log('✅ Audio chunk sent successfully');
           } else {
             console.log('⏭️ Skipping empty audio chunk (0 bytes)');
           }
-        } else {
-          console.error('❌ Cannot send audio: WebSocket is not open', {
-            wsExists: !!wsRef.current,
-            wsOpen: wsRef.current?.isOpen,
-            wsConnecting: wsRef.current?.isConnecting,
-            wsClosed: wsRef.current?.isClosed,
-          });
         }
       };
 
