@@ -11,14 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import UsageWidget from '@/components/UsageWidget'
 import { useSubscription } from '@/hooks/useSubscription'
-
-function formatSeconds(value?: number) {
-  if (!value && value !== 0) return '—'
-  if (value < 60) return `${Math.round(value)}s`
-  const minutes = Math.floor(value / 60)
-  const seconds = Math.round(value % 60)
-  return `${minutes}m ${seconds}s`
-}
+import { formatSeconds, resolveAvgGenerationSeconds } from '@/utils/time'
 
 function daysUntil(dateString?: string) {
   if (!dateString) return null
@@ -46,6 +39,16 @@ export default function DashboardPage() {
     }
   }, [])
 
+  useEffect(() => {
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      subscriptionData?.usage_stats
+    ) {
+      // Surfacing raw timing data locally helps debug mismatches with backend averages.
+      console.debug('Dashboard usage stats', subscriptionData.usage_stats)
+    }
+  }, [subscriptionData?.usage_stats, subscriptionData])
+
   const handlePrimaryCta = useCallback(() => {
     if (ctaBusy) return
     setCtaBusy(true)
@@ -55,6 +58,9 @@ export default function DashboardPage() {
   const stats = useMemo(() => {
     const sub = subscriptionData?.subscription
     const usageStats = subscriptionData?.usage_stats
+    const avgGenerationSeconds = resolveAvgGenerationSeconds(usageStats)
+    const hasAvgGenerationData =
+      avgGenerationSeconds != null && avgGenerationSeconds >= 0.5
     const resetDays = daysUntil(sub?.period_end)
 
     return [
@@ -68,8 +74,12 @@ export default function DashboardPage() {
       },
       {
         label: 'Avg. generation time',
-        value: usageStats ? formatSeconds(usageStats.avg_generation_time) : '—',
-        change: usageStats ? 'Last 30 days' : '',
+        value: hasAvgGenerationData ? formatSeconds(avgGenerationSeconds) : '—',
+        change: hasAvgGenerationData
+          ? 'Last 30 days'
+          : usageStats
+          ? 'Timing data not yet available'
+          : '',
         icon: Clock,
         bgClass: 'bg-blue-50',
         iconClass: 'text-blue-600',

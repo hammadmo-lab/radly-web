@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useAuthSession } from '@/hooks/useAuthSession'
 import { useSubscription } from '@/hooks/useSubscription'
+import { formatSeconds, resolveAvgGenerationSeconds } from '@/utils/time'
 
 export default function UsageWidget() {
   const { isAuthed } = useAuthSession()
@@ -85,6 +86,12 @@ export default function UsageWidget() {
   }
 
   const { subscription } = usage
+  const usageStats = usage.usage_stats || null
+  const avgGenerationSecondsRaw = resolveAvgGenerationSeconds(usageStats)
+  const avgGenerationSeconds = avgGenerationSecondsRaw != null && avgGenerationSecondsRaw >= 0.5
+    ? avgGenerationSecondsRaw
+    : null
+  const totalReports = Number(usageStats?.total_reports ?? 0)
   const usagePercentage = (subscription.reports_used / subscription.reports_limit) * 100
   
   const daysUntilReset = Math.ceil(
@@ -187,18 +194,18 @@ export default function UsageWidget() {
         )}
 
         {/* Stats Grid */}
-        {usage.usage_stats && usage.usage_stats.total_reports > 0 && (
+        {(totalReports > 0 || avgGenerationSeconds != null) && (
           <div className="pt-4 border-t grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-muted-foreground mb-1">Total Reports</p>
               <p className="text-lg font-semibold text-foreground">
-                {usage.usage_stats.total_reports}
+                {totalReports}
               </p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Avg. Time</p>
               <p className="text-lg font-semibold text-foreground">
-                {usage.usage_stats.avg_generation_time.toFixed(1)}s
+                {formatSeconds(avgGenerationSeconds)}
               </p>
             </div>
           </div>
