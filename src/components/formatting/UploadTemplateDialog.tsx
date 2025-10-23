@@ -12,7 +12,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
 import { AlertCircle, Upload, FileText, CheckCircle } from 'lucide-react';
 import { useUploadTemplate } from '@/hooks/useFormattingProfiles';
 import { motion, AnimatePresence } from 'framer-motion';

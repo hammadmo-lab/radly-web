@@ -9,20 +9,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { motion } from "framer-motion";
 import {
   FileText,
-  User,
-  Stethoscope,
   Download,
   CheckCircle,
   ArrowRight,
   Clock,
-  Shield,
   Zap,
   ChevronDown,
   ChevronUp,
   Sparkles,
-  Target,
   ArrowLeft,
-  Settings,
   Mic,
   Brain,
   Radio

@@ -1,5 +1,5 @@
 import { test, expect } from './fixtures/auth';
-import { TEST_PATIENTS, TEST_CLINICAL_DATA, TEST_TEMPLATES, MOCK_API_RESPONSES, TEST_USERS } from './fixtures/test-data';
+import { TEST_PATIENTS, TEST_CLINICAL_DATA, TEST_TEMPLATES, MOCK_API_RESPONSES } from './fixtures/test-data';
 
 test.describe('Report Generation Flow', () => {
   test.beforeEach(async ({ page }) => {
@@ -59,7 +59,7 @@ test.describe('Report Generation Flow', () => {
   });
 
   test.describe('Patient Information Form', () => {
-    test.beforeEach(async ({ page, navigation }) => {
+    test.beforeEach(async ({ navigation }) => {
       await navigation.goToGenerate();
     });
 
@@ -145,7 +145,7 @@ test.describe('Report Generation Flow', () => {
   });
 
   test.describe('Clinical Information Form', () => {
-    test.beforeEach(async ({ page, navigation }) => {
+    test.beforeEach(async ({ navigation }) => {
       await navigation.goToGenerate();
     });
 
@@ -195,7 +195,7 @@ test.describe('Report Generation Flow', () => {
   });
 
   test.describe('Signature Form', () => {
-    test.beforeEach(async ({ page, navigation }) => {
+    test.beforeEach(async ({ navigation }) => {
       await navigation.goToGenerate();
     });
 
@@ -228,7 +228,7 @@ test.describe('Report Generation Flow', () => {
   });
 
   test.describe('Form Submission', () => {
-    test.beforeEach(async ({ page, navigation }) => {
+    test.beforeEach(async ({ navigation }) => {
       await navigation.goToGenerate();
     });
 
@@ -373,7 +373,7 @@ test.describe('Report Generation Flow', () => {
   });
 
   test.describe('Form Validation', () => {
-    test.beforeEach(async ({ page, navigation }) => {
+    test.beforeEach(async ({ navigation }) => {
       await navigation.goToGenerate();
     });
 

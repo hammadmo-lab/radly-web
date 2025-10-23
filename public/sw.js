@@ -17,12 +17,12 @@ function isAuthCallbackUrl(url) {
     if (u.pathname.startsWith('/auth/callback')) return true;
     if (u.search && u.search.includes('code=')) return true;
     return false;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   // Skip waiting for faster deploys if desired (optional)
   self.skipWaiting();
   console.info('[SW] installed');

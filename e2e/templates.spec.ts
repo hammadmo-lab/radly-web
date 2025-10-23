@@ -1,5 +1,5 @@
 import { test, expect } from './fixtures/auth';
-import { TEST_TEMPLATES, MOCK_API_RESPONSES, TEST_USERS } from './fixtures/test-data';
+import { TEST_TEMPLATES, MOCK_API_RESPONSES } from './fixtures/test-data';
 
 test.describe('Templates Management', () => {
   test.beforeEach(async ({ page }) => {
@@ -9,7 +9,7 @@ test.describe('Templates Management', () => {
   });
 
   test.describe('Templates Page', () => {
-    test('should display templates page correctly', async ({ page, navigation, assertions }) => {
+    test('should display templates page correctly', async ({ page, navigation }) => {
       await navigation.goToTemplates();
       
       // Check page title and heading

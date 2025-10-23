@@ -1,0 +1,390 @@
+'use client'
+
+import type { ComponentProps } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import { formatDistanceToNow } from 'date-fns'
+import {
+  Bell,
+  Clock,
+  FileText,
+  Sparkles,
+  TrendingUp,
+  Zap,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useSubscription } from '@/hooks/useSubscription'
+import { formatSeconds, resolveAvgGenerationSeconds } from '@/utils/time'
+import { cn } from '@/lib/utils'
+
+type LucideIcon = typeof Sparkles
+
+interface NotificationCard {
+  id: string
+  title: string
+  description: string
+  icon: LucideIcon
+  iconClassName: string
+  badge?: string
+  badgeVariant?: ComponentProps<typeof Badge>['variant']
+  badgeClassName?: string
+  meta?: string
+  actionLabel?: string
+  href?: string
+  onAction?: () => void
+  progress?: number
+  attention?: boolean
+}
+
+interface RecentDraft {
+  id: string
+  name: string | null
+}
+
+function isValidDate(date: Date | null) {
+  return Boolean(date && !Number.isNaN(date.getTime()))
+}
+
+export function NotificationCenter() {
+  const router = useRouter()
+  const { data: subscriptionData, isLoading: subscriptionLoading } = useSubscription()
+  const [open, setOpen] = useState(false)
+  const [openedOnce, setOpenedOnce] = useState(false)
+  const [recentDraft, setRecentDraft] = useState<RecentDraft | null>(null)
+  const [dailyInsight] = useState(() => {
+    const insights = [
+      {
+        id: 'insight-templates',
+        title: 'Plan tomorrow\'s templates today',
+        description: 'Queue up tomorrow\'s cases in Templates and they\'ll be ready for review when you log in.',
+        icon: Sparkles,
+        iconClassName: 'bg-violet-50 text-violet-600 ring-violet-100',
+        badge: 'Workflow tip',
+        badgeVariant: 'outline' as const,
+        badgeClassName: 'border-transparent bg-violet-50 text-violet-600',
+        actionLabel: 'Browse templates',
+        href: '/app/templates',
+      },
+      {
+        id: 'insight-reports',
+        title: 'Keep your report history tidy',
+        description: 'Archive older reports from the Reports page to keep search lightning fast.',
+        icon: FileText,
+        iconClassName: 'bg-sky-50 text-sky-600 ring-sky-100',
+        badge: 'Housekeeping',
+        badgeVariant: 'outline' as const,
+        badgeClassName: 'border-transparent bg-sky-50 text-sky-600',
+        actionLabel: 'Open reports',
+        href: '/app/reports',
+      },
+      {
+        id: 'insight-speed',
+        title: 'Speed up with reusable snippets',
+        description: 'Save recurring phrases as template snippets so every new report starts 80% complete.',
+        icon: Zap,
+        iconClassName: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
+        badge: 'Power user',
+        badgeVariant: 'outline' as const,
+        badgeClassName: 'border-transparent bg-emerald-50 text-emerald-600',
+        actionLabel: 'Manage templates',
+        href: '/app/templates',
+      },
+    ]
+
+    return insights[Math.floor(Math.random() * insights.length)]
+  })
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const id = localStorage.getItem('recent-template-id')
+    const name = localStorage.getItem('recent-template-name')
+    if (id) {
+      setRecentDraft({ id, name })
+    }
+  }, [])
+
+  const subscriptionNotifications = useMemo(() => {
+    const notifications: NotificationCard[] = []
+    const subscription = subscriptionData?.subscription
+
+    if (subscription) {
+      const totalReports = subscription.reports_limit || 0
+      const usedReports = subscription.reports_used || 0
+      const remainingReports = Math.max(subscription.reports_remaining ?? 0, 0)
+      const usagePercent = totalReports > 0 ? Math.min((usedReports / totalReports) * 100, 100) : 0
+      const periodEnd = subscription.period_end ? new Date(subscription.period_end) : null
+      const resetCopy = isValidDate(periodEnd)
+        ? `Resets ${formatDistanceToNow(periodEnd!, { addSuffix: true })}`
+        : 'Cycle renewal date coming up'
+      const isRunningLow = totalReports > 0
+        ? remainingReports <= Math.max(3, Math.round(totalReports * 0.15))
+        : remainingReports <= 3
+
+      notifications.push({
+        id: 'subscription-usage',
+        title: isRunningLow ? "You're nearing your plan limit" : 'Plenty of runway left',
+        description: isRunningLow
+          ? `Only ${remainingReports} report${remainingReports === 1 ? '' : 's'} left on the ${subscription.tier_display_name} plan.`
+          : `You still have ${remainingReports} report${remainingReports === 1 ? '' : 's'} available this cycle.`,
+        icon: TrendingUp,
+        iconClassName: isRunningLow
+          ? 'bg-amber-50 text-amber-600 ring-amber-100'
+          : 'bg-emerald-50 text-emerald-600 ring-emerald-100',
+        badge: `${Math.round(usagePercent)}% used`,
+        badgeVariant: 'outline',
+        badgeClassName: isRunningLow
+          ? 'bg-amber-100 text-amber-800 border-transparent'
+          : 'bg-emerald-100 text-emerald-700 border-transparent',
+        meta: resetCopy,
+        progress: usagePercent,
+        actionLabel: isRunningLow ? 'Review plans' : undefined,
+        href: isRunningLow ? '/pricing' : undefined,
+        attention: isRunningLow,
+      })
+
+      const avgSeconds = resolveAvgGenerationSeconds(subscriptionData?.usage_stats)
+      if (avgSeconds != null && avgSeconds >= 0.5) {
+        notifications.push({
+          id: 'generation-speed',
+          title: `Reports finish in ~${formatSeconds(avgSeconds)}`,
+          description: 'Your 30-day average generation time looks healthy. We will surface alerts if it trends upward.',
+          icon: Clock,
+          iconClassName: 'bg-blue-50 text-blue-600 ring-blue-100',
+          badge: 'Performance',
+          badgeVariant: 'outline',
+          badgeClassName: 'border-transparent bg-blue-50 text-blue-600',
+          meta: `Tracking ${subscriptionData?.usage_stats?.total_reports ?? subscription.reports_used} recent reports`,
+        })
+      }
+    }
+
+    return notifications
+  }, [subscriptionData])
+
+  const draftNotification = useMemo<NotificationCard | null>(() => {
+    if (!recentDraft) return null
+    const trimmedName = recentDraft.name
+      ? recentDraft.name.length > 40
+        ? `${recentDraft.name.slice(0, 37)}…`
+        : recentDraft.name
+      : null
+
+    return {
+      id: 'resume-draft',
+      title: trimmedName ? `Resume "${trimmedName}"` : 'Resume your saved draft',
+      description: 'We\'ll restore the latest inputs so you can finish in one click.',
+      icon: FileText,
+      iconClassName: 'bg-violet-50 text-violet-600 ring-violet-100',
+      badge: 'Draft ready',
+      badgeVariant: 'outline',
+      badgeClassName: 'bg-emerald-100 text-emerald-700 border-transparent',
+      actionLabel: 'Open draft',
+      href: `/app/generate?templateId=${encodeURIComponent(recentDraft.id)}`,
+      attention: true,
+    }
+  }, [recentDraft])
+
+  const notifications = useMemo(() => {
+    const items: NotificationCard[] = [...subscriptionNotifications]
+    if (draftNotification) items.unshift(draftNotification)
+
+    if (dailyInsight) {
+      items.push({
+        ...dailyInsight,
+        attention: false,
+      })
+    }
+
+    return items
+  }, [subscriptionNotifications, draftNotification, dailyInsight])
+
+  const handleNavigate = useCallback(
+    (href?: string, action?: () => void) => {
+      if (href) {
+        router.push(href)
+      } else if (action) {
+        action()
+      }
+      setOpen(false)
+    },
+    [router]
+  )
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen)
+    if (nextOpen && !openedOnce) {
+      setOpenedOnce(true)
+    }
+  }
+
+  const hasAttention = notifications.some((notification) => notification.attention)
+  const showAttentionBadge = hasAttention && !open && !openedOnce
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            'relative hidden sm:flex transition-transform hover:scale-[1.03]',
+            open && 'text-primary'
+          )}
+          title="Notifications"
+          aria-label="Open notifications"
+        >
+          <Bell className="w-5 h-5" />
+          {showAttentionBadge && (
+            <span className="absolute top-1 right-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold text-white">
+              {Math.min(notifications.length, 9)}
+            </span>
+          )}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="flex w-full max-w-lg max-h-[85vh] flex-col overflow-hidden rounded-3xl bg-white p-0 shadow-2xl">
+        <div className="border-b border-slate-200 bg-gradient-to-r from-white via-emerald-50 to-sky-50 px-6 py-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                Notification Center
+              </p>
+              <DialogTitle className="mt-1 text-2xl font-semibold text-slate-900">
+                Stay on track effortlessly
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-slate-600">
+                Tailored nudges and insights so your reporting flow stays fast.
+              </DialogDescription>
+            </div>
+            <div className="hidden sm:flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Sparkles className="h-5 w-5" />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
+          {subscriptionLoading && notifications.length === 0 ? (
+            <div className="space-y-3">
+              <Skeleton className="h-20 w-full rounded-2xl" />
+              <Skeleton className="h-20 w-full rounded-2xl" />
+              <Skeleton className="h-20 w-full rounded-2xl" />
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white shadow">
+                <Sparkles className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold text-slate-900">
+                All quiet for now
+              </h3>
+              <p className="mt-2 text-sm text-slate-600">
+                We'll ping you here when there's something truly worth your attention.
+              </p>
+            </div>
+          ) : (
+            notifications.map((notification) => (
+              <div
+                key={notification.id}
+                className="rounded-2xl border border-slate-200/80 bg-white/95 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              >
+                <div className="grid gap-3 px-4 py-4 sm:grid-cols-[auto,1fr] sm:gap-5 sm:px-5 sm:py-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-100 bg-slate-50">
+                    <div
+                      className={cn(
+                        'flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-inset',
+                        notification.iconClassName
+                      )}
+                    >
+                      <notification.icon className="h-4 w-4" />
+                    </div>
+                  </div>
+
+                  <div className="flex min-w-0 flex-col gap-3">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                      <div className="space-y-1">
+                        <p className="text-sm font-semibold leading-tight text-slate-900">
+                          {notification.title}
+                        </p>
+                        <p className="text-sm leading-relaxed text-slate-600">
+                          {notification.description}
+                        </p>
+                      </div>
+                      {notification.badge && (
+                        <Badge
+                          variant={notification.badgeVariant}
+                          className={cn(
+                            'rounded-full border border-transparent px-3 py-1 text-[11px] font-semibold uppercase tracking-wide leading-none',
+                            notification.badgeClassName
+                          )}
+                        >
+                          {notification.badge}
+                        </Badge>
+                      )}
+                    </div>
+
+                    {notification.progress != null && (
+                      <div className="space-y-2">
+                        <Progress value={notification.progress} />
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                          {notification.meta}
+                        </p>
+                      </div>
+                    )}
+
+                    {notification.progress == null && notification.meta && (
+                      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        {notification.meta}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                {notification.actionLabel && (
+                  <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-4 py-3">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-9 px-4 text-sm font-semibold text-primary border-primary/20 hover:bg-primary/10"
+                      onClick={() => handleNavigate(notification.href, notification.onAction)}
+                    >
+                      {notification.actionLabel}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">
+                  Tune your notification preferences
+                </p>
+                <p className="text-sm text-slate-600">
+                  Choose email digests and in-app nudges that work best for your day.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="mt-1 h-9 px-3 text-sm font-semibold text-primary border-primary/20 hover:bg-primary/10 sm:mt-0"
+                onClick={() => handleNavigate('/app/settings')}
+              >
+                Adjust settings
+              </Button>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
