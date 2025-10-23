@@ -37,8 +37,15 @@ test.describe('Authentication Flow', () => {
       const googleButton = page.getByRole('button', { name: 'Continue with Google' });
       const appleButton = page.getByRole('button', { name: 'Continue with Apple' });
       
-      // These buttons may or may not be visible depending on environment config
-      // We'll just check that the page loads without errors
+      if (await googleButton.count()) {
+        await expect(googleButton).toBeVisible();
+      }
+      
+      if (await appleButton.count()) {
+        await expect(appleButton).toBeVisible();
+      }
+      
+      // Ensure the page renders without errors regardless of which buttons display
       await expect(page.locator('body')).toBeVisible();
     });
 

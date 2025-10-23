@@ -19,7 +19,7 @@ interface RegenerateWithToneProps {
   };
 }
 
-export function RegenerateWithTone({ reportId, currentReport }: RegenerateWithToneProps) {
+export function RegenerateWithTone({ reportId }: RegenerateWithToneProps) {
   const router = useRouter();
   const [selectedTone, setSelectedTone] = useState<string>("standard");
   const [isRegenerating, setIsRegenerating] = useState(false);
@@ -40,7 +40,7 @@ export function RegenerateWithTone({ reportId, currentReport }: RegenerateWithTo
 
     setIsRegenerating(true);
     try {
-      const response = await httpPost<{ tone: string }, { job_id: string }>(
+      await httpPost<{ tone: string }, { job_id: string }>(
         `/v1/reports/${reportId}/regenerate`,
         { tone: selectedTone }
       );

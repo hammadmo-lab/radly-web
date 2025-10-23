@@ -40,7 +40,7 @@ export function RefineFindings({ reportId, sections }: RefineFindingsProps) {
 
     setIsRefining(true);
     try {
-      const response = await httpPost<
+      await httpPost<
         { section: string; refinement_prompt: string },
         { job_id: string }
       >(`/v1/reports/${reportId}/refine`, {

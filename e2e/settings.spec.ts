@@ -28,7 +28,7 @@ test.describe('Settings Management', () => {
   });
 
   test.describe('Account Information', () => {
-    test.beforeEach(async ({ page, navigation }) => {
+    test.beforeEach(async ({ navigation }) => {
       await navigation.goToSettings();
     });
 
@@ -69,7 +69,7 @@ test.describe('Settings Management', () => {
   });
 
   test.describe('Terms & Privacy', () => {
-    test.beforeEach(async ({ page, navigation }) => {
+    test.beforeEach(async ({ navigation }) => {
       await navigation.goToSettings();
     });
 
@@ -109,7 +109,7 @@ test.describe('Settings Management', () => {
   });
 
   test.describe('Default Settings', () => {
-    test.beforeEach(async ({ page, navigation }) => {
+    test.beforeEach(async ({ navigation }) => {
       await navigation.goToSettings();
     });
 
@@ -234,7 +234,7 @@ test.describe('Settings Management', () => {
   });
 
   test.describe('System Status', () => {
-    test.beforeEach(async ({ page, navigation }) => {
+    test.beforeEach(async ({ navigation }) => {
       await navigation.goToSettings();
     });
 
@@ -336,7 +336,7 @@ test.describe('Settings Management', () => {
   });
 
   test.describe('Form Validation', () => {
-    test.beforeEach(async ({ page, navigation }) => {
+    test.beforeEach(async ({ navigation }) => {
       await navigation.goToSettings();
     });
 
@@ -368,7 +368,7 @@ test.describe('Settings Management', () => {
   });
 
   test.describe('Data Persistence', () => {
-    test.beforeEach(async ({ page, navigation }) => {
+    test.beforeEach(async ({ navigation }) => {
       await navigation.goToSettings();
     });
 
@@ -445,7 +445,7 @@ test.describe('Settings Management', () => {
   });
 
   test.describe('Error Handling', () => {
-    test.beforeEach(async ({ page, navigation }) => {
+    test.beforeEach(async ({ navigation }) => {
       await navigation.goToSettings();
     });
 

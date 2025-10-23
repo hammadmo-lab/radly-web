@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,27 +29,27 @@ export function CustomizeTemplateModal({
   const [isLoading, setIsLoading] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Load existing custom instructions when modal opens
-  useEffect(() => {
-    if (isOpen && templateId) {
-      loadCustomInstructions();
-    }
-  }, [isOpen, templateId]);
-
-  const loadCustomInstructions = async () => {
+  const loadCustomInstructions = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await httpGet<{ instructions: string }>(`/v1/templates/${templateId}/custom-instructions`);
       setCustomInstructions(data.instructions || "");
       setHasChanges(false);
-    } catch (error) {
+    } catch {
       // No custom instructions yet or error fetching
       setCustomInstructions("");
       setHasChanges(false);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [templateId]);
+
+  // Load existing custom instructions when modal opens
+  useEffect(() => {
+    if (isOpen && templateId) {
+      void loadCustomInstructions();
+    }
+  }, [isOpen, templateId, loadCustomInstructions]);
 
   const handleSave = async () => {
     setIsSaving(true);

@@ -11,7 +11,6 @@ import {
   Menu, 
   X,
   User as UserIcon,
-  Bell,
   ChevronDown,
   Activity,
   Plus,
@@ -30,6 +29,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { useAdminAuth } from '@/components/admin/AdminAuthProvider'
+import { NotificationCenter } from '@/components/layout/NotificationCenter'
 
 interface NavLinkProps {
   href: string
@@ -271,17 +271,7 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
             New Report
           </Button>
 
-          {/* Notification Bell (placeholder) */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="relative hidden sm:flex"
-            title="Notifications"
-          >
-            <Bell className="w-5 h-5" />
-            {/* Notification badge */}
-            <span className="absolute top-1 right-1 w-2 h-2 bg-error rounded-full" />
-          </Button>
+          <NotificationCenter />
 
           {/* User Dropdown Menu */}
           <DropdownMenu>

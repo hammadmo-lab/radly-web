@@ -166,7 +166,7 @@ export class E2EAssertions {
   async expectTableRow(tableSelector: string, rowData: Record<string, string>) {
     const table = this.page.locator(tableSelector);
     
-    for (const [column, value] of Object.entries(rowData)) {
+    for (const value of Object.values(rowData)) {
       const cell = table.locator(`text=${value}`);
       await expect(cell).toBeVisible();
     }
