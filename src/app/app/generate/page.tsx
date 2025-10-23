@@ -18,7 +18,7 @@ import { httpGet } from '@/lib/http'
 import { enqueueJob } from '@/lib/jobs'
 import { buildSigninWithNext } from '@/lib/redirect'
 import { toast } from 'sonner'
-import { ArrowLeft, User, AlertCircle, FileText, Stethoscope, CheckCircle, ChevronLeft, ChevronRight, Eye, RotateCcw } from 'lucide-react'
+import { ArrowLeft, User, AlertCircle, FileText, Stethoscope, CheckCircle, ChevronLeft, ChevronRight, Eye, RotateCcw, Loader2 } from 'lucide-react'
 import { useAuthToken } from '@/hooks/useAuthToken';
 import { useAuth } from '@/components/auth-provider';
 import { fetchUserData, userDataQueryConfig } from '@/lib/user-data';
@@ -73,7 +73,7 @@ export default function GeneratePage() {
   const [upgradeReason, setUpgradeReason] = useState<'trial_exhausted' | 'tier_blocked' | 'daily_limit'>('tier_blocked')
   const [currentTier, setCurrentTier] = useState<SubscriptionTier>('free')
 
-  const { data: template } = useQuery({
+  const { data: template, isLoading: templateLoading, error: templateError } = useQuery({
     queryKey: ['template', templateId],
     queryFn: async () => {
       if (!templateId) return null
@@ -123,7 +123,8 @@ export default function GeneratePage() {
     watch,
     setValue,
     reset,
-    formState: { errors, isValid, isDirty, isSubmitting: formIsSubmitting },
+    trigger,
+    formState: { errors, isDirty, isSubmitting: formIsSubmitting },
   } = useForm<GenerateFormValues>({
     resolver: zodResolver(generateFormSchema),
     mode: 'onBlur', // Validate on blur for earlier feedback
@@ -174,12 +175,6 @@ export default function GeneratePage() {
           }).replace(/\//g, profile.default_signature_date_format.includes('/') ? '/' : '-')
         : new Date().toLocaleDateString();
 
-      console.log('Setting form defaults from profile:', {
-        default_signature_name: profile.default_signature_name,
-        default_signature_date_format: profile.default_signature_date_format,
-        formattedDate
-      });
-
       reset({
         templateId: templateId || '',
         includePatient: true,
@@ -196,19 +191,9 @@ export default function GeneratePage() {
   }, [profile, reset, templateId]);
 
   // Debug: Track form state changes
+  // Reset intentional submit when step changes
   useEffect(() => {
-    console.log('Form state changed:', { isValid, formIsSubmitting, currentStep });
-  }, [isValid, formIsSubmitting, currentStep]);
-
-
-  // Debug: Track step changes
-  useEffect(() => {
-    console.log('Step changed to:', currentStep);
-    // Reset intentional submit flag when step changes
     setIntentionalSubmit(false);
-    if (currentStep === 4) {
-      console.log('Reached step 4 - checking if form submission is triggered');
-    }
   }, [currentStep]);
 
   // Warn user before leaving page with unsaved changes
@@ -227,32 +212,46 @@ export default function GeneratePage() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [isDirty, formIsSubmitting])
 
-  const handleNext = () => {
-    console.log('handleNext called, currentStep:', currentStep);
-    if (currentStep < 4) {
-      const newStep = currentStep + 1;
-      console.log('Setting step to:', newStep);
-      setCurrentStep(newStep);
+  const handleNext = useCallback(async () => {
+    if (currentStep === 1) {
+      setCurrentStep(2);
+      return;
     }
-  }
 
-  const handlePrevious = () => {
-    console.log('handlePrevious called, currentStep:', currentStep);
-    if (currentStep > 1) {
-      const newStep = currentStep - 1;
-      console.log('Setting step to:', newStep);
-      setCurrentStep(newStep);
+    if (currentStep === 2) {
+      const valid = await trigger(['patient.age', 'patient.sex'], { shouldFocus: true });
+      if (!valid) {
+        toast.error('Please complete the required patient details before continuing.');
+        return;
+      }
+      setCurrentStep(3);
+      return;
     }
-  }
+
+    if (currentStep === 3) {
+      const valid = await trigger(['indication', 'findings'], { shouldFocus: true });
+      if (!valid) {
+        toast.error('Clinical information is required to continue.');
+        return;
+      }
+      setCurrentStep(4);
+    }
+  }, [currentStep, trigger]);
+
+  const handlePrevious = useCallback(() => {
+    setCurrentStep((prev) => Math.max(1, prev - 1));
+  }, []);
 
   // Memoized callback for voice transcript to prevent React error #185
-  const handleVoiceTranscript = useCallback((text: string) => {
-    const currentFindings = watch('findings') || '';
-    const newFindings = currentFindings
-      ? `${currentFindings} ${text}`
-      : text;
-    setValue('findings', newFindings, { shouldValidate: true });
-  }, [watch, setValue]);
+  const handleVoiceTranscript = useCallback(
+    (text: string) => {
+      const currentFindings = (watch('findings') || '').trimEnd();
+      const separator = currentFindings ? '\n\n' : '';
+      const newFindings = `${currentFindings}${separator}${text}`;
+      setValue('findings', newFindings, { shouldValidate: true, shouldDirty: true });
+    },
+    [watch, setValue]
+  );
 
   // Memoized callback for voice error handling
   const handleVoiceError = useCallback((errorMsg: string) => {
@@ -279,28 +278,82 @@ export default function GeneratePage() {
     setShowUpgradeModal(true);
   }, []);
 
-  // Handle missing template ID gracefully
+  // Redirect users to template picker when no template is provided
+  useEffect(() => {
+    if (!templateId) {
+      router.replace('/app/templates');
+    }
+  }, [templateId, router]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (templateId) {
+      localStorage.setItem('recent-template-id', templateId);
+    }
+  }, [templateId]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (templateId && template?.templateTitle) {
+      localStorage.setItem('recent-template-name', template.templateTitle);
+    }
+  }, [templateId, template?.templateTitle]);
+
+  const templateInfo = (template ?? {}) as {
+    templateTitle?: string;
+    modality?: string;
+    anatomy?: string;
+    body_system?: string;
+  };
+
   if (!templateId) {
     return (
-      <div className="p-6">
-        <h2 className="text-xl font-semibold">Missing template id</h2>
-        <p className="text-sm text-muted-foreground mt-2">
-          The page URL must include ?template=&lt;id&gt;.
-        </p>
-        <a href="/app/templates" className="mt-4 inline-flex items-center px-3 py-2 rounded-lg bg-primary text-primary-foreground">
-          Back to Templates
-        </a>
+      <div className="flex min-h-[60vh] items-center justify-center p-6">
+        <div className="flex flex-col items-center gap-3 text-center text-muted-foreground">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <p>Redirecting you to Templates…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (templateLoading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center p-6">
+        <div className="flex flex-col items-center gap-3 text-center text-muted-foreground">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <p>Loading template details…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (templateError) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center p-6">
+        <div className="max-w-md rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+          <AlertCircle className="mx-auto mb-3 h-8 w-8 text-red-600" />
+          <h2 className="text-lg font-semibold text-red-900 mb-2">Unable to load template</h2>
+          <p className="text-sm text-red-700">
+            We couldn&apos;t load the selected template. It may have been removed or you may no longer have access.
+          </p>
+          <div className="mt-4 flex justify-center gap-2">
+            <Button onClick={() => router.push('/app/templates')}>
+              Browse templates
+            </Button>
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
 
 
   const onSubmit = async (data: GenerateFormValues) => {
-    console.log('Form submitted!', { currentStep, data, intentionalSubmit });
-    
     // Prevent submission if not on step 4 or not intentional
     if (currentStep !== 4 || !intentionalSubmit) {
-      console.log('Preventing submission - not on step 4 or not intentional:', { currentStep, intentionalSubmit });
       return;
     }
 
@@ -334,8 +387,6 @@ export default function GeneratePage() {
         signature: data.signature,
       }
 
-      console.debug('Creating job with:', payload)
-
       // Enqueue the job using new API helper
       const createResp = await enqueueJob(payload)
       const jobId = createResp.job_id
@@ -345,8 +396,6 @@ export default function GeneratePage() {
 
       // Trigger success celebration
       celebrateSuccess()
-
-      console.debug('Job enqueued with ID:', jobId)
 
       // Add optimistic row to localStorage with user-specific key
       try {
@@ -363,7 +412,9 @@ export default function GeneratePage() {
           localStorage.setItem(userJobsKey, JSON.stringify(local))
         }
       } catch (e) {
-        console.warn('Failed to update localStorage:', e)
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('Failed to update localStorage:', e)
+        }
       }
       
       // Store job ID in session storage
@@ -374,7 +425,9 @@ export default function GeneratePage() {
       router.push(`/app/report/${jobId}`)
 
     } catch (err: unknown) {
-      console.error('Generate error:', err)
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Generate error:', err)
+      }
 
       // Handle different error types with specific, actionable messages
       let errorMessage = 'Failed to start report generation'
@@ -605,10 +658,13 @@ export default function GeneratePage() {
         onSubmit={handleSubmit(onSubmit)} 
         className="space-y-6"
         onKeyDown={(e) => {
-          // Prevent form submission on Enter key unless it's the submit button
-          if (e.key === 'Enter' && e.target !== e.currentTarget.querySelector('button[type="submit"]')) {
+          if (e.key !== 'Enter') return;
+          const target = e.target as HTMLElement;
+          if (target instanceof HTMLTextAreaElement) return;
+          if (target instanceof HTMLButtonElement) return;
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          if (target instanceof HTMLInputElement && target.type !== 'submit') {
             e.preventDefault();
-            console.log('Prevented Enter key form submission');
           }
         }}
       >
@@ -640,11 +696,37 @@ export default function GeneratePage() {
                 <div className="p-4 sm:p-6">
                   <div className="p-4 sm:p-6 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200">
                     <h3 className="font-bold text-emerald-700 text-xl mb-2">
-                      {(template as { templateTitle?: string })?.templateTitle || "(Untitled Template)"}
+                      {templateInfo.templateTitle || "(Untitled Template)"}
                     </h3>
                     <p className="text-sm text-gray-600">
                       Template ID: {templateId}
                     </p>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-emerald-800">
+                      {templateInfo.modality && (
+                        <span className="rounded-full bg-white/70 px-3 py-1 font-semibold">
+                          {templateInfo.modality}
+                        </span>
+                      )}
+                      {templateInfo.body_system && (
+                        <span className="rounded-full bg-white/70 px-3 py-1 font-semibold">
+                          {templateInfo.body_system}
+                        </span>
+                      )}
+                      {templateInfo.anatomy && (
+                        <span className="rounded-full bg-white/70 px-3 py-1 font-semibold">
+                          {templateInfo.anatomy}
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => router.push('/app/templates')}
+                      >
+                        Change template
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -712,9 +794,14 @@ export default function GeneratePage() {
                       <Label htmlFor="patient.sex" className="text-gray-900 font-medium">Sex</Label>
                       <Select 
                         value={watch('patient.sex') || ''} 
-                        onValueChange={(value) => setValue('patient.sex', value as 'M' | 'F' | 'O')}
+                        onValueChange={(value) =>
+                          setValue('patient.sex', value as 'M' | 'F' | 'O', { shouldValidate: true })
+                        }
                       >
-                        <SelectTrigger className="border-2 border-gray-200 focus:border-emerald-500">
+                        <SelectTrigger
+                          id="patient.sex"
+                          className="border-2 border-gray-200 focus:border-emerald-500"
+                        >
                           <SelectValue placeholder="Select sex" />
                         </SelectTrigger>
                         <SelectContent>
@@ -801,6 +888,7 @@ export default function GeneratePage() {
                         rows={6}
                         className="border-2 border-gray-200 focus:border-emerald-500 textarea-mobile"
                       />
+                      <p className="text-xs text-gray-500">Press Enter to start a new line. Voice dictation will auto-separate entries for you.</p>
                       {errors.findings && (
                         <p className="text-sm text-red-600">{errors.findings.message}</p>
                       )}
@@ -859,7 +947,6 @@ export default function GeneratePage() {
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               e.preventDefault();
-                              console.log('Prevented Enter key submission in signature name');
                             }
                           }}
                         />
@@ -877,7 +964,6 @@ export default function GeneratePage() {
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               e.preventDefault();
-                              console.log('Prevented Enter key submission in signature date');
                             }
                           }}
                         />
@@ -891,7 +977,7 @@ export default function GeneratePage() {
                     <div className="mt-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200">
                       <h4 className="font-bold mb-4 text-gray-900 text-lg">Report Summary</h4>
                       <div className="text-sm space-y-2 text-gray-700">
-                        <p><strong>Template:</strong> {(template as { templateTitle?: string })?.templateTitle || "(Untitled Template)"}</p>
+                        <p><strong>Template:</strong> {templateInfo.templateTitle || "(Untitled Template)"}</p>
                         <p><strong>Patient Data:</strong> Included</p>
                         <p><strong>Indication:</strong> {watch('indication') || 'Not provided'}</p>
                         <p><strong>Findings:</strong> {watch('findings') ? `${watch('findings').length} characters` : 'Not provided'}</p>
@@ -946,7 +1032,6 @@ export default function GeneratePage() {
                 disabled={isSubmitting || formIsSubmitting || (usage?.subscription && usage.subscription.reports_used >= usage.subscription.reports_limit)}
                 className="btn-primary flex items-center gap-2 touch-target btn-mobile"
                 onClick={() => {
-                  console.log('Generate Report button clicked - setting intentional submit');
                   setIntentionalSubmit(true);
                 }}
               >

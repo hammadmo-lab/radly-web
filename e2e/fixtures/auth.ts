@@ -206,19 +206,19 @@ export const test = base.extend<{
   navigation: NavigationHelper;
   assertions: CustomAssertions;
 }>({
-  auth: async ({ page }, use) => {
+  auth: async ({ page }, runWithFixture) => {
     const authHelper = new AuthHelper(page);
-    await use(authHelper);
+    await runWithFixture(authHelper);
   },
   
-  navigation: async ({ page }, use) => {
+  navigation: async ({ page }, runWithFixture) => {
     const navigationHelper = new NavigationHelper(page);
-    await use(navigationHelper);
+    await runWithFixture(navigationHelper);
   },
   
-  assertions: async ({ page }, use) => {
+  assertions: async ({ page }, runWithFixture) => {
     const assertions = new CustomAssertions(page);
-    await use(assertions);
+    await runWithFixture(assertions);
   },
 });
 

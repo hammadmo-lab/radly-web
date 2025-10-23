@@ -20,12 +20,6 @@ async function getAuthToken(): Promise<string | null> {
     const supabase = createBrowserSupabase();
     const { data: { session } } = await supabase.auth.getSession();
 
-    console.log('🔍 getAuthToken:', {
-      hasSession: !!session,
-      hasToken: !!session?.access_token,
-      tokenPreview: session?.access_token ? `${session.access_token.substring(0, 20)}...` : 'null'
-    });
-
     // Cache the token and expiry
     cachedToken = session?.access_token || null;
     tokenExpiry = session?.expires_at ? session.expires_at * 1000 : 0;
@@ -59,8 +53,6 @@ async function handle<T>(res: Response): Promise<T> {
 export async function httpGet<T = unknown>(path: string): Promise<T> {
   const token = await getAuthToken();
   
-  console.log('🔍 httpGet:', { path, hasToken: !!token, tokenPreview: token ? `${token.substring(0, 20)}...` : 'null' });
-  
   const headers: Record<string, string> = {
     'x-client-key': CLIENT_KEY,
     'X-Request-Id': crypto.randomUUID(),
@@ -76,8 +68,6 @@ export async function httpGet<T = unknown>(path: string): Promise<T> {
     credentials: 'include',
     cache: 'no-store',
   });
-  
-  console.log('🔍 httpGet response:', { path, status: res.status, ok: res.ok });
   
   return handle<T>(res);
 }

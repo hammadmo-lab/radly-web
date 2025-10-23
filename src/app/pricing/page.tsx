@@ -149,21 +149,30 @@ export default function PricingPage() {
                   <CardTitle className="text-2xl">
                     {tier.tier_display_name}
                   </CardTitle>
-                  <CardDescription>
-                    <div className="mt-4">
-                      <span className="text-4xl font-bold text-foreground">
-                        {tier.price_monthly === 0 ? 'Free' : tier.price_monthly}
+                  <CardDescription className="mt-4 text-lg">
+                    <span className="text-4xl font-bold text-foreground">
+                      {tier.price_monthly === 0 ? 'Free' : tier.price_monthly}
+                    </span>
+                    {tier.price_monthly > 0 && (
+                      <span className="text-muted-foreground ml-2">
+                        {tier.currency}/month
                       </span>
-                      {tier.price_monthly > 0 && (
-                        <span className="text-muted-foreground ml-2">
-                          {tier.currency}/month
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-2 text-lg font-semibold text-foreground">
-                      {tier.monthly_report_limit} reports/month
-                    </div>
+                    )}
                   </CardDescription>
+                  <CardDescription>
+                    {tier.price_monthly === 0 ? (
+                      <span className="text-sm text-muted-foreground">
+                        Perfect for getting started
+                      </span>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">
+                        Billed monthly, cancel anytime
+                      </span>
+                    )}
+                  </CardDescription>
+                  <div className="mt-2 text-lg font-semibold text-foreground">
+                    {tier.monthly_report_limit} reports/month
+                  </div>
                 </CardHeader>
 
                 <CardContent>

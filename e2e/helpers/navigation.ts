@@ -190,7 +190,7 @@ export class E2EHelpers {
   /**
    * Mock API responses for testing
    */
-  async mockApiResponse(url: string | RegExp, response: any, status: number = 200) {
+  async mockApiResponse<T>(url: string | RegExp, response: T, status: number = 200) {
     await this.page.route(url, route => {
       route.fulfill({
         status,

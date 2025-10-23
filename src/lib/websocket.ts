@@ -38,10 +38,34 @@ export class TranscriptionWebSocket {
     this.isClosedManually = false;
 
     try {
-      // WebSocket connects directly to api.radly.app, bypassing the edge Worker
-      // HTTP API calls use edge.radly.app for security (client-key validation, rate limiting)
-      const wsUrl = 'wss://api.radly.app';
-      const url = `${wsUrl}/v1/transcribe/stream?token=${encodeURIComponent(this.config.token)}`;
+      // Prefer the configured URL, falling back to production socket endpoint
+      const configured = (this.config.url || 'https://api.radly.app').trim();
+
+      // Ensure the value parses as a URL, defaulting to https if protocol omitted
+      const candidate = configured.match(/^https?:|^wss?:/)
+        ? configured
+        : `https://${configured}`;
+
+      let urlBuilder: URL;
+      try {
+        urlBuilder = new URL(candidate);
+      } catch {
+        urlBuilder = new URL('https://api.radly.app');
+      }
+
+      // Map edge hostnames to the websocket host that actually accepts connections
+      if (urlBuilder.hostname === 'edge.radly.app') {
+        urlBuilder.hostname = 'api.radly.app';
+      }
+
+      // Upgrade protocol to websocket variants
+      urlBuilder.protocol = urlBuilder.protocol === 'http:' ? 'ws:' : 'wss:';
+
+      // Remove any trailing slash before appending path segment
+      const basePath = urlBuilder.pathname.replace(/\/+$/, '');
+      const normalizedBase = `${urlBuilder.origin}${basePath}`;
+
+      const url = `${normalizedBase}/v1/transcribe/stream?token=${encodeURIComponent(this.config.token)}`;
 
       console.log('🔌 Connecting to WebSocket:', url);
 
