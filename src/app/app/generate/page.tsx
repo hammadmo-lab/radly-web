@@ -294,12 +294,22 @@ export default function GeneratePage() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (templateId && template?.templateTitle) {
-      localStorage.setItem('recent-template-name', template.templateTitle);
+    const title =
+      template &&
+      typeof template === 'object' &&
+      template !== null &&
+      'templateTitle' in template &&
+      typeof (template as { templateTitle?: unknown }).templateTitle === 'string'
+        ? (template as { templateTitle: string }).templateTitle
+        : null;
+    if (templateId && title) {
+      localStorage.setItem('recent-template-name', title);
     }
-  }, [templateId, template?.templateTitle]);
+  }, [templateId, template]);
 
-  const templateInfo = (template ?? {}) as {
+  const templateInfo = (template && typeof template === 'object'
+    ? template
+    : {}) as {
     templateTitle?: string;
     modality?: string;
     anatomy?: string;
