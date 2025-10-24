@@ -41,11 +41,11 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://static.cloudflareinsights.com", // Required for Next.js + Cloudflare
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://static.cloudflareinsights.com https://www.googletagmanager.com https://www.google-analytics.com", // Required for Next.js + Cloudflare + GTM/GA
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-      `connect-src 'self' ${apiBase} wss://edge.radly.app https://edge.radly.app https://*.supabase.co https://cloudflareinsights.com wss:`,
+      `connect-src 'self' ${apiBase} wss://edge.radly.app https://edge.radly.app https://*.supabase.co https://cloudflareinsights.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com wss:`,
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

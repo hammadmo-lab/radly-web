@@ -200,7 +200,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: Rec
                     <td className="p-3">{formatPrice(tier)}</td>
                     <td className="p-3">{tier.monthly_report_limit}</td>
                     <td className="p-3">
-                      Templates: {features.templates === "all" ? "All" : "Core"}; queue: {features.queue_priority > 0 ? "Priority" : "Standard"}; DOCX export; support options.
+                      Templates: {features.templates === "all" ? "All" : "Core"}; queue: {(features.queue_priority ?? 0) > 0 ? "Priority" : "Standard"}; DOCX export; support options.
                     </td>
                   </tr>
                 );

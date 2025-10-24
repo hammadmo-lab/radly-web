@@ -15,22 +15,22 @@ export function PatientHeader({ patient }: { patient?: PatientBlock }) {
   if (!patient) return null
   const hasAny = patient.name || patient.age !== undefined || patient.sex || patient.history || patient.mrn || patient.dob
   if (!hasAny) return null
-  
+
   return (
-    <motion.section 
-      className="rounded-xl border p-4 mb-4 bg-white"
+    <motion.section
+      className="rounded-xl border border-[var(--ds-border-medium)] p-4 mb-4 bg-[var(--ds-surface)]"
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.18 }}
     >
-      <h3 className="font-semibold mb-2 text-[#0D2240]">Patient</h3>
-      <div className="grid gap-2 md:grid-cols-3 text-sm">
-        {patient.name && <div><span className="text-muted-foreground">Name:</span> {patient.name}</div>}
-        {patient.age !== undefined && <div><span className="text-muted-foreground">Age:</span> {patient.age}</div>}
-        {patient.sex && <div><span className="text-muted-foreground">Sex:</span> {patient.sex}</div>}
-        {patient.mrn && <div><span className="text-muted-foreground">MRN:</span> {patient.mrn}</div>}
-        {patient.dob && <div><span className="text-muted-foreground">DOB:</span> {patient.dob}</div>}
-        {patient.history && <div className="md:col-span-3"><span className="text-muted-foreground">History:</span> {patient.history}</div>}
+      <h3 className="font-semibold mb-2 text-[var(--ds-text-primary)]">Patient</h3>
+      <div className="grid gap-2 md:grid-cols-3 text-sm text-[var(--ds-text-secondary)]">
+        {patient.name && <div><span className="text-[var(--ds-text-muted)]">Name:</span> {patient.name}</div>}
+        {patient.age !== undefined && <div><span className="text-[var(--ds-text-muted)]">Age:</span> {patient.age}</div>}
+        {patient.sex && <div><span className="text-[var(--ds-text-muted)]">Sex:</span> {patient.sex}</div>}
+        {patient.mrn && <div><span className="text-[var(--ds-text-muted)]">MRN:</span> {patient.mrn}</div>}
+        {patient.dob && <div><span className="text-[var(--ds-text-muted)]">DOB:</span> {patient.dob}</div>}
+        {patient.history && <div className="md:col-span-3"><span className="text-[var(--ds-text-muted)]">History:</span> {patient.history}</div>}
       </div>
     </motion.section>
   )
@@ -39,8 +39,8 @@ export function PatientHeader({ patient }: { patient?: PatientBlock }) {
 export default function ReportRenderer({ report, patient, signature, className = "" }: ReportRendererProps) {
   if (!report) {
     return (
-      <div className="max-w-3xl mx-auto bg-white shadow-md p-6 rounded-2xl">
-        <p className="text-gray-500 text-center">No report data available</p>
+      <div className="max-w-3xl mx-auto bg-[var(--ds-surface)] border border-[var(--ds-border-medium)] shadow-md p-6 rounded-2xl">
+        <p className="text-[var(--ds-text-muted)] text-center">No report data available</p>
       </div>
     )
   }
@@ -72,7 +72,7 @@ export default function ReportRenderer({ report, patient, signature, className =
 
   return (
     <motion.article
-      className={`max-w-3xl mx-auto bg-white shadow-md p-6 rounded-2xl space-y-6 print:shadow-none print:rounded-none ${className}`}
+      className={`max-w-3xl mx-auto bg-[var(--ds-surface-elevated)] border border-[var(--ds-border-medium)] shadow-lg p-6 rounded-2xl space-y-6 print:shadow-none print:rounded-none print:bg-white print:text-black ${className}`}
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -85,14 +85,14 @@ export default function ReportRenderer({ report, patient, signature, className =
       <motion.header className="text-center" variants={itemVariants}>
         {report.title && (
           <>
-            <h1 className="text-2xl font-bold text-[#0D2240] mb-2">
+            <h1 className="text-2xl font-bold text-[var(--ds-text-primary)] mb-2">
               {report.title}
             </h1>
-            <div className="bg-[#127C99] h-0.5 w-24 mx-auto my-3 rounded" />
+            <div className="bg-[var(--ds-primary)] h-0.5 w-24 mx-auto my-3 rounded" />
           </>
         )}
         {report.technique && (
-          <p className="italic text-gray-600 text-sm">
+          <p className="italic text-[var(--ds-text-secondary)] text-sm">
             {report.technique}
           </p>
         )}
@@ -101,11 +101,11 @@ export default function ReportRenderer({ report, patient, signature, className =
       {/* Findings */}
       {report.findings && (
         <motion.section variants={itemVariants}>
-          <h2 className="text-lg font-semibold text-[#0D2240] mb-3">
+          <h2 className="text-lg font-semibold text-[var(--ds-text-primary)] mb-3">
             Findings
           </h2>
-          <div className="bg-gray-50 p-4 rounded-lg print:bg-transparent print:p-0">
-            <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
+          <div className="bg-[rgba(255,255,255,0.04)] border border-[var(--ds-border-light)] p-4 rounded-lg print:bg-transparent print:p-0 print:border-0">
+            <div className="whitespace-pre-wrap text-[var(--ds-text-secondary)] leading-relaxed">
               {report.findings}
             </div>
           </div>
@@ -115,11 +115,11 @@ export default function ReportRenderer({ report, patient, signature, className =
       {/* Impression */}
       {report.impression && (
         <motion.section variants={itemVariants}>
-          <h2 className="text-lg font-semibold text-[#0D2240] mb-3">
+          <h2 className="text-lg font-semibold text-[var(--ds-text-primary)] mb-3">
             Impression
           </h2>
-          <div className="bg-blue-50 p-4 rounded-lg print:bg-transparent print:p-0">
-            <div className="whitespace-pre-wrap text-gray-900 font-medium leading-relaxed">
+          <div className="bg-[rgba(58,130,247,0.08)] border border-[rgba(58,130,247,0.2)] p-4 rounded-lg print:bg-transparent print:p-0 print:border-0">
+            <div className="whitespace-pre-wrap text-[var(--ds-text-primary)] font-medium leading-relaxed">
               {report.impression}
             </div>
           </div>
@@ -129,11 +129,11 @@ export default function ReportRenderer({ report, patient, signature, className =
       {/* Recommendations */}
       {report.recommendations && (
         <motion.section variants={itemVariants}>
-          <h2 className="text-lg font-semibold text-[#0D2240] mb-3">
+          <h2 className="text-lg font-semibold text-[var(--ds-text-primary)] mb-3">
             Recommendations
           </h2>
-          <div className="bg-green-50 p-4 rounded-lg print:bg-transparent print:p-0">
-            <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
+          <div className="bg-[rgba(63,191,140,0.08)] border border-[rgba(63,191,140,0.2)] p-4 rounded-lg print:bg-transparent print:p-0 print:border-0">
+            <div className="whitespace-pre-wrap text-[var(--ds-text-secondary)] leading-relaxed">
               {report.recommendations}
             </div>
           </div>
@@ -143,17 +143,17 @@ export default function ReportRenderer({ report, patient, signature, className =
       {/* Signature Section */}
       {signature && (signature.name || signature.date) && (
         <motion.section
-          className="mt-8 pt-6 border-t border-gray-200"
+          className="mt-8 pt-6 border-t border-[var(--ds-border-medium)]"
           variants={itemVariants}
         >
           <div className="flex flex-col items-end space-y-2">
             {signature.name && (
-              <p className="text-sm italic text-gray-700">
+              <p className="text-sm italic text-[var(--ds-text-secondary)]">
                 <span className="font-medium">Signed:</span> {signature.name}
               </p>
             )}
             {signature.date && (
-              <p className="text-sm italic text-gray-700">
+              <p className="text-sm italic text-[var(--ds-text-secondary)]">
                 <span className="font-medium">Date:</span> {signature.date}
               </p>
             )}
