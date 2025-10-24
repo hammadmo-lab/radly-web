@@ -86,8 +86,23 @@ export class TranscriptionWebSocket {
       };
 
       this.ws.onerror = (event) => {
-        console.error('❌ WebSocket error:', event);
-        this.config.onError(new Error('WebSocket connection error'));
+        // WebSocket errors are typically followed by onclose with more details
+        // Log at warn level instead of error to reduce noise
+        console.warn('⚠️ WebSocket error detected (details will be in close event):', {
+          type: event.type,
+          target: event.target instanceof WebSocket ? {
+            readyState: event.target.readyState,
+            url: event.target.url,
+          } : 'unknown'
+        });
+
+        // Don't call onError here - wait for onclose which has more details
+        // Only set a generic error if close doesn't happen
+        setTimeout(() => {
+          if (this.ws?.readyState === WebSocket.CLOSED) {
+            this.config.onError(new Error('WebSocket connection error'));
+          }
+        }, 100);
       };
 
       this.ws.onclose = (event) => {
