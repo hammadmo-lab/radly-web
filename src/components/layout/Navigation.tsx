@@ -43,14 +43,21 @@ const NavLink = ({ href, icon: Icon, label, isActive }: NavLinkProps) => {
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200",
-        "min-h-[44px] touch-manipulation",
-        "hover:bg-accent/10 hover:text-accent",
-        isActive && "bg-accent/10 text-accent font-medium border-l-2 border-accent"
+        "flex items-center gap-3 rounded-xl border border-[rgba(255,255,255,0.08)] px-4 py-3 text-sm font-medium transition-all duration-200",
+        "min-h-[44px] touch-manipulation text-[rgba(207,207,207,0.7)] bg-[rgba(12,16,28,0.72)] hover:border-[rgba(75,142,255,0.32)] hover:bg-[rgba(75,142,255,0.12)] hover:text-white hover:shadow-[0_14px_30px_rgba(31,64,175,0.35)]",
+        isActive &&
+          "border-[rgba(75,142,255,0.45)] bg-[rgba(75,142,255,0.16)] text-white shadow-[0_18px_42px_rgba(31,64,175,0.4)]"
       )}
     >
-      <Icon className={cn("w-5 h-5", isActive && "text-accent")} />
-      <span className="hidden sm:inline">{label}</span>
+      <div
+        className={cn(
+          "flex h-9 w-9 items-center justify-center rounded-lg border border-[rgba(255,255,255,0.08)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.7)] transition-colors",
+          isActive && "border-[rgba(75,142,255,0.35)] bg-[rgba(75,142,255,0.2)] text-[#D7E3FF]"
+        )}
+      >
+        <Icon className="h-4.5 w-4.5" />
+      </div>
+      <span>{label}</span>
     </Link>
   )
 }
@@ -113,28 +120,33 @@ export function MobileNav({ user, onSignOut }: MobileNavProps) {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="relative w-80 max-w-[85vw] h-full bg-gradient-to-b from-emerald-50 via-white to-violet-50 border-r border-emerald-200/50 shadow-xl"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-emerald-200/50">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-lg flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-white" />
+          className="relative h-full w-80 max-w-[88vw] bg-[rgba(8,12,22,0.96)] border-r border-[rgba(75,142,255,0.25)] shadow-[0_30px_80px_rgba(10,14,24,0.75)]"
+        >
+            <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.08)] p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#2653FF_0%,#4B8EFF_60%,#8F82FF_100%)] shadow-[0_18px_42px_rgba(31,64,175,0.42)]">
+                  <FileText className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-xl font-bold text-gradient-brand">Radly</span>
+                <div className="flex flex-col">
+                  <span className="text-sm uppercase tracking-[0.24em] text-[rgba(207,207,207,0.45)]">
+                    Radly
+                  </span>
+                  <span className="text-xl font-semibold text-white">Assistant</span>
+                </div>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsOpen(false)}
                 aria-label="Close navigation menu"
+                className="text-[rgba(207,207,207,0.7)] hover:text-white"
               >
                 <X className="w-5 h-5" />
               </Button>
             </div>
 
             {/* Navigation items */}
-            <nav className="p-4 space-y-2">
+            <nav className="space-y-3 p-4">
               {navItems.map((item) => (
                 <NavLink
                   key={item.href}
@@ -147,24 +159,24 @@ export function MobileNav({ user, onSignOut }: MobileNavProps) {
             </nav>
 
             {/* User info and sign out */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-emerald-200/50">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                  <UserIcon className="w-4 h-4 text-muted-foreground" />
+            <div className="absolute inset-x-0 bottom-0 border-t border-[rgba(255,255,255,0.08)] bg-[rgba(6,10,18,0.95)] p-4">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.7)]">
+                  <UserIcon className="h-4.5 w-4.5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">
+                  <p className="truncate text-sm font-medium text-white">
                     {user?.email || 'test@radly.test'}
                   </p>
                 </div>
               </div>
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={() => {
                   onSignOut()
                   setIsOpen(false)
                 }}
-                className="w-full"
+                className="w-full justify-center rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.72)] text-[rgba(207,207,207,0.75)] hover:border-[rgba(255,107,107,0.35)] hover:bg-[rgba(255,107,107,0.16)] hover:text-[#FFD1D1]"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out
@@ -207,23 +219,23 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-gradient-to-r from-emerald-50 via-white to-violet-50 border-b border-emerald-200/50 shadow-sm">
+    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[rgba(12,12,14,0.92)] border-b border-[rgba(255,255,255,0.05)] shadow-[0_1px_2px_rgba(255,255,255,0.05)]">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         {/* Enhanced Logo with gradient and animation */}
         <Link href="/app/dashboard" className="flex items-center gap-3 group">
           <div className="relative">
             {/* Gradient glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-xl blur-sm opacity-75 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#4B8EFF_0%,rgba(12,12,14,0)_65%)] rounded-xl blur-sm opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
             {/* Logo container */}
-            <div className="relative w-10 h-10 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-xl flex items-center justify-center shadow-lg">
-              <FileText className="w-6 h-6 text-white" />
+            <div className="relative w-10 h-10 bg-[linear-gradient(135deg,rgba(58,130,247,0.9)0%,rgba(143,130,255,0.9)100%)] rounded-xl flex items-center justify-center shadow-[0_8px_24px_rgba(58,130,247,0.45)]">
+              <FileText className="w-6 h-6 text-white drop-shadow" />
             </div>
           </div>
           <div className="flex flex-col">
             <span className="text-2xl font-bold text-gradient-brand">
               Radly
             </span>
-            <span className="text-xs text-muted-foreground hidden sm:block">
+            <span className="text-xs text-[var(--ds-text-muted)] hidden sm:block">
               Medical Reporting
             </span>
           </div>
@@ -239,19 +251,19 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
                 href={item.href}
                 className={cn(
                   "relative px-4 py-2 rounded-lg transition-all duration-200",
-                  "flex items-center gap-2 text-sm font-medium",
+                  "flex items-center gap-2 text-sm font-medium text-[var(--ds-text-secondary)]",
                   isActive
-                    ? "text-primary bg-primary/10"
-                    : "text-gray-600 hover:text-primary hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                    ? "text-[#3A82F7] bg-[rgba(58,130,247,0.12)]"
+                    : "hover:text-white hover:bg-[rgba(255,255,255,0.06)]"
                 )}
               >
-                <item.icon className="w-4 h-4" />
+                <item.icon className={cn("w-4 h-4 text-[var(--ds-text-secondary)]", isActive && "text-[#3A82F7]")} />
                 <span>{item.label}</span>
                 {/* Animated underline for active state */}
                 {isActive && (
                   <motion.div
                     layoutId="activeNavTab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#3A82F7]"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
@@ -263,8 +275,7 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
         {/* User Menu and Actions */}
         <div className="flex items-center gap-3">
           {/* New Report Button */}
-          <Button 
-            className="btn-primary"
+          <Button
             onClick={handleNewReport}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -346,7 +357,7 @@ export function BottomNav({ pathname }: BottomNavProps) {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-gradient-to-r from-emerald-50/95 via-white/95 to-violet-50/95 backdrop-blur-lg border-t border-emerald-200/50 z-40 safe-area-inset-bottom shadow-lg">
+    <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-[rgba(12,12,14,0.94)] backdrop-blur-lg border-t border-[rgba(255,255,255,0.06)] z-40 safe-area-inset-bottom shadow-[0_-4px_12px_rgba(0,0,0,0.45)]">
       <div className="flex justify-around items-center h-16 px-2">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href)
@@ -360,7 +371,7 @@ export function BottomNav({ pathname }: BottomNavProps) {
               {isActive && (
                 <motion.div
                   layoutId="mobileActiveTab"
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-primary rounded-full"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#3A82F7] rounded-full"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
@@ -372,14 +383,14 @@ export function BottomNav({ pathname }: BottomNavProps) {
                   "p-3 rounded-xl transition-all duration-200",
                   "min-w-[44px] min-h-[44px] flex items-center justify-center",
                   isActive
-                    ? "bg-primary/10"
-                    : "group-active:bg-gray-100 dark:group-active:bg-gray-800"
+                    ? "bg-[rgba(58,130,247,0.16)]"
+                    : "group-active:bg-[rgba(255,255,255,0.08)]"
                 )}
               >
                 <item.icon
                   className={cn(
                     "w-6 h-6 transition-colors",
-                    isActive ? "text-primary" : "text-gray-500 dark:text-gray-400"
+                    isActive ? "text-[#3A82F7]" : "text-[rgba(207,207,207,0.7)]"
                   )}
                 />
               </motion.div>
@@ -388,8 +399,8 @@ export function BottomNav({ pathname }: BottomNavProps) {
               <span className={cn(
                 "text-xs font-medium transition-colors",
                 isActive 
-                  ? "text-primary" 
-                  : "text-gray-500 dark:text-gray-400"
+                  ? "text-[#3A82F7]" 
+                  : "text-[rgba(207,207,207,0.7)]"
               )}>
                 {item.label}
               </span>

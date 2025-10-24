@@ -69,8 +69,8 @@ export default function DashboardPage() {
         value: sub ? `${sub.reports_used}/${sub.reports_limit}` : '—',
         change: sub ? `${sub.reports_remaining} remaining` : '',
         icon: FileText,
-        bgClass: 'bg-emerald-50',
-        iconClass: 'text-emerald-600',
+        bgClass: 'bg-[rgba(75,142,255,0.18)] shadow-[0_0_12px_rgba(75,142,255,0.25)]',
+        iconClass: 'text-[#4B8EFF]',
       },
       {
         label: 'Avg. generation time',
@@ -81,24 +81,24 @@ export default function DashboardPage() {
           ? 'Timing data not yet available'
           : '',
         icon: Clock,
-        bgClass: 'bg-blue-50',
-        iconClass: 'text-blue-600',
+        bgClass: 'bg-[rgba(143,130,255,0.18)] shadow-[0_0_12px_rgba(143,130,255,0.25)]',
+        iconClass: 'text-[#8F82FF]',
       },
       {
         label: 'Plan',
         value: sub?.tier_display_name ?? '—',
         change: sub ? sub.status : '',
         icon: BookTemplate,
-        bgClass: 'bg-violet-50',
-        iconClass: 'text-violet-600',
+        bgClass: 'bg-[rgba(63,191,140,0.18)] shadow-[0_0_12px_rgba(63,191,140,0.25)]',
+        iconClass: 'text-[#3FBF8C]',
       },
       {
         label: 'Resets in',
         value: resetDays != null ? `${resetDays} day${resetDays === 1 ? '' : 's'}` : '—',
         change: sub?.period_end ? new Date(sub.period_end).toLocaleDateString() : '',
         icon: TrendingUp,
-        bgClass: 'bg-cyan-50',
-        iconClass: 'text-cyan-600',
+        bgClass: 'bg-[rgba(248,183,77,0.2)] shadow-[0_0_12px_rgba(248,183,77,0.25)]',
+        iconClass: 'text-[#F8B74D]',
       },
     ]
   }, [subscriptionData])
@@ -117,7 +117,7 @@ export default function DashboardPage() {
             title: recentTitle ? `Resume ${recentTitle}` : 'Resume recent draft',
             description: 'Pick up where you left off',
             href: `/app/generate?templateId=${encodeURIComponent(recentTemplate.id)}`,
-            gradient: 'from-emerald-500 to-teal-500',
+            gradient: 'from-[#4B8EFF] to-[#8F82FF]',
             badge: 'Draft saved',
             cta: 'Continue',
           }
@@ -126,7 +126,7 @@ export default function DashboardPage() {
             title: 'Choose a Template',
             description: 'Start a fresh report from our library',
             href: '/app/templates',
-            gradient: 'from-emerald-500 to-teal-500',
+            gradient: 'from-[#4B8EFF] to-[#3FBF8C]',
             cta: 'Get started',
           },
       {
@@ -134,7 +134,7 @@ export default function DashboardPage() {
         title: 'Browse Templates',
         description: 'View all available report templates',
         href: '/app/templates',
-        gradient: 'from-violet-500 to-purple-500',
+        gradient: 'from-[#8F82FF] to-[#4B8EFF]',
         cta: 'Browse',
       },
       {
@@ -142,14 +142,14 @@ export default function DashboardPage() {
         title: 'View Reports',
         description: 'Access your generated reports',
         href: '/app/reports',
-        gradient: 'from-blue-500 to-cyan-500',
+        gradient: 'from-[#3FBF8C] to-[#4B8EFF]',
         cta: 'Open reports',
       },
     ]
   }, [recentTemplate])
 
   return (
-    <div className="space-y-8 pb-24 md:pb-8 px-4 sm:px-0">
+    <div className="space-y-8 pb-24 md:pb-8 px-4 sm:px-0 text-white">
       {/* USAGE WIDGET - Top Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -163,18 +163,29 @@ export default function DashboardPage() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-emerald-200 bg-emerald-50/60 px-5 py-4 text-sm text-emerald-900 shadow-sm"
+          className="aurora-card border border-[rgba(58,130,247,0.28)] bg-[rgba(22,30,52,0.82)] px-6 py-5 text-sm text-[#D7E3FF] shadow-[0_18px_44px_rgba(58,130,247,0.22)]"
         >
-          {`You're ${subscriptionData.subscription.reports_remaining} reports away from your ${
-            subscriptionData.subscription.tier_display_name
-          } plan limit this cycle.`}{' '}
-          <button
-            className="font-semibold text-primary underline-offset-4 hover:underline"
-            onClick={() => router.push('/pricing')}
-            type="button"
-          >
-            Explore upgrade options
-          </button>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <span className="text-xs uppercase tracking-[0.3em] text-[rgba(215,227,255,0.6)]">
+                Plan Status
+              </span>
+              <p className="text-base sm:text-lg font-semibold text-white">
+                {`You're ${subscriptionData.subscription.reports_remaining} reports away from your ${subscriptionData.subscription.tier_display_name} limit.`}
+              </p>
+              <p className="text-[rgba(215,227,255,0.65)]">
+                Keep momentum going—upgrade now to unlock more capacity this cycle.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              className="h-10 px-5 text-sm font-semibold text-[#4B8EFF] border-[#4B8EFF]/40 hover:bg-[rgba(75,142,255,0.12)]"
+              onClick={() => router.push('/pricing')}
+              type="button"
+            >
+              Explore upgrade options
+            </Button>
+          </div>
         </motion.div>
       )}
 
@@ -182,29 +193,29 @@ export default function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-emerald-50 via-white to-violet-50 p-6 sm:p-8 lg:p-12 border-2 border-gray-100"
+        className="aurora-card relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(135deg,rgba(38,83,255,0.32)0%,rgba(12,12,14,0.85)70%)] p-6 sm:p-8 lg:p-12 shadow-[0_24px_48px_rgba(0,0,0,0.6)]"
       >
         <div className="flex items-center gap-3 mb-4">
-          <Sparkles className="w-8 h-8 text-primary animate-pulse" />
-          <span className="text-sm font-medium text-gray-600 uppercase tracking-wide">
+          <Sparkles className="w-8 h-8 text-[#4B8EFF] animate-pulse" />
+          <span className="text-sm font-medium text-[rgba(207,207,207,0.75)] uppercase tracking-wide">
             Welcome back
           </span>
         </div>
         
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-white">
           <span className="text-gradient-brand">Generate Reports</span>
           <br />
-          <span className="text-gray-900">With AI Speed</span>
+          <span className="text-white">With AI Speed</span>
         </h1>
         
-        <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mb-6 sm:mb-8">
+        <p className="text-lg sm:text-xl text-[rgba(207,207,207,0.75)] max-w-2xl mb-6 sm:mb-8">
           Create professional medical reports in seconds. Choose a template, enter patient data, and let AI handle the rest.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <Button
             size="lg"
-            className="btn-primary h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg w-full sm:w-auto"
+            className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg w-full sm:w-auto"
             onClick={handlePrimaryCta}
             disabled={ctaBusy}
           >
@@ -214,7 +225,7 @@ export default function DashboardPage() {
           <Button
             size="lg"
             variant="outline"
-            className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg border-2 w-full sm:w-auto"
+            className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg w-full sm:w-auto"
             onClick={() => router.push('/app/templates')}
           >
             <BookTemplate className="w-5 h-5 mr-2" />
@@ -232,20 +243,20 @@ export default function DashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ y: -4 }}
           >
-            <Card className="card-modern touch-target">
+            <Card className="aurora-card card-modern touch-target">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`p-3 rounded-xl ${stat.bgClass}`}>
+                  <div className={`p-3 rounded-xl border border-[rgba(255,255,255,0.08)] ${stat.bgClass}`}>
                     <stat.icon className={`w-6 h-6 ${stat.iconClass}`} />
                   </div>
                   {stat.change ? (
-                    <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full font-medium">
+                    <span className="text-xs text-[#3FBF8C] bg-[rgba(63,191,140,0.18)] px-2 py-1 rounded-full font-medium">
                       {stat.change}
                     </span>
                   ) : null}
                 </div>
-                <p className="text-sm text-gray-600 font-medium mb-1">{stat.label}</p>
-                <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                <p className="text-sm text-[rgba(207,207,207,0.75)] font-medium mb-1">{stat.label}</p>
+                <p className="text-3xl font-bold text-white">{stat.value}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -255,28 +266,28 @@ export default function DashboardPage() {
       {/* QUICK ACTIONS - Interactive Cards */}
       <div>
         <div className="flex items-center gap-2 mb-6">
-          <Zap className="w-5 h-5 text-primary" />
-          <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
+          <Zap className="w-5 h-5 text-[#4B8EFF]" />
+          <h2 className="text-2xl font-bold text-white">Quick Actions</h2>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           {quickActions.map((action) => (
             <Card
               key={action.title}
-              className="card-interactive group touch-manipulation"
+              className="aurora-card card-interactive group touch-manipulation"
               onClick={() => router.push(action.href)}
             >
               <CardContent className="p-6">
-                <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${action.gradient} mb-4 group-hover:scale-110 transition-transform`}>
+                <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${action.gradient} mb-4 shadow-[0_0_16px_rgba(75,142,255,0.35)] group-hover:scale-110 transition-transform`}>
                   <action.icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-primary transition-colors">
+                <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-[#4B8EFF] transition-colors">
                   {action.title}
                 </h3>
-                <p className="text-gray-600 mb-4">{action.description}</p>
-                <div className="flex items-center text-primary font-medium">
+                <p className="text-[rgba(207,207,207,0.75)] mb-4">{action.description}</p>
+                <div className="flex items-center text-[#4B8EFF] font-medium">
                   {action.badge ? (
-                    <span className="mr-2 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                    <span className="mr-2 rounded-full bg-[rgba(63,191,140,0.2)] px-2 py-0.5 text-xs font-semibold text-[#B6F2DB]">
                       {action.badge}
                     </span>
                   ) : null}

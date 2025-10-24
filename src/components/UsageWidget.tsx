@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { AlertCircle, Calendar, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useAuthSession } from '@/hooks/useAuthSession'
@@ -99,23 +99,24 @@ export default function UsageWidget() {
   )
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="aurora-card border-none backdrop-blur-xl">
+      <CardHeader className="pb-4">
         <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg">
-              {subscription.tier_display_name} Plan
-            </CardTitle>
+          <div className="space-y-2">
+            <span className="tag-pulse text-xs uppercase tracking-[0.22em]">
+              <strong>{subscription.tier_display_name}</strong> Plan
+            </span>
             {subscription.price_monthly > 0 && (
-              <CardDescription>
+              <p className="text-xs text-[rgba(207,207,207,0.6)]">
                 {subscription.price_monthly} {subscription.currency}/month
-              </CardDescription>
+              </p>
             )}
           </div>
           <div className="flex gap-2">
             <Button 
               variant="ghost" 
               size="sm" 
+              className="text-[rgba(207,207,207,0.75)] hover:text-white"
               onClick={() => {
                 console.log('🔄 Manual refresh triggered')
                 refetch()
@@ -124,7 +125,7 @@ export default function UsageWidget() {
               <RefreshCw className="w-4 h-4" />
             </Button>
             <Link href="/pricing">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="text-[rgba(207,207,207,0.75)] hover:text-white">
                 Manage
               </Button>
             </Link>
@@ -132,14 +133,14 @@ export default function UsageWidget() {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
         {/* Usage Progress */}
         <div>
           <div className="flex justify-between text-sm mb-2">
-            <span className="text-muted-foreground">
+            <span className="text-[rgba(207,207,207,0.65)]">
               {subscription.reports_used} of {subscription.reports_limit} reports used
             </span>
-            <span className="font-medium text-foreground">
+            <span className="font-semibold text-white">
               {subscription.reports_remaining} remaining
             </span>
           </div>
@@ -153,8 +154,8 @@ export default function UsageWidget() {
         </div>
 
         {/* Reset Date */}
-        <div className="flex items-center text-sm text-muted-foreground">
-          <Calendar className="w-4 h-4 mr-2" />
+        <div className="flex items-center text-sm text-[rgba(207,207,207,0.65)]">
+          <Calendar className="w-4 h-4 mr-2 text-[#4B8EFF]" />
           <span>
             Resets in {daysUntilReset} day{daysUntilReset !== 1 ? 's' : ''} 
             {' '}({new Date(subscription.period_end).toLocaleDateString()})
@@ -163,16 +164,16 @@ export default function UsageWidget() {
 
         {/* Warning when approaching limit */}
         {usagePercentage >= 80 && (
-          <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+          <div className="rounded-lg border border-[rgba(248,183,77,0.35)] bg-[rgba(248,183,77,0.16)] p-3 shadow-[0_8px_20px_rgba(248,183,77,0.18)]">
             <div className="flex items-start gap-2">
-              <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-5 h-5 text-[#F8B74D] flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-yellow-900 dark:text-yellow-100">
+                <p className="text-sm font-semibold text-white">
                   {usagePercentage >= 100
                     ? 'Monthly limit reached'
                     : 'Approaching monthly limit'}
                 </p>
-                <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                <p className="text-sm text-[rgba(248,183,77,0.85)] mt-1">
                   {usagePercentage >= 100 ? (
                     <>
                       Upgrade to continue generating reports or wait {daysUntilReset} days for reset.
@@ -183,7 +184,7 @@ export default function UsageWidget() {
                 </p>
                 {subscription.tier !== 'premium' && (
                   <Link href="/pricing" className="inline-block mt-2">
-                    <Button variant="outline" size="sm" className="h-8">
+                    <Button variant="outline" size="sm" className="h-8 text-[#F8B74D] border-[rgba(248,183,77,0.35)] hover:bg-[rgba(248,183,77,0.12)]">
                       View upgrade options →
                     </Button>
                   </Link>
@@ -195,17 +196,17 @@ export default function UsageWidget() {
 
         {/* Stats Grid */}
         {(totalReports > 0 || avgGenerationSeconds != null) && (
-          <div className="pt-4 border-t grid grid-cols-2 gap-4">
+          <div className="pt-4 border-t border-[rgba(255,255,255,0.06)] grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Total Reports</p>
-              <p className="text-lg font-semibold text-foreground">
+              <p className="text-xs text-[rgba(207,207,207,0.55)] mb-1">Total Reports</p>
+              <p className="text-lg font-semibold text-white">
                 {totalReports}
               </p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground mb-1">Avg. Time</p>
-              <p className="text-lg font-semibold text-foreground">
-                {formatSeconds(avgGenerationSeconds)}
+              <p className="text-xs text-[rgba(207,207,207,0.55)] mb-1">Avg. Time</p>
+              <p className="text-lg font-semibold text-white">
+                {avgGenerationSeconds != null ? formatSeconds(avgGenerationSeconds) : '—'}
               </p>
             </div>
           </div>

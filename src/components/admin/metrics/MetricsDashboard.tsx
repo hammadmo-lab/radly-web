@@ -74,19 +74,22 @@ export function MetricsDashboard() {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-        <div className="text-red-800 font-semibold mb-2">Error loading metrics</div>
-        <div className="text-red-600 mb-4">
+      <div className="rounded-2xl border border-[rgba(255,107,107,0.32)] bg-[rgba(255,107,107,0.12)] p-6 text-[#FFD1D1]">
+        <div className="text-lg font-semibold text-white">Error loading metrics</div>
+        <div className="mt-2 text-sm">
           {error.message.includes('404') 
             ? 'The metrics dashboard endpoint is not yet implemented on the backend. Please contact your administrator.'
             : error.message
           }
         </div>
-        <div className="text-sm text-gray-600 mb-4">
-          <strong>Expected endpoint:</strong> <code>/v1/admin/metrics/dashboard</code>
+        <div className="mt-4 text-xs uppercase tracking-[0.18em] text-[rgba(255,209,209,0.7)]">
+          Expected endpoint: <code className="ml-1 font-mono text-[rgba(255,209,209,0.9)]">/v1/admin/metrics/dashboard</code>
         </div>
-        <Button onClick={handleRefresh} className="mt-4">
-          <RefreshCw className="h-4 w-4 mr-2" />
+        <Button
+          onClick={handleRefresh}
+          className="mt-6 h-10 rounded-lg border border-[rgba(255,255,255,0.12)] bg-transparent px-4 text-[#FFD1D1] hover:border-[rgba(255,107,107,0.45)] hover:bg-[rgba(255,107,107,0.12)]"
+        >
+          <RefreshCw className="mr-2 h-4 w-4" />
           Retry
         </Button>
       </div>
@@ -95,40 +98,43 @@ export function MetricsDashboard() {
 
   if (!data) {
     return (
-      <div className="text-center py-12">
-        <div className="text-gray-600">No metrics data available</div>
+      <div className="aurora-card border border-[rgba(255,255,255,0.08)] p-10 text-center text-sm text-[rgba(207,207,207,0.65)]">
+        <p className="text-lg font-semibold text-white">No metrics data available</p>
+        <p className="mt-2 text-sm text-[rgba(207,207,207,0.55)]">
+          Try refreshing the dashboard or verify that the metrics backend is reporting.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-4">
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={() => router.push('/admin')}
-            className="flex items-center gap-2"
+            className="h-11 rounded-xl border border-[rgba(255,255,255,0.12)] px-4 text-[rgba(207,207,207,0.8)] hover:border-[#4B8EFF]/40 hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Admin
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Metrics Dashboard</h1>
-            <div className="flex items-center text-sm text-gray-600 mt-1">
-              <Clock className="h-4 w-4 mr-1" />
-              Last updated: {lastUpdated.toLocaleTimeString()}
+            <h1 className="text-3xl font-semibold text-white">Metrics Dashboard</h1>
+            <div className="mt-1 flex items-center text-sm text-[rgba(207,207,207,0.55)]">
+              <Clock className="mr-2 h-4 w-4 text-[#4B8EFF]" />
+              Last updated: <span className="ml-1 font-medium text-white">{lastUpdated.toLocaleTimeString()}</span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="h-11 w-48 rounded-xl border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.75)] hover:border-[#4B8EFF]/40">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,14,24,0.95)] text-white">
               {TIME_RANGES.map((range) => (
                 <SelectItem key={range.value} value={range.value}>
                   {range.label}
@@ -137,13 +143,23 @@ export function MetricsDashboard() {
             </SelectContent>
           </Select>
 
-          <Button onClick={handleRefresh} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
+          <Button
+            onClick={handleRefresh}
+            variant="ghost"
+            size="sm"
+            className="h-10 rounded-xl border border-[rgba(255,255,255,0.12)] px-4 text-[rgba(207,207,207,0.8)] hover:border-[#4B8EFF]/40 hover:text-white"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
 
-          <Button onClick={handleExport} variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
+          <Button
+            onClick={handleExport}
+            variant="ghost"
+            size="sm"
+            className="h-10 rounded-xl border border-[rgba(75,142,255,0.35)] bg-[rgba(75,142,255,0.16)] px-4 text-[#D7E3FF] hover:border-[rgba(75,142,255,0.45)] hover:bg-[rgba(75,142,255,0.22)]"
+          >
+            <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
         </div>

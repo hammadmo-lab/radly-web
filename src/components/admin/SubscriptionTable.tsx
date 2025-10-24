@@ -1,28 +1,28 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  Users, 
-  Search, 
-  Download, 
-  RefreshCw, 
-  ChevronLeft, 
+import {
+  Users,
+  Search,
+  Download,
+  RefreshCw,
+  ChevronLeft,
   ChevronRight,
-  Eye
+  Eye,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { 
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { 
+import {
   Table,
   TableBody,
   TableCell,
@@ -34,6 +34,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Subscription } from '@/types/admin'
 import { UsageProgressBar } from './UsageProgressBar'
 import { useUserEmails } from '@/hooks/useUserEmails'
+import { cn } from '@/lib/utils'
 
 interface SubscriptionTableProps {
   subscriptions: Subscription[]
@@ -47,6 +48,19 @@ interface SubscriptionTableProps {
   onRefresh: () => void
   onExport: () => void
   onViewUser: (userId: string) => void
+}
+
+const STATUS_BADGE_STYLES: Record<string, string> = {
+  active: 'border-[rgba(63,191,140,0.35)] bg-[rgba(63,191,140,0.18)] text-[#C8F3E2]',
+  cancelled: 'border-[rgba(255,107,107,0.32)] bg-[rgba(255,107,107,0.18)] text-[#FFD1D1]',
+  expired: 'border-[rgba(207,207,207,0.2)] bg-[rgba(18,22,36,0.75)] text-[rgba(207,207,207,0.7)]',
+}
+
+const TIER_BADGE_STYLES: Record<string, string> = {
+  free: 'border-[rgba(207,207,207,0.18)] bg-[rgba(207,207,207,0.08)] text-[rgba(207,207,207,0.75)]',
+  starter: 'border-[rgba(75,142,255,0.35)] bg-[rgba(75,142,255,0.16)] text-[#D7E3FF]',
+  professional: 'border-[rgba(143,130,255,0.35)] bg-[rgba(143,130,255,0.16)] text-[#E2DAFF]',
+  premium: 'border-[rgba(248,183,77,0.35)] bg-[rgba(248,183,77,0.16)] text-[#FBE3B5]',
 }
 
 export function SubscriptionTable({
@@ -64,86 +78,110 @@ export function SubscriptionTable({
 }: SubscriptionTableProps) {
   const [searchValue, setSearchValue] = useState('')
 
-  // Extract all user IDs from subscriptions
-  const userIds = subscriptions?.map(s => s.user_id).filter(Boolean) || []
-
-  // Fetch emails for all users
+  const userIds = useMemo(
+    () => subscriptions?.map((s) => s.user_id).filter(Boolean) || [],
+    [subscriptions]
+  )
   const { data: emailMap, isLoading: emailsLoading } = useUserEmails(userIds)
+
+  const totalPages = Math.max(1, Math.ceil(total / Math.max(pageSize, 1)))
+  const hasResults = total > 0
+  const startItem = hasResults ? (currentPage - 1) * pageSize + 1 : 0
+  const endItem = hasResults ? Math.min(currentPage * pageSize, total) : 0
 
   const handleSearch = (value: string) => {
     setSearchValue(value)
     onSearch(value)
   }
 
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      active: 'bg-green-100 text-green-800',
-      cancelled: 'bg-red-100 text-red-800',
-      expired: 'bg-gray-100 text-gray-800',
-    }
+  const renderStatusBadge = (status: string) => {
+    const normalized = status?.toLowerCase() ?? 'expired'
+    const classes =
+      STATUS_BADGE_STYLES[normalized] || STATUS_BADGE_STYLES.expired
     return (
-      <Badge className={variants[status as keyof typeof variants] || variants.expired}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+      <Badge
+        className={cn(
+          'border px-2.5 py-0.5 text-xs font-semibold uppercase tracking-[0.14em] bg-transparent',
+          classes
+        )}
+      >
+        {normalized.charAt(0).toUpperCase() + normalized.slice(1)}
       </Badge>
     )
   }
 
-  const getTierBadge = (tier: string) => {
-    const variants = {
-      free: 'bg-gray-100 text-gray-800',
-      starter: 'bg-blue-100 text-blue-800',
-      professional: 'bg-purple-100 text-purple-800',
-      premium: 'bg-yellow-100 text-yellow-800',
-    }
+  const renderTierBadge = (tier: string) => {
+    const normalized = tier?.toLowerCase() ?? 'free'
+    const classes = TIER_BADGE_STYLES[normalized] || TIER_BADGE_STYLES.free
     return (
-      <Badge className={variants[tier as keyof typeof variants] || variants.free}>
-        {tier.charAt(0).toUpperCase() + tier.slice(1)}
+      <Badge
+        className={cn(
+          'border px-2.5 py-0.5 text-xs font-semibold uppercase tracking-[0.14em] bg-transparent',
+          classes
+        )}
+      >
+        {normalized.charAt(0).toUpperCase() + normalized.slice(1)}
       </Badge>
     )
   }
-
-  const totalPages = Math.ceil(total / pageSize)
-  const startItem = (currentPage - 1) * pageSize + 1
-  const endItem = Math.min(currentPage * pageSize, total)
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            Subscriptions ({total})
-          </CardTitle>
-          
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button variant="outline" size="sm" onClick={onRefresh}>
-              <RefreshCw className="w-4 h-4 mr-2" />
+    <Card className="aurora-card border border-[rgba(255,255,255,0.08)] backdrop-blur-xl">
+      <CardHeader className="space-y-6 border-b border-[rgba(255,255,255,0.06)] p-6 pb-5">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#2653FF_0%,#4B8EFF_55%,#8F82FF_100%)] shadow-[0_22px_48px_rgba(52,84,207,0.38)]">
+              <Users className="h-5 w-5 text-white" />
+            </div>
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold text-white">Subscriptions</h2>
+              <p className="text-sm text-[rgba(207,207,207,0.65)]">
+                Tracking {total} customer plans across tiers
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRefresh}
+              className="h-10 border border-[rgba(255,255,255,0.12)] text-[rgba(207,207,207,0.85)] hover:border-[#4B8EFF]/40 hover:text-white"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
               Refresh
             </Button>
-            <Button variant="outline" size="sm" onClick={onExport}>
-              <Download className="w-4 h-4 mr-2" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onExport}
+              className="h-10 border border-[rgba(75,142,255,0.35)] bg-[rgba(75,142,255,0.16)] text-[#D7E3FF] hover:border-[rgba(75,142,255,0.45)] hover:bg-[rgba(75,142,255,0.22)]"
+            >
+              <Download className="mr-2 h-4 w-4" />
               Export CSV
             </Button>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[rgba(207,207,207,0.45)]" />
             <Input
-              placeholder="Search by email or user ID..."
+              placeholder="Search by email, user ID, or plan..."
               value={searchValue}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10"
+              onChange={(event) => handleSearch(event.target.value)}
+              className="h-12 rounded-xl border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] pl-12 text-white placeholder:text-[rgba(207,207,207,0.45)] focus-visible:ring-[#4B8EFF]"
             />
           </div>
-          
-          <div className="flex gap-2">
-            <Select onValueChange={(value) => onFilterChange('status', value === 'all' ? '' : value)}>
-              <SelectTrigger className="w-32">
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <Select
+              onValueChange={(value) => onFilterChange('status', value === 'all' ? '' : value)}
+            >
+              <SelectTrigger className="h-11 min-w-[140px] rounded-xl border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.75)] hover:border-[#4B8EFF]/40">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,14,24,0.95)] text-white">
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
@@ -151,11 +189,13 @@ export function SubscriptionTable({
               </SelectContent>
             </Select>
 
-            <Select onValueChange={(value) => onFilterChange('tier', value === 'all' ? '' : value)}>
-              <SelectTrigger className="w-32">
+            <Select
+              onValueChange={(value) => onFilterChange('tier', value === 'all' ? '' : value)}
+            >
+              <SelectTrigger className="h-11 min-w-[140px] rounded-xl border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.75)] hover:border-[#4B8EFF]/40">
                 <SelectValue placeholder="Tier" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,14,24,0.95)] text-white">
                 <SelectItem value="all">All Tiers</SelectItem>
                 <SelectItem value="free">Free</SelectItem>
                 <SelectItem value="starter">Starter</SelectItem>
@@ -164,11 +204,13 @@ export function SubscriptionTable({
               </SelectContent>
             </Select>
 
-            <Select onValueChange={(value) => onFilterChange('region', value === 'all' ? '' : value)}>
-              <SelectTrigger className="w-32">
+            <Select
+              onValueChange={(value) => onFilterChange('region', value === 'all' ? '' : value)}
+            >
+              <SelectTrigger className="h-11 min-w-[140px] rounded-xl border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.75)] hover:border-[#4B8EFF]/40">
                 <SelectValue placeholder="Region" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,14,24,0.95)] text-white">
                 <SelectItem value="all">All Regions</SelectItem>
                 <SelectItem value="egypt">Egypt</SelectItem>
                 <SelectItem value="international">International</SelectItem>
@@ -178,100 +220,113 @@ export function SubscriptionTable({
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="space-y-6 p-6">
         {isLoading ? (
           <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center space-x-4">
-                <Skeleton className="h-4 w-[250px]" />
-                <Skeleton className="h-4 w-[100px]" />
-                <Skeleton className="h-4 w-[80px]" />
-                <Skeleton className="h-4 w-[120px]" />
-                <Skeleton className="h-4 w-[100px]" />
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="flex items-center gap-4">
+                <Skeleton className="h-4 w-[240px] rounded bg-[rgba(255,255,255,0.08)]" />
+                <Skeleton className="h-4 w-[110px] rounded bg-[rgba(255,255,255,0.08)]" />
+                <Skeleton className="h-4 w-[90px] rounded bg-[rgba(255,255,255,0.08)]" />
+                <Skeleton className="h-4 w-[140px] rounded bg-[rgba(255,255,255,0.08)]" />
+                <Skeleton className="h-4 w-[120px] rounded bg-[rgba(255,255,255,0.08)]" />
               </div>
             ))}
           </div>
         ) : subscriptions.length === 0 ? (
-          <div className="text-center py-8">
-            <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No subscriptions found</h3>
-            <p className="text-gray-500">Try adjusting your search or filter criteria.</p>
+          <div className="aurora-card border border-dashed border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.65)] py-12 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-[rgba(75,142,255,0.35)] bg-[rgba(75,142,255,0.16)] text-[#D7E3FF]">
+              <Users className="h-6 w-6" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">No subscriptions match that view</h3>
+            <p className="mt-2 text-sm text-[rgba(207,207,207,0.65)]">
+              Adjust your filters or search query to see more customers.
+            </p>
           </div>
         ) : (
           <>
-            <div className="rounded-md border">
+            <div className="overflow-hidden rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[rgba(12,16,28,0.55)]">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Tier</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Usage</TableHead>
-                    <TableHead>Revenue</TableHead>
-                    <TableHead>Period End</TableHead>
-                    <TableHead>Actions</TableHead>
+                <TableHeader className="bg-[rgba(12,16,28,0.72)]">
+                  <TableRow className="border-b border-[rgba(255,255,255,0.06)]">
+                    {['User', 'Tier', 'Status', 'Usage', 'Revenue', 'Period End', 'Actions'].map(
+                      (column) => (
+                        <TableHead
+                          key={column}
+                          className="px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[rgba(207,207,207,0.45)]"
+                        >
+                          {column}
+                        </TableHead>
+                      )
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {subscriptions.map((subscription) => (
                     <motion.tr
                       key={subscription.subscription_id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.2 }}
-                      className="hover:bg-gray-50"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="border-b border-[rgba(255,255,255,0.05)] bg-transparent last:border-none hover:bg-[rgba(75,142,255,0.08)]"
                     >
-                      <TableCell className="font-medium">
-                        <div className="space-y-1 min-w-[200px]">
-                          {/* Email */}
-                          <div className="text-sm font-medium truncate">
+                      <TableCell className="px-6 py-5 text-sm text-white">
+                        <div className="min-w-[200px] space-y-2">
+                          <div className="font-medium">
                             {emailsLoading ? (
-                              <span className="text-muted-foreground animate-pulse">
-                                Loading email...
+                              <span className="animate-pulse text-[rgba(207,207,207,0.55)]">
+                                Loading email…
                               </span>
-                            ) : emailMap?.[subscription.user_id] && emailMap[subscription.user_id].includes('@') ? (
+                            ) : emailMap?.[subscription.user_id] &&
+                              emailMap[subscription.user_id].includes('@') ? (
                               <span title={emailMap[subscription.user_id]}>
                                 {emailMap[subscription.user_id]}
                               </span>
                             ) : (
-                              <span className="text-muted-foreground">
+                              <span className="text-[rgba(207,207,207,0.55)]">
                                 {emailMap?.[subscription.user_id] || 'Email unavailable'}
                               </span>
                             )}
                           </div>
-                          
-                          {/* User ID (shortened) */}
-                          <div className="text-xs text-muted-foreground font-mono" title={subscription.user_id}>
-                            ID: {subscription.user_id ? subscription.user_id.substring(0, 8) + '...' : 'N/A'}
+                          <div
+                            className="font-mono text-[11px] uppercase tracking-[0.18em] text-[rgba(207,207,207,0.45)]"
+                            title={subscription.user_id}
+                          >
+                            ID:{' '}
+                            {subscription.user_id
+                              ? `${subscription.user_id.substring(0, 8)}…`
+                              : 'N/A'}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        {getTierBadge(subscription.tier_name)}
-                      </TableCell>
-                      <TableCell>
-                        {getStatusBadge(subscription.status)}
-                      </TableCell>
-                      <TableCell>
+
+                      <TableCell className="px-6 py-5">{renderTierBadge(subscription.tier_name)}</TableCell>
+                      <TableCell className="px-6 py-5">{renderStatusBadge(subscription.status)}</TableCell>
+
+                      <TableCell className="px-6 py-5">
                         <UsageProgressBar
                           used={subscription.reports_used_current_period}
                           limit={subscription.reports_limit}
                         />
                       </TableCell>
-                      <TableCell>
+
+                      <TableCell className="px-6 py-5 text-sm text-[rgba(207,207,207,0.75)]">
                         {subscription.currency} {subscription.price_paid}
                       </TableCell>
-                      <TableCell>
+
+                      <TableCell className="px-6 py-5 text-sm text-[rgba(207,207,207,0.75)]">
                         {new Date(subscription.period_end).toLocaleDateString()}
                       </TableCell>
-                      <TableCell>
+
+                      <TableCell className="px-6 py-5">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => onViewUser(subscription.user_id)}
                           disabled={!subscription.user_id}
+                          className="h-9 border border-transparent text-[#D7E3FF] hover:border-[rgba(75,142,255,0.35)] hover:bg-[rgba(75,142,255,0.12)]"
                         >
-                          <Eye className="w-4 h-4 mr-2" />
+                          <Eye className="mr-2 h-4 w-4" />
                           View Details
                         </Button>
                       </TableCell>
@@ -281,32 +336,36 @@ export function SubscriptionTable({
               </Table>
             </div>
 
-            <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-gray-500">
-                Showing {startItem}-{endItem} of {total} results
+            <div className="flex flex-col gap-3 text-sm text-[rgba(207,207,207,0.55)] sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                {hasResults
+                  ? `Showing ${startItem}-${endItem} of ${total} results`
+                  : 'No matching subscriptions'}
               </div>
-              
-              <div className="flex items-center gap-2">
+
+              <div className="flex items-center gap-3">
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={() => onPageChange(currentPage - 1)}
                   disabled={currentPage === 1}
+                  className="h-9 border border-[rgba(255,255,255,0.12)] text-[rgba(207,207,207,0.8)] disabled:border-transparent disabled:text-[rgba(207,207,207,0.3)]"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="h-4 w-4" />
                 </Button>
-                
-                <span className="text-sm text-gray-500">
+
+                <span className="text-xs uppercase tracking-[0.18em] text-[rgba(207,207,207,0.45)]">
                   Page {currentPage} of {totalPages}
                 </span>
-                
+
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={() => onPageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
+                  className="h-9 border border-[rgba(255,255,255,0.12)] text-[rgba(207,207,207,0.8)] disabled:border-transparent disabled:text-[rgba(207,207,207,0.3)]"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
             </div>

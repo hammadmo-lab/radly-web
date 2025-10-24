@@ -27,6 +27,25 @@ interface LocalStorageJob {
 
 export const dynamic = 'force-dynamic';
 
+const STATUS_STYLES: Record<string, { label: string; badgeClass: string }> = {
+  done: {
+    label: 'Completed',
+    badgeClass: 'bg-[rgba(63,191,140,0.18)] border border-[rgba(63,191,140,0.32)] text-[#C8F3E2]',
+  },
+  running: {
+    label: 'Generating',
+    badgeClass: 'bg-[rgba(75,142,255,0.16)] border border-[rgba(75,142,255,0.35)] text-[#D7E3FF]',
+  },
+  queued: {
+    label: 'Queued',
+    badgeClass: 'bg-[rgba(248,183,77,0.16)] border border-[rgba(248,183,77,0.35)] text-[#FBE3B5]',
+  },
+  error: {
+    label: 'Failed',
+    badgeClass: 'bg-[rgba(255,107,107,0.18)] border border-[rgba(255,107,107,0.28)] text-[#FFD1D1]',
+  },
+}
+
 export default function ReportsPage() {
   const router = useRouter();
   const { userId } = useAuthToken();
@@ -287,133 +306,142 @@ export default function ReportsPage() {
 
   return (
     <PullToRefresh onRefresh={handleRefresh} enabled={!loading}>
-      <div className="p-4 sm:p-6">
-        {/* Breadcrumb */}
+      <div className="neon-shell space-y-6 p-5 sm:p-8 md:p-10">
         <Breadcrumb items={[{ label: 'Reports' }]} />
 
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl sm:text-2xl font-semibold">Your Recent Reports</h1>
-          <Button variant="outline" onClick={() => {
-            triggerHaptic('light');
-            load();
-          }} size="sm" aria-label="Refresh reports list" className="touch-target">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-white">Your Recent Reports</h1>
+            <p className="text-sm text-[rgba(207,207,207,0.65)] mt-1">
+              Track generated studies, monitor statuses, and jump back into results instantly.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-10 px-4 text-[#4B8EFF] border-[#4B8EFF]/40 hover:bg-[rgba(75,142,255,0.12)]"
+            onClick={() => {
+              triggerHaptic('light');
+              load();
+            }}
+            aria-label="Refresh reports list"
+          >
             Refresh
           </Button>
         </div>
 
-      {/* Search and Sort Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          <Input
-            placeholder="Search by job ID, template, or status..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value)
-              setCurrentPage(1) // Reset to first page on search
-            }}
-            className="pl-9"
-            aria-label="Search reports"
-          />
-        </div>
-        <Select value={sortBy} onValueChange={(value: 'newest' | 'oldest' | 'status') => setSortBy(value)}>
-          <SelectTrigger className="w-full sm:w-[180px]" aria-label="Sort reports">
-            <SelectValue placeholder="Sort by..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">Newest First</SelectItem>
-            <SelectItem value="oldest">Oldest First</SelectItem>
-            <SelectItem value="status">By Status</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Results count */}
-      {searchQuery && (
-        <div className="mb-4 text-sm text-muted-foreground">
-          Found {filteredAndSortedRows.length} {filteredAndSortedRows.length === 1 ? 'report' : 'reports'}
-        </div>
-      )}
-
-      {/* Warning banner for polling failures */}
-      {pollingFailures >= 3 && (
-        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-start gap-3">
-            <div className="text-yellow-600 mt-0.5">⚠️</div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-yellow-900 mb-1">Status Updates Delayed</h3>
-              <p className="text-sm text-yellow-700">
-                We&apos;re having trouble fetching the latest job status. Your reports are still processing, but the status shown may be outdated. Try refreshing the page.
-              </p>
-            </div>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[rgba(207,207,207,0.5)]" aria-hidden="true" />
+            <Input
+              placeholder="Search by job ID, template, or status..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                setCurrentPage(1)
+              }}
+              className="pl-9 bg-[rgba(18,22,36,0.8)] border border-[rgba(255,255,255,0.08)] text-white placeholder:text-[rgba(207,207,207,0.45)] focus-visible:ring-[#4B8EFF]"
+              aria-label="Search reports"
+            />
           </div>
+          <Select value={sortBy} onValueChange={(value: 'newest' | 'oldest' | 'status') => setSortBy(value)}>
+            <SelectTrigger className="w-full sm:w-[200px] bg-[rgba(18,22,36,0.8)] border border-[rgba(255,255,255,0.08)] text-white" aria-label="Sort reports">
+              <SelectValue placeholder="Sort by..." />
+            </SelectTrigger>
+            <SelectContent className="bg-[rgba(10,12,20,0.95)] border border-[rgba(255,255,255,0.08)] text-white">
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="status">By Status</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      )}
 
-      <ul className="space-y-3">
-        {paginatedRows.map((r) => (
-          <li key={r.job_id} className="flex flex-col sm:flex-row sm:items-center justify-between rounded-lg border p-4 hover:bg-gray-50 transition-colors touch-manipulation gap-3 sm:gap-0">
-            <div className="flex-1">
-              <div className="font-medium text-gray-900">{r.template_id ?? 'Untitled Report'}</div>
-              <div className="text-sm text-muted-foreground mt-1">
-                Status: <span className={`font-medium ${
-                  r.status === 'done' ? 'text-green-600' :
-                  r.status === 'running' ? 'text-blue-600' :
-                  r.status === 'error' ? 'text-red-600' :
-                  'text-yellow-600'
-                }`}>
-                  {r.status === 'done' ? 'Completed' :
-                   r.status === 'running' ? 'Generating' :
-                   r.status === 'error' ? 'Failed' :
-                   'Queued'}
-                </span>
+        {searchQuery && (
+          <div className="text-sm text-[rgba(207,207,207,0.6)]">
+            Found {filteredAndSortedRows.length} {filteredAndSortedRows.length === 1 ? 'report' : 'reports'}
+          </div>
+        )}
+
+        {pollingFailures >= 3 && (
+          <div className="aurora-card border border-[rgba(248,183,77,0.28)] bg-[rgba(54,42,22,0.65)] p-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 text-[#F8B74D]">⚠️</div>
+              <div className="flex-1 space-y-1">
+                <h3 className="font-semibold text-white">Status updates delayed</h3>
+                <p className="text-sm text-[rgba(248,183,77,0.85)]">
+                  We&apos;re having trouble fetching the latest job status. Reports are still processing; try refreshing to sync again.
+                </p>
               </div>
-              <div className="text-xs text-gray-500 mt-1 truncate">Job ID: {r.job_id}</div>
             </div>
-            <div className="flex items-center gap-3">
-              <Link
-                href={`/app/report/${r.job_id}`}
-                className="inline-flex items-center justify-center gap-2 px-4 py-3 sm:px-3 sm:py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors touch-target w-full sm:w-auto"
-                onClick={() => triggerHaptic('light')}
-              >
-                <Eye className="h-4 w-4" />
-                <span>View Report</span>
-              </Link>
-            </div>
-          </li>
-        ))}
-      </ul>
+          </div>
+        )}
 
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-between border-t pt-4">
-          <div className="text-sm text-muted-foreground">
-            Page {currentPage} of {totalPages} ({filteredAndSortedRows.length} total {filteredAndSortedRows.length === 1 ? 'report' : 'reports'})
+        <ul className="space-y-4">
+          {paginatedRows.map((r) => {
+            const statusStyle = STATUS_STYLES[r.status] ?? STATUS_STYLES.queued
+            return (
+              <li
+                key={r.job_id}
+                className="aurora-card border border-[rgba(255,255,255,0.05)] p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(75,142,255,0.35)] hover:shadow-[0_18px_42px_rgba(20,28,45,0.55)]"
+              >
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-lg font-semibold text-white tracking-tight">
+                        {(r.template_id ?? 'Untitled Report').replace(/_/g, ' ')}
+                      </span>
+                      <span className={`text-xs font-medium px-3 py-1 rounded-full ${statusStyle.badgeClass}`}>
+                        {statusStyle.label}
+                      </span>
+                    </div>
+                    <div className="text-xs text-[rgba(207,207,207,0.55)]">
+                      <span className="uppercase tracking-[0.28em] text-[rgba(207,207,207,0.4)] mr-2">Job ID</span>
+                      <span className="font-mono text-[rgba(207,207,207,0.75)] truncate block sm:inline">{r.job_id}</span>
+                    </div>
+                  </div>
+                  <Link
+                    href={`/app/report/${r.job_id}`}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[linear-gradient(90deg,#2653FF_0%,#4B8EFF_100%)] text-white shadow-[0_10px_24px_rgba(75,142,255,0.35)] hover:shadow-[0_16px_28px_rgba(75,142,255,0.45)] transition-all touch-target"
+                    onClick={() => triggerHaptic('light')}
+                  >
+                    <Eye className="h-4 w-4" />
+                    <span>View Report</span>
+                  </Link>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+
+        {totalPages > 1 && (
+          <div className="flex flex-col gap-4 border-t border-[rgba(255,255,255,0.06)] pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-[rgba(207,207,207,0.6)]">
+              Page {currentPage} of {totalPages} ({filteredAndSortedRows.length} total {filteredAndSortedRows.length === 1 ? 'report' : 'reports'})
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 px-3 text-[rgba(207,207,207,0.8)] border-[rgba(255,255,255,0.12)] hover:text-white"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                aria-label="Go to previous page"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 px-3 text-[rgba(207,207,207,0.8)] border-[rgba(255,255,255,0.12)] hover:text-white"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                aria-label="Go to next page"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              aria-label="Go to previous page"
-            >
-              <ChevronLeft className="h-4 w-4 mr-1" aria-hidden="true" />
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              aria-label="Go to next page"
-            >
-              Next
-              <ChevronRight className="h-4 w-4 ml-1" aria-hidden="true" />
-            </Button>
-          </div>
-        </div>
-      )}
+        )}
       </div>
     </PullToRefresh>
   );

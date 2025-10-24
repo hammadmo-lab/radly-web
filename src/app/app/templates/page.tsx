@@ -88,256 +88,246 @@ export default function TemplatesPage() {
   }, [templates, searchQuery, selectedModality, selectedAnatomy])
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 md:pb-8">
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        
-        {/* HEADER - BOLD AND READABLE */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-              Templates
-            </h1>
-            <p className="text-base sm:text-lg text-gray-600">
-              Select a template to generate your medical report
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-semibold text-white">Templates</h1>
+          <p className="text-sm sm:text-base text-[rgba(207,207,207,0.65)]">
+            Select a template to generate your medical report.
+          </p>
+        </div>
+        <Button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="h-12 px-6 bg-[linear-gradient(90deg,#2653FF_0%,#4B8EFF_100%)] text-white shadow-[0_10px_24px_rgba(75,142,255,0.35)] hover:shadow-[0_16px_28px_rgba(75,142,255,0.45)]"
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          New Report
+        </Button>
+      </div>
+
+      <div className="aurora-card border border-[rgba(255,255,255,0.08)] p-5 sm:p-6 md:p-7">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-full bg-[linear-gradient(135deg,#F8B74D,#FF6B6B)] shadow-[0_10px_24px_rgba(255,155,80,0.35)] flex items-center justify-center">
+            <Settings className="w-5 h-5 text-white" />
+          </div>
+          <div className="space-y-2 text-sm text-[rgba(207,207,207,0.75)]">
+            <h3 className="text-lg font-semibold text-white">Save time with custom instructions</h3>
+            <p>
+              Tap the{' '}
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.08)] gap-1">
+                <Settings className="w-3 h-3 text-[#8F82FF]" />
+                <span className="text-xs uppercase tracking-wide text-[rgba(207,207,207,0.75)]">Settings</span>
+              </span>{' '}
+              icon on any template to add preferences (e.g. “always mention lymphadenopathy”). The AI remembers them for every future report.
             </p>
           </div>
-          <Button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold px-6 h-12 rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105 w-full sm:w-auto"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            New Report
-          </Button>
         </div>
+      </div>
 
-        {/* CUSTOM INSTRUCTIONS BANNER */}
-        <div className="bg-gradient-to-r from-orange-50 to-purple-50 border-2 border-orange-300 rounded-2xl p-4 sm:p-6 shadow-sm">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-400 rounded-full flex items-center justify-center flex-shrink-0">
-              <Settings className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-gray-900 mb-1">
-                💡 Save Time with Custom Instructions
-              </h3>
-              <p className="text-sm text-gray-700 leading-relaxed">
-                Click the <span className="inline-flex items-center mx-1 px-1.5 py-0.5 bg-white border border-gray-300 rounded">
-                  <Settings className="w-3 h-3 text-gray-600" />
-                </span> <span className="font-semibold">Settings</span> icon on any template to add your preferences (like &quot;always mention lymphadenopathy&quot;). Radly will remember them forever and apply them to every report you generate with that template!
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* SEARCH BAR - WHITE BACKGROUND, NOT DARK! */}
-        <div className="bg-white rounded-2xl border-2 border-gray-200 p-4 sm:p-6 lg:p-8 shadow-sm">
-          <div className="relative mb-4 sm:mb-6">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <Input
-              type="search"
-              placeholder="Search templates by name, modality, or body system..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 h-12 sm:h-14 text-base border-2 border-gray-200 rounded-xl focus:border-emerald-500 bg-white text-gray-900"
-            />
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className={`border-2 h-11 rounded-lg hover:border-emerald-500 w-full sm:w-auto ${
-                    selectedModality ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'
-                  }`}
-                >
-                  <Filter className="w-4 h-4 mr-2" />
-                  Modality
-                  {selectedModality && (
-                    <span className="ml-2 px-2 py-0.5 bg-emerald-500 text-white text-xs rounded-full">
-                      {selectedModality}
-                    </span>
-                  )}
-                  <ChevronDown className="w-4 h-4 ml-2" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuItem onClick={() => handleModalityChange(null)}>
-                  <X className="w-4 h-4 mr-2" />
-                  Clear Filter
-                </DropdownMenuItem>
-                {modalities.map((modality) => (
-                  <DropdownMenuItem 
-                    key={modality}
-                    onClick={() => handleModalityChange(modality)}
-                    className={selectedModality === modality ? 'bg-emerald-50' : ''}
-                  >
-                    {modality}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className={`border-2 h-11 rounded-lg hover:border-emerald-500 w-full sm:w-auto ${
-                    selectedAnatomy ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'
-                  } ${!selectedModality ? 'opacity-60' : ''}`}
-                  disabled={!selectedModality}
-                >
-                  <Filter className="w-4 h-4 mr-2" />
-                  Body System
-                  {!selectedModality && (
-                    <span className="ml-2 px-2 py-0.5 bg-gray-400 text-white text-xs rounded-full">
-                      Select modality first
-                    </span>
-                  )}
-                  {selectedAnatomy && (
-                    <span className="ml-2 px-2 py-0.5 bg-emerald-500 text-white text-xs rounded-full">
-                      {selectedAnatomy}
-                    </span>
-                  )}
-                  <ChevronDown className="w-4 h-4 ml-2" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuItem onClick={() => setSelectedAnatomy(null)}>
-                  <X className="w-4 h-4 mr-2" />
-                  Clear Filter
-                </DropdownMenuItem>
-                {anatomies.map((anatomy) => (
-                  <DropdownMenuItem 
-                    key={anatomy}
-                    onClick={() => setSelectedAnatomy(anatomy)}
-                    className={selectedAnatomy === anatomy ? 'bg-emerald-50' : ''}
-                  >
-                    {anatomy}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
-        {/* TEMPLATE CARDS - MODERN DESIGN */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {isLoading ? (
-            // Show skeleton loaders while loading
-            Array.from({ length: 6 }).map((_, index) => (
-              <TemplateCardSkeleton key={index} />
-            ))
-          ) : filteredTemplates.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <Search className="w-12 h-12 mx-auto" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No templates found</h3>
-              <p className="text-gray-600">
-                {searchQuery || selectedModality || selectedAnatomy
-                  ? 'Try adjusting your search or filters'
-                  : 'No templates available'
-                }
-              </p>
-              {(searchQuery || selectedModality || selectedAnatomy) && (
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSearchQuery('')
-                    handleModalityChange(null)
-                    setSelectedAnatomy(null)
-                  }}
-                  className="mt-4"
-                >
-                  Clear all filters
-                </Button>
-              )}
-            </div>
-          ) : (
-            filteredTemplates.map((template) => (
-              <Card
-                key={template.id}
-                className="group bg-white border-2 border-gray-200 rounded-2xl p-6 hover:border-emerald-500 hover:shadow-xl transition-all relative"
-              >
-                {/* Customize Button */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedTemplate({ id: template.id, name: template.title || 'Untitled Template' });
-                    setCustomizeModalOpen(true);
-                  }}
-                  className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg bg-white border-2 border-gray-200 hover:border-purple-500 hover:bg-purple-50 transition-all z-10"
-                  title="Add custom instructions - Set your preferences and Radly will remember them!"
-                >
-                  <Settings className="w-4 h-4 text-gray-600 hover:text-purple-600" />
-                </button>
-
-                <div
-                  className="cursor-pointer"
-                  onClick={() => router.push(`/app/generate?templateId=${template.id}`)}
-                >
-                  {/* Icon */}
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-violet-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-
-                  {/* Badges */}
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {template.modality && (
-                      <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        {template.modality}
-                      </div>
-                    )}
-                    {template.anatomy && (
-                      <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-200">
-                        {template.anatomy}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
-                    {template.title || 'Untitled Template'}
-                  </h3>
-
-                  {/* Description */}
-                  {template.description && (
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                      {template.description}
-                    </p>
-                  )}
-
-                  {/* Action */}
-                  <Button
-                    className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-lg h-11 group-hover:shadow-lg transition-all"
-                  >
-                    Use Template
-                  </Button>
-                </div>
-              </Card>
-            ))
-          )}
-        </div>
-
-        {/* Customize Template Modal */}
-        {selectedTemplate && (
-          <CustomizeTemplateModal
-            templateId={selectedTemplate.id}
-            templateName={selectedTemplate.name}
-            isOpen={customizeModalOpen}
-            onClose={() => {
-              setCustomizeModalOpen(false);
-              setSelectedTemplate(null);
-            }}
-            onSaved={() => {
-              // Optionally refetch templates or show indicator
-            }}
+      <div className="aurora-card border border-[rgba(255,255,255,0.08)] p-5 sm:p-6 md:p-7 space-y-5">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[rgba(207,207,207,0.45)]" />
+          <Input
+            type="search"
+            placeholder="Search templates by name, modality, or body system..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-12 h-12 sm:h-13 bg-[rgba(18,22,36,0.85)] border border-[rgba(255,255,255,0.08)] text-white placeholder:text-[rgba(207,207,207,0.45)] focus-visible:ring-[#4B8EFF]"
           />
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className={`h-11 rounded-lg border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-white hover:border-[#4B8EFF]/40 hover:text-white ${
+                  selectedModality ? 'border-[#4B8EFF]/40 bg-[rgba(75,142,255,0.12)]' : ''
+                }`}
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Modality
+                {selectedModality && (
+                  <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-[rgba(75,142,255,0.2)] text-[#D7E3FF]">
+                    {selectedModality}
+                  </span>
+                )}
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 bg-[rgba(12,14,24,0.95)] border border-[rgba(255,255,255,0.12)] text-white">
+              <DropdownMenuItem onClick={() => handleModalityChange(null)}>
+                <X className="w-4 h-4 mr-2" />
+                Clear Filter
+              </DropdownMenuItem>
+              {modalities.map((modality) => (
+                <DropdownMenuItem
+                  key={modality}
+                  onClick={() => handleModalityChange(modality)}
+                  className={selectedModality === modality ? 'bg-[rgba(75,142,255,0.18)] text-[#D7E3FF]' : ''}
+                >
+                  {modality}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className={`h-11 rounded-lg border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-white hover:border-[#4B8EFF]/40 hover:text-white ${
+                  selectedAnatomy ? 'border-[#4B8EFF]/40 bg-[rgba(75,142,255,0.12)]' : ''
+                } ${!selectedModality ? 'opacity-60 cursor-not-allowed' : ''}`}
+                disabled={!selectedModality}
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Body System
+                {selectedAnatomy && (
+                  <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-[rgba(143,130,255,0.2)] text-[#E0D9FF]">
+                    {selectedAnatomy}
+                  </span>
+                )}
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 bg-[rgba(12,14,24,0.95)] border border-[rgba(255,255,255,0.12)] text-white">
+              <DropdownMenuItem onClick={() => setSelectedAnatomy(null)}>
+                <X className="w-4 h-4 mr-2" />
+                Clear Filter
+              </DropdownMenuItem>
+              {anatomies.map((anatomy) => (
+                <DropdownMenuItem
+                  key={anatomy}
+                  onClick={() => setSelectedAnatomy(anatomy)}
+                  className={selectedAnatomy === anatomy ? 'bg-[rgba(143,130,255,0.18)] text-[#E0D9FF]' : ''}
+                >
+                  {anatomy}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {isLoading ? (
+          Array.from({ length: 6 }).map((_, index) => <TemplateCardSkeleton key={index} />)
+        ) : filteredTemplates.length === 0 ? (
+          <div className="col-span-full aurora-card border border-[rgba(255,255,255,0.08)] py-12 text-center space-y-4">
+            <div className="text-[rgba(207,207,207,0.45)]">
+              <Search className="w-12 h-12 mx-auto" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">No templates found</h3>
+            <p className="text-sm text-[rgba(207,207,207,0.65)] max-w-md mx-auto">
+              {searchQuery || selectedModality || selectedAnatomy
+                ? 'Try adjusting your search or filters.'
+                : 'Templates will appear here as soon as they are available.'}
+            </p>
+            {(searchQuery || selectedModality || selectedAnatomy) && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery('')
+                  handleModalityChange(null)
+                  setSelectedAnatomy(null)
+                }}
+                className="mt-4 h-10 px-5 text-[rgba(207,207,207,0.85)] border-[rgba(255,255,255,0.12)] hover:text-white"
+              >
+                Clear all filters
+              </Button>
+            )}
+          </div>
+        ) : (
+          filteredTemplates.map((template) => (
+            <Card
+              key={template.id}
+              className="aurora-card group relative border border-[rgba(255,255,255,0.08)] p-6 sm:p-7 transition-all hover:-translate-y-1 hover:border-[rgba(75,142,255,0.35)] hover:shadow-[0_18px_42px_rgba(20,28,45,0.5)]"
+            >
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSelectedTemplate({ id: template.id, name: template.title || 'Untitled Template' })
+                  setCustomizeModalOpen(true)
+                }}
+                className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-lg bg-[rgba(18,22,36,0.9)] border border-[rgba(255,255,255,0.12)] text-[rgba(207,207,207,0.75)] hover:text-white hover:border-[rgba(143,130,255,0.45)] transition-all"
+                title="Add custom instructions that auto-apply to this template"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+
+              <div
+                className="cursor-pointer space-y-4"
+                onClick={() => router.push(`/app/generate?templateId=${template.id}`)}
+              >
+                <div
+                  className="w-14 h-14 rounded-xl flex items-center justify-center shadow-[0_10px_28px_rgba(75,142,255,0.45)] group-hover:scale-105 transition-transform"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(58,130,247,0.95), rgba(143,130,255,0.85))',
+                  }}
+                >
+                  <svg className="w-7 h-7 text-white drop-shadow" viewBox="0 0 24 24" fill="none">
+                    <path
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {template.modality && (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[rgba(75,142,255,0.18)] border border-[rgba(75,142,255,0.35)] text-[#D7E3FF]">
+                      {template.modality}
+                    </span>
+                  )}
+                  {template.anatomy && (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[rgba(143,130,255,0.18)] border border-[rgba(143,130,255,0.32)] text-[#E0D9FF]">
+                      {template.anatomy}
+                    </span>
+                  )}
+                </div>
+
+                <h3 className="text-xl font-semibold text-white tracking-tight group-hover:text-[#4B8EFF] transition-colors">
+                  {template.title || 'Untitled Template'}
+                </h3>
+
+                {template.description && (
+                  <p className="text-sm text-[rgba(207,207,207,0.65)] line-clamp-2">
+                    {template.description}
+                  </p>
+                )}
+
+                <Button
+                  className="w-full h-11 text-white shadow-[0_10px_24px_rgba(75,142,255,0.35)] hover:shadow-[0_16px_28px_rgba(75,142,255,0.45)]"
+                  style={{
+                    background: 'linear-gradient(90deg, #2653FF 0%, #4B8EFF 100%)',
+                  }}
+                >
+                  Use Template
+                </Button>
+              </div>
+            </Card>
+          ))
         )}
       </div>
+
+      {selectedTemplate && (
+        <CustomizeTemplateModal
+          templateId={selectedTemplate.id}
+          templateName={selectedTemplate.name}
+          isOpen={customizeModalOpen}
+          onClose={() => {
+            setCustomizeModalOpen(false)
+            setSelectedTemplate(null)
+          }}
+          onSaved={() => {
+            // Optionally refetch templates or show indicator
+          }}
+        />
+      )}
     </div>
   )
 }

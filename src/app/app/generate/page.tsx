@@ -30,6 +30,7 @@ import { celebrateSuccess } from '@/lib/confetti';
 import { VoiceInput } from '@/components/VoiceInput';
 import { UpgradePromptModal } from '@/components/UpgradePromptModal';
 import type { SubscriptionTier } from '@/types/transcription';
+import { cn } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic';
 
@@ -341,17 +342,25 @@ export default function GeneratePage() {
   if (templateError) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center p-6">
-        <div className="max-w-md rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
-          <AlertCircle className="mx-auto mb-3 h-8 w-8 text-red-600" />
-          <h2 className="text-lg font-semibold text-red-900 mb-2">Unable to load template</h2>
-          <p className="text-sm text-red-700">
+        <div className="aurora-card w-full max-w-md border border-[rgba(255,107,107,0.35)] bg-[rgba(255,107,107,0.12)] p-6 text-center">
+          <AlertCircle className="mx-auto mb-3 h-8 w-8 text-[#FFD1D1]" />
+          <h2 className="mb-2 text-lg font-semibold text-white">Unable to load template</h2>
+          <p className="text-sm text-[rgba(255,209,209,0.8)]">
             We couldn&apos;t load the selected template. It may have been removed or you may no longer have access.
           </p>
-          <div className="mt-4 flex justify-center gap-2">
-            <Button onClick={() => router.push('/app/templates')}>
+          <div className="mt-4 flex justify-center gap-3">
+            <Button
+              variant="ghost"
+              onClick={() => router.push('/app/templates')}
+              className="rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.75)] px-5 text-[rgba(207,207,207,0.85)] hover:border-[rgba(75,142,255,0.45)] hover:bg-[rgba(75,142,255,0.18)] hover:text-white"
+            >
               Browse templates
             </Button>
-            <Button variant="outline" onClick={() => window.location.reload()}>
+            <Button
+              variant="ghost"
+              onClick={() => window.location.reload()}
+              className="rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.75)] px-5 text-[rgba(207,207,207,0.85)] hover:border-[rgba(75,142,255,0.45)] hover:bg-[rgba(75,142,255,0.18)] hover:text-white"
+            >
               Retry
             </Button>
           </div>
@@ -493,7 +502,8 @@ export default function GeneratePage() {
   ]
 
   return (
-    <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 pb-24 md:pb-8 px-4 sm:px-0">
+    <div className="min-h-screen bg-[var(--ds-bg-gradient)] text-white">
+      <main className="mx-auto max-w-5xl space-y-6 sm:space-y-8 px-4 sm:px-6 py-10 sm:py-12 pb-28">
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
@@ -502,81 +512,76 @@ export default function GeneratePage() {
         ]}
       />
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          onClick={() => router.push('/app/dashboard')}
-          className="gap-2"
-          aria-label="Go back to dashboard"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </Button>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Generate Report</h1>
-        <div className="w-24" /> {/* Spacer */}
-      </div>
+      <div className="neon-shell space-y-6 p-6 sm:p-8 md:p-10 backdrop-blur-xl">
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            onClick={() => router.push('/app/dashboard')}
+            className="gap-2 text-[rgba(207,207,207,0.78)] hover:text-white"
+            aria-label="Go back to dashboard"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-white">Generate Report</h1>
+          <div className="w-24" />
+        </div>
 
-      {/* Clean Step Indicator */}
-      <Card className="bg-white border-2 border-gray-100">
-        <CardContent className="p-4 sm:p-6">
-          {/* Mobile: Simplified progress dots */}
-          <div className="flex sm:hidden justify-center gap-2 mb-4">
-            {steps.map((step) => (
-              <motion.div
-                key={step.id}
-                className={`h-2 rounded-full transition-all ${
-                  currentStep >= step.id
-                    ? 'bg-gradient-to-r from-emerald-500 to-violet-500 w-8'
-                    : 'bg-gray-300 w-6'
-                }`}
-                layout
-              />
-            ))}
-          </div>
-
-          {/* Desktop: Full step indicator */}
-          <div className="hidden sm:flex items-center justify-between relative">
-            {/* Progress line */}
-            <div className="absolute top-6 left-0 right-0 h-0.5 bg-gray-200">
-              <motion.div
-                className="h-full bg-gradient-to-r from-emerald-500 to-violet-500"
-                animate={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
-                transition={{ duration: 0.3 }}
-              />
+        {/* Clean Step Indicator */}
+        <Card className="aurora-card border border-[rgba(255,255,255,0.08)] text-white">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex sm:hidden justify-center gap-2 mb-4">
+              {steps.map((step) => (
+                <motion.div
+                  key={step.id}
+                  className={`h-2 rounded-full transition-all ${
+                    currentStep >= step.id
+                      ? 'bg-[linear-gradient(90deg,#2653FF_0%,#4B8EFF_50%,#8F82FF_100%)] w-8'
+                      : 'bg-[rgba(207,207,207,0.25)] w-6'
+                  }`}
+                  layout
+                />
+              ))}
             </div>
 
-            {/* Steps */}
-            <div className="flex items-center justify-between w-full relative z-10">
-              {steps.map((step) => {
-                const isActive = currentStep === step.id
-                const isCompleted = currentStep > step.id
-                return (
-                  <div key={step.id} className="flex flex-col items-center gap-2">
-                    <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all touch-target ${
-                      isActive || isCompleted
-                        ? "bg-gradient-to-br from-emerald-500 to-violet-500 text-white shadow-lg"
-                        : "bg-white border-2 border-gray-300 text-gray-400"
-                    }`}>
-                      {isCompleted ? (
-                        <CheckCircle className="w-7 h-7" />
-                      ) : (
-                        <step.icon className="w-7 h-7" />
-                      )}
+            <div className="hidden sm:flex items-center justify-between relative">
+              <div className="absolute top-6 left-0 right-0 h-0.5 bg-[rgba(207,207,207,0.18)]">
+                <motion.div
+                  className="h-full bg-[linear-gradient(90deg,#2653FF_0%,#4B8EFF_60%,#8F82FF_100%)]"
+                  animate={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+
+              <div className="relative z-10 flex w-full items-center justify-between">
+                {steps.map((step) => {
+                  const isActive = currentStep === step.id
+                  const isCompleted = currentStep > step.id
+                  return (
+                    <div key={step.id} className="flex flex-col items-center gap-2">
+                      <div
+                        className={cn(
+                          "flex h-14 w-14 items-center justify-center rounded-full border transition-all",
+                          isActive || isCompleted
+                            ? "border-[rgba(75,142,255,0.45)] bg-[linear-gradient(135deg,#2653FF,#8F82FF)] text-white shadow-[0_18px_42px_rgba(31,64,175,0.4)]"
+                            : "border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.85)] text-[rgba(207,207,207,0.5)]"
+                        )}
+                      >
+                        <step.icon className="h-6 w-6" />
+                      </div>
+                      <span className={cn("text-xs uppercase tracking-[0.18em] text-[rgba(207,207,207,0.5)]", isActive && "text-white")}>
+                        {step.name}
+                      </span>
                     </div>
-                    <span className={`text-sm font-medium text-center ${
-                      isActive || isCompleted ? "text-emerald-600" : "text-gray-500"
-                    }`}>
-                      {step.name}
-                    </span>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
+        {/* Existing content continues */}
+      </div>
       {/* Draft Restoration Notification */}
       {showDraftNotification && draftData && (
         <Alert className="bg-blue-50 border-blue-200">
@@ -617,12 +622,12 @@ export default function GeneratePage() {
 
       {/* Error Display */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex items-center space-x-2">
-            <AlertCircle className="w-5 h-5 text-red-600" />
+        <div className="rounded-2xl border border-[rgba(255,107,107,0.35)] bg-[rgba(255,107,107,0.12)] p-4">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-[#FFD1D1]" />
             <div>
-              <h3 className="text-sm font-medium text-red-900">Error</h3>
-              <p className="text-sm text-red-700">{error}</p>
+              <h3 className="text-sm font-semibold text-white">Error</h3>
+              <p className="text-sm text-[rgba(255,209,209,0.85)]">{error}</p>
             </div>
           </div>
         </div>
@@ -630,29 +635,29 @@ export default function GeneratePage() {
 
       {/* Usage Limit Warning */}
       {usage?.subscription && usage.subscription.reports_used >= usage.subscription.reports_limit && (
-        <Card className="bg-red-50 border-red-200">
+        <Card className="aurora-card border border-[rgba(255,107,107,0.35)] bg-[rgba(255,107,107,0.12)]">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-[#FFD1D1] flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <h3 className="font-semibold text-red-900 mb-1">Monthly Limit Reached</h3>
-                <p className="text-sm text-red-700 mb-3">
-                  You have used {usage.subscription.reports_used} of {usage.subscription.reports_limit} reports this month. 
-                  Please upgrade your plan to continue generating reports.
+                <h3 className="mb-1 text-base font-semibold text-white">Monthly Limit Reached</h3>
+                <p className="mb-3 text-sm text-[rgba(255,209,209,0.8)]">
+                  You have used {usage.subscription.reports_used} of {usage.subscription.reports_limit} reports this month.
+                  Upgrade your plan to continue generating reports immediately.
                 </p>
                 <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     onClick={() => router.push('/pricing')}
-                    className="bg-red-600 hover:bg-red-700"
+                    className="rounded-lg bg-[linear-gradient(90deg,#FF6B6B_0%,#FF9F6B_100%)] px-4 text-white shadow-[0_12px_28px_rgba(255,107,107,0.32)]"
                   >
                     Upgrade Plan
                   </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
+                  <Button
+                    size="sm"
+                    variant="ghost"
                     onClick={() => router.push('/app/dashboard')}
-                    className="border-red-300 text-red-700 hover:bg-red-50"
+                    className="rounded-lg border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.78)] px-4 text-[rgba(207,207,207,0.85)] hover:border-[rgba(255,255,255,0.3)] hover:text-white"
                   >
                     Back to Dashboard
                   </Button>
@@ -688,50 +693,46 @@ export default function GeneratePage() {
           >
             {/* Step 1: Template Selection */}
             {currentStep === 1 && (
-              <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b-2 border-gray-200">
+              <div className="aurora-card border border-[rgba(255,255,255,0.08)] overflow-hidden">
+                <div className="border-b border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.78)] px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-white" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#2653FF,#8F82FF)] shadow-[0_14px_32px_rgba(31,64,175,0.35)]">
+                      <FileText className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">Template Selection</h3>
-                      <p className="text-sm text-gray-600">Confirm the template you&apos;re using for this report</p>
+                      <h3 className="text-lg font-semibold text-white">Template Selection</h3>
+                      <p className="text-sm text-[rgba(207,207,207,0.65)]">Confirm the template you&apos;re using for this report.</p>
                     </div>
                   </div>
                 </div>
-
-                {/* Content */}
-                <div className="p-4 sm:p-6">
-                  <div className="p-4 sm:p-6 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200">
-                    <h3 className="font-bold text-emerald-700 text-xl mb-2">
+                <div className="space-y-4 p-5 sm:p-6">
+                  <div className="rounded-2xl border border-[rgba(75,142,255,0.3)] bg-[rgba(12,16,28,0.65)] p-5">
+                    <h3 className="text-xl font-semibold text-white">
                       {templateInfo.templateTitle || "(Untitled Template)"}
                     </h3>
-                    <p className="text-sm text-gray-600">
-                      Template ID: {templateId}
-                    </p>
-                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-emerald-800">
+                    <p className="mt-1 text-sm text-[rgba(207,207,207,0.65)]">Template ID: {templateId}</p>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[#D7E3FF]">
                       {templateInfo.modality && (
-                        <span className="rounded-full bg-white/70 px-3 py-1 font-semibold">
+                        <span className="rounded-full bg-[rgba(75,142,255,0.18)] px-3 py-1 font-semibold">
                           {templateInfo.modality}
                         </span>
                       )}
                       {templateInfo.body_system && (
-                        <span className="rounded-full bg-white/70 px-3 py-1 font-semibold">
+                        <span className="rounded-full bg-[rgba(75,142,255,0.18)] px-3 py-1 font-semibold">
                           {templateInfo.body_system}
                         </span>
                       )}
                       {templateInfo.anatomy && (
-                        <span className="rounded-full bg-white/70 px-3 py-1 font-semibold">
+                        <span className="rounded-full bg-[rgba(75,142,255,0.18)] px-3 py-1 font-semibold">
                           {templateInfo.anatomy}
                         </span>
                       )}
                     </div>
-                    <div className="mt-4 flex flex-wrap gap-3">
+                    <div className="mt-5 flex flex-wrap gap-3">
                       <Button
-                        variant="secondary"
+                        variant="ghost"
                         size="sm"
+                        className="rounded-lg border border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.72)] px-4 text-[rgba(207,207,207,0.8)] hover:border-[rgba(75,142,255,0.45)] hover:bg-[rgba(75,142,255,0.18)] hover:text-white"
                         onClick={() => router.push('/app/templates')}
                       >
                         Change template
@@ -744,25 +745,23 @@ export default function GeneratePage() {
 
             {/* Step 2: Patient Information */}
             {currentStep === 2 && (
-              <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b-2 border-gray-200">
+              <div className="aurora-card border border-[rgba(255,255,255,0.08)] overflow-hidden">
+                <div className="border-b border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.78)] px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                      <User className="w-5 h-5 text-white" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#3FBF8C,#6EE7B7)] text-white shadow-[0_14px_32px_rgba(63,191,140,0.35)]">
+                      <User className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">Patient Information</h3>
-                      <p className="text-sm text-gray-600">Provide patient details (age and sex are required)</p>
+                      <h3 className="text-lg font-semibold text-white">Patient Information</h3>
+                      <p className="text-sm text-[rgba(207,207,207,0.65)]">Provide patient details (age and sex are required).</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Form Fields */}
-                <div className="p-4 sm:p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4 p-5 sm:p-6">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="patient.name" className="text-gray-900 font-medium">Patient Name (optional)</Label>
+                      <Label htmlFor="patient.name" className="text-[rgba(207,207,207,0.75)]">Patient Name (optional)</Label>
                       <Input
                         id="patient.name"
                         inputMode="text"
@@ -770,11 +769,11 @@ export default function GeneratePage() {
                         autoComplete="name"
                         {...register('patient.name')}
                         placeholder="John Doe"
-                        className="border-2 border-gray-200 focus:border-emerald-500 input-mobile"
+                        className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] input-mobile"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="patient.mrn" className="text-gray-900 font-medium">Medical Record Number (optional)</Label>
+                      <Label htmlFor="patient.mrn" className="text-[rgba(207,207,207,0.75)]">Medical Record Number (optional)</Label>
                       <Input
                         id="patient.mrn"
                         inputMode="text"
@@ -782,11 +781,11 @@ export default function GeneratePage() {
                         autoCorrect="off"
                         {...register('patient.mrn')}
                         placeholder="MRN123456"
-                        className="border-2 border-gray-200 focus:border-emerald-500 input-mobile"
+                        className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] input-mobile"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="patient.age" className="text-gray-900 font-medium">Age (required)</Label>
+                      <Label htmlFor="patient.age" className="text-[rgba(207,207,207,0.75)]">Age (required)</Label>
                       <Input
                         id="patient.age"
                         type="number"
@@ -794,34 +793,34 @@ export default function GeneratePage() {
                         pattern="[0-9]*"
                         {...register('patient.age', { valueAsNumber: true })}
                         placeholder="45"
-                        className="border-2 border-gray-200 focus:border-emerald-500 input-mobile"
+                        className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] input-mobile"
                       />
                       {errors.patient?.age && (
-                        <p className="text-sm text-red-600">{errors.patient.age.message}</p>
+                        <p className="text-sm text-[#FF9F9F]">{errors.patient.age.message}</p>
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="patient.sex" className="text-gray-900 font-medium">Sex</Label>
-                      <Select 
-                        value={watch('patient.sex') || ''} 
+                      <Label htmlFor="patient.sex" className="text-[rgba(207,207,207,0.75)]">Sex</Label>
+                      <Select
+                        value={watch('patient.sex') || ''}
                         onValueChange={(value) =>
                           setValue('patient.sex', value as 'M' | 'F' | 'O', { shouldValidate: true })
                         }
                       >
                         <SelectTrigger
                           id="patient.sex"
-                          className="border-2 border-gray-200 focus:border-emerald-500"
+                          className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white focus:border-[rgba(75,142,255,0.45)]"
                         >
                           <SelectValue placeholder="Select sex" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,14,24,0.95)] text-white">
                           <SelectItem value="M">Male</SelectItem>
                           <SelectItem value="F">Female</SelectItem>
                           <SelectItem value="O">Other</SelectItem>
                         </SelectContent>
                       </Select>
                       {errors.patient?.sex && (
-                        <p className="text-sm text-red-600">{errors.patient.sex.message}</p>
+                        <p className="text-sm text-[#FF9F9F]">{errors.patient.sex.message}</p>
                       )}
                     </div>
                   </div>
@@ -831,26 +830,24 @@ export default function GeneratePage() {
 
             {/* Step 3: Clinical Data */}
             {currentStep === 3 && (
-              <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b-2 border-gray-200">
+              <div className="aurora-card border border-[rgba(255,255,255,0.08)] overflow-hidden">
+                <div className="border-b border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.78)] px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                      <Stethoscope className="w-5 h-5 text-white" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#4B8EFF,#8F82FF)] text-white shadow-[0_14px_32px_rgba(31,64,175,0.35)]">
+                      <Stethoscope className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">Clinical Information</h3>
-                      <p className="text-sm text-gray-600">Provide the clinical details for the report</p>
+                      <h3 className="text-lg font-semibold text-white">Clinical Information</h3>
+                      <p className="text-sm text-[rgba(207,207,207,0.65)]">Provide the clinical details for the report.</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Form Fields */}
                 <TooltipProvider>
-                  <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                  <div className="space-y-4 p-5 sm:p-6 sm:space-y-6">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="indication" className="text-gray-900 font-medium">Indication / Clinical history (required)</Label>
+                        <Label htmlFor="indication" className="text-[rgba(207,207,207,0.75)]">Indication / Clinical history (required)</Label>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button className="inline-flex items-center justify-center" type="button">
@@ -869,15 +866,15 @@ export default function GeneratePage() {
                         {...register('indication')}
                         placeholder="Reason for study..."
                         rows={3}
-                        className="border-2 border-gray-200 focus:border-emerald-500 textarea-mobile"
+                        className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] textarea-mobile"
                       />
                       {errors.indication && (
-                        <p className="text-sm text-red-600">{errors.indication.message}</p>
+                        <p className="text-sm text-[#FF9F9F]">{errors.indication.message}</p>
                       )}
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Label htmlFor="findings" className="text-gray-900 font-medium">Findings (required)</Label>
+                        <Label htmlFor="findings" className="text-[rgba(207,207,207,0.75)]">Findings (required)</Label>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button className="inline-flex items-center justify-center" type="button">
@@ -896,11 +893,11 @@ export default function GeneratePage() {
                         {...register('findings')}
                         placeholder="- Bullet 1\n- Bullet 2\nor free text..."
                         rows={6}
-                        className="border-2 border-gray-200 focus:border-emerald-500 textarea-mobile"
+                        className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] textarea-mobile"
                       />
-                      <p className="text-xs text-gray-500">Press Enter to start a new line. Voice dictation will auto-separate entries for you.</p>
+                      <p className="text-xs text-[rgba(207,207,207,0.45)]">Press Enter to start a new line. Voice dictation will auto-separate entries for you.</p>
                       {errors.findings && (
-                        <p className="text-sm text-red-600">{errors.findings.message}</p>
+                        <p className="text-sm text-[#FF9F9F]">{errors.findings.message}</p>
                       )}
 
                       {/* Voice Input Integration */}
@@ -912,14 +909,14 @@ export default function GeneratePage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="technique" className="text-gray-900 font-medium">Technique (optional)</Label>
+                      <Label htmlFor="technique" className="text-[rgba(207,207,207,0.75)]">Technique (optional)</Label>
                       <Input
                         id="technique"
                         inputMode="text"
                         autoCapitalize="sentences"
                         {...register('technique')}
                         placeholder="Portal venous phase..."
-                        className="border-2 border-gray-200 focus:border-emerald-500 input-mobile"
+                        className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] input-mobile"
                       />
                     </div>
                   </div>
@@ -930,30 +927,29 @@ export default function GeneratePage() {
             {/* Step 4: Review */}
             {currentStep === 4 && (
               <div className="space-y-6">
-                <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden">
-                  {/* Header */}
-                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b-2 border-gray-200">
+                <div className="aurora-card border border-[rgba(255,255,255,0.08)] overflow-hidden">
+                  <div className="border-b border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.78)] px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                        <CheckCircle className="w-5 h-5 text-white" />
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#F8B74D,#FF6B6B)] text-white shadow-[0_14px_32px_rgba(255,155,80,0.35)]">
+                        <CheckCircle className="h-5 w-5" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900">Review & Submit</h3>
-                        <p className="text-sm text-gray-600">Review your information before generating the report</p>
+                        <h3 className="text-lg font-semibold text-white">Review &amp; Submit</h3>
+                        <p className="text-sm text-[rgba(207,207,207,0.65)]">Review your information before generating the report.</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Form Fields */}
                   <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="signature.name" className="text-gray-900 font-medium">Signature Name</Label>
+                        <Label htmlFor="signature.name" className="text-[rgba(207,207,207,0.75)]">Signature Name</Label>
                         <Input
                           id="signature.name"
                           {...register('signature.name')}
                           placeholder="Dr. Jane Smith"
-                          className="border-2 border-gray-200 focus:border-emerald-500"
+                          className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)]"
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               e.preventDefault();
@@ -961,16 +957,16 @@ export default function GeneratePage() {
                           }}
                         />
                         {errors.signature?.name && (
-                          <p className="text-red-500 text-sm">{errors.signature.name.message}</p>
+                          <p className="text-sm text-[#FF9F9F]">{errors.signature.name.message}</p>
                         )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="signature.date" className="text-gray-900 font-medium">Date</Label>
+                        <Label htmlFor="signature.date" className="text-[rgba(207,207,207,0.75)]">Date</Label>
                         <Input
                           id="signature.date"
                           {...register('signature.date')}
                           placeholder={new Date().toLocaleDateString()}
-                          className="border-2 border-gray-200 focus:border-emerald-500"
+                          className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)]"
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               e.preventDefault();
@@ -978,30 +974,30 @@ export default function GeneratePage() {
                           }}
                         />
                         {errors.signature?.date && (
-                          <p className="text-red-500 text-sm">{errors.signature.date.message}</p>
+                          <p className="text-sm text-[#FF9F9F]">{errors.signature.date.message}</p>
                         )}
                       </div>
                     </div>
                     
                     {/* Summary */}
-                    <div className="mt-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200">
-                      <h4 className="font-bold mb-4 text-gray-900 text-lg">Report Summary</h4>
-                      <div className="text-sm space-y-2 text-gray-700">
-                        <p><strong>Template:</strong> {templateInfo.templateTitle || "(Untitled Template)"}</p>
-                        <p><strong>Patient Data:</strong> Included</p>
-                        <p><strong>Indication:</strong> {watch('indication') || 'Not provided'}</p>
-                        <p><strong>Findings:</strong> {watch('findings') ? `${watch('findings').length} characters` : 'Not provided'}</p>
+                    <div className="mt-6 rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.65)] p-6">
+                      <h4 className="mb-4 text-lg font-semibold text-white">Report Summary</h4>
+                      <div className="space-y-2 text-sm text-[rgba(207,207,207,0.7)]">
+                        <p><span className="text-white">Template:</span> {templateInfo.templateTitle || "(Untitled Template)"}</p>
+                        <p><span className="text-white">Patient Data:</span> Included</p>
+                        <p><span className="text-white">Indication:</span> {watch('indication') || 'Not provided'}</p>
+                        <p><span className="text-white">Findings:</span> {watch('findings') ? `${watch('findings').length} characters` : 'Not provided'}</p>
                       </div>
                     </div>
                     
                     {/* Ready to Generate Notice */}
-                    <div className="mt-6 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200">
+                    <div className="mt-6 rounded-2xl border border-[rgba(75,142,255,0.35)] bg-[rgba(12,16,28,0.6)] p-4">
                       <div className="flex items-center gap-3">
-                        <CheckCircle className="w-6 h-6 text-emerald-600" />
+                        <CheckCircle className="h-5 w-5 text-[#7AE7B4]" />
                         <div>
-                          <h4 className="font-bold text-emerald-900">Ready to Generate</h4>
-                          <p className="text-sm text-emerald-700">
-                            Review your information above and click the &quot;Generate Report&quot; button below to create your report.
+                          <h4 className="font-semibold text-white">Ready to Generate</h4>
+                          <p className="text-sm text-[rgba(207,207,207,0.7)]">
+                            Review the details above and click “Generate Report” when you&apos;re ready.
                           </p>
                         </div>
                       </div>
@@ -1013,14 +1009,16 @@ export default function GeneratePage() {
           </motion.div>
         </AnimatePresence>
 
-        {/* Navigation - Sticky on mobile */}
-        <div className="sticky bottom-0 left-0 right-0 bg-white border-t md:static md:border-0 p-4 md:p-0 mt-6 flex items-center justify-between z-20 safe-bottom">
+        <div className="sticky bottom-0 left-0 right-0 mt-6 flex items-center justify-between border-t border-[rgba(255,255,255,0.12)] bg-[rgba(6,10,18,0.92)] p-4 text-white md:static md:border-0 md:bg-transparent md:p-0 z-20 safe-bottom">
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             onClick={handlePrevious}
             disabled={currentStep === 1}
-            className="flex items-center gap-2 border-2 touch-target btn-mobile"
+            className={cn(
+              "flex items-center gap-2 rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.72)] text-[rgba(207,207,207,0.85)] hover:border-[rgba(255,255,255,0.3)] hover:text-white",
+              currentStep === 1 && "opacity-50"
+            )}
           >
             <ChevronLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Previous</span>
@@ -1031,7 +1029,7 @@ export default function GeneratePage() {
               <Button
                 type="button"
                 onClick={handleNext}
-                className="btn-primary flex items-center gap-2 touch-target btn-mobile"
+                className="flex items-center gap-2 rounded-xl bg-[linear-gradient(90deg,#2653FF_0%,#4B8EFF_55%,#8F82FF_100%)] px-5 py-2 font-semibold text-white shadow-[0_18px_42px_rgba(31,64,175,0.4)] transition-transform hover:-translate-y-0.5"
               >
                 <span className="hidden sm:inline">Next</span>
                 <ChevronRight className="w-4 h-4" />
@@ -1040,7 +1038,7 @@ export default function GeneratePage() {
               <Button
                 type="submit"
                 disabled={isSubmitting || formIsSubmitting || (usage?.subscription && usage.subscription.reports_used >= usage.subscription.reports_limit)}
-                className="btn-primary flex items-center gap-2 touch-target btn-mobile"
+                className="flex items-center gap-2 rounded-xl bg-[linear-gradient(90deg,#3FBF8C_0%,#6EE7B7_100%)] px-5 py-2 font-semibold text-white shadow-[0_18px_42px_rgba(63,191,140,0.35)] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
                 onClick={() => {
                   setIntentionalSubmit(true);
                 }}
@@ -1063,6 +1061,45 @@ export default function GeneratePage() {
           router.push('/pricing');
         }}
       />
+
+      {(isSubmitting || formIsSubmitting) && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(4,8,18,0.85)] backdrop-blur-xl"
+        >
+          <motion.div
+            initial={{ scale: 0.94, opacity: 0.75 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="hero-starfield relative w-full max-w-md rounded-[44px] px-10 py-12 text-center"
+          >
+            <div className="hero-aurora" />
+            <div className="relative space-y-5">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[rgba(75,142,255,0.35)] bg-[rgba(12,16,28,0.78)] shadow-[0_30px_82px_rgba(31,64,175,0.45)]">
+                <motion.span
+                  className="block h-12 w-12 rounded-full border-2 border-[rgba(143,130,255,0.7)] border-t-transparent"
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 1.1, ease: 'linear' }}
+                />
+              </div>
+              <div className="space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[rgba(207,207,207,0.48)]">
+                  Assistant at work
+                </p>
+                <h2 className="text-2xl font-semibold text-white sm:text-[2.1rem]">
+                  Generating your radiology report
+                </h2>
+                <p className="text-sm text-[rgba(207,207,207,0.72)]">
+                  Radly is aligning findings, impressions, and follow-up recommendations. You&apos;ll review the draft in just a moment.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+      </main>
     </div>
   )
 }
