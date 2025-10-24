@@ -57,64 +57,61 @@ export function StatsDisplay({ startTime, jobStatus, estimatedSeconds }: StatsDi
       icon: Clock,
       label: 'Elapsed Time',
       value: elapsedTime,
-      color: 'blue',
+      accent: 'from-[rgba(75,142,255,0.16)] to-[rgba(75,142,255,0.35)]',
+      iconGlow: 'bg-[linear-gradient(135deg,#2653FF,#4B8EFF)]',
       show: startTime !== null
     },
     {
       icon: FileText,
       label: 'Words Generated',
       value: estimatedWords > 0 ? `~${estimatedWords}` : '0',
-      color: 'emerald',
+      accent: 'from-[rgba(63,191,140,0.16)] to-[rgba(63,191,140,0.32)]',
+      iconGlow: 'bg-[linear-gradient(135deg,#3FBF8C,#6EE7B7)]',
       show: jobStatus === 'running' || jobStatus === 'done'
     },
     {
       icon: TrendingUp,
       label: 'Status',
-      value: jobStatus === 'done' ? 'Complete' :
-             jobStatus === 'running' ? 'Processing' :
-             'Queued',
-      color: jobStatus === 'done' ? 'green' :
-             jobStatus === 'running' ? 'yellow' :
-             'gray',
+      value: jobStatus === 'done' ? 'Complete' : jobStatus === 'running' ? 'Processing' : 'Queued',
+      accent: 'from-[rgba(248,183,77,0.16)] to-[rgba(248,183,77,0.32)]',
+      iconGlow: 'bg-[linear-gradient(135deg,#F8B74D,#FF6B6B)]',
       show: true
     },
     {
       icon: Zap,
       label: 'Est. Remaining',
-      value: estimatedSeconds ? `~${estimatedSeconds}s` : 'Calculating...',
-      color: 'violet',
+      value: estimatedSeconds ? `~${estimatedSeconds}s` : 'Calculating…',
+      accent: 'from-[rgba(143,130,255,0.16)] to-[rgba(143,130,255,0.35)]',
+      iconGlow: 'bg-[linear-gradient(135deg,#8F82FF,#B094FF)]',
       show: jobStatus !== 'done' && estimatedSeconds !== undefined
     }
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {stats.filter(stat => stat.show).map((stat, index) => (
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2 xl:grid-cols-2">
+      {stats.filter((stat) => stat.show).map((stat, index) => (
         <motion.div
           key={stat.label}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
-          className={`
-            bg-gradient-to-br from-${stat.color}-50 to-${stat.color}-100
-            rounded-xl p-4 border-2 border-${stat.color}-200
-          `}
+          className={`aurora-card border border-[rgba(255,255,255,0.08)] p-4 sm:p-5 bg-gradient-to-br ${stat.accent}`}
         >
-          <div className="flex items-center gap-3 mb-2">
-            <div className={`p-2 rounded-lg bg-white shadow-sm`}>
-              <stat.icon className={`w-5 h-5 text-${stat.color}-600`} />
+          <div className="flex items-center gap-3">
+            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${stat.iconGlow} text-white shadow-[0_14px_32px_rgba(31,64,175,0.35)]`}>
+              <stat.icon className="h-5 w-5" />
             </div>
-          </div>
-          <div>
-            <p className="text-xs font-medium text-gray-600 mb-1">{stat.label}</p>
-            <motion.p
-              key={stat.value}
-              initial={{ scale: 1.2, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className={`text-2xl font-bold text-${stat.color}-700`}
-            >
-              {stat.value}
-            </motion.p>
+            <div className="text-left">
+              <p className="text-[0.65rem] uppercase tracking-[0.18em] text-[rgba(207,207,207,0.55)]">{stat.label}</p>
+              <motion.p
+                key={stat.value}
+                initial={{ scale: 1.1, opacity: 0.85 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="text-xl font-semibold text-white"
+              >
+                {stat.value}
+              </motion.p>
+            </div>
           </div>
         </motion.div>
       ))}

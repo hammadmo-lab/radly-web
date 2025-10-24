@@ -17,18 +17,16 @@ export function ReportSkeleton({ progress }: ReportSkeletonProps) {
   ];
 
   return (
-    <div className="bg-white rounded-2xl border-2 border-gray-200 shadow-lg overflow-hidden">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-emerald-500 to-violet-500 p-6">
-        <h3 className="text-white text-lg font-semibold flex items-center gap-2">
-          <FileText className="w-5 h-5" />
-          Your Report Preview
+    <div className="aurora-card border border-[rgba(255,255,255,0.08)] overflow-hidden">
+      <div className="border-b border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.78)] px-6 py-4">
+        <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
+          <FileText className="h-5 w-5" />
+          Report structure preview
         </h3>
-        <p className="text-white/90 text-sm mt-1">Sections being generated...</p>
+        <p className="mt-1 text-sm text-[rgba(207,207,207,0.65)]">Sections assembling in real time.</p>
       </div>
 
-      {/* Skeleton Sections */}
-      <div className="p-6 space-y-4">
+      <div className="space-y-4 p-6">
         {sections.map((section, index) => {
           const isGenerated = progress >= section.minProgress;
           const Icon = section.icon;
@@ -36,68 +34,52 @@ export function ReportSkeleton({ progress }: ReportSkeletonProps) {
           return (
             <motion.div
               key={section.name}
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -14 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.15 }}
-              className={`
-                border-l-4 pl-4 py-3 transition-all duration-500
-                ${isGenerated ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-gray-50'}
-              `}
+              transition={{ delay: index * 0.12 }}
+              className={`rounded-xl border border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.7)] px-4 py-3 transition-colors ${isGenerated ? 'border-[rgba(63,191,140,0.35)] bg-[rgba(63,191,140,0.15)] shadow-[0_12px_28px_rgba(63,191,140,0.25)]' : ''}`}
             >
-              <div className="flex items-center gap-3 mb-2">
-                <div className={`
-                  p-2 rounded-lg
-                  ${isGenerated ? 'bg-green-500' : 'bg-gray-300'}
-                `}>
-                  <Icon className={`w-4 h-4 ${isGenerated ? 'text-white' : 'text-gray-500'}`} />
+              <div className="flex items-center gap-3">
+                <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${isGenerated ? 'bg-[linear-gradient(135deg,#3FBF8C,#6EE7B7)] text-white' : 'bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.55)]'}`}>
+                  <Icon className="h-4.5 w-4.5" />
                 </div>
-                <h4 className={`
-                  font-semibold text-sm
-                  ${isGenerated ? 'text-green-700' : 'text-gray-500'}
-                `}>
+                <h4 className={`text-sm font-semibold ${isGenerated ? 'text-white' : 'text-[rgba(207,207,207,0.55)]'}`}>
                   {section.name}
                 </h4>
                 {isGenerated && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="ml-auto"
-                  >
-                    <CheckSquare className="w-5 h-5 text-green-500" />
+                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="ml-auto">
+                    <CheckSquare className="h-5 w-5 text-[#7AE7B4]" />
                   </motion.div>
                 )}
               </div>
 
-              {/* Skeleton Lines */}
-              <div className="space-y-2 mt-3">
+              <div className="mt-3 space-y-2">
                 {isGenerated ? (
-                  // Show filled skeleton lines for generated sections
                   <>
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: '100%' }}
                       transition={{ duration: 0.5 }}
-                      className="h-2 bg-green-200 rounded"
+                      className="h-2 rounded bg-[rgba(63,191,140,0.35)]"
                     />
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: '90%' }}
                       transition={{ duration: 0.5, delay: 0.1 }}
-                      className="h-2 bg-green-200 rounded"
+                      className="h-2 rounded bg-[rgba(63,191,140,0.3)]"
                     />
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: '75%' }}
                       transition={{ duration: 0.5, delay: 0.2 }}
-                      className="h-2 bg-green-200 rounded"
+                      className="h-2 rounded bg-[rgba(63,191,140,0.25)]"
                     />
                   </>
                 ) : (
-                  // Show placeholder skeleton lines for pending sections
                   <>
-                    <div className="h-2 bg-gray-200 rounded animate-pulse" />
-                    <div className="h-2 bg-gray-200 rounded animate-pulse" style={{ width: '90%' }} />
-                    <div className="h-2 bg-gray-200 rounded animate-pulse" style={{ width: '75%' }} />
+                    <div className="h-2 rounded bg-[rgba(207,207,207,0.2)] animate-pulse" />
+                    <div className="h-2 w-[90%] rounded bg-[rgba(207,207,207,0.2)] animate-pulse" />
+                    <div className="h-2 w-[75%] rounded bg-[rgba(207,207,207,0.2)] animate-pulse" />
                   </>
                 )}
               </div>
@@ -106,14 +88,10 @@ export function ReportSkeleton({ progress }: ReportSkeletonProps) {
         })}
       </div>
 
-      {/* Footer */}
-      <div className="bg-gray-50 p-4 border-t border-gray-200">
-        <p className="text-xs text-gray-500 text-center">
-          {progress < 100
-            ? `Generating report structure... ${Math.round(progress)}% complete`
-            : 'Report generation complete! Loading...'
-          }
-        </p>
+      <div className="border-t border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.78)] px-6 py-3 text-center text-xs text-[rgba(207,207,207,0.55)]">
+        {progress < 100
+          ? `Generating report structure… ${Math.round(progress)}% complete`
+          : 'Report generation complete! Loading…'}
       </div>
     </div>
   );

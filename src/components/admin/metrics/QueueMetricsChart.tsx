@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * src/components/admin/metrics/QueueMetricsChart.tsx
  * Queue processing rates and saturation visualization
@@ -18,16 +20,7 @@ import { Line, Bar } from 'react-chartjs-2';
 import { parsePrometheusResult, formatPercentage } from '@/lib/metrics-helpers';
 import { PrometheusResult } from '@/lib/admin-metrics';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
 interface QueueMetricsChartProps {
   queueRates: PrometheusResult;
@@ -38,13 +31,18 @@ export function QueueMetricsChart({ queueRates, queueSaturation }: QueueMetricsC
   const ratesData = parsePrometheusResult(queueRates);
   const saturationData = parsePrometheusResult(queueSaturation);
 
-  // Queue processing rates line chart
+  const axisColor = 'rgba(215,227,255,0.78)';
+  const gridColor = 'rgba(75,142,255,0.18)';
+
   const ratesChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top' as const,
+        labels: {
+          color: axisColor,
+        },
       },
       title: {
         display: true,
@@ -53,11 +51,15 @@ export function QueueMetricsChart({ queueRates, queueSaturation }: QueueMetricsC
           size: 16,
           weight: 'bold' as const,
         },
+        color: '#D7E3FF',
       },
       tooltip: {
+        backgroundColor: 'rgba(12,16,28,0.92)',
+        titleColor: '#FFFFFF',
+        bodyColor: '#D7E3FF',
         callbacks: {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          label: function(this: any, tooltipItem: any) {
+          label: function (this: any, tooltipItem: any) {
             return `${tooltipItem.dataset.label}: ${tooltipItem.parsed.y.toFixed(2)} jobs/sec`;
           },
         },
@@ -69,12 +71,27 @@ export function QueueMetricsChart({ queueRates, queueSaturation }: QueueMetricsC
         title: {
           display: true,
           text: 'Jobs per Second',
+          color: axisColor,
+        },
+        ticks: {
+          color: axisColor,
+        },
+        grid: {
+          color: gridColor,
+          drawBorder: false,
         },
       },
       x: {
         title: {
           display: true,
           text: 'Time',
+          color: axisColor,
+        },
+        ticks: {
+          color: axisColor,
+        },
+        grid: {
+          color: 'rgba(75,142,255,0.08)',
         },
       },
     },
@@ -85,22 +102,23 @@ export function QueueMetricsChart({ queueRates, queueSaturation }: QueueMetricsC
     datasets: [
       {
         label: 'Enqueue Rate',
-        data: ratesData.map(item => item.value),
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.1,
+        data: ratesData.map((item) => item.value),
+        borderColor: '#4B8EFF',
+        backgroundColor: 'rgba(75,142,255,0.18)',
+        pointRadius: 3,
+        tension: 0.25,
       },
       {
         label: 'Dequeue Rate',
-        data: ratesData.map(item => item.value * 0.95), // Simulated dequeue rate
-        borderColor: '#10b981',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        tension: 0.1,
+        data: ratesData.map((item) => item.value * 0.95),
+        borderColor: '#3FBF8C',
+        backgroundColor: 'rgba(63,191,140,0.16)',
+        pointRadius: 3,
+        tension: 0.25,
       },
     ],
   };
 
-  // Queue saturation bar chart
   const saturationChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -115,11 +133,15 @@ export function QueueMetricsChart({ queueRates, queueSaturation }: QueueMetricsC
           size: 16,
           weight: 'bold' as const,
         },
+        color: '#D7E3FF',
       },
       tooltip: {
+        backgroundColor: 'rgba(12,16,28,0.92)',
+        titleColor: '#FFFFFF',
+        bodyColor: '#D7E3FF',
         callbacks: {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          label: function(this: any, tooltipItem: any) {
+          label: function (this: any, tooltipItem: any) {
             return `Saturation: ${formatPercentage(tooltipItem.parsed.y)}`;
           },
         },
@@ -132,50 +154,75 @@ export function QueueMetricsChart({ queueRates, queueSaturation }: QueueMetricsC
         title: {
           display: true,
           text: 'Saturation (%)',
+          color: axisColor,
         },
         ticks: {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          callback: function(value: any) {
+          callback: function (value: any) {
             return `${value}%`;
           },
+          color: axisColor,
+        },
+        grid: {
+          color: gridColor,
+          drawBorder: false,
+        },
+      },
+      x: {
+        ticks: {
+          color: axisColor,
+        },
+        grid: {
+          display: false,
         },
       },
     },
   };
 
+  const saturationValue = saturationData[0]?.value || 0;
+
   const saturationChartConfig = {
     labels: ['Current Saturation'],
     datasets: [
       {
-        data: [saturationData[0]?.value || 0],
-        backgroundColor: (saturationData[0]?.value || 0) >= 80 ? '#ef4444' : 
-                         (saturationData[0]?.value || 0) >= 60 ? '#f59e0b' : '#10b981',
-        borderColor: (saturationData[0]?.value || 0) >= 80 ? '#ef4444' : 
-                     (saturationData[0]?.value || 0) >= 60 ? '#f59e0b' : '#10b981',
+        data: [saturationValue],
+        backgroundColor:
+          saturationValue >= 80
+            ? '#FF6B6B'
+            : saturationValue >= 60
+              ? '#F8B74D'
+              : '#3FBF8C',
+        borderColor:
+          saturationValue >= 80
+            ? 'rgba(255,107,107,0.85)'
+            : saturationValue >= 60
+              ? 'rgba(248,183,77,0.85)'
+              : 'rgba(63,191,140,0.9)',
         borderWidth: 2,
+        borderRadius: 8,
       },
     ],
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Queue Processing Rates */}
-      <div className="bg-white p-6 rounded-lg border shadow-sm">
-        <div className="h-80">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="aurora-card border border-[rgba(255,255,255,0.08)] p-5 sm:p-6">
+        <div className="h-80 rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[rgba(12,16,28,0.55)] p-3">
           <Line data={ratesChartConfig} options={ratesChartOptions} />
         </div>
       </div>
 
-      {/* Queue Saturation */}
-      <div className="bg-white p-6 rounded-lg border shadow-sm">
-        <div className="h-80">
+      <div className="aurora-card border border-[rgba(255,255,255,0.08)] p-5 sm:p-6">
+        <div className="h-80 rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[rgba(12,16,28,0.55)] p-3">
           <Bar data={saturationChartConfig} options={saturationChartOptions} />
         </div>
-        <div className="mt-4 text-center">
-          <div className="text-3xl font-bold text-gray-900">
-            {formatPercentage(saturationData[0]?.value || 0)}
+        <div className="mt-5 text-center text-sm text-[rgba(207,207,207,0.65)]">
+          <div className="text-3xl font-semibold text-white">
+            {formatPercentage(saturationValue)}
           </div>
-          <div className="text-sm text-gray-600">Current Saturation</div>
+          <div className="mt-1 uppercase tracking-[0.18em] text-[rgba(207,207,207,0.45)]">
+            Current Saturation
+          </div>
         </div>
       </div>
     </div>

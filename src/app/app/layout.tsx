@@ -28,10 +28,10 @@ export default function AppLayout({
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+      <div className="min-h-screen bg-[var(--ds-bg-gradient)] text-[var(--ds-text-primary)]">
         {/* Test Mode Indicator */}
         {testMode && (
-          <div className="bg-yellow-100 border-b border-yellow-200 px-4 py-2 text-center text-sm text-yellow-800">
+          <div className="bg-yellow-500/10 border-b border-yellow-500/30 px-4 py-2 text-center text-sm text-yellow-200">
             🧪 Test Mode Active
           </div>
         )}
@@ -43,8 +43,10 @@ export default function AppLayout({
         <MobileNav user={testMode ? { email: 'test@radly.test' } : user} onSignOut={handleSignOut} />
 
         {/* Main Content */}
-        <main className="container max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-20 md:pb-8">
-          {children}
+        <main className="container max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pb-24 md:pb-12 neon-page-stack">
+          <div className="neon-shell p-6 sm:p-8 md:p-10 backdrop-blur-lg">
+            {children}
+          </div>
         </main>
 
         {/* Bottom Navigation for Mobile */}

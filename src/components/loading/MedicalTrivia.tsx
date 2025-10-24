@@ -111,49 +111,34 @@ export function MedicalTrivia({ rotationInterval = 4000 }: MedicalTriviaProps) {
           transition={{ duration: 0.5 }}
           className="w-full"
         >
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-200">
+          <div className="aurora-card border border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.72)] p-6">
             <div className="flex items-start gap-4">
-              {/* Animated Icon */}
               <motion.div
-                animate={{
-                  scale: [1, 1.1, 1],
-                  rotate: [0, 5, -5, 0]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="flex-shrink-0 p-3 bg-white rounded-xl shadow-md"
+                animate={{ scale: [1, 1.08, 1], rotate: [0, 6, -6, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                className="flex h-12 w-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#2653FF,#8F82FF)] text-white shadow-[0_16px_36px_rgba(31,64,175,0.4)]"
               >
-                <Icon className="w-6 h-6 text-blue-600" />
+                <Icon className="h-6 w-6" />
               </motion.div>
 
-              {/* Content */}
-              <div className="flex-1">
-                {/* Category Badge */}
-                <div className="inline-block mb-2">
-                  <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                    {currentTrivia.category}
-                  </span>
-                </div>
-
-                {/* Trivia Text */}
-                <p className="text-gray-700 leading-relaxed">
+              <div className="flex-1 space-y-2">
+                <span className="inline-block rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.78)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[rgba(207,207,207,0.6)]">
+                  {currentTrivia.category}
+                </span>
+                <p className="text-sm leading-relaxed text-[rgba(207,207,207,0.75)]">
                   {currentTrivia.text}
                 </p>
               </div>
             </div>
 
-            {/* Progress Dots */}
-            <div className="flex justify-center gap-1.5 mt-4">
+            <div className="mt-4 flex justify-center gap-2">
               {MEDICAL_TRIVIA.map((_, index) => (
                 <motion.div
                   key={index}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                  className={`h-1 rounded-full transition-all ${
                     index === currentIndex
-                      ? 'w-8 bg-blue-600'
-                      : 'w-1.5 bg-blue-300'
+                      ? 'w-8 bg-[rgba(75,142,255,0.7)]'
+                      : 'w-2 bg-[rgba(207,207,207,0.25)]'
                   }`}
                   initial={{ scale: 0.8 }}
                   animate={{ scale: index === currentIndex ? 1 : 0.8 }}

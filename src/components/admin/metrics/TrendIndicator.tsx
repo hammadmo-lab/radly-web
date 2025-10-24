@@ -1,20 +1,16 @@
-/**
- * src/components/admin/metrics/TrendIndicator.tsx
- * Visual indicator for metric trends with percentage change
- */
 import React from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TrendIndicatorProps {
-  change: number; // Percentage change
+  change: number;
   changeAbsolute?: number;
-  period?: string; // e.g., "vs last hour"
+  period?: string;
   format?: 'percentage' | 'absolute' | 'both';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   showIcon?: boolean;
-  inverse?: boolean; // If true, down is good, up is bad (for error rates, costs, etc.)
+  inverse?: boolean;
 }
 
 export function TrendIndicator({
@@ -27,7 +23,7 @@ export function TrendIndicator({
   showIcon = true,
   inverse = false,
 }: TrendIndicatorProps) {
-  const threshold = 0.5; // 0.5% change threshold for "neutral"
+  const threshold = 0.5;
 
   let trend: 'up' | 'down' | 'neutral';
   if (Math.abs(change) < threshold) {
@@ -36,15 +32,14 @@ export function TrendIndicator({
     trend = change > 0 ? 'up' : 'down';
   }
 
-  // Determine if this is a "good" or "bad" trend
-  const isGood = inverse
-    ? (trend === 'down' || trend === 'neutral')
-    : (trend === 'up' || trend === 'neutral');
+  const isPositive = inverse
+    ? trend === 'down' || trend === 'neutral'
+    : trend === 'up' || trend === 'neutral';
 
   const sizeClasses = {
-    sm: 'text-xs',
-    md: 'text-sm',
-    lg: 'text-base',
+    sm: 'text-[11px] px-2 py-1',
+    md: 'text-xs px-3 py-1.5',
+    lg: 'text-sm px-3.5 py-2',
   };
 
   const iconSizes = {
@@ -53,21 +48,23 @@ export function TrendIndicator({
     lg: 'h-5 w-5',
   };
 
-  const getColor = () => {
-    if (trend === 'neutral') return 'text-gray-600';
-    return isGood ? 'text-green-600' : 'text-red-600';
-  };
+  const containerTone =
+    trend === 'neutral'
+      ? 'border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.75)] text-[rgba(207,207,207,0.75)]'
+      : isPositive
+        ? 'border-[rgba(63,191,140,0.35)] bg-[rgba(63,191,140,0.18)] text-[#C8F3E2]'
+        : 'border-[rgba(255,107,107,0.32)] bg-[rgba(255,107,107,0.18)] text-[#FFD1D1]';
 
-  const getBgColor = () => {
-    if (trend === 'neutral') return 'bg-gray-100';
-    return isGood ? 'bg-green-50' : 'bg-red-50';
-  };
+  const iconTone =
+    trend === 'neutral'
+      ? 'text-[rgba(207,207,207,0.65)]'
+      : isPositive
+        ? 'text-[#7AE7B4]'
+        : 'text-[#FF9F9F]';
 
-  const getIcon = () => {
+  const renderIcon = () => {
     if (!showIcon) return null;
-
-    const iconClass = cn(iconSizes[size], getColor());
-
+    const iconClass = cn(iconSizes[size], iconTone);
     if (trend === 'up') return <TrendingUp className={iconClass} />;
     if (trend === 'down') return <TrendingDown className={iconClass} />;
     return <Minus className={iconClass} />;
@@ -77,9 +74,7 @@ export function TrendIndicator({
     const sign = change > 0 ? '+' : '';
     const percentageText = `${sign}${Math.abs(change).toFixed(1)}%`;
 
-    if (format === 'percentage') {
-      return percentageText;
-    }
+    if (format === 'percentage') return percentageText;
 
     if (format === 'absolute' && changeAbsolute !== undefined) {
       const absSign = changeAbsolute > 0 ? '+' : '';
@@ -97,16 +92,19 @@ export function TrendIndicator({
   return (
     <div
       className={cn(
-        'inline-flex items-center gap-1 px-2 py-1 rounded-md',
+        'inline-flex items-center gap-2 rounded-full border font-semibold uppercase tracking-[0.16em]',
         sizeClasses[size],
-        getColor(),
-        getBgColor(),
+        containerTone,
         className
       )}
     >
-      {getIcon()}
-      <span className="font-medium">{formatChange()}</span>
-      {period && <span className="text-gray-500 ml-1">{period}</span>}
+      {renderIcon()}
+      <span>{formatChange()}</span>
+      {period && (
+        <span className="text-[rgba(207,207,207,0.55)] first-letter:uppercase normal-case tracking-normal">
+          {period}
+        </span>
+      )}
     </div>
   );
 }

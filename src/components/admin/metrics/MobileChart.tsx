@@ -20,17 +20,17 @@ export function MobileChart({
 }: MobileChartProps) {
   return (
     <div className={cn(
-      'bg-white p-4 sm:p-6 rounded-lg border shadow-sm',
+      'aurora-card border border-[rgba(255,255,255,0.08)] p-5 sm:p-6 backdrop-blur-xl',
       className
     )}>
-      <h3 className="text-lg font-semibold mb-4 text-center sm:text-left">
+      <h3 className="mb-4 text-base font-semibold text-white sm:text-lg">
         {title}
       </h3>
       <div className={cn(
-        'overflow-x-auto',
+        'overflow-x-auto rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[rgba(12,16,28,0.55)] p-2',
         height
       )}>
-        <div className="min-w-[300px] h-full">
+        <div className="h-full min-w-[300px]">
           {children}
         </div>
       </div>

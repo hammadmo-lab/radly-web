@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
 import { 
   Users, 
   DollarSign, 
@@ -22,7 +21,6 @@ import { ConnectionStatus } from '@/components/admin/ConnectionStatus'
 import { useAdminAuth } from '@/components/admin/AdminAuthProvider'
 import { useSubscriptions, useRevenueAnalytics } from '@/hooks/useAdminData'
 import { SubscriptionListParams } from '@/types/admin'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { toast } from 'sonner'
 
 export default function AdminDashboard() {
@@ -151,140 +149,142 @@ export default function AdminDashboard() {
     },
   ]
 
+  const errorCopy = subscriptionsError
+    ? `Failed to load subscriptions: ${subscriptionsError.message}`
+    : revenueError
+      ? `Failed to load revenue data: ${revenueError.message}`
+      : ''
+
   return (
     <AdminGuard>
       <AdminErrorBoundary>
-        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-violet-50">
-        {/* Connection Status Banner */}
-        <ConnectionStatus />
-        
-        {/* Header */}
-        <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-violet-500 rounded-xl flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-white" />
+        <div className="min-h-screen bg-[var(--ds-bg-gradient)] text-white">
+          <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 neon-page-stack">
+            <div className="neon-shell space-y-8 p-6 sm:p-8 md:p-10 backdrop-blur-xl">
+              <ConnectionStatus className="border border-[rgba(75,142,255,0.18)]" />
+
+              <header className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#2653FF_0%,#4B8EFF_55%,#8F82FF_100%)] shadow-[0_22px_48px_rgba(52,84,207,0.38)]">
+                      <Shield className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[rgba(207,207,207,0.55)]">
+                        Radly Control Room
+                      </p>
+                      <h1 className="text-3xl font-semibold text-white">Admin Dashboard</h1>
+                    </div>
+                  </div>
+                  <p className="max-w-xl text-sm text-[rgba(207,207,207,0.65)]">
+                    Monitor subscription health, revenue, and customer usage without leaving the neon shell.
+                  </p>
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-                  <p className="text-sm text-gray-500">Manage subscriptions and users</p>
+
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <Button
+                    variant="ghost"
+                    onClick={() => router.push('/admin/metrics')}
+                    className="h-11 rounded-xl border border-[rgba(75,142,255,0.35)] bg-[rgba(75,142,255,0.16)] px-5 text-[#D7E3FF] hover:border-[rgba(75,142,255,0.45)] hover:bg-[rgba(75,142,255,0.22)]"
+                  >
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                    Metrics Dashboard
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={handleLogout}
+                    className="h-11 rounded-xl border border-[rgba(255,255,255,0.12)] px-5 text-[rgba(207,207,207,0.8)] hover:border-[rgba(255,107,107,0.32)] hover:text-[#FFD1D1]"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </Button>
                 </div>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => router.push('/admin/metrics')}
-                  className="flex items-center gap-2"
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  Metrics Dashboard
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={handleLogout}
-                  className="flex items-center gap-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
+              </header>
 
-        {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Error Banner */}
-          {hasErrors && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Connection Error</AlertTitle>
-              <AlertDescription>
-                {subscriptionsError 
-                  ? `Failed to load subscriptions: ${subscriptionsError.message}` 
-                  : `Failed to load revenue data: ${revenueError?.message}`}
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="ml-4"
-                  onClick={() => {
-                    refetchSubscriptions()
-                  }}
-                >
-                  Retry
-                </Button>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Stats Grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-          >
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.3 }}
-              >
-                <StatCard {...stat} />
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Subscription Table */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.3 }}
-          >
-            {subscriptionsLoading ? (
-              <div className="mt-6 p-8 text-center">
-                <div className="text-lg font-medium text-gray-600">Loading subscriptions...</div>
-                <div className="text-sm text-gray-500 mt-2">Please wait while we fetch the data</div>
-              </div>
-            ) : subscriptionsError ? (
-              <div className="mt-6">
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error Loading Subscriptions</AlertTitle>
-                  <AlertDescription>
-                    {subscriptionsError.message}
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="ml-4"
+              {hasErrors && (
+                <div className="rounded-2xl border border-[rgba(255,107,107,0.32)] bg-[rgba(255,107,107,0.12)] p-5 sm:p-6">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(255,107,107,0.32)] bg-[rgba(255,107,107,0.18)] text-[#FFD1D1]">
+                        <AlertCircle className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h2 className="text-base font-semibold text-white">Connection error</h2>
+                        <p className="text-sm text-[#FFD1D1]">
+                          {errorCopy}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => refetchSubscriptions()}
+                      className="h-9 rounded-lg border border-[rgba(255,255,255,0.12)] px-4 text-[#FFD1D1] hover:border-[rgba(255,107,107,0.45)] hover:bg-[rgba(255,107,107,0.12)]"
                     >
                       Retry
                     </Button>
-                  </AlertDescription>
-                </Alert>
-              </div>
-            ) : (
-              <SubscriptionTable
-                subscriptions={subscriptionsData?.subscriptions || []}
-                isLoading={subscriptionsLoading}
-                total={subscriptionsData?.total || 0}
-                currentPage={currentPage}
-                pageSize={filters.limit || 10}
-                onPageChange={handlePageChange}
-                onSearch={handleSearch}
-                onFilterChange={handleFilterChange}
-                onRefresh={handleRefresh}
-                onExport={handleExport}
-                onViewUser={handleViewUser}
-              />
-            )}
-          </motion.div>
-        </main>
+                  </div>
+                </div>
+              )}
+
+              <section>
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  {stats.map((stat) => (
+                    <StatCard key={stat.title} {...stat} />
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                {subscriptionsLoading ? (
+                  <div className="aurora-card border border-[rgba(255,255,255,0.08)] p-10 text-center text-sm text-[rgba(207,207,207,0.65)]">
+                    <p className="text-lg font-medium text-white">Loading subscriptions…</p>
+                    <p className="mt-2 text-sm text-[rgba(207,207,207,0.55)]">
+                      Fetching the latest customer data. This should only take a moment.
+                    </p>
+                  </div>
+                ) : subscriptionsError ? (
+                  <div className="rounded-2xl border border-[rgba(255,107,107,0.32)] bg-[rgba(255,107,107,0.12)] p-5 sm:p-6">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(255,107,107,0.32)] bg-[rgba(255,107,107,0.18)] text-[#FFD1D1]">
+                          <AlertCircle className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <h2 className="text-base font-semibold text-white">Error loading subscriptions</h2>
+                          <p className="text-sm text-[#FFD1D1]">
+                            {subscriptionsError.message}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => refetchSubscriptions()}
+                        className="h-9 rounded-lg border border-[rgba(255,255,255,0.12)] px-4 text-[#FFD1D1] hover:border-[rgba(255,107,107,0.45)] hover:bg-[rgba(255,107,107,0.12)]"
+                      >
+                        Retry
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <SubscriptionTable
+                    subscriptions={subscriptionsData?.subscriptions || []}
+                    isLoading={subscriptionsLoading}
+                    total={subscriptionsData?.total || 0}
+                    currentPage={currentPage}
+                    pageSize={filters.limit || 10}
+                    onPageChange={handlePageChange}
+                    onSearch={handleSearch}
+                    onFilterChange={handleFilterChange}
+                    onRefresh={handleRefresh}
+                    onExport={handleExport}
+                    onViewUser={handleViewUser}
+                  />
+                )}
+              </section>
+            </div>
+          </div>
         </div>
       </AdminErrorBoundary>
     </AdminGuard>

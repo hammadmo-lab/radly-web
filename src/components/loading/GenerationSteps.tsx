@@ -88,64 +88,37 @@ export function GenerationSteps({ currentProgress, jobStatus }: GenerationStepsP
         return (
           <motion.div
             key={step.stage}
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className={`
-              flex items-center gap-3 p-3 rounded-lg transition-all duration-300
-              ${isActive ? 'bg-emerald-50 border-2 border-emerald-300 shadow-md' : ''}
-              ${isCompleted ? 'bg-green-50 border border-green-200' : ''}
-              ${!isActive && !isCompleted ? 'bg-gray-50 border border-gray-200 opacity-60' : ''}
-            `}
+            transition={{ delay: index * 0.08 }}
+            className={`flex items-center gap-3 rounded-xl border border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.6)] px-4 py-3 transition-all duration-300 ${isActive ? 'shadow-[0_18px_42px_rgba(31,64,175,0.35)] border-[rgba(75,142,255,0.35)]' : ''} ${isCompleted ? 'border-[rgba(63,191,140,0.35)] bg-[rgba(63,191,140,0.16)]' : ''}`}
           >
-            {/* Icon */}
-            <div className={`
-              flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center
-              ${isActive ? 'bg-emerald-500 animate-pulse' : ''}
-              ${isCompleted ? 'bg-green-500' : ''}
-              ${!isActive && !isCompleted ? 'bg-gray-300' : ''}
-            `}>
+            <div
+              className={`flex h-10 w-10 items-center justify-center rounded-lg text-white ${isActive ? 'bg-[linear-gradient(135deg,#2653FF,#4B8EFF)] animate-pulse' : isCompleted ? 'bg-[linear-gradient(135deg,#3FBF8C,#6EE7B7)]' : 'bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.6)]'}`}
+            >
               {isActive ? (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                >
-                  <Icon className="w-5 h-5 text-white" />
+                <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}>
+                  <Icon className="h-5 w-5" />
                 </motion.div>
               ) : (
-                <Icon className={`w-5 h-5 ${isCompleted ? 'text-white' : 'text-gray-500'}`} />
+                <Icon className="h-5 w-5" />
               )}
             </div>
 
-            {/* Text */}
             <div className="flex-1">
-              <p className={`
-                text-sm font-medium transition-colors
-                ${isActive ? 'text-emerald-700' : ''}
-                ${isCompleted ? 'text-green-700' : ''}
-                ${!isActive && !isCompleted ? 'text-gray-500' : ''}
-              `}>
+              <p className={`text-sm font-medium ${isActive || isCompleted ? 'text-white' : 'text-[rgba(207,207,207,0.55)]'}`}>
                 {step.text}
               </p>
             </div>
 
-            {/* Status indicator */}
             {isActive && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="flex-shrink-0"
-              >
-                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping" />
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex-shrink-0">
+                <div className="h-2 w-2 rounded-full bg-[rgba(75,142,255,0.8)] animate-ping" />
               </motion.div>
             )}
             {isCompleted && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="flex-shrink-0"
-              >
-                <CheckCircle className="w-5 h-5 text-green-500" />
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex-shrink-0">
+                <CheckCircle className="h-5 w-5 text-[#7AE7B4]" />
               </motion.div>
             )}
           </motion.div>
