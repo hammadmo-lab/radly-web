@@ -1,5 +1,6 @@
 import { httpPost, httpGet } from '@/lib/http';
 import type { EnqueueInput } from '@/types/api';
+import type { JobStatusResponse } from '@/types/jobs';
 
 export type RecentJobRow = {
   job_id: string;
@@ -66,9 +67,4 @@ export const getQueueStats = () =>
   httpGet<{ queue_depth: number; jobs_running: number }>('/v1/queue/stats');
 
 // Type exports for compatibility
-export type JobStatusResponse = {
-  job_id: string;
-  status: string;
-  result?: Record<string, unknown>;
-  error?: string;
-};
+export type { JobStatusResponse };

@@ -51,6 +51,7 @@ export interface JobStatusResponse {
   status: JobStatusType;
   result?: GenerateResponseDTO;
   error?: string;
+  progress?: number;
 }
 
 export interface RecentJobRow {
