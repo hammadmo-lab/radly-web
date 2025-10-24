@@ -1,0 +1,110 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ShieldCheck, Lock, ClipboardList, Archive } from "lucide-react";
+import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { PrimaryCTA, SecondaryCTA } from "@/components/marketing/PrimaryCTA";
+
+export const dynamic = "force-static";
+
+const commitments = [
+  {
+    icon: Lock,
+    title: "Encryption",
+    body: "Data in transit is encrypted with TLS 1.2+ and data at rest is encrypted using AES-256 aligned with cloud-provider best practice.",
+  },
+  {
+    icon: ClipboardList,
+    title: "Access controls",
+    body: "Role-based access limits internal data access. Administrative actions require SSO and are audited.",
+  },
+  {
+    icon: Archive,
+    title: "Retention",
+    body: "Async job results expire after six hours while usage and audit logs stay available for 90 days before automatic cleanup.",
+  },
+];
+
+const metadataDescription = "Security overview for Radly: encryption, access controls, retention options, and data subject request contacts.";
+
+export const metadata: Metadata = {
+  title: "Security | Radly controls and safeguards",
+  description: metadataDescription,
+  openGraph: {
+    title: "Radly Security",
+    description: metadataDescription,
+  },
+};
+
+export default function SecurityPage() {
+  return (
+    <div className="bg-[var(--ds-bg-gradient)] text-white">
+      <main className="mx-auto max-w-4xl px-5 py-16">
+        <header className="space-y-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgba(207,207,207,0.55)]">Security and compliance</p>
+          <h1 className="text-4xl font-semibold leading-tight">How Radly protects clinician and patient data</h1>
+          <p className="text-sm text-[rgba(207,207,207,0.75)] sm:text-base">
+            Radly supports radiologists with an assistant workflow. This page summarises the controls we use to safeguard data, honour deletion requests, and support compliance reviews.
+          </p>
+        </header>
+
+        <section className="mt-12 space-y-6">
+          <h2 className="text-3xl font-semibold">Core safeguards</h2>
+          <div className="grid gap-6 sm:grid-cols-2">
+            {commitments.map((item) => (
+              <div key={item.title} className="aurora-card border border-[rgba(255,255,255,0.1)] p-6 text-sm text-[rgba(207,207,207,0.72)]">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[rgba(143,130,255,0.35)] bg-[rgba(12,16,28,0.65)] text-[#D7E3FF]">
+                  <item.icon className="h-5 w-5" aria-hidden />
+                </div>
+                <h3 className="text-lg font-semibold text-white">{item.title}</h3>
+                <p className="mt-2">{item.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-12 space-y-4">
+          <h2 className="text-3xl font-semibold">Audit and monitoring</h2>
+          <ul className="space-y-3 text-sm text-[rgba(207,207,207,0.75)]">
+            <li>
+              <ShieldCheck className="mr-2 inline h-4 w-4 text-[rgba(111,231,183,0.85)]" aria-hidden />
+              Access logs are retained for 90 days and can be shared with partner security teams on request.
+            </li>
+            <li>
+              <ShieldCheck className="mr-2 inline h-4 w-4 text-[rgba(111,231,183,0.85)]" aria-hidden />
+              Administrative actions (template updates, user changes) require multi-factor authentication and are reviewed weekly.
+            </li>
+            <li>
+              <ShieldCheck className="mr-2 inline h-4 w-4 text-[rgba(111,231,183,0.85)]" aria-hidden />
+              Third-party vendors undergo regular security reviews aligned with their risk profile.
+            </li>
+          </ul>
+        </section>
+
+        <section className="mt-12 space-y-4 rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.68)] p-6 text-sm text-[rgba(207,207,207,0.75)]">
+          <h2 className="text-2xl font-semibold text-white">Data subject requests</h2>
+          <p>
+            Email <Link href="mailto:privacy@radly.app" className="text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">privacy@radly.app</Link> to request deletion, export, or to review subprocessors. We respond within two business days.
+          </p>
+          <p>Radly assists clinicians. Radiologists review and finalise every report.</p>
+        </section>
+
+        <section className="mt-16 space-y-4 text-center">
+          <h2 className="text-3xl font-semibold">Ready to evaluate with your security team?</h2>
+          <p className="text-sm text-[rgba(207,207,207,0.72)] sm:text-base">
+            Download the compliance pack or contact us for a tailored review. Five complimentary reports are included for trials.
+          </p>
+          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+            <PrimaryCTA href="/auth/signin" ariaLabel="Create a Radly account from the security page">
+              Get started free
+            </PrimaryCTA>
+            <SecondaryCTA href="mailto:security@radly.app" ariaLabel="Email the Radly security team">
+              Contact security team
+            </SecondaryCTA>
+          </div>
+        </section>
+      </main>
+
+      <MarketingFooter />
+    </div>
+  );
+}
