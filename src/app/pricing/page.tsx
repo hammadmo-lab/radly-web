@@ -9,6 +9,12 @@ import { siteConfig } from "@/lib/siteConfig";
 
 export const dynamic = "force-dynamic";
 
+type TierFeatures = {
+  templates?: string;
+  queue_priority?: number;
+  support?: string;
+};
+
 interface Tier {
   tier_id: number;
   tier_name: string;
@@ -41,12 +47,12 @@ export const metadata: Metadata = {
   },
 };
 
-function parseFeatures(raw: string) {
+function parseFeatures(raw: string): TierFeatures {
   try {
-    return JSON.parse(raw) as Record<string, unknown>;
+    return JSON.parse(raw) as TierFeatures;
   } catch (error) {
     console.warn("Failed to parse tier features", error);
-    return {} as Record<string, unknown>;
+    return {} as TierFeatures;
   }
 }
 
@@ -99,6 +105,10 @@ export default async function PricingPage({ searchParams }: { searchParams?: Rec
           {tiers.map((tier) => {
             const features = parseFeatures(tier.features);
             const isRecommended = tier.tier_name === "professional";
+            const hasPriorityProcessing = typeof features.queue_priority === "number" && features.queue_priority > 0;
+            const supportLabel = typeof features.support === "string" && features.support.trim().length
+              ? features.support.trim()
+              : null;
 
             return (
               <article
@@ -129,12 +139,12 @@ export default async function PricingPage({ searchParams }: { searchParams?: Rec
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="mt-1 h-4 w-4 text-[rgba(111,231,183,0.85)]" aria-hidden />
-                    <span>{features.queue_priority > 0 ? "Priority assistant processing" : "Standard assistant processing"}</span>
+                    <span>{hasPriorityProcessing ? "Priority assistant processing" : "Standard assistant processing"}</span>
                   </li>
-                  {features.support ? (
+                  {supportLabel ? (
                     <li className="flex items-start gap-2">
                       <Check className="mt-1 h-4 w-4 text-[rgba(111,231,183,0.85)]" aria-hidden />
-                      <span>{features.support}</span>
+                      <span>{supportLabel}</span>
                     </li>
                   ) : null}
                 </ul>
