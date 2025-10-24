@@ -6,7 +6,7 @@ import { Copy, Check, ArrowLeft, Mail } from 'lucide-react'
 import Link from 'next/link'
 import { httpGet } from '@/lib/http'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface Tier {
   tier_id: number
@@ -85,14 +85,14 @@ function CheckoutContent() {
             <CardTitle className="text-3xl mb-2">
               Subscribe to {tierInfo.tier_display_name}
             </CardTitle>
-            <CardDescription>
-              <span className="text-2xl font-semibold text-foreground">
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <span className="block text-2xl font-semibold text-foreground">
                 {tierInfo.price_monthly} {tierInfo.currency}/month
               </span>
-              <div className="text-muted-foreground mt-2">
+              <span className="block">
                 {tierInfo.monthly_report_limit} reports per month
-              </div>
-            </CardDescription>
+              </span>
+            </div>
           </CardHeader>
 
           <CardContent className="pt-6">

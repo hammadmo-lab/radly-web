@@ -1,249 +1,206 @@
-'use client'
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Check } from "lucide-react";
+import { marketingGet } from "@/lib/http/marketing";
+import { PrimaryCTA, SecondaryCTA } from "@/components/marketing/PrimaryCTA";
+import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { siteConfig } from "@/lib/siteConfig";
 
-import { useEffect, useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import { Check } from 'lucide-react'
-import { httpGet } from '@/lib/http'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+export const dynamic = "force-dynamic";
 
 interface Tier {
-  tier_id: number
-  tier_name: string
-  tier_display_name: string
-  monthly_report_limit: number
-  price_monthly: number
-  currency: string
-  features: string // JSON string from API
+  tier_id: number;
+  tier_name: string;
+  tier_display_name: string;
+  monthly_report_limit: number;
+  price_monthly: number;
+  currency: string;
+  features: string;
 }
 
-export default function PricingPage() {
-  const [tiers, setTiers] = useState<Tier[]>([])
-  const [region, setRegion] = useState<'egypt' | 'international'>('egypt')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
+const regions = [
+  { id: "egypt", label: "Egypt (EGP)" },
+  { id: "international", label: "International (USD)" },
+] as const;
 
-  // Helper function to parse features JSON string
-  const parseFeatures = (featuresString: string) => {
-    try {
-      return JSON.parse(featuresString)
-    } catch (error) {
-      console.error('Failed to parse features:', error)
-      return {}
-    }
+export const metadata: Metadata = {
+  title: "Pricing | Radly assistant plans",
+  description: "Compare Radly plans, report limits, and support options. Five complimentary reports included for new teams.",
+  openGraph: {
+    title: "Radly Pricing",
+    description: "Compare Radly assistant plans and choose the right coverage for your team.",
+    images: [
+      {
+        url: siteConfig.ogImage,
+        width: 1200,
+        height: 630,
+        alt: "Radly pricing overview",
+      },
+    ],
+  },
+};
+
+function parseFeatures(raw: string) {
+  try {
+    return JSON.parse(raw) as Record<string, unknown>;
+  } catch (error) {
+    console.warn("Failed to parse tier features", error);
+    return {} as Record<string, unknown>;
+  }
+}
+
+function formatPrice(tier: Tier) {
+  if (tier.price_monthly === 0) return "Free";
+  return `${tier.price_monthly.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${tier.currency}/month`;
+}
+
+export default async function PricingPage({ searchParams }: { searchParams?: Record<string, string | string[]> }) {
+  const regionParam = Array.isArray(searchParams?.region) ? searchParams?.region[0] : searchParams?.region;
+  const region = regionParam === "international" ? "international" : regionParam === "egypt" || !regionParam ? "egypt" : null;
+
+  if (!region) {
+    notFound();
   }
 
-  const fetchTiers = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const data = await httpGet<Tier[]>(`/v1/subscription/tiers?region=${region}`)
-      setTiers(data)
-    } catch (error) {
-      console.error('Failed to fetch tiers:', error)
-      setError('Unable to load pricing information. Please try again later.')
-    } finally {
-      setLoading(false)
-    }
-  }, [region])
-
-  useEffect(() => {
-    fetchTiers()
-  }, [fetchTiers])
-
-  const handleSelectPlan = (tier: Tier) => {
-    if (tier.tier_name === 'free') {
-      router.push('/app/dashboard')
-      return
-    }
-    
-    // Navigate to checkout/payment instructions
-    router.push(`/pricing/checkout?tier=${tier.tier_name}&region=${region}`)
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-muted-foreground">Loading pricing...</div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background px-4">
-        <div className="max-w-md w-full text-center">
-          <div className="mb-4 text-red-500 text-5xl">⚠️</div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">
-            Oops! Something went wrong
-          </h2>
-          <p className="text-muted-foreground mb-6">{error}</p>
-          <Button onClick={fetchTiers} variant="default">
-            Try Again
-          </Button>
-        </div>
-      </div>
-    )
-  }
+  const tiers = await marketingGet<Tier[]>(`/v1/subscription/tiers?region=${region}`);
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-foreground mb-4">
-            Choose Your Plan
-          </h1>
-          <p className="text-xl text-muted-foreground">
-            Professional radiology reports in under 90 seconds
+    <div className="bg-[var(--ds-bg-gradient)] text-white">
+      <main className="mx-auto max-w-6xl px-5 py-16">
+        <header className="text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgba(207,207,207,0.55)]">Radly plans</p>
+          <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">Choose the plan that fits your reporting volume</h1>
+          <p className="mt-4 text-sm text-[rgba(207,207,207,0.75)] sm:text-base">
+            All plans include five complimentary reports to evaluate the assistant. Detailed validation notes are available for compliance teams.
           </p>
+        </header>
 
-          {/* Region Selector */}
-          <div className="mt-8 inline-flex rounded-lg border border-border p-1 bg-card">
-            <button
-              onClick={() => setRegion('egypt')}
-              className={`px-6 py-2 rounded-md font-medium transition ${
-                region === 'egypt'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Egypt (EGP)
-            </button>
-            <button
-              onClick={() => setRegion('international')}
-              className={`px-6 py-2 rounded-md font-medium transition ${
-                region === 'international'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              International (USD)
-            </button>
-          </div>
-        </div>
-
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {tiers.map((tier) => {
-            const isPopular = tier.tier_name === 'professional'
-            const features = parseFeatures(tier.features)
-
+        <div className="mt-10 flex justify-center gap-2 rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.72)] p-1 text-sm">
+          {regions.map((item) => {
+            const isActive = item.id === region;
             return (
-              <Card
-                key={tier.tier_id}
-                className={`relative ${
-                  isPopular ? 'border-primary border-2 shadow-lg' : ''
+              <Link
+                key={item.id}
+                href={item.id === "egypt" ? "/pricing" : `/pricing?region=${item.id}`}
+                className={`flex items-center rounded-full px-5 py-2 font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(143,130,255,0.65)] ${
+                  isActive
+                    ? "bg-[linear-gradient(90deg,#2653FF_0%,#4B8EFF_45%,#8F82FF_100%)] text-white"
+                    : "text-[rgba(207,207,207,0.78)] hover:text-white"
                 }`}
               >
-                {isPopular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-semibold">
-                      Most Popular
-                    </span>
-                  </div>
-                )}
-
-                <CardHeader>
-                  <CardTitle className="text-2xl">
-                    {tier.tier_display_name}
-                  </CardTitle>
-                  <CardDescription className="mt-4 text-lg">
-                    <span className="text-4xl font-bold text-foreground">
-                      {tier.price_monthly === 0 ? 'Free' : tier.price_monthly}
-                    </span>
-                    {tier.price_monthly > 0 && (
-                      <span className="text-muted-foreground ml-2">
-                        {tier.currency}/month
-                      </span>
-                    )}
-                  </CardDescription>
-                  <CardDescription>
-                    {tier.price_monthly === 0 ? (
-                      <span className="text-sm text-muted-foreground">
-                        Perfect for getting started
-                      </span>
-                    ) : (
-                      <span className="text-sm text-muted-foreground">
-                        Billed monthly, cancel anytime
-                      </span>
-                    )}
-                  </CardDescription>
-                  <div className="mt-2 text-lg font-semibold text-foreground">
-                    {tier.monthly_report_limit} reports/month
-                  </div>
-                </CardHeader>
-
-                <CardContent>
-                  <ul className="space-y-3">
-                    <li className="flex items-start">
-                      <Check className="w-5 h-5 text-primary mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground">
-                        {features.templates === 'all' ? 'All 100+ templates' : 'Basic templates'}
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="w-5 h-5 text-primary mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground">
-                        DOCX export
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="w-5 h-5 text-primary mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground">
-                        {features.queue_priority > 0 ? 'Priority' : 'Standard'} processing
-                      </span>
-                    </li>
-                    {features.support && (
-                      <li className="flex items-start">
-                        <Check className="w-5 h-5 text-primary mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-muted-foreground">
-                          {features.support === 'priority' ? 'Priority' : 'Email'} support
-                        </span>
-                      </li>
-                    )}
-                    {features.analytics && (
-                      <li className="flex items-start">
-                        <Check className="w-5 h-5 text-primary mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-muted-foreground">Usage analytics</span>
-                      </li>
-                    )}
-                    {features.api_access && (
-                      <li className="flex items-start">
-                        <Check className="w-5 h-5 text-primary mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-muted-foreground">API access</span>
-                      </li>
-                    )}
-                    {features.custom_templates && (
-                      <li className="flex items-start">
-                        <Check className="w-5 h-5 text-primary mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-muted-foreground">Custom templates</span>
-                      </li>
-                    )}
-                  </ul>
-                </CardContent>
-
-                <CardFooter>
-                  <Button
-                    onClick={() => handleSelectPlan(tier)}
-                    className="w-full"
-                    variant={isPopular ? 'default' : 'outline'}
-                  >
-                    {tier.tier_name === 'free' ? 'Get Started' : 'Subscribe Now'}
-                  </Button>
-                </CardFooter>
-              </Card>
-            )
+                {item.label}
+              </Link>
+            );
           })}
         </div>
 
-        {/* Footer Info */}
-        <div className="mt-16 text-center text-muted-foreground">
-          <p>All plans include clinical validators and professional DOCX export</p>
-          <p className="mt-2">Reports available for 24 hours after generation</p>
-        </div>
-      </div>
+        <section className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {tiers.map((tier) => {
+            const features = parseFeatures(tier.features);
+            const isRecommended = tier.tier_name === "professional";
+
+            return (
+              <article
+                key={tier.tier_id}
+                className={`aurora-card h-full border border-[rgba(255,255,255,0.1)] p-6 ${
+                  isRecommended ? "ring-1 ring-[rgba(111,231,183,0.5)]" : ""
+                }`}
+              >
+                {isRecommended ? (
+                  <span className="mb-4 inline-flex items-center rounded-full bg-[rgba(111,231,183,0.18)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-[rgba(111,231,183,0.9)]">
+                    Most selected
+                  </span>
+                ) : null}
+                <h2 className="text-2xl font-semibold text-white">{tier.tier_display_name}</h2>
+                <div className="mt-2 text-sm text-[rgba(207,207,207,0.72)]">{formatPrice(tier)}</div>
+                <div className="mt-1 text-xs uppercase tracking-[0.28em] text-[rgba(207,207,207,0.55)]">
+                  {tier.monthly_report_limit} reports/month
+                </div>
+
+                <ul className="mt-6 space-y-3 text-sm text-[rgba(207,207,207,0.75)]">
+                  <li className="flex items-start gap-2">
+                    <Check className="mt-1 h-4 w-4 text-[rgba(111,231,183,0.85)]" aria-hidden />
+                    <span>{features.templates === "all" ? "Access to the full Radly template library" : "Core template library"}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="mt-1 h-4 w-4 text-[rgba(111,231,183,0.85)]" aria-hidden />
+                    <span>Structured DOCX export and copy-to-clipboard</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="mt-1 h-4 w-4 text-[rgba(111,231,183,0.85)]" aria-hidden />
+                    <span>{features.queue_priority > 0 ? "Priority assistant processing" : "Standard assistant processing"}</span>
+                  </li>
+                  {features.support ? (
+                    <li className="flex items-start gap-2">
+                      <Check className="mt-1 h-4 w-4 text-[rgba(111,231,183,0.85)]" aria-hidden />
+                      <span>{features.support}</span>
+                    </li>
+                  ) : null}
+                </ul>
+
+                <div className="mt-8 text-sm text-[rgba(207,207,207,0.65)]">
+                  Radly assists clinicians. Radiologists review and finalise every report. See <Link href="/validation" className="text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">Validation</Link> for methodology.
+                </div>
+
+                <PrimaryCTA href={tier.tier_name === "free" ? "/auth/signin" : `/pricing/checkout?tier=${tier.tier_name}&region=${region}`} ariaLabel={`Select the ${tier.tier_display_name} plan`} className="mt-6 w-full">
+                  {tier.tier_name === "free" ? "Create free account" : "Subscribe now"}
+                </PrimaryCTA>
+              </article>
+            );
+          })}
+        </section>
+
+        <section className="mt-16 space-y-4 rounded-3xl border border-[rgba(255,255,255,0.1)] bg-[rgba(12,16,28,0.65)] p-8 text-center">
+          <h2 className="text-3xl font-semibold">Need a detailed comparison?</h2>
+          <p className="text-sm text-[rgba(207,207,207,0.72)] sm:text-base">
+            Download the plan matrix or contact the team for bespoke agreements.
+          </p>
+          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <PrimaryCTA href="/auth/signin" ariaLabel="Create a Radly account from pricing">
+              Get started free
+              <Check className="ml-2 h-5 w-5" aria-hidden />
+            </PrimaryCTA>
+            <SecondaryCTA href="mailto:sales@radly.app" ariaLabel="Email Radly sales">
+              Talk to sales
+            </SecondaryCTA>
+          </div>
+          <p className="text-xs uppercase tracking-[0.24em] text-[rgba(207,207,207,0.55)]">
+            Includes five complimentary reports • No billing setup required to evaluate
+          </p>
+        </section>
+
+        <noscript>
+          <table className="mt-12 w-full border border-[rgba(255,255,255,0.12)] text-left text-sm text-[rgba(207,207,207,0.78)]">
+            <caption className="p-4 font-semibold text-white">Radly pricing tiers</caption>
+            <thead>
+              <tr className="bg-[rgba(12,16,28,0.75)] text-white">
+                <th className="p-3">Plan</th>
+                <th className="p-3">Monthly price</th>
+                <th className="p-3">Reports / month</th>
+                <th className="p-3">Key features</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tiers.map((tier) => {
+                const features = parseFeatures(tier.features);
+                return (
+                  <tr key={`noscript-${tier.tier_id}`} className="border-t border-[rgba(255,255,255,0.12)]">
+                    <td className="p-3 text-white">{tier.tier_display_name}</td>
+                    <td className="p-3">{formatPrice(tier)}</td>
+                    <td className="p-3">{tier.monthly_report_limit}</td>
+                    <td className="p-3">
+                      Templates: {features.templates === "all" ? "All" : "Core"}; queue: {features.queue_priority > 0 ? "Priority" : "Standard"}; DOCX export; support options.
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </noscript>
+      </main>
+
+      <MarketingFooter />
     </div>
-  )
+  );
 }
