@@ -66,9 +66,6 @@ This document tracks the current state of the Radly UI redesign as we transition
 - **Validation**
   - Run `npm run lint` and `npm run build` once all surfaces are updated to confirm there are no lingering syntax or styling regressions.
 
-- **Validation**
-  - Run `npm run lint` and `npm run build` once all surfaces are updated to confirm there are no lingering syntax or styling regressions.
-
 ---
 
 ## Notes & Guidelines
