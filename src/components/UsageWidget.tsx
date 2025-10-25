@@ -99,20 +99,20 @@ export default function UsageWidget() {
   )
 
   return (
-    <Card className="aurora-card border-none backdrop-blur-xl">
+    <Card className="aurora-card border-none backdrop-blur-xl w-full max-w-full">
       <CardHeader className="pb-4">
-        <div className="flex justify-between items-start">
-          <div className="space-y-2">
-            <span className="tag-pulse text-xs uppercase tracking-[0.22em]">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-0 w-full">
+          <div className="space-y-2 min-w-0 flex-1">
+            <span className="tag-pulse text-xs uppercase tracking-[0.22em] break-words">
               <strong>{subscription.tier_display_name}</strong> Plan
             </span>
             {subscription.price_monthly > 0 && (
-              <p className="text-xs text-[rgba(207,207,207,0.6)]">
+              <p className="text-xs text-[rgba(207,207,207,0.6)] break-words">
                 {subscription.price_monthly} {subscription.currency}/month
               </p>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 shrink-0">
             <Button 
               variant="ghost" 
               size="sm" 
@@ -135,9 +135,9 @@ export default function UsageWidget() {
 
       <CardContent className="space-y-5">
         {/* Usage Progress */}
-        <div>
-          <div className="flex justify-between text-sm mb-2">
-            <span className="text-[rgba(207,207,207,0.65)]">
+        <div className="w-full max-w-full">
+          <div className="flex flex-col sm:flex-row justify-between text-sm mb-2 gap-1 w-full">
+            <span className="text-[rgba(207,207,207,0.65)] break-words">
               {subscription.reports_used} of {subscription.reports_limit} reports used
             </span>
             <span className="font-semibold text-white">
@@ -154,26 +154,26 @@ export default function UsageWidget() {
         </div>
 
         {/* Reset Date */}
-        <div className="flex items-center text-sm text-[rgba(207,207,207,0.65)]">
-          <Calendar className="w-4 h-4 mr-2 text-[#4B8EFF]" />
-          <span>
-            Resets in {daysUntilReset} day{daysUntilReset !== 1 ? 's' : ''} 
+        <div className="flex items-center text-sm text-[rgba(207,207,207,0.65)] w-full max-w-full">
+          <Calendar className="w-4 h-4 mr-2 text-[#4B8EFF] shrink-0" />
+          <span className="break-words">
+            Resets in {daysUntilReset} day{daysUntilReset !== 1 ? 's' : ''}
             {' '}({new Date(subscription.period_end).toLocaleDateString()})
           </span>
         </div>
 
         {/* Warning when approaching limit */}
         {usagePercentage >= 80 && (
-          <div className="rounded-lg border border-[rgba(248,183,77,0.35)] bg-[rgba(248,183,77,0.16)] p-3 shadow-[0_8px_20px_rgba(248,183,77,0.18)]">
-            <div className="flex items-start gap-2">
+          <div className="rounded-lg border border-[rgba(248,183,77,0.35)] bg-[rgba(248,183,77,0.16)] p-3 shadow-[0_8px_20px_rgba(248,183,77,0.18)] w-full max-w-full">
+            <div className="flex items-start gap-2 w-full">
               <AlertCircle className="w-5 h-5 text-[#F8B74D] flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-white">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white break-words">
                   {usagePercentage >= 100
                     ? 'Monthly limit reached'
                     : 'Approaching monthly limit'}
                 </p>
-                <p className="text-sm text-[rgba(248,183,77,0.85)] mt-1">
+                <p className="text-sm text-[rgba(248,183,77,0.85)] mt-1 break-words">
                   {usagePercentage >= 100 ? (
                     <>
                       Upgrade to continue generating reports or wait {daysUntilReset} days for reset.
@@ -184,7 +184,7 @@ export default function UsageWidget() {
                 </p>
                 {subscription.tier !== 'premium' && (
                   <Link href="/pricing" className="inline-block mt-2">
-                    <Button variant="outline" size="sm" className="h-8 text-[#F8B74D] border-[rgba(248,183,77,0.35)] hover:bg-[rgba(248,183,77,0.12)]">
+                    <Button variant="outline" size="sm" className="h-8 text-[#F8B74D] border-[rgba(248,183,77,0.35)] hover:bg-[rgba(248,183,77,0.12)] text-xs sm:text-sm">
                       View upgrade options →
                     </Button>
                   </Link>
@@ -196,7 +196,7 @@ export default function UsageWidget() {
 
         {/* Stats Grid */}
         {(totalReports > 0 || avgGenerationSeconds != null) && (
-          <div className="pt-4 border-t border-[rgba(255,255,255,0.06)] grid grid-cols-2 gap-4">
+          <div className="pt-4 border-t border-[rgba(255,255,255,0.06)] grid grid-cols-2 gap-4 w-full max-w-full">
             <div>
               <p className="text-xs text-[rgba(207,207,207,0.55)] mb-1">Total Reports</p>
               <p className="text-lg font-semibold text-white">

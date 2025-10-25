@@ -76,8 +76,8 @@ export default function RootLayout({
   const gaEnabled = gaMeasurementId && process.env.NEXT_PUBLIC_GA_ENABLED === "1";
 
   return (
-    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
-      <body className={`${inter.variable} font-sans min-h-screen bg-background text-foreground antialiased`}>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className="overflow-x-hidden">
+      <body className={`${inter.variable} font-sans min-h-screen bg-background text-foreground antialiased overflow-x-hidden`}>
         <Providers>
           {children}
         </Providers>

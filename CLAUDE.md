@@ -173,6 +173,67 @@ const form = useForm({
 5. **Layout Components** (`src/components/layout/`)
    - Navigation (Desktop, Mobile, Bottom)
 
+### Responsive Design Patterns
+
+**Mobile-First Approach**:
+- Start with mobile layout (320px+), progressively enhance for larger screens
+- Use Tailwind responsive prefixes: `sm:`, `md:`, `lg:`, `xl:`
+- Stack elements vertically on mobile, horizontal on desktop
+
+**Navigation Patterns**:
+- **Desktop** (`md:` and up): Top navbar with horizontal navigation (`<DesktopNav>`)
+  - Located in header, sticky positioning
+  - User menu with dropdown
+  - "New Report" CTA button
+- **Mobile** (below `md:`): Dual navigation system
+  - `<MobileNav>`: Hamburger menu (slide-in from left)
+  - `<BottomNav>`: Fixed bottom tab bar for primary navigation
+  - Location: `src/components/layout/Navigation.tsx`
+
+**Layout Considerations**:
+- **App Layout** (`src/app/app/layout.tsx`):
+  - Padding: `px-4 sm:px-6 py-8 sm:py-12 pb-24 md:pb-12`
+  - Extra bottom padding on mobile (`pb-24`) accounts for bottom navigation bar
+  - Reduces to `pb-12` on desktop when bottom nav is hidden
+- **Page Containers**:
+  - Max width: `max-w-5xl` or `max-w-6xl` for content
+  - Responsive padding: `px-4 sm:px-6 lg:px-8`
+
+**Grid Layouts**:
+- Stats/Cards: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`
+- Forms: `grid-cols-1 md:grid-cols-2` (stack on mobile)
+- Template cards: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`
+
+**Touch Interactions**:
+- Minimum touch target: `44px` (iOS Human Interface Guidelines)
+- Apply to all interactive elements: buttons, links, form controls
+- Classes: `touch-manipulation`, `min-h-[44px]`, `min-w-[44px]`
+- Use `touch-target` class for consistent sizing
+
+**Common Pitfalls to Avoid**:
+- ❌ Fixed widths without `max-w-full`: `w-[500px]` → ✅ `w-full max-w-[500px]`
+- ❌ Missing overflow handling on tables: ✅ Wrap in `<div className="overflow-x-auto">`
+- ❌ Non-responsive text: `text-lg` → ✅ `text-sm sm:text-base lg:text-lg`
+- ❌ Fixed padding: `p-6` → ✅ `p-4 sm:p-6 lg:p-8`
+- ❌ Forgetting mobile bottom nav space: ✅ Add `pb-24 md:pb-12` to page content
+
+**Debugging Horizontal Scroll**:
+```bash
+# Find elements with fixed widths
+grep -r "min-w-\[" src/components/
+grep -r 'className=".*w-\[' src/
+
+# Check for overflow issues
+# Open DevTools → Elements → Look for elements wider than viewport
+# Add temporary border: * { outline: 1px solid red; }
+```
+
+**Testing Checklist**:
+- [ ] iPhone SE (375px) - Smallest common mobile viewport
+- [ ] iPhone Pro (390px) - Modern iPhone
+- [ ] iPad (768px) - Tablet breakpoint
+- [ ] Desktop (1280px+) - Large screen
+
 ### Routing Structure
 
 **Protected routes** (`/app/*`) require authentication:
@@ -320,3 +381,101 @@ Build configured with:
 **Package manager**: npm 10+
 
 **React 19 overrides**: Chart.js dependencies have React overrides in `package.json` to ensure compatibility
+
+## Troubleshooting Responsive Issues
+
+### Horizontal Scroll Problems
+
+**Identifying the culprit**:
+```bash
+# 1. Find fixed widths that may overflow
+grep -r "min-w-\[" src/ | grep -v node_modules
+
+# 2. Check for tables without overflow handling
+grep -r "<table" src/ -A 5 | grep -v "overflow-x"
+
+# 3. Look for wide content in admin pages
+grep -r "w-\[" src/components/admin/
+```
+
+**Quick fixes**:
+- Add `overflow-x-auto` to parent container
+- Replace fixed widths with responsive ones: `w-[600px]` → `w-full max-w-[600px]`
+- Use responsive display: `hidden md:block` to hide wide content on mobile
+
+### Common Mobile Layout Fixes
+
+**Problem**: Bottom nav overlaps content
+```tsx
+// ❌ Bad - content cut off
+<div className="pb-8">Content</div>
+
+// ✅ Good - accounts for bottom nav
+<div className="pb-24 md:pb-8">Content</div>
+```
+
+**Problem**: Touch targets too small
+```tsx
+// ❌ Bad - hard to tap on mobile
+<button className="p-1">Click</button>
+
+// ✅ Good - accessible touch target
+<button className="p-3 min-h-[44px] touch-manipulation">Click</button>
+```
+
+**Problem**: Form inputs stack awkwardly
+```tsx
+// ❌ Bad - always side-by-side
+<div className="grid grid-cols-2 gap-4">
+
+// ✅ Good - stack on mobile
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+```
+
+**Problem**: Text overflows container
+```tsx
+// ❌ Bad - text can overflow
+<p className="text-lg">{longText}</p>
+
+// ✅ Good - responsive text with overflow handling
+<p className="text-sm sm:text-base lg:text-lg break-words">{longText}</p>
+```
+
+### Testing Workflow
+
+```bash
+# 1. Start dev server
+npm run dev
+
+# 2. Open in browser with DevTools
+open http://localhost:3000
+
+# 3. Toggle device toolbar (Cmd+Shift+M)
+
+# 4. Test these viewports in order:
+# - iPhone SE (375px width) - smallest
+# - iPhone 14 Pro (390px)
+# - iPad (768px) - tablet breakpoint
+# - Laptop (1024px) - desktop breakpoint
+# - Desktop (1280px+)
+
+# 5. Check for:
+# - No horizontal scrollbar at any viewport
+# - All buttons are tappable (44px min)
+# - Text is readable (not too small)
+# - Forms are usable
+# - Navigation works correctly
+```
+
+### Admin Dashboard Specifics
+
+Admin pages often have complex tables and metrics. Common issues:
+
+**Wide tables**: Use the `<SubscriptionTable>` component which handles overflow automatically
+
+**Metrics cards**: Use responsive grid
+```tsx
+<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+```
+
+**Charts**: Wrap in containers with `overflow-x-auto` and use `<MobileChart>` for mobile-optimized views
