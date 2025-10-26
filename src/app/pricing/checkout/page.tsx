@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { httpGet } from '@/lib/http'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { MobileAppPricingRedirect } from '@/components/pricing/MobileAppPricingRedirect'
 
 interface Tier {
   tier_id: number
@@ -71,6 +72,9 @@ function CheckoutContent() {
 
   return (
     <div className="min-h-screen bg-background py-12 px-4">
+      {/* Redirect mobile app users */}
+      <MobileAppPricingRedirect />
+
       <div className="max-w-3xl mx-auto">
         <Link
           href="/pricing"

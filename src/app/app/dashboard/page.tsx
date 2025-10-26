@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useEffect, useCallback } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
@@ -24,7 +24,6 @@ function daysUntil(dateString?: string) {
 export default function DashboardPage() {
   const router = useRouter()
   const { data: subscriptionData } = useSubscription()
-  const [ctaBusy, setCtaBusy] = useState(false)
   const [recentTemplate, setRecentTemplate] = useState<{ id: string; name: string | null } | null>(null)
 
   useEffect(() => {
@@ -48,12 +47,6 @@ export default function DashboardPage() {
       console.debug('Dashboard usage stats', subscriptionData.usage_stats)
     }
   }, [subscriptionData?.usage_stats, subscriptionData])
-
-  const handlePrimaryCta = useCallback(() => {
-    if (ctaBusy) return
-    setCtaBusy(true)
-    router.push('/app/templates')
-  }, [ctaBusy, router])
 
   const stats = useMemo(() => {
     const sub = subscriptionData?.subscription
@@ -201,7 +194,7 @@ export default function DashboardPage() {
             Welcome back
           </span>
         </div>
-        
+
         <h1
           className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-white"
           style={{
@@ -213,29 +206,41 @@ export default function DashboardPage() {
           <span className="text-white">With AI Speed</span>
         </h1>
 
-        <p className="text-base sm:text-lg lg:text-xl text-[rgba(207,207,207,0.75)] max-w-full sm:max-w-2xl mb-6 sm:mb-8 break-words">
+        <p className="text-base sm:text-lg lg:text-xl text-[rgba(207,207,207,0.75)] max-w-full sm:max-w-2xl mb-6 break-words">
           Create professional medical reports in seconds. Choose a template, enter patient data, and let AI handle the rest.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          <Button
-            size="lg"
-            className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg w-full sm:w-auto"
-            onClick={handlePrimaryCta}
-            disabled={ctaBusy}
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            {ctaBusy ? 'Opening templates…' : 'Choose a Template'}
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="h-12 sm:h-14 px-6 sm:px-8 text-base sm:text-lg w-full sm:w-auto"
-            onClick={() => router.push('/app/templates')}
-          >
-            <BookTemplate className="w-5 h-5 mr-2" />
-            Browse Templates
-          </Button>
+        {/* Value Propositions Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-[rgba(75,142,255,0.08)] border border-[rgba(75,142,255,0.2)]">
+            <div className="p-2 rounded-lg bg-[rgba(75,142,255,0.15)]">
+              <Zap className="w-5 h-5 text-[#4B8EFF]" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-white mb-1">Lightning Fast</h3>
+              <p className="text-xs text-[rgba(207,207,207,0.65)]">Generate reports in under 60 seconds</p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-[rgba(143,130,255,0.08)] border border-[rgba(143,130,255,0.2)]">
+            <div className="p-2 rounded-lg bg-[rgba(143,130,255,0.15)]">
+              <FileText className="w-5 h-5 text-[#8F82FF]" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-white mb-1">Professional Quality</h3>
+              <p className="text-xs text-[rgba(207,207,207,0.65)]">AI-powered medical accuracy</p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-[rgba(63,191,140,0.08)] border border-[rgba(63,191,140,0.2)]">
+            <div className="p-2 rounded-lg bg-[rgba(63,191,140,0.15)]">
+              <BookTemplate className="w-5 h-5 text-[#3FBF8C]" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-white mb-1">Multiple Templates</h3>
+              <p className="text-xs text-[rgba(207,207,207,0.65)]">Choose from our curated library</p>
+            </div>
+          </div>
         </div>
       </motion.div>
 

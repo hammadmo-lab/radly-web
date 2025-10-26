@@ -1183,4 +1183,51 @@ a,
     color: #8FB0FF;
     font-weight: 600;
   }
+
+  /* Toast Notification Styles */
+  [data-sonner-toaster] {
+    z-index: 9999 !important;
+  }
+
+  [data-sonner-toast] {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  [data-sonner-toast][data-type="error"] {
+    background: rgba(255, 107, 107, 0.12) !important;
+    border-color: rgba(255, 107, 107, 0.35) !important;
+    color: #FFD1D1 !important;
+  }
+
+  [data-sonner-toast][data-type="success"] {
+    background: rgba(63, 191, 140, 0.12) !important;
+    border-color: rgba(63, 191, 140, 0.35) !important;
+    color: #B6F2DB !important;
+  }
+
+  [data-sonner-toast][data-type="warning"] {
+    background: rgba(248, 183, 77, 0.12) !important;
+    border-color: rgba(248, 183, 77, 0.35) !important;
+    color: #FFE4B5 !important;
+  }
+
+  [data-sonner-toast][data-type="info"] {
+    background: rgba(75, 142, 255, 0.12) !important;
+    border-color: rgba(75, 142, 255, 0.35) !important;
+    color: #D7E3FF !important;
+  }
+
+  /* Performance optimizations for smooth scrolling */
+  .aurora-card {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Optimize grid rendering on mobile */
+  @media (max-width: 768px) {
+    .grid {
+      contain: layout style paint;
+    }
+  }
 }

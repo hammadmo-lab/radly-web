@@ -13,10 +13,10 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ items }: BreadcrumbProps) {
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center space-x-2 text-sm text-muted-foreground mb-4">
+    <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
       <Link
         href="/app/dashboard"
-        className="flex items-center hover:text-foreground transition-colors"
+        className="flex items-center justify-center hover:text-foreground transition-colors"
         aria-label="Go to dashboard"
       >
         <Home className="h-4 w-4" />
@@ -27,17 +27,17 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
 
         return (
           <React.Fragment key={index}>
-            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            <ChevronRight className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
 
             {item.href && !isLast ? (
               <Link
                 href={item.href}
-                className="hover:text-foreground transition-colors"
+                className="hover:text-foreground transition-colors whitespace-nowrap leading-none flex items-center"
               >
                 {item.label}
               </Link>
             ) : (
-              <span className={isLast ? 'text-foreground font-medium' : ''} aria-current={isLast ? 'page' : undefined}>
+              <span className={`whitespace-nowrap leading-none flex items-center ${isLast ? 'text-foreground font-medium' : ''}`} aria-current={isLast ? 'page' : undefined}>
                 {item.label}
               </span>
             )}

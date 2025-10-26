@@ -28,14 +28,23 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <AuthProvider>
           <AdminAuthProvider>
             {children}
-            <Toaster 
-              position="top-right"
+            <Toaster
+              position="top-center"
+              expand={false}
+              richColors
               toastOptions={{
                 style: {
-                  background: 'hsl(var(--background))',
-                  color: 'hsl(var(--foreground))',
-                  border: '1px solid hsl(var(--border))',
+                  background: 'rgba(12, 16, 28, 0.95)',
+                  color: 'white',
+                  border: '1px solid rgba(75, 142, 255, 0.3)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  fontSize: '14px',
+                  backdropFilter: 'blur(12px)',
+                  maxWidth: '500px',
+                  wordBreak: 'break-word',
                 },
+                className: 'sonner-toast',
               }}
             />
           </AdminAuthProvider>

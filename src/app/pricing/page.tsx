@@ -6,6 +6,7 @@ import { marketingGet } from "@/lib/http/marketing";
 import { PrimaryCTA, SecondaryCTA } from "@/components/marketing/PrimaryCTA";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { siteConfig } from "@/lib/siteConfig";
+import { MobileAppPricingRedirect } from "@/components/pricing/MobileAppPricingRedirect";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,9 @@ export default async function PricingPage({ searchParams }: { searchParams?: Rec
 
   return (
     <div className="bg-[var(--ds-bg-gradient)] text-white">
+      {/* Show redirect message for mobile app users */}
+      <MobileAppPricingRedirect />
+
       <main className="mx-auto max-w-6xl px-5 py-16">
         <header className="text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgba(207,207,207,0.55)]">Radly plans</p>
