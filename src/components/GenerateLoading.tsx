@@ -124,12 +124,12 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime, jobStatus
         <div className="absolute inset-y-0 -right-48 w-72 bg-[radial-gradient(circle,rgba(248,183,77,0.16),transparent_70%)]" />
       </div>
 
-      <div className="relative mx-auto max-w-6xl px-4 py-12 sm:py-16">
+      <div className="relative mx-auto max-w-6xl px-3 py-8 sm:px-4 sm:py-12 lg:py-16">
         <motion.div
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="hero-starfield rounded-[46px] px-8 py-10 sm:px-12 sm:py-14 lg:px-16 lg:py-16"
+          className="hero-starfield rounded-3xl sm:rounded-[46px] px-4 py-6 sm:px-8 sm:py-10 lg:px-16 lg:py-16"
         >
           <div className="hero-aurora" />
 
@@ -164,10 +164,10 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime, jobStatus
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[rgba(207,207,207,0.5)]">
                   {isComplete ? 'Complete' : 'Assistant at work'}
                 </p>
-                <h1 className="text-3xl font-semibold sm:text-[3rem] sm:leading-[1.1]">
+                <h1 className="text-2xl font-semibold leading-tight sm:text-3xl lg:text-[3rem] lg:leading-[1.1]">
                   {isComplete ? 'Report ready for your review 🎉' : 'Generating your radiology report'}
                 </h1>
-                <p className="max-w-2xl text-sm text-[rgba(207,207,207,0.72)] sm:text-base">
+                <p className="max-w-2xl text-xs sm:text-sm lg:text-base text-[rgba(207,207,207,0.72)]">
                   {isComplete
                     ? 'Radly assembled the report. Take a moment to review and finalize it with your clinical judgment.'
                     : 'Radly is aligning findings, impressions, and structured sections behind the scenes. We will bring you the draft shortly.'}
