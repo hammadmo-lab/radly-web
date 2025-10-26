@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
 import { httpGet } from '@/lib/http'
 import { enqueueJob } from '@/lib/jobs'
@@ -516,9 +515,9 @@ export default function GeneratePage() {
         <div className="flex items-center justify-between">
           <Button
             variant="ghost"
-            onClick={() => router.push('/app/dashboard')}
+            onClick={() => router.push('/app/templates')}
             className="gap-2 text-[rgba(207,207,207,0.78)] hover:text-white"
-            aria-label="Go back to dashboard"
+            aria-label="Go back to templates"
           >
             <ArrowLeft className="w-4 h-4" />
             Back
@@ -584,21 +583,24 @@ export default function GeneratePage() {
       </div>
       {/* Draft Restoration Notification */}
       {showDraftNotification && draftData && (
-        <Alert className="bg-blue-50 border-blue-200">
-          <RotateCcw className="h-4 w-4 text-blue-600" />
-          <AlertDescription className="flex items-center justify-between">
-            <span className="text-blue-900">
-              We found a saved draft from your previous session. Would you like to restore it?
-            </span>
-            <div className="flex gap-2 ml-4">
+        <div className="aurora-card border border-[rgba(75,142,255,0.35)] bg-[rgba(75,142,255,0.12)] p-4 sm:p-5 rounded-2xl">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <RotateCcw className="h-5 w-5 text-[#4B8EFF] flex-shrink-0 mt-0.5" />
+              <p className="text-sm sm:text-base text-white break-words">
+                We found a saved draft from your previous session. Would you like to restore it?
+              </p>
+            </div>
+            <div className="flex gap-2 sm:gap-3 sm:flex-shrink-0">
               <Button
                 size="sm"
-                variant="outline"
+                variant="ghost"
                 onClick={() => {
                   setShowDraftNotification(false)
                   setDraftData(null)
                   clearDraft()
                 }}
+                className="flex-1 sm:flex-none min-h-[44px] rounded-lg border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.78)] text-[rgba(207,207,207,0.85)] hover:border-[rgba(255,255,255,0.3)] hover:text-white"
               >
                 Discard
               </Button>
@@ -612,12 +614,13 @@ export default function GeneratePage() {
                   setShowDraftNotification(false)
                   toast.success('Draft restored successfully')
                 }}
+                className="flex-1 sm:flex-none min-h-[44px] rounded-lg bg-[linear-gradient(90deg,#2653FF_0%,#4B8EFF_100%)] text-white shadow-[0_12px_28px_rgba(75,142,255,0.32)]"
               >
-                Restore Draft
+                Restore
               </Button>
             </div>
-          </AlertDescription>
-        </Alert>
+          </div>
+        </div>
       )}
 
       {/* Error Display */}
@@ -694,45 +697,44 @@ export default function GeneratePage() {
             {/* Step 1: Template Selection */}
             {currentStep === 1 && (
               <div className="aurora-card border border-[rgba(255,255,255,0.08)] overflow-hidden">
-                <div className="border-b border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.78)] px-6 py-4">
+                <div className="border-b border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.78)] px-4 sm:px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#2653FF,#8F82FF)] shadow-[0_14px_32px_rgba(31,64,175,0.35)]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#2653FF,#8F82FF)] shadow-[0_14px_32px_rgba(31,64,175,0.35)] flex-shrink-0">
                       <FileText className="h-5 w-5 text-white" />
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-white">Template Selection</h3>
-                      <p className="text-sm text-[rgba(207,207,207,0.65)]">Confirm the template you&apos;re using for this report.</p>
+                    <div className="min-w-0">
+                      <h3 className="text-base sm:text-lg font-semibold text-white">Template Selection</h3>
+                      <p className="text-xs sm:text-sm text-[rgba(207,207,207,0.65)]">Confirm the template you&apos;re using for this report.</p>
                     </div>
                   </div>
                 </div>
-                <div className="space-y-4 p-5 sm:p-6">
-                  <div className="rounded-2xl border border-[rgba(75,142,255,0.3)] bg-[rgba(12,16,28,0.65)] p-5">
-                    <h3 className="text-xl font-semibold text-white">
-                      {templateInfo.templateTitle || "(Untitled Template)"}
-                    </h3>
-                    <p className="mt-1 text-sm text-[rgba(207,207,207,0.65)]">Template ID: {templateId}</p>
-                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[#D7E3FF]">
-                      {templateInfo.modality && (
-                        <span className="rounded-full bg-[rgba(75,142,255,0.18)] px-3 py-1 font-semibold">
-                          {templateInfo.modality}
-                        </span>
-                      )}
-                      {templateInfo.body_system && (
-                        <span className="rounded-full bg-[rgba(75,142,255,0.18)] px-3 py-1 font-semibold">
-                          {templateInfo.body_system}
-                        </span>
-                      )}
-                      {templateInfo.anatomy && (
-                        <span className="rounded-full bg-[rgba(75,142,255,0.18)] px-3 py-1 font-semibold">
-                          {templateInfo.anatomy}
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-5 flex flex-wrap gap-3">
+                <div className="p-4 sm:p-6 md:p-8">
+                  <div className="max-w-2xl mx-auto">
+                    <div className="rounded-2xl border border-[rgba(75,142,255,0.3)] bg-[rgba(12,16,28,0.65)] p-5 sm:p-6 text-center">
+                      <h3 className="text-xl sm:text-2xl font-semibold text-white mb-4">
+                        {templateInfo.templateTitle || "(Untitled Template)"}
+                      </h3>
+                      <div className="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm text-[#D7E3FF] mb-6">
+                        {templateInfo.modality && (
+                          <span className="rounded-full bg-[rgba(75,142,255,0.18)] px-3 py-1.5 font-semibold">
+                            {templateInfo.modality}
+                          </span>
+                        )}
+                        {templateInfo.body_system && (
+                          <span className="rounded-full bg-[rgba(75,142,255,0.18)] px-3 py-1.5 font-semibold">
+                            {templateInfo.body_system}
+                          </span>
+                        )}
+                        {templateInfo.anatomy && (
+                          <span className="rounded-full bg-[rgba(75,142,255,0.18)] px-3 py-1.5 font-semibold">
+                            {templateInfo.anatomy}
+                          </span>
+                        )}
+                      </div>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="rounded-lg border border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.72)] px-4 text-[rgba(207,207,207,0.8)] hover:border-[rgba(75,142,255,0.45)] hover:bg-[rgba(75,142,255,0.18)] hover:text-white"
+                        className="rounded-lg border border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.72)] px-5 py-2 text-[rgba(207,207,207,0.8)] hover:border-[rgba(75,142,255,0.45)] hover:bg-[rgba(75,142,255,0.18)] hover:text-white min-h-[44px]"
                         onClick={() => router.push('/app/templates')}
                       >
                         Change template
@@ -800,7 +802,7 @@ export default function GeneratePage() {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="patient.sex" className="text-[rgba(207,207,207,0.75)]">Sex</Label>
+                      <Label htmlFor="patient.sex" className="text-[rgba(207,207,207,0.75)]">Sex (required)</Label>
                       <Select
                         value={watch('patient.sex') || ''}
                         onValueChange={(value) =>
@@ -886,19 +888,22 @@ export default function GeneratePage() {
                           </TooltipContent>
                         </Tooltip>
                       </div>
+                      {errors.findings && (
+                        <p className="text-sm text-[#FF9F9F] flex items-center gap-1.5">
+                          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                          {errors.findings.message}
+                        </p>
+                      )}
                       <Textarea
                         id="findings"
                         inputMode="text"
                         autoCapitalize="sentences"
                         {...register('findings')}
-                        placeholder="- Bullet 1\n- Bullet 2\nor free text..."
+                        placeholder="Enter your findings here. You can type bullet points, write in free text format, or use voice dictation."
                         rows={6}
                         className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] textarea-mobile"
                       />
-                      <p className="text-xs text-[rgba(207,207,207,0.45)]">Press Enter to start a new line. Voice dictation will auto-separate entries for you.</p>
-                      {errors.findings && (
-                        <p className="text-sm text-[#FF9F9F]">{errors.findings.message}</p>
-                      )}
+                      <p className="text-xs text-[rgba(207,207,207,0.45)]">Tip: Press Enter for a new line, or use the Voice Dictation button below for hands-free input.</p>
 
                       {/* Voice Input Integration */}
                       <VoiceInput
@@ -982,11 +987,23 @@ export default function GeneratePage() {
                     {/* Summary */}
                     <div className="mt-6 rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.65)] p-6">
                       <h4 className="mb-4 text-lg font-semibold text-white">Report Summary</h4>
-                      <div className="space-y-2 text-sm text-[rgba(207,207,207,0.7)]">
-                        <p><span className="text-white">Template:</span> {templateInfo.templateTitle || "(Untitled Template)"}</p>
-                        <p><span className="text-white">Patient Data:</span> Included</p>
-                        <p><span className="text-white">Indication:</span> {watch('indication') || 'Not provided'}</p>
-                        <p><span className="text-white">Findings:</span> {watch('findings') ? `${watch('findings').length} characters` : 'Not provided'}</p>
+                      <div className="space-y-3 text-sm text-[rgba(207,207,207,0.7)]">
+                        <div>
+                          <span className="text-white font-medium">Template:</span>
+                          <p className="mt-1">{templateInfo.templateTitle || "(Untitled Template)"}</p>
+                        </div>
+                        <div>
+                          <span className="text-white font-medium">Patient Data:</span>
+                          <p className="mt-1">Included</p>
+                        </div>
+                        <div>
+                          <span className="text-white font-medium">Indication:</span>
+                          <p className="mt-1 whitespace-pre-wrap break-words">{watch('indication') || 'Not provided'}</p>
+                        </div>
+                        <div>
+                          <span className="text-white font-medium">Findings:</span>
+                          <p className="mt-1 whitespace-pre-wrap break-words">{watch('findings') || 'Not provided'}</p>
+                        </div>
                       </div>
                     </div>
                     
@@ -1009,36 +1026,36 @@ export default function GeneratePage() {
           </motion.div>
         </AnimatePresence>
 
-        <div className="sticky bottom-0 left-0 right-0 mt-6 flex items-center justify-between border-t border-[rgba(255,255,255,0.12)] bg-[rgba(6,10,18,0.92)] p-4 text-white md:static md:border-0 md:bg-transparent md:p-0 z-20 safe-bottom">
+        <div className="fixed bottom-0 left-0 right-0 mt-6 flex items-center justify-between bg-[rgba(6,10,18,0.98)] backdrop-blur-md px-4 py-3 text-white md:static md:bg-transparent md:p-0 md:mt-6 z-20 safe-area-inset-bottom">
           <Button
             type="button"
             variant="ghost"
             onClick={handlePrevious}
             disabled={currentStep === 1}
             className={cn(
-              "flex items-center gap-2 rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.72)] text-[rgba(207,207,207,0.85)] hover:border-[rgba(255,255,255,0.3)] hover:text-white",
-              currentStep === 1 && "opacity-50"
+              "flex items-center justify-center rounded-full w-12 h-12 bg-[rgba(18,22,36,0.8)] border border-[rgba(255,255,255,0.12)] text-white hover:bg-[rgba(75,142,255,0.2)] hover:border-[rgba(75,142,255,0.4)] transition-all",
+              currentStep === 1 && "opacity-40 cursor-not-allowed"
             )}
+            aria-label="Previous step"
           >
-            <ChevronLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Previous</span>
+            <ChevronLeft className="w-6 h-6" />
           </Button>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {currentStep < 4 ? (
               <Button
                 type="button"
                 onClick={handleNext}
-                className="flex items-center gap-2 rounded-xl bg-[linear-gradient(90deg,#2653FF_0%,#4B8EFF_55%,#8F82FF_100%)] px-5 py-2 font-semibold text-white shadow-[0_18px_42px_rgba(31,64,175,0.4)] transition-transform hover:-translate-y-0.5"
+                className="flex items-center justify-center rounded-full w-12 h-12 bg-[#2653FF] hover:bg-[#4B8EFF] text-white transition-all"
+                aria-label="Next step"
               >
-                <span className="hidden sm:inline">Next</span>
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-6 h-6" />
               </Button>
             ) : (
               <Button
                 type="submit"
                 disabled={isSubmitting || formIsSubmitting || (usage?.subscription && usage.subscription.reports_used >= usage.subscription.reports_limit)}
-                className="flex items-center gap-2 rounded-xl bg-[linear-gradient(90deg,#3FBF8C_0%,#6EE7B7_100%)] px-5 py-2 font-semibold text-white shadow-[0_18px_42px_rgba(63,191,140,0.35)] transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+                className="flex items-center justify-center gap-2 rounded-full px-6 h-12 bg-[#3FBF8C] hover:bg-[#6EE7B7] text-white font-semibold transition-all disabled:opacity-60"
                 onClick={() => {
                   setIntentionalSubmit(true);
                 }}
@@ -1063,41 +1080,32 @@ export default function GeneratePage() {
       />
 
       {(isSubmitting || formIsSubmitting) && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(4,8,18,0.85)] backdrop-blur-xl"
-        >
-          <motion.div
-            initial={{ scale: 0.94, opacity: 0.75 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.35, ease: 'easeOut' }}
-            className="hero-starfield relative w-full max-w-md rounded-[44px] px-10 py-12 text-center"
-          >
-            <div className="hero-aurora" />
-            <div className="relative space-y-5">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[rgba(75,142,255,0.35)] bg-[rgba(12,16,28,0.78)] shadow-[0_30px_82px_rgba(31,64,175,0.45)]">
-                <motion.span
-                  className="block h-12 w-12 rounded-full border-2 border-[rgba(143,130,255,0.7)] border-t-transparent"
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 1.1, ease: 'linear' }}
-                />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(4,8,18,0.95)] backdrop-blur-sm">
+          <div className="relative w-full max-w-md mx-4 rounded-3xl border border-[rgba(75,142,255,0.3)] bg-gradient-to-br from-[rgba(12,16,28,0.98)] to-[rgba(5,8,16,0.95)] px-8 py-10 text-center shadow-2xl">
+            {/* Simple animated background glow */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[rgba(75,142,255,0.08)] to-transparent opacity-50 pointer-events-none" />
+
+            <div className="relative space-y-6">
+              {/* Spinner */}
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[rgba(75,142,255,0.3)] bg-[rgba(12,16,28,0.9)] shadow-lg">
+                <div className="h-12 w-12 rounded-full border-3 border-[rgba(143,130,255,0.3)] border-t-[rgba(143,130,255,0.9)] animate-spin" style={{ borderWidth: '3px' }} />
               </div>
+
+              {/* Text content */}
               <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[rgba(207,207,207,0.48)]">
+                <p className="text-xs font-semibold uppercase tracking-widest text-[rgba(207,207,207,0.5)]">
                   Assistant at work
                 </p>
-                <h2 className="text-2xl font-semibold text-white sm:text-[2.1rem]">
+                <h2 className="text-2xl sm:text-3xl font-bold text-white">
                   Generating your radiology report
                 </h2>
-                <p className="text-sm text-[rgba(207,207,207,0.72)]">
+                <p className="text-sm text-[rgba(207,207,207,0.75)] max-w-sm mx-auto">
                   Radly is aligning findings, impressions, and follow-up recommendations. You&apos;ll review the draft in just a moment.
                 </p>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
       </main>
     </div>

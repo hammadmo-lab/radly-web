@@ -23,6 +23,7 @@ import {
 import { FormattingDashboard } from '@/components/formatting/FormattingDashboard'
 import { TierGate } from '@/components/formatting/TierGate'
 import { useSubscriptionTier } from '@/hooks/useSubscription'
+import { SubscriptionStatusCard } from '@/components/subscription/SubscriptionStatusCard'
 
 export const dynamic = 'force-dynamic';
 
@@ -241,6 +242,15 @@ export default function SettingsPage() {
 
       {/* Settings Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Subscription Status */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <SubscriptionStatusCard />
+        </motion.div>
+
         {/* Account Information */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}

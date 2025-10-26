@@ -105,20 +105,20 @@ export default function TemplatesPage() {
         </Button>
       </div>
 
-      <div className="aurora-card border border-[rgba(255,255,255,0.08)] p-5 sm:p-6 md:p-7">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-full bg-[linear-gradient(135deg,#F8B74D,#FF6B6B)] shadow-[0_10px_24px_rgba(255,155,80,0.35)] flex items-center justify-center">
-            <Settings className="w-5 h-5 text-white" />
+      <div className="aurora-card border border-[rgba(255,255,255,0.08)] p-4 sm:p-6">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[linear-gradient(135deg,#F8B74D,#FF6B6B)] shadow-lg flex items-center justify-center flex-shrink-0">
+            <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
-          <div className="space-y-2 text-sm text-[rgba(207,207,207,0.75)]">
-            <h3 className="text-lg font-semibold text-white">Save time with custom instructions</h3>
-            <p>
+          <div className="space-y-2 min-w-0 flex-1">
+            <h3 className="text-base sm:text-lg font-semibold text-white">Save time with custom instructions</h3>
+            <p className="text-xs sm:text-sm text-[rgba(207,207,207,0.75)] leading-relaxed">
               Tap the{' '}
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.08)] gap-1">
+              <span className="inline-flex items-center px-2 py-1 rounded-md border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.08)] gap-1.5 align-middle">
                 <Settings className="w-3 h-3 text-[#8F82FF]" />
-                <span className="text-xs uppercase tracking-wide text-[rgba(207,207,207,0.75)]">Settings</span>
+                <span className="text-xs font-medium uppercase tracking-wider text-[rgba(207,207,207,0.85)]">Settings</span>
               </span>{' '}
-              icon on any template to add preferences (e.g. “always mention lymphadenopathy”). The AI remembers them for every future report.
+              icon on any template to add preferences (e.g. &quot;always mention lymphadenopathy&quot;). The AI remembers them for every future report.
             </p>
           </div>
         </div>
@@ -210,7 +210,7 @@ export default function TemplatesPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {isLoading ? (
           Array.from({ length: 6 }).map((_, index) => <TemplateCardSkeleton key={index} />)
         ) : filteredTemplates.length === 0 ? (
@@ -242,55 +242,38 @@ export default function TemplatesPage() {
           filteredTemplates.map((template) => (
             <Card
               key={template.id}
-              className="aurora-card group relative border border-[rgba(255,255,255,0.08)] p-6 sm:p-7 transition-all hover:-translate-y-1 hover:border-[rgba(75,142,255,0.35)] hover:shadow-[0_18px_42px_rgba(20,28,45,0.5)]"
+              className="aurora-card group relative border border-[rgba(255,255,255,0.08)] p-5 sm:p-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
+              onClick={() => router.push(`/app/generate?templateId=${template.id}`)}
             >
               <button
+                type="button"
                 onClick={(e) => {
+                  e.preventDefault()
                   e.stopPropagation()
                   setSelectedTemplate({ id: template.id, name: template.title || 'Untitled Template' })
                   setCustomizeModalOpen(true)
                 }}
-                className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-lg bg-[rgba(18,22,36,0.9)] border border-[rgba(255,255,255,0.12)] text-[rgba(207,207,207,0.75)] hover:text-white hover:border-[rgba(143,130,255,0.45)] transition-all"
-                title="Add custom instructions that auto-apply to this template"
+                className="absolute top-3 right-3 z-10 min-w-[44px] min-h-[44px] w-10 h-10 flex items-center justify-center rounded-lg bg-[rgba(18,22,36,0.95)] border border-[rgba(255,255,255,0.15)] text-[rgba(207,207,207,0.75)] hover:text-white hover:border-[rgba(143,130,255,0.45)] active:scale-95 transition-colors touch-manipulation"
+                aria-label="Customize template settings"
               >
-                <Settings className="w-4 h-4" />
+                <Settings className="w-5 h-5" />
               </button>
 
-              <div
-                className="cursor-pointer space-y-4"
-                onClick={() => router.push(`/app/generate?templateId=${template.id}`)}
-              >
-                <div
-                  className="w-14 h-14 rounded-xl flex items-center justify-center shadow-[0_10px_28px_rgba(75,142,255,0.45)] group-hover:scale-105 transition-transform"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(58,130,247,0.95), rgba(143,130,255,0.85))',
-                  }}
-                >
-                  <svg className="w-7 h-7 text-white drop-shadow" viewBox="0 0 24 24" fill="none">
-                    <path
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                </div>
-
+              <div className="space-y-3">
                 <div className="flex flex-wrap gap-2">
                   {template.modality && (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[rgba(75,142,255,0.18)] border border-[rgba(75,142,255,0.35)] text-[#D7E3FF]">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[rgba(75,142,255,0.18)] text-[#D7E3FF]">
                       {template.modality}
                     </span>
                   )}
                   {template.anatomy && (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[rgba(143,130,255,0.18)] border border-[rgba(143,130,255,0.32)] text-[#E0D9FF]">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[rgba(143,130,255,0.18)] text-[#E0D9FF]">
                       {template.anatomy}
                     </span>
                   )}
                 </div>
 
-                <h3 className="text-xl font-semibold text-white tracking-tight group-hover:text-[#4B8EFF] transition-colors">
+                <h3 className="text-lg sm:text-xl font-semibold text-white">
                   {template.title || 'Untitled Template'}
                 </h3>
 
@@ -301,9 +284,10 @@ export default function TemplatesPage() {
                 )}
 
                 <Button
-                  className="w-full h-11 text-white shadow-[0_10px_24px_rgba(75,142,255,0.35)] hover:shadow-[0_16px_28px_rgba(75,142,255,0.45)]"
-                  style={{
-                    background: 'linear-gradient(90deg, #2653FF 0%, #4B8EFF 100%)',
+                  className="w-full h-10 sm:h-11 bg-[#2653FF] text-white hover:bg-[#4B8EFF]"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    router.push(`/app/generate?templateId=${template.id}`)
                   }}
                 >
                   Use Template
