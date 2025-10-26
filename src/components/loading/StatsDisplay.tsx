@@ -88,26 +88,26 @@ export function StatsDisplay({ startTime, jobStatus, estimatedSeconds }: StatsDi
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2 xl:grid-cols-2">
+    <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
       {stats.filter((stat) => stat.show).map((stat, index) => (
         <motion.div
           key={stat.label}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
-          className={`aurora-card border border-[rgba(255,255,255,0.08)] p-4 sm:p-5 bg-gradient-to-br ${stat.accent}`}
+          className={`aurora-card border border-[rgba(255,255,255,0.08)] p-3 sm:p-4 lg:p-5 bg-gradient-to-br ${stat.accent}`}
         >
-          <div className="flex items-center gap-3">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${stat.iconGlow} text-white shadow-[0_14px_32px_rgba(31,64,175,0.35)]`}>
-              <stat.icon className="h-5 w-5" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className={`flex h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-lg ${stat.iconGlow} text-white shadow-[0_14px_32px_rgba(31,64,175,0.35)]`}>
+              <stat.icon className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div className="text-left">
-              <p className="text-[0.65rem] uppercase tracking-[0.18em] text-[rgba(207,207,207,0.55)]">{stat.label}</p>
+            <div className="text-left min-w-0">
+              <p className="text-[0.55rem] sm:text-[0.65rem] uppercase tracking-[0.18em] text-[rgba(207,207,207,0.55)] truncate">{stat.label}</p>
               <motion.p
                 key={stat.value}
                 initial={{ scale: 1.1, opacity: 0.85 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="text-xl font-semibold text-white"
+                className="text-sm sm:text-lg lg:text-xl font-semibold text-white truncate"
               >
                 {stat.value}
               </motion.p>
