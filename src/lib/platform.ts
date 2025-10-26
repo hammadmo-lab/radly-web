@@ -253,8 +253,8 @@ export function getPlatformConfig() {
     isWeb: isWebApp(),
     displayName: getPlatformDisplayName(),
     storeName: getAppStoreDisplayName(),
-    supportsWebSubscriptions: shouldShowWebSubscriptions(),
-    supportsMobileSubscriptions: shouldShowMobileSubscriptions(),
+    shouldShowWebSubscriptions: shouldShowWebSubscriptions(),
+    shouldShowMobileSubscriptions: shouldShowMobileSubscriptions(),
     supportsPushNotifications: supportsPushNotifications(),
     subscriptionManagementUrl: getSubscriptionManagementUrl(),
   }

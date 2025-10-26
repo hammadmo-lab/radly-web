@@ -19,7 +19,6 @@ import Link from 'next/link'
 export function SubscriptionStatusCard() {
   const {
     platform,
-    displayName,
     storeName,
     shouldShowWebSubscriptions,
     shouldShowMobileSubscriptions,
@@ -27,7 +26,8 @@ export function SubscriptionStatusCard() {
     isReady,
   } = usePlatform()
 
-  const { data: subscription, isLoading } = useSubscription()
+  const { data: usageData, isLoading } = useSubscription()
+  const subscription = usageData?.subscription
 
   if (!isReady || isLoading) {
     return (
@@ -98,8 +98,8 @@ export function SubscriptionStatusCard() {
     (subscription.reports_used / subscription.reports_limit) * 100
   )
 
-  // Determine subscription platform display
-  const subscriptionPlatform = subscription.platform || platform
+  // Determine subscription platform display (no platform in subscription data, use current platform)
+  const subscriptionPlatform = platform
   const isPlatformWeb = subscriptionPlatform === 'web'
   const isPlatformMobile = subscriptionPlatform === 'ios' || subscriptionPlatform === 'android'
 
@@ -120,7 +120,7 @@ export function SubscriptionStatusCard() {
           </Badge>
         </CardTitle>
         <CardDescription>
-          {subscription.tier_display_name || subscription.tier_name} Plan
+          {subscription.tier_display_name || subscription.tier} Plan
         </CardDescription>
       </CardHeader>
 
@@ -144,16 +144,16 @@ export function SubscriptionStatusCard() {
               {subscription.reports_used} / {subscription.reports_limit}
             </span>
           </div>
-          <Progress value={usagePercentage} className="h-2" />
+          <Progress value={usagePercentage} />
         </div>
 
         {/* Billing Info */}
         <div className="space-y-2 text-sm">
-          {subscription.price !== 0 && (
+          {subscription.price_monthly !== 0 && (
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Price</span>
               <span className="font-medium">
-                {subscription.price} {subscription.currency}/month
+                {subscription.price_monthly} {subscription.currency}/month
               </span>
             </div>
           )}

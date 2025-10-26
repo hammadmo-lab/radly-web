@@ -7,8 +7,6 @@
 
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { usePlatform } from '@/hooks/usePlatform'
 import { Store, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -21,7 +19,6 @@ export function MobileAppPricingRedirect() {
     subscriptionManagementUrl,
     isReady,
   } = usePlatform()
-  const router = useRouter()
 
   // Don't render anything during SSR or if on web
   if (!isReady || !isNative) {
