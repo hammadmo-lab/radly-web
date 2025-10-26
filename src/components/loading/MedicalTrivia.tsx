@@ -101,47 +101,41 @@ export function MedicalTrivia({ rotationInterval = 4000 }: MedicalTriviaProps) {
   const Icon = currentTrivia.icon;
 
   return (
-    <div className="relative min-h-[120px] flex items-center justify-center">
+    <div className="relative min-h-[120px] flex items-center justify-center w-full overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -20, scale: 0.95 }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
           className="w-full"
         >
-          <div className="aurora-card border border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.72)] p-6">
-            <div className="flex items-start gap-4">
-              <motion.div
-                animate={{ scale: [1, 1.08, 1], rotate: [0, 6, -6, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                className="flex h-12 w-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#2653FF,#8F82FF)] text-white shadow-[0_16px_36px_rgba(31,64,175,0.4)]"
-              >
-                <Icon className="h-6 w-6" />
-              </motion.div>
+          <div className="aurora-card border border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.72)] p-4 sm:p-6">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#2653FF,#8F82FF)] text-white shadow-[0_16px_36px_rgba(31,64,175,0.4)]">
+                <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+              </div>
 
-              <div className="flex-1 space-y-2">
+              <div className="flex-1 space-y-2 min-w-0">
                 <span className="inline-block rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.78)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[rgba(207,207,207,0.6)]">
                   {currentTrivia.category}
                 </span>
-                <p className="text-sm leading-relaxed text-[rgba(207,207,207,0.75)]">
+                <p className="text-xs sm:text-sm leading-relaxed text-[rgba(207,207,207,0.75)] break-words">
                   {currentTrivia.text}
                 </p>
               </div>
             </div>
 
-            <div className="mt-4 flex justify-center gap-2">
+            <div className="mt-4 flex justify-center gap-2 overflow-x-auto scrollbar-hide">
               {MEDICAL_TRIVIA.map((_, index) => (
-                <motion.div
+                <div
                   key={index}
                   className={`h-1 rounded-full transition-all ${
                     index === currentIndex
                       ? 'w-8 bg-[rgba(75,142,255,0.7)]'
                       : 'w-2 bg-[rgba(207,207,207,0.25)]'
                   }`}
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: index === currentIndex ? 1 : 0.8 }}
                 />
               ))}
             </div>
