@@ -1230,4 +1230,76 @@ a,
       contain: layout style paint;
     }
   }
+
+  /* GPU acceleration for animated elements */
+  .hero-starfield,
+  .hero-aurora,
+  .neon-shell,
+  motion-div,
+  [class*="animate-"] {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
+
+  /* Optimize heavy blur effects for mobile */
+  @media (max-width: 768px) {
+    .hero-starfield::before,
+    .hero-starfield::after,
+    .hero-aurora,
+    .neon-shell::before,
+    .aurora-card::before {
+      will-change: opacity;
+      transform: translateZ(0);
+    }
+
+    /* Reduce blur intensity on mobile for better performance */
+    .hero-starfield::before {
+      filter: blur(40px);
+    }
+
+    .hero-aurora {
+      filter: blur(30px);
+    }
+
+    .neon-shell::before,
+    .aurora-card::before {
+      filter: blur(40px);
+    }
+  }
+
+  /* Optimize scrolling performance */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent layout shift */
+  img,
+  video,
+  iframe {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Reduce motion for better battery life and accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-starfield::after,
+    .animate-float-orb,
+    .animate-pulse-glow,
+    .animate-shimmer {
+      animation: none !important;
+    }
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
