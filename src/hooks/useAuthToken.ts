@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createBrowserSupabase } from '@/lib/supabase/client'
+import { getSupabaseClient } from '@/lib/supabase-singleton'
 import { isTestMode, getTestSession } from '@/lib/test-mode'
+import type { Session, AuthChangeEvent } from '@supabase/supabase-js'
 
 type AuthStatus = "loading" | "authenticated" | "signed_out";
 
@@ -22,30 +23,47 @@ export function useAuthToken() {
     }
 
     let cancelled = false;
-    const supabase = createBrowserSupabase();
 
-    const init = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (cancelled) return;
-      const t = data.session?.access_token ?? null;
-      setToken(t);
-      setUserId(data.session?.user?.id ?? null);
-      setStatus(t ? "authenticated" : "signed_out");
-    };
+    const initializeClient = async () => {
+      try {
+        const supabase = await getSupabaseClient();
 
-    init();
+        if (cancelled) return;
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_evt, session) => {
-      if (cancelled) return;
-      const t = session?.access_token ?? null;
-      setToken(t);
-      setUserId(session?.user?.id ?? null);
-      setStatus(t ? "authenticated" : "signed_out");
-    });
+        const init = async () => {
+          const { data } = await supabase.auth.getSession();
+          if (cancelled) return;
+          const t = data.session?.access_token ?? null;
+          setToken(t);
+          setUserId(data.session?.user?.id ?? null);
+          setStatus(t ? "authenticated" : "signed_out");
+        };
+
+        init();
+
+        const { data: sub } = supabase.auth.onAuthStateChange((_evt: AuthChangeEvent, session: Session | null) => {
+          if (cancelled) return;
+          const t = session?.access_token ?? null;
+          setToken(t);
+          setUserId(session?.user?.id ?? null);
+          setStatus(t ? "authenticated" : "signed_out");
+        });
+
+        return () => {
+          sub.subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error('Failed to initialize Supabase client:', error);
+        if (!cancelled) {
+          setStatus("signed_out");
+        }
+      }
+    }
+
+    initializeClient();
 
     return () => {
       cancelled = true;
-      sub.subscription.unsubscribe();
     };
   }, []);
 

@@ -45,7 +45,7 @@ export function AnimatedHomePage({
   stats,
 }: AnimatedHomePageProps) {
   return (
-    <main className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 sm:px-5 pb-24">
+    <main className="mx-auto flex max-w-6xl flex-col px-4 sm:px-5 pb-24">
       <header className="pt-12 sm:pt-20 lg:pt-28">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

@@ -18,12 +18,16 @@ import {
   User, Settings, Wifi, Palette,
   Save, CheckCircle, AlertCircle, Clock,
   Eye, Download, Upload,
-  Activity, Lock, FileText
+  Activity, Lock, FileText,
+  Smartphone, ShoppingCart, Loader2
 } from 'lucide-react'
 import { FormattingDashboard } from '@/components/formatting/FormattingDashboard'
 import { TierGate } from '@/components/formatting/TierGate'
 import { useSubscriptionTier } from '@/hooks/useSubscription'
 import { SubscriptionStatusCard } from '@/components/subscription/SubscriptionStatusCard'
+import { usePlatform } from '@/hooks/usePlatform'
+import { useRevenueCat } from '@/hooks/useRevenueCat'
+import { PaywallSheet } from '@/components/iap/PaywallSheet'
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +35,8 @@ export default function SettingsPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const currentTier = useSubscriptionTier() // Fetch real subscription tier
+  const { isNative } = usePlatform()
+  const { currentTier: mobileCurrentTier, restorePurchases, isRestoring } = useRevenueCat()
   const [defaultSignatureName, setDefaultSignatureName] = useState('')
   const [defaultDateFormat, setDefaultDateFormat] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -41,6 +47,7 @@ export default function SettingsPage() {
   const [darkMode, setDarkMode] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [showPaywall, setShowPaywall] = useState(false)
 
   const { data: profile } = useQuery({
     queryKey: ['profile', user?.id],
@@ -250,6 +257,82 @@ export default function SettingsPage() {
         >
           <SubscriptionStatusCard />
         </motion.div>
+
+        {/* Mobile App Subscription (only on native) */}
+        {isNative && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card className="h-full border-2 border-blue-200 hover:border-blue-500 transition-colors bg-gradient-to-br from-blue-50 to-white">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                    <Smartphone className="w-5 h-5 text-white" />
+                  </div>
+                  <span>Mobile Subscription</span>
+                </CardTitle>
+                <CardDescription>
+                  Manage your in-app purchase subscription
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">Current Plan</span>
+                    {mobileCurrentTier && (
+                      <Badge className="bg-blue-100 text-blue-700 capitalize">
+                        {mobileCurrentTier}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Your subscription is managed through the App Store or Google Play Store
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Button
+                    onClick={() => setShowPaywall(true)}
+                    className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    Change Plan
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        await restorePurchases()
+                        toast.success('Purchases restored successfully!')
+                      } catch (err) {
+                        const errorMessage = err instanceof Error ? err.message : 'Restore failed'
+                        toast.error(errorMessage)
+                      }
+                    }}
+                    disabled={isRestoring}
+                    className="w-full"
+                  >
+                    {isRestoring ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Restoring...
+                      </>
+                    ) : (
+                      'Restore Purchases'
+                    )}
+                  </Button>
+                </div>
+
+                <p className="text-xs text-gray-500 bg-blue-50 p-3 rounded-md border border-blue-200">
+                  📱 To cancel or modify your subscription, go to your App Store or Google Play settings
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Account Information */}
         <motion.div
@@ -650,6 +733,9 @@ export default function SettingsPage() {
           <FormattingDashboard />
         </TierGate>
       </motion.div>
+
+      {/* Mobile Paywall Sheet */}
+      <PaywallSheet isOpen={showPaywall} onClose={() => setShowPaywall(false)} />
     </div>
   )
 }

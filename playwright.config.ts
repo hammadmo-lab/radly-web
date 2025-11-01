@@ -2,6 +2,13 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * @see https://playwright.dev/docs/test-configuration
+ *
+ * IMPORTANT: E2E tests are configured to run LOCALLY ONLY (not on GitHub CI)
+ * This saves costs while maintaining local test coverage
+ *
+ * To skip tests on GitHub Actions, use:
+ * - Set SKIP_E2E=true in GitHub environment
+ * - Or add `skip: process.env.SKIP_E2E === 'true'` to projects
  */
 export default defineConfig({
   testDir: './e2e',

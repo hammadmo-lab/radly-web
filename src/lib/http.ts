@@ -1,5 +1,5 @@
 import type { ApiError } from '@/types/api';
-import { createBrowserSupabase } from '@/lib/supabase/client';
+import { getSupabaseClient } from '@/lib/supabase-singleton';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE!;
 const CLIENT_KEY = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY!;
@@ -17,7 +17,7 @@ async function getAuthToken(): Promise<string | null> {
       return cachedToken;
     }
 
-    const supabase = createBrowserSupabase();
+    const supabase = await getSupabaseClient();
     const { data: { session } } = await supabase.auth.getSession();
 
     // Cache the token and expiry
@@ -96,21 +96,46 @@ export async function httpPost<TBody, TResp = unknown>(path: string, body: TBody
 
 export async function httpPut<TBody, TResp = unknown>(path: string, body: TBody): Promise<TResp> {
   const token = await getAuthToken();
-  
+
   const headers: Record<string, string> = {
     'content-type': 'application/json',
     'x-client-key': CLIENT_KEY,
     'X-Request-Id': crypto.randomUUID(),
   };
-  
+
   if (token) {
     headers['authorization'] = `Bearer ${token}`;
   }
-  
+
   const res = await fetch(`${BASE_URL}${path}`, {
     method: 'PUT',
     headers,
     body: JSON.stringify(body),
+    credentials: 'include',
+  });
+  return handle<TResp>(res);
+}
+
+export async function httpDelete<TBody, TResp = unknown>(path: string, body?: TBody): Promise<TResp> {
+  const token = await getAuthToken();
+
+  const headers: Record<string, string> = {
+    'x-client-key': CLIENT_KEY,
+    'X-Request-Id': crypto.randomUUID(),
+  };
+
+  if (body) {
+    headers['content-type'] = 'application/json';
+  }
+
+  if (token) {
+    headers['authorization'] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: 'DELETE',
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
     credentials: 'include',
   });
   return handle<TResp>(res);
