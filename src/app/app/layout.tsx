@@ -20,7 +20,9 @@ export default function AppLayout({
     try {
       await signOut()
       toast.success('Signed out successfully')
-      window.location.href = 'https://radly.app'
+      // Return the user to the marketing homepage on the SAME origin
+      // so the cleared session is respected. From there, the CTA goes to /auth/signin.
+      window.location.assign('/')
     } catch {
       toast.error('Failed to sign out')
     }
