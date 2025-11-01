@@ -4,54 +4,15 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { Session } from '@supabase/supabase-js'
 import { isTestMode, getTestSession } from './test-mode'
-import { Capacitor } from '@capacitor/core'
 
 /**
  * Get Supabase client with test mode support
  */
 export function getSupabaseClient() {
   try {
-    // For Capacitor apps, localStorage works reliably and is accessible to Supabase's internal storage
-    // For web apps, use default Supabase storage (cookies for SSR, localStorage fallback)
-    let storage = undefined
-
-    if (Capacitor.isNativePlatform()) {
-      console.log('🔐 Setting up localStorage for Capacitor app (mobile)')
-      // Use localStorage directly - Supabase can access this reliably in Capacitor
-      // This is simpler and more reliable than custom storage adapters
-      storage = {
-        getItem: (key: string) => {
-          const value = localStorage.getItem(key)
-          console.log('💾 Mobile localStorage GET:', key, value ? 'found' : 'not found')
-          return value
-        },
-        setItem: (key: string, value: string) => {
-          console.log('💾 Mobile localStorage SET:', key, 'saved')
-          localStorage.setItem(key, value)
-        },
-        removeItem: (key: string) => {
-          console.log('💾 Mobile localStorage REMOVE:', key, 'removed')
-          localStorage.removeItem(key)
-        }
-      }
-    } else {
-      console.log('🔐 Using default Supabase storage for web app')
-      // Web app: use undefined to get Supabase's default storage (cookies + localStorage)
-      storage = undefined
-    }
-
     const client = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        auth: {
-          storage: storage,
-          persistSession: true,
-          detectSessionInUrl: false,
-          // Enable debugging for mobile to track session issues
-          debug: Capacitor.isNativePlatform()
-        }
-      }
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
     // If in test mode, override auth methods

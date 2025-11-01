@@ -400,7 +400,7 @@ export default function ReportsPage() {
                     </div>
                   </div>
                   <Link
-                    href={`/app/report?id=${r.job_id}`}
+                    href={`/app/report/${r.job_id}`}
                     className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[linear-gradient(90deg,#2653FF_0%,#4B8EFF_100%)] text-white shadow-[0_10px_24px_rgba(75,142,255,0.35)] hover:shadow-[0_16px_28px_rgba(75,142,255,0.45)] transition-all touch-target"
                     onClick={() => triggerHaptic('light')}
                   >

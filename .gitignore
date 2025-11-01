@@ -42,17 +42,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Capacitor
-ios/App/Pods/
-ios/App/App.xcworkspace/
-ios/App/build/
-android/app/build/
-android/.gradle/
-android/build/
-android/.idea/
-android/local.properties
-/Users/idrmido/Radly project/radly-frontend/out
-/src/app/auth/callback/route.ts
-/src/app/auth/callback/page.tsx
-/src/app/pricing/page.tsx
