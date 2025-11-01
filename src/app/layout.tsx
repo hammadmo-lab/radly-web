@@ -8,8 +8,6 @@ import { ClientPerformanceSetup } from "@/components/client-performance-setup";
 import { TestModeIndicator } from "@/components/test-mode-indicator";
 import { OfflineIndicator } from "@/components/shared/OfflineIndicator";
 import { siteConfig } from "@/lib/siteConfig";
-import { IOSScrollEnabler } from "@/components/ios-scroll-enabler";
-import { SessionHydrator } from "@/components/session-hydrator";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -67,7 +65,6 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   themeColor: '#0B1220',
-  viewportFit: 'cover',
 };
 
 export default function RootLayout({
@@ -79,20 +76,11 @@ export default function RootLayout({
   const gaEnabled = gaMeasurementId && process.env.NEXT_PUBLIC_GA_ENABLED === "1";
 
   return (
-    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className="overflow-x-hidden" style={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Radly" />
-      </head>
-      <body className={`${inter.variable} font-sans bg-background text-foreground antialiased overflow-x-hidden`} style={{ minHeight: '100vh', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <IOSScrollEnabler />
-        <SessionHydrator>
-          <Providers>
-            {children}
-          </Providers>
-        </SessionHydrator>
+    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className="overflow-x-hidden">
+      <body className={`${inter.variable} font-sans min-h-screen bg-background text-foreground antialiased overflow-x-hidden`}>
+        <Providers>
+          {children}
+        </Providers>
         <ClientPerformanceSetup />
         <PerformanceMonitor />
         <TestModeIndicator />

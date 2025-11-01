@@ -1,7 +1,7 @@
 "use client"
 
-import { useSearchParams, useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { useState } from 'react'
 import {
   ArrowLeft,
   AlertCircle,
@@ -23,25 +23,16 @@ import { useUserEmails } from '@/hooks/useUserEmails'
 import { toast } from 'sonner'
 
 export default function UserDetailsPage() {
-  const searchParams = useSearchParams()
+  const params = useParams()
   const router = useRouter()
   const { logout } = useAdminAuth()
   const [isChangeTierOpen, setIsChangeTierOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
 
-  const userId = searchParams.get('userId')
-  const email = searchParams.get('email')
-
-  // Redirect if no userId provided
-  useEffect(() => {
-    if (!userId) {
-      router.push('/admin')
-    }
-  }, [userId, router])
-
-  const { data, isLoading, error } = useUserSubscription(userId || '')
-  const { data: emailMap } = useUserEmails(userId ? [userId] : [])
-  const userEmail = email || emailMap?.[userId || '']
+  const userId = params.userId as string
+  const { data, isLoading, error } = useUserSubscription(userId)
+  const { data: emailMap } = useUserEmails([userId])
+  const userEmail = emailMap?.[userId]
 
   const handleBack = () => {
     router.push('/admin')
@@ -53,20 +44,8 @@ export default function UserDetailsPage() {
   }
 
   const copyUserId = () => {
-    if (userId) {
-      navigator.clipboard.writeText(userId)
-      toast.success('User ID copied to clipboard')
-    }
-  }
-
-  if (!userId) {
-    return (
-      <AdminGuard>
-        <div className="min-h-screen bg-[#0C0C0E] flex items-center justify-center">
-          <p className="text-white">Loading...</p>
-        </div>
-      </AdminGuard>
-    )
+    navigator.clipboard.writeText(userId)
+    toast.success('User ID copied to clipboard')
   }
 
   if (isLoading) {
@@ -237,7 +216,7 @@ export default function UserDetailsPage() {
                 Delete User
               </Button>
             </div>
-
+            
             {/* User ID Card */}
             <div className="border border-[rgba(255,255,255,0.12)] rounded-2xl p-4 sm:p-6 bg-[rgba(18,22,36,0.6)]">
               <h2 className="font-semibold mb-4 text-white text-base sm:text-lg">User Information</h2>

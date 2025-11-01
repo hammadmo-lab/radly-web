@@ -83,9 +83,9 @@ export default function AdminDashboard() {
       toast.error('Cannot view user: user ID not available')
       return
     }
-
+    
     console.log('Viewing user:', userId)
-    router.push(`/admin/users?userId=${userId}`)
+    router.push(`/admin/users/${userId}`)
   }, [router])
 
   const handleLogout = useCallback(() => {

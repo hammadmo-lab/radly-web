@@ -62,8 +62,7 @@ function formatPrice(tier: Tier) {
   return `${tier.price_monthly.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${tier.currency}/month`;
 }
 
-export default async function PricingPage(props: { searchParams?: Promise<Record<string, string | string[]>> }) {
-  const searchParams = await props.searchParams;
+export default async function PricingPage({ searchParams }: { searchParams?: Record<string, string | string[]> }) {
   const regionParam = Array.isArray(searchParams?.region) ? searchParams?.region[0] : searchParams?.region;
   const region = regionParam === "international" ? "international" : regionParam === "egypt" || !regionParam ? "egypt" : null;
 
