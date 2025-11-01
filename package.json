@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "dev:clean": "rm -rf .next && next dev",
     "build": "next build --turbopack",
+    "build:mobile": "CAPACITOR_BUILD=true next build && next export",
     "start": "next start",
     "lint": "eslint",
     "test": "jest",

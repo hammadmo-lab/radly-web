@@ -77,6 +77,8 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
+    // For Capacitor builds we export static HTML, disable image optimization
+    unoptimized: process.env.CAPACITOR_BUILD === 'true',
   },
   
   // Compiler optimizations
@@ -84,8 +86,8 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   
-  // Output standalone for better Docker builds
-  output: 'standalone',
+  // Output standalone for Docker; use export for Capacitor mobile builds
+  output: process.env.CAPACITOR_BUILD === 'true' ? 'export' : 'standalone',
   
   // Performance optimizations
   poweredByHeader: false,
