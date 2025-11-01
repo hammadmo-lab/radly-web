@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { httpGet } from '@/lib/http'
 import { useAuthSession } from '@/hooks/useAuthSession'
+import type { SubscriptionStatus, MobileSubscription, Platform } from '@/lib/mobile-subscriptions'
 
 export type SubscriptionTier = 'free' | 'starter' | 'professional' | 'premium'
 
@@ -16,6 +17,14 @@ export interface SubscriptionData {
   price_monthly: number
   currency: string
   status: string
+  // New fields from mobile subscriptions API
+  platform?: Platform
+  subscription_id?: string
+  expires_at?: string
+  auto_renew?: boolean
+  transaction_id?: string
+  days_until_expiration?: number
+  active_subscriptions?: MobileSubscription[]
 }
 
 interface UsageStats {
@@ -83,4 +92,46 @@ export function useSubscriptionTier(): SubscriptionTier {
 export function useHasTierAccess(requiredTiers: SubscriptionTier[]): boolean {
   const currentTier = useSubscriptionTier()
   return requiredTiers.includes(currentTier)
+}
+
+/**
+ * Hook to fetch subscription status from the mobile subscriptions API
+ *
+ * This endpoint returns the BEST subscription across all platforms (web, iOS, Android).
+ * Use this for cross-platform subscription checks.
+ *
+ * @returns {Object} Query result with subscription status across all platforms
+ */
+export function useSubscriptionStatus() {
+  const { isAuthed, mounted } = useAuthSession()
+
+  return useQuery({
+    queryKey: ['subscription'],
+    queryFn: () => httpGet<SubscriptionStatus>('/v1/subscriptions/status'),
+    refetchInterval: 60000, // Refetch every minute
+    enabled: mounted && isAuthed, // Only fetch when authenticated
+    retry: (failureCount, error) => {
+      // Don't retry on authentication errors (401, 403)
+      if (error && typeof error === 'object' && 'status' in error) {
+        const status = (error as { status: number }).status
+        if (status === 401 || status === 403 || status === 404) {
+          return false
+        }
+      }
+      return failureCount < 3
+    },
+    staleTime: 30000, // Consider data stale after 30 seconds
+  })
+}
+
+/**
+ * Hook to get subscription tier from mobile subscriptions API
+ *
+ * Returns the tier from the BEST subscription across all platforms.
+ *
+ * @returns {SubscriptionTier} The user's current subscription tier
+ */
+export function useSubscriptionStatusTier(): SubscriptionTier {
+  const { data } = useSubscriptionStatus()
+  return (data?.current_tier?.tier_name as SubscriptionTier) || 'free'
 }

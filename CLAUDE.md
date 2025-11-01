@@ -81,11 +81,12 @@ This application uses a **layered state management** approach:
 
 **Core HTTP client**: `src/lib/http.ts`
 
-All API calls go through three type-safe functions:
+All API calls go through four type-safe functions:
 ```typescript
 httpGet<T>(path: string): Promise<T>
 httpPost<TBody, TResp>(path: string, body: TBody): Promise<TResp>
 httpPut<TBody, TResp>(path: string, body: TBody): Promise<TResp>
+httpDelete<TBody, TResp>(path: string, body?: TBody): Promise<TResp>
 ```
 
 **Key behaviors**:
@@ -129,6 +130,58 @@ httpPut<TBody, TResp>(path: string, body: TBody): Promise<TResp>
 - `AdminAuthProvider` in `src/components/admin/AdminAuthProvider.tsx`
 - Uses API keys stored in localStorage
 - Access via `useAdminAuth()` hook
+
+### Mobile Subscriptions & Push Notifications
+
+**Platform Detection** (`src/lib/platform.ts`, `src/hooks/usePlatform.ts`):
+- `getPlatform()` - Returns 'web' | 'ios' | 'android'
+- `isNativeApp()` - True on iOS/Android
+- `usePlatform()` - SSR-safe hook with all helpers
+- Used to conditionally show/hide mobile IAP features
+
+**Mobile Subscriptions API** (`src/lib/mobile-subscriptions.ts`):
+- Apple App Store: `verifyAppleReceipt(receipt_data, product_id)`
+- Google Play: `verifyGooglePurchase(purchase_token, product_id)`
+- Cross-platform: `getSubscriptionStatus()` - Returns best subscription across all platforms
+- Restore: `restorePurchases(request)` - Restore on new device
+- Sync: `syncSubscriptions()` - Re-verify with stores
+
+**Mobile Subscriptions Hooks** (`src/hooks/useMobileSubscription.ts`):
+- `useVerifyAppleReceipt()` - Mutation for receipt verification
+- `useVerifyGooglePurchase()` - Mutation for purchase verification
+- `useRestorePurchases()` - Mutation to restore purchases
+- `useSyncSubscriptions()` - Mutation to sync subscriptions
+
+**Subscription Status** (`src/hooks/useSubscription.ts`):
+- `useSubscriptionStatus()` - Fetch cross-platform status
+- `useSubscriptionStatusTier()` - Get best tier
+- Returns `{ active_subscriptions[], current_tier }` with platform info
+- Shows highest tier when user has multiple subscriptions
+
+**Push Notifications API** (`src/lib/notifications.ts`):
+- `registerFCMToken(fcm_token, platform, device_name)` - Register device
+- `unregisterFCMToken(fcm_token)` - Unregister device
+- `getRegisteredTokens()` - List user's tokens
+- `sendTestNotification(fcm_token)` - Test notification
+- Support for: report_complete, report_failed, usage_warning, subscription_expiring
+
+**Push Notification Hooks** (`src/hooks/useNotifications.ts`):
+- `useRegisterFCMToken()` - Register for push notifications
+- `useUnregisterFCMToken()` - Stop notifications
+- `useNotificationTokens()` - Fetch registered tokens
+- `useSendTestNotification()` - Send test
+- `useNotifications()` - Combined hook for all operations
+
+**Components**:
+- `NotificationPermissionPrompt` - Requests permission on native apps
+- `NotificationHandler` - Listens for taps, handles deep linking
+- Both integrated in `src/app/app/layout.tsx`
+
+**Capacitor Integration**:
+- All code marked with `// TODO: When Capacitor is integrated`
+- Permission flow ready in `NotificationPermissionPrompt.tsx` (lines 56-90)
+- Notification listener ready in `NotificationHandler.tsx` (lines 82-130)
+- Install: `npm install @capacitor/push-notifications`
 
 ### Form Validation Pattern
 
