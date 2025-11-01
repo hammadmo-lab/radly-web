@@ -1,13 +1,10 @@
 'use client'
 
 import { useState, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { getSupabaseClient } from '@/lib/supabase-client-test'
-import { getUniversalCallbackUrl } from '@/lib/auth-callback'
+import { useSearchParams } from 'next/navigation'
+import { createBrowserSupabase } from '@/lib/supabase/client'
 import { sanitizeNext } from '@/lib/redirect'
 import { storeAuthOrigin } from '@/lib/auth-origin'
-import { signInWithAppleNative, signInWithGoogleNative } from '@/lib/native-auth'
-import { usePlatform } from '@/hooks/usePlatform'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CheckCircle2, Mail, Sparkles } from 'lucide-react'
@@ -17,13 +14,10 @@ const allowGoogle = process.env.NEXT_PUBLIC_ALLOW_GOOGLE === '1'
 const allowApple = process.env.NEXT_PUBLIC_ALLOW_APPLE === '1'
 
 function SignInContent() {
-  const supabase = getSupabaseClient()
-  const router = useRouter()
+  const supabase = createBrowserSupabase()
   const searchParams = useSearchParams()
-  const { isNative } = usePlatform()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const hasProviders = allowGoogle || allowApple
 
   // Get the next parameter or default to /app/dashboard
@@ -33,78 +27,34 @@ function SignInContent() {
   // IMPORTANT: This URL must exactly match one of the URLs in Supabase Dashboard
   // → Authentication → URL Configuration → Additional Redirect URLs
   const getRedirectUrl = () => {
-    // Keep for OAuth flows if needed, but magic links will use universal below
-    const fallback = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '')
-    if (typeof window === 'undefined') return `${fallback}/auth/callback`
-    const origin = window.location.origin
-    return origin.startsWith('http://') || origin.startsWith('https://')
-      ? `${origin}/auth/callback`
-      : `${fallback}/auth/callback`
+    if (typeof window === 'undefined') return 'http://localhost:3000/auth/callback'
+    return `${window.location.origin}/auth/callback`
   }
 
   console.log('🔐 Auth flow:', {
     currentOrigin: typeof window !== 'undefined' ? window.location.origin : 'N/A',
-    isNative,
     next,
     redirectUrl: getRedirectUrl()
   })
 
   async function signInWithGoogle() {
     setLoading(true)
-    setError(null)
     try {
-      if (isNative) {
-        // Native sign-in on iOS/Android
-        console.log('🔵 Using native Google Sign-In')
-        const signInResult = await signInWithGoogleNative()
+      // Store next path in cookie (primary method)
+      storeAuthOrigin(next)
 
-        console.log('🔵 Sign-in returned, result:', {
-          user: signInResult.user?.email,
-          hasSession: !!signInResult.session,
-        })
+      // Use base callback URL WITHOUT query parameters
+      // Supabase validates the base URL, not the query params
+      const redirectTo = getRedirectUrl()
 
-        // Wait longer for session to persist to storage
-        await new Promise(resolve => setTimeout(resolve, 2000))
+      console.log('🔐 Google OAuth redirect:', redirectTo, 'next:', next)
 
-        // Try to get session - should be available now
-        const { data: { session } } = await supabase.auth.getSession()
-        console.log('🔵 Session after 2s wait:', !!session, {
-          email: session?.user?.email,
-          expiresAt: session?.expires_at,
-        })
-
-        if (session) {
-          console.log('🔵 Session detected, redirecting to dashboard')
-          router.push(next)
-        } else {
-          console.log('🔵 No session found after wait, forcing refresh...')
-          // Try forcing a refresh
-          await supabase.auth.refreshSession()
-          const { data: { session: sessionAfterRefresh } } = await supabase.auth.getSession()
-          console.log('🔵 Session after refresh:', !!sessionAfterRefresh)
-
-          if (sessionAfterRefresh) {
-            router.push(next)
-          } else {
-            console.error('🔵 Failed to establish session')
-            setError('Sign-in failed: Unable to establish session. Please try again.')
-          }
-        }
-      } else {
-        // Web OAuth flow
-        console.log('🔵 Using web-based Google OAuth')
-        storeAuthOrigin(next)
-        const redirectTo = getRedirectUrl()
-
-        await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: { redirectTo },
-        })
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Google Sign-In failed'
-      console.error('🔵 Google Sign-In error:', err)
-      setError(message)
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo, // Base URL only, next param stored in cookie
+        },
+      })
     } finally {
       setLoading(false)
     }
@@ -112,60 +62,22 @@ function SignInContent() {
 
   async function signInWithApple() {
     setLoading(true)
-    setError(null)
     try {
-      if (isNative) {
-        // Native sign-in on iOS
-        console.log('🍎 Using native Apple Sign-In')
-        const signInResult = await signInWithAppleNative()
+      // Store next path in cookie (primary method)
+      storeAuthOrigin(next)
 
-        console.log('🍎 Sign-in returned, result:', {
-          user: signInResult.user?.email,
-          hasSession: !!signInResult.session,
-        })
+      // Use base callback URL WITHOUT query parameters
+      // Supabase validates the base URL, not the query params
+      const redirectTo = getRedirectUrl()
 
-        // Wait longer for session to persist to storage
-        await new Promise(resolve => setTimeout(resolve, 2000))
+      console.log('🔐 Apple OAuth redirect:', redirectTo, 'next:', next)
 
-        // Try to get session - should be available now
-        const { data: { session } } = await supabase.auth.getSession()
-        console.log('🍎 Session after 2s wait:', !!session, {
-          email: session?.user?.email,
-          expiresAt: session?.expires_at,
-        })
-
-        if (session) {
-          console.log('🍎 Session detected, redirecting to dashboard')
-          router.push(next)
-        } else {
-          console.log('🍎 No session found after wait, forcing refresh...')
-          // Try forcing a refresh
-          await supabase.auth.refreshSession()
-          const { data: { session: sessionAfterRefresh } } = await supabase.auth.getSession()
-          console.log('🍎 Session after refresh:', !!sessionAfterRefresh)
-
-          if (sessionAfterRefresh) {
-            router.push(next)
-          } else {
-            console.error('🍎 Failed to establish session')
-            setError('Sign-in failed: Unable to establish session. Please try again.')
-          }
-        }
-      } else {
-        // Web OAuth flow
-        console.log('🍎 Using web-based Apple OAuth')
-        storeAuthOrigin(next)
-        const redirectTo = getRedirectUrl()
-
-        await supabase.auth.signInWithOAuth({
-          provider: 'apple',
-          options: { redirectTo },
-        })
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Apple Sign-In failed'
-      console.error('🍎 Apple Sign-In error:', err)
-      setError(message)
+      await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo, // Base URL only, next param stored in cookie
+        },
+      })
     } finally {
       setLoading(false)
     }
@@ -181,8 +93,7 @@ function SignInContent() {
 
       // Use base callback URL WITHOUT query parameters
       // Supabase validates the base URL, not the query params
-      // Always use universal https callback for email links so they work on phones
-      const emailRedirectTo = getUniversalCallbackUrl()
+      const emailRedirectTo = getRedirectUrl()
 
       console.log('🔐 Sending magic link:', {
         email,
@@ -253,16 +164,6 @@ function SignInContent() {
                 <p className="text-sm text-[rgba(207,207,207,0.7)]">
                   Choose a provider or request a magic link to continue.
                 </p>
-                {isNative && (
-                  <div className="text-xs text-[rgba(111,231,183,0.85)]">
-                    Native app detected - using device sign-in
-                  </div>
-                )}
-                {error && (
-                  <div className="text-xs text-red-400 bg-[rgba(255,107,107,0.1)] px-3 py-2 rounded-lg border border-red-500/30">
-                    {error}
-                  </div>
-                )}
               </div>
 
               {hasProviders && (
