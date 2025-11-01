@@ -77,42 +77,22 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
-    // Disable optimization for Capacitor static export
-    unoptimized: process.env.CAPACITOR_BUILD === 'true',
   },
   
   // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-
-  // Output configuration
-  // Use 'export' for Capacitor (static HTML), 'standalone' for Docker
-  output: process.env.CAPACITOR_BUILD === 'true' ? 'export' : 'standalone',
-
-  // Trailing slash
-  trailingSlash: false,
-
+  
+  // Output standalone for better Docker builds
+  output: 'standalone',
+  
   // Performance optimizations
   poweredByHeader: false,
   compress: true,
   
   async headers() {
     return [
-      {
-        source: '/apple-app-site-association',
-        headers: [
-          { key: 'Content-Type', value: 'application/json' },
-          { key: 'Cache-Control', value: 'public, max-age=300' },
-        ],
-      },
-      {
-        source: '/.well-known/apple-app-site-association',
-        headers: [
-          { key: 'Content-Type', value: 'application/json' },
-          { key: 'Cache-Control', value: 'public, max-age=300' },
-        ],
-      },
       {
         source: '/manifest.json',
         headers: [

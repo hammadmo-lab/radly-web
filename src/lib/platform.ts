@@ -56,60 +56,15 @@ export function getPlatform(): Platform {
     return 'web'
   }
 
-  // Development/testing: Allow forcing platform via URL param (?platform=ios or ?platform=android)
-  if (process.env.NODE_ENV === 'development') {
-    const params = new URLSearchParams(window.location.search)
-    const forcedPlatform = params.get('platform') as Platform | null
-    if (forcedPlatform === 'ios' || forcedPlatform === 'android') {
-      console.log('📱 Platform: Forced via URL param:', forcedPlatform)
-      return forcedPlatform
-    }
-  }
-
-  // Check if Capacitor is available and running natively
-  if (window.Capacitor?.isNativePlatform?.()) {
-    const capacitorPlatform = window.Capacitor.getPlatform()
-    console.log('📱 Platform: Capacitor native detected:', capacitorPlatform)
-
-    if (capacitorPlatform === 'ios') {
-      console.log('📱 Platform: Returning iOS (from Capacitor)')
-      return 'ios'
-    }
-    if (capacitorPlatform === 'android') {
-      console.log('📱 Platform: Returning Android (from Capacitor)')
-      return 'android'
-    }
-  }
-
-  // Check if Capacitor is available (even if not native, for fallback)
+  // Check if Capacitor is available
   if (window.Capacitor) {
     const capacitorPlatform = window.Capacitor.getPlatform()
-    console.log('📱 Platform: Capacitor detected (non-native):', capacitorPlatform)
-  } else {
-    console.log('📱 Platform: Capacitor not available')
-  }
 
-  // Fallback: Detect mobile browsers via user agent (for testing in simulators/mobile browsers)
-  // This helps when testing without Capacitor installed
-  if (typeof navigator !== 'undefined') {
-    const userAgent = navigator.userAgent || navigator.vendor || (window as unknown as { opera?: string }).opera || ''
-    console.log('📱 Platform: User agent:', userAgent.substring(0, 100))
-
-    // iOS detection (iPhone, iPad, iPod)
-    if (/iPad|iPhone|iPod/.test(userAgent) && !(window as unknown as { MSStream?: unknown }).MSStream) {
-      console.log('📱 Platform: Returning iOS (from User Agent)')
-      return 'ios'
-    }
-
-    // Android detection
-    if (/android/i.test(userAgent)) {
-      console.log('📱 Platform: Returning Android (from User Agent)')
-      return 'android'
-    }
+    if (capacitorPlatform === 'ios') return 'ios'
+    if (capacitorPlatform === 'android') return 'android'
   }
 
   // Default to web
-  console.log('📱 Platform: Defaulting to web')
   return 'web'
 }
 
@@ -283,26 +238,6 @@ export function supportsPushNotifications(): boolean {
 }
 
 /**
- * Check if running in Capacitor native environment (more reliable than isNativeApp)
- */
-export function isCapacitorNative(): boolean {
-  if (typeof window === 'undefined') {
-    return false // Server-side
-  }
-  return !!(window.Capacitor?.isNativePlatform?.())
-}
-
-/**
- * Get platform type for Supabase client configuration
- */
-export function getSupabasePlatformType(): 'capacitor' | 'web' | 'server' {
-  if (typeof window === 'undefined') {
-    return 'server'
-  }
-  return isCapacitorNative() ? 'capacitor' : 'web'
-}
-
-/**
  * Get platform-specific configuration.
  *
  * @returns Configuration object with platform-specific settings
@@ -316,8 +251,6 @@ export function getPlatformConfig() {
     store,
     isNative: isNativeApp(),
     isWeb: isWebApp(),
-    isCapacitorNative: isCapacitorNative(),
-    supabasePlatform: getSupabasePlatformType(),
     displayName: getPlatformDisplayName(),
     storeName: getAppStoreDisplayName(),
     shouldShowWebSubscriptions: shouldShowWebSubscriptions(),
