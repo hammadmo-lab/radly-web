@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": [
+          "5C282NCY69.com.radly.app"
+        ],
+        "paths": [
+          "/auth/*",
+          "/auth/callback"
+        ]
+      }
+    ]
+  }
+}

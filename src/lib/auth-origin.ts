@@ -74,6 +74,7 @@ export function getStoredAuthOrigin(cookieHeader?: string): string | null {
 export function clearAuthOrigin(): void {
   if (typeof document !== 'undefined') {
     document.cookie = `${AUTH_ORIGIN_COOKIE}=; path=/; max-age=0`
+    document.cookie = `${AUTH_NEXT_COOKIE}=; path=/; max-age=0`
   }
 }
 

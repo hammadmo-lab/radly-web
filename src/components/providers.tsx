@@ -43,8 +43,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
                   backdropFilter: 'blur(12px)',
                   maxWidth: '500px',
                   wordBreak: 'break-word',
+                  marginTop: 'env(safe-area-inset-top, 0px)',
                 },
-                className: 'sonner-toast',
+                className: 'sonner-toast safe-area-inset-top',
               }}
             />
           </AdminAuthProvider>

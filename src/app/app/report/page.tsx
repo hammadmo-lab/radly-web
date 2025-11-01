@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRef, useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { getJob, getQueueStats, JobStatusResponse } from "@/lib/jobs";
 import { JobResultSchema, StrictReport, Patient, Signature, JobResult } from "@/types/report";
 import ReportRenderer from "@/components/ReportRenderer";
@@ -19,8 +19,9 @@ import { useSubscriptionTier } from "@/hooks/useSubscription";
 export const dynamic = 'force-dynamic';
 
 export default function JobDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
   const router = useRouter();
+  const id = searchParams.get('id');
 
   const [jobStatus, setJobStatus] = useState<JobStatusResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -34,8 +35,17 @@ export default function JobDetailPage() {
 
   const startedAtMs = useRef<number | null>(null);
 
+  // Redirect if no ID provided
+  useEffect(() => {
+    if (!id) {
+      router.push('/app');
+    }
+  }, [id, router]);
+
   // Safe polling for job status updates with exponential backoff
   useJobStatusPolling(async () => {
+    if (!id) return;
+
     try {
       const s = await getJob(id);
       setJobStatus(s);
@@ -47,7 +57,7 @@ export default function JobDetailPage() {
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : "Failed to fetch job status";
       setErr(errorMessage);
-      
+
       // If unauthenticated, redirect to login
       if (errorMessage.includes('401')) {
         router.push('/login');
@@ -76,29 +86,29 @@ export default function JobDetailPage() {
   // Export handler with safe click handling
   const handleExportDocx = useSafeClickHandler(async () => {
     if (!jobStatus?.result) return;
-    
+
     setIsExporting(true);
     try {
       const parsed = JobResultSchema.parse(jobStatus.result);
       const resultReport: StrictReport = parsed.report;
       const resultPatient: Patient = parsed.patient ?? {};
       const resultSignature: Signature | undefined = parsed.signature;
-      
+
       // Determine if patient data should be included
       const hasPatientData = Boolean(resultPatient && (
-        resultPatient.name || 
-        resultPatient.age !== undefined || 
-        resultPatient.sex || 
-        resultPatient.mrn || 
-        resultPatient.dob || 
+        resultPatient.name ||
+        resultPatient.age !== undefined ||
+        resultPatient.sex ||
+        resultPatient.mrn ||
+        resultPatient.dob ||
         resultPatient.history
       ));
-      
+
       // Generate filename
-      const filename = resultReport.title 
+      const filename = resultReport.title
         ? `${resultReport.title.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')}.docx`
         : 'radiology_report.docx';
-      
+
       const exportResult = await exportReportDocx(
         resultReport,
         resultPatient,
@@ -108,10 +118,10 @@ export default function JobDetailPage() {
         selectedFormattingProfile, // Custom formatting profile ID
         user?.id // User ID for profile lookup
       );
-      
+
       // Use public_url if available, otherwise use presigned URL
       const downloadUrl = exportResult.public_url || exportResult.url;
-      
+
       // Trigger download
       const link = document.createElement('a');
       link.href = downloadUrl;
@@ -119,7 +129,7 @@ export default function JobDetailPage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       toast.success('Report exported successfully!');
     } catch (error) {
       console.error('Export error:', error);
@@ -129,6 +139,16 @@ export default function JobDetailPage() {
       setIsExporting(false);
     }
   });
+
+  // Show loading if no ID
+  if (!id) {
+    return (
+      <div className="max-w-3xl mx-auto py-16 text-center space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
 
   // Error UI
   if (err || jobStatus?.status === "error") {
@@ -150,12 +170,12 @@ export default function JobDetailPage() {
       queueDepth != null && running != null ? Math.max(0, queueDepth - running) : null;
 
     // Format estimated time based on queue position
-    const estimatedTime = jobsAhead != null && jobsAhead > 0 
+    const estimatedTime = jobsAhead != null && jobsAhead > 0
       ? `${Math.ceil(jobsAhead * 2)} min` // Rough estimate: 2 minutes per job
       : null;
 
     return (
-      <GenerateLoading 
+      <GenerateLoading
         jobId={id}
         queuePosition={jobsAhead}
         estimatedTime={estimatedTime}
@@ -166,7 +186,7 @@ export default function JobDetailPage() {
 
   // Done → render the report
   const result = jobStatus.result;
-  
+
   // Validate that we have a result
   if (!result) {
     return (
@@ -180,7 +200,7 @@ export default function JobDetailPage() {
       </div>
     );
   }
-  
+
   // Parse & type the payload with error handling
   let parsed: JobResult;
   try {
@@ -199,11 +219,11 @@ export default function JobDetailPage() {
       </div>
     );
   }
-  
+
   const resultReport: StrictReport = parsed.report;
   const resultPatient: Patient = parsed.patient ?? {};
   const resultSignature: Signature | undefined = parsed.signature;
-  
+
   return (
     <div className="py-8">
       {/* Export Options */}

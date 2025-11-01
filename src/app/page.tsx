@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/siteConfig";
-import { MarketingFooter } from "@/components/marketing/MarketingFooter";
-import { AnimatedHomePage } from "@/components/marketing/AnimatedHomePage";
+import { HomePageRenderer } from "@/components/HomePageRenderer";
+import { AuthGuardHome } from "@/components/auth-guard-home";
 
-export const dynamic = "force-static";
-
+// Metadata is not supported in client components, will be handled by root layout
 const workflowSteps = [
   {
     title: "Capture findings",
@@ -121,21 +120,21 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className="bg-[var(--ds-bg-gradient)] text-white overflow-x-hidden">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+    <AuthGuardHome>
+      <div className="bg-[var(--ds-bg-gradient)] text-white overflow-x-hidden">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
 
-      <AnimatedHomePage
-        workflowSteps={workflowSteps}
-        valuePillars={valuePillars}
-        comparisonPoints={comparisonPoints}
-        spotlightHighlights={spotlightHighlights}
-        stats={stats}
-      />
-
-      <MarketingFooter />
-    </div>
+        <HomePageRenderer
+          workflowSteps={workflowSteps}
+          valuePillars={valuePillars}
+          comparisonPoints={comparisonPoints}
+          spotlightHighlights={spotlightHighlights}
+          stats={stats}
+        />
+      </div>
+    </AuthGuardHome>
   );
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, Suspense, lazy } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
@@ -11,7 +11,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import UsageWidget from '@/components/UsageWidget'
 import { useSubscription } from '@/hooks/useSubscription'
+import { useIsNativeApp } from '@/hooks/usePlatform'
+import { usePlatform } from '@/hooks/usePlatform'
 import { formatSeconds, resolveAvgGenerationSeconds } from '@/utils/time'
+
+// Lazy load mobile dashboard
+const MobileDashboard = lazy(() => import('./mobile.page'))
 
 function daysUntil(dateString?: string) {
   if (!dateString) return null
@@ -21,7 +26,7 @@ function daysUntil(dateString?: string) {
   return Math.ceil(diff / (1000 * 60 * 60 * 24))
 }
 
-export default function DashboardPage() {
+function WebDashboard() {
   const router = useRouter()
   const { data: subscriptionData } = useSubscription()
   const [recentTemplate, setRecentTemplate] = useState<{ id: string; name: string | null } | null>(null)
@@ -318,4 +323,48 @@ export default function DashboardPage() {
       </div>
     </div>
   )
+}
+
+export default function DashboardPage() {
+  const isNative = useIsNativeApp()
+  const { platform } = usePlatform()
+
+  // Debug logging
+  if (typeof window !== 'undefined') {
+    console.log('📱 Dashboard: Platform check - isNative:', isNative, 'platform:', platform)
+    console.log('📱 Dashboard: window.Capacitor:', !!window.Capacitor)
+    console.log('📱 Dashboard: navigator.userAgent:', navigator.userAgent.substring(0, 100))
+  }
+
+  // Emergency override for testing: set localStorage.setItem('forceMobileDashboard', 'true')
+  if (typeof window !== 'undefined') {
+    const forceMobile = localStorage.getItem('forceMobileDashboard')
+    if (forceMobile === 'true') {
+      console.log('📱 Dashboard: FORCING MOBILE dashboard (localStorage override)')
+      return (
+        <Suspense fallback={<div className="min-h-screen bg-[#0A0E1A]" />}>
+          <MobileDashboard />
+        </Suspense>
+      )
+    }
+  }
+
+  // Check if we should show mobile dashboard
+  // Show mobile version on native apps OR mobile browsers (iOS/Android)
+  const isMobileBrowser = platform === 'ios' || platform === 'android'
+  const shouldShowMobile = isNative || isMobileBrowser
+
+  // If on mobile or native, show the mobile-specific dashboard
+  if (shouldShowMobile) {
+    console.log('📱 Dashboard: Rendering MOBILE dashboard (isNative:', isNative, ', platform:', platform, ')')
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-[#0A0E1A]" />}>
+        <MobileDashboard />
+      </Suspense>
+    )
+  }
+
+  // Otherwise show the web dashboard
+  console.log('📱 Dashboard: Rendering WEB dashboard')
+  return <WebDashboard />
 }
