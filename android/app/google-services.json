@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "590422684479",
+    "project_id": "radly-97e6a",
+    "storage_bucket": "radly-97e6a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:590422684479:android:d1e83d5104aed21c6fd98a",
+        "android_client_info": {
+          "package_name": "com.radly.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuuK8NzhjXV3E8Y_0wyfaOwsOmyzJrr4Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

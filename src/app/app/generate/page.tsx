@@ -440,7 +440,7 @@ export default function GeneratePage() {
 
       // Navigate to the report detail page
       toast.success('Report generation started!')
-      router.push(`/app/report/${jobId}`)
+      router.push(`/app/report?id=${jobId}`)
 
     } catch (err: unknown) {
       if (process.env.NODE_ENV !== 'production') {

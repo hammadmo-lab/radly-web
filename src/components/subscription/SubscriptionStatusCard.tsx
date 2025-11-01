@@ -8,13 +8,16 @@
 'use client'
 
 import { usePlatform } from '@/hooks/usePlatform'
-import { useSubscription } from '@/hooks/useSubscription'
+import { useSubscriptionStatus } from '@/hooks/useSubscription'
+import { useRestorePurchases, useSyncSubscriptions } from '@/hooks/useMobileSubscription'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { CreditCard, Store, ExternalLink, Smartphone, Globe } from 'lucide-react'
+import { CreditCard, Store, ExternalLink, Smartphone, Globe, RefreshCw, History } from 'lucide-react'
 import Link from 'next/link'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 export function SubscriptionStatusCard() {
   const {
@@ -26,8 +29,28 @@ export function SubscriptionStatusCard() {
     isReady,
   } = usePlatform()
 
-  const { data: usageData, isLoading } = useSubscription()
-  const subscription = usageData?.subscription
+  const { data: subscriptionData, isLoading } = useSubscriptionStatus()
+  const subscription = subscriptionData?.current_tier
+  const activeSubscriptions = subscriptionData?.active_subscriptions || []
+
+  // Mobile subscription mutations
+  const { mutate: syncSubscriptions, isPending: isSyncing } = useSyncSubscriptions({
+    onSuccess: (data) => {
+      if (data.errors && data.errors.length > 0) {
+        toast.error(`Synced ${data.synced_count} subscriptions, but ${data.errors.length} failed`)
+      } else {
+        toast.success(`Successfully synced ${data.synced_count} subscription(s)`)
+      }
+    },
+    onError: (error) => {
+      toast.error('Failed to sync subscriptions: ' + error.message)
+    },
+  })
+
+  // Note: Restore purchases requires platform-specific receipt/token data
+  // This would typically be called from native app code with Capacitor
+  // For now, we'll show the button but with a placeholder implementation
+  const [isRestoring, setIsRestoring] = useState(false)
 
   if (!isReady || isLoading) {
     return (
@@ -98,10 +121,13 @@ export function SubscriptionStatusCard() {
     (subscription.reports_used / subscription.reports_limit) * 100
   )
 
-  // Determine subscription platform display (no platform in subscription data, use current platform)
-  const subscriptionPlatform = platform
+  // Determine subscription platform from the API response
+  const subscriptionPlatform = subscription.platform || platform
   const isPlatformWeb = subscriptionPlatform === 'web'
   const isPlatformMobile = subscriptionPlatform === 'ios' || subscriptionPlatform === 'android'
+
+  // Check if user has multiple active subscriptions
+  const hasMultipleSubscriptions = activeSubscriptions.length > 1
 
   return (
     <Card>
@@ -120,7 +146,7 @@ export function SubscriptionStatusCard() {
           </Badge>
         </CardTitle>
         <CardDescription>
-          {subscription.tier_display_name || subscription.tier} Plan
+          {subscription.tier_display_name || subscription.tier_name} Plan
         </CardDescription>
       </CardHeader>
 
@@ -149,25 +175,35 @@ export function SubscriptionStatusCard() {
 
         {/* Billing Info */}
         <div className="space-y-2 text-sm">
-          {subscription.price_monthly !== 0 && (
+          {subscription.expires_at && (
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Price</span>
+              <span className="text-muted-foreground">
+                {subscription.auto_renew ? 'Renews on' : 'Expires on'}
+              </span>
               <span className="font-medium">
-                {subscription.price_monthly} {subscription.currency}/month
+                {new Date(subscription.expires_at).toLocaleDateString()}
               </span>
             </div>
           )}
-          {subscription.period_end && (
+          {subscription.days_until_expiration !== undefined && (
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">
-                {subscription.status === 'active' ? 'Renews on' : 'Expires on'}
-              </span>
+              <span className="text-muted-foreground">Days Remaining</span>
               <span className="font-medium">
-                {new Date(subscription.period_end).toLocaleDateString()}
+                {subscription.days_until_expiration}
               </span>
             </div>
           )}
         </div>
+
+        {/* Multiple Subscriptions Notice */}
+        {hasMultipleSubscriptions && (
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+            <p className="text-xs text-blue-600 dark:text-blue-400">
+              You have {activeSubscriptions.length} active subscriptions across different platforms.
+              Showing your highest tier: {subscription.tier_display_name || subscription.tier_name}
+            </p>
+          </div>
+        )}
 
         {/* Management Actions */}
         <div className="pt-4 border-t">
@@ -185,19 +221,50 @@ export function SubscriptionStatusCard() {
             </div>
           )}
 
-          {shouldShowMobileSubscriptions && isPlatformMobile && subscriptionManagementUrl && (
+          {shouldShowMobileSubscriptions && isPlatformMobile && (
             <div className="space-y-2">
-              <Button asChild variant="outline" className="w-full">
-                <a
-                  href={subscriptionManagementUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              {subscriptionManagementUrl && (
+                <Button asChild variant="outline" className="w-full">
+                  <a
+                    href={subscriptionManagementUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Store className="w-4 h-4 mr-2" />
+                    Manage in {storeName}
+                    <ExternalLink className="w-3 h-3 ml-auto" />
+                  </a>
+                </Button>
+              )}
+
+              {/* Mobile subscription management buttons */}
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => syncSubscriptions()}
+                  disabled={isSyncing}
+                  className="w-full"
                 >
-                  <Store className="w-4 h-4 mr-2" />
-                  Manage in {storeName}
-                  <ExternalLink className="w-3 h-3 ml-auto" />
-                </a>
-              </Button>
+                  <RefreshCw className={`w-3 h-3 mr-1 ${isSyncing ? 'animate-spin' : ''}`} />
+                  Sync
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    // This will be implemented when Capacitor is integrated
+                    // For now, show a message
+                    toast.info('Restore purchases will be available in the mobile app')
+                  }}
+                  disabled={isRestoring}
+                  className="w-full"
+                >
+                  <History className="w-3 h-3 mr-1" />
+                  Restore
+                </Button>
+              </div>
+
               <p className="text-xs text-muted-foreground text-center">
                 Subscription managed through {storeName}
               </p>
