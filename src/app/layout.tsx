@@ -76,7 +76,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-  const gaEnabled = gaMeasurementId && process.env.NEXT_PUBLIC_GA_ENABLED === "1";
+  // Always enable GA when a measurement ID is present (dev + prod).
+  const gaEnabled = !!gaMeasurementId;
   const isDev = process.env.NODE_ENV === 'development';
 
   return (
@@ -114,11 +115,7 @@ export default function RootLayout({
             </Script>
           </>
         ) : null}
-        {!gaEnabled && gaMeasurementId && isDev ? (
-          <Script id="ga-disabled" strategy="afterInteractive">
-            {`console.warn('Google Analytics detected but not injected. Set NEXT_PUBLIC_GA_ENABLED=1 and ensure your Content Security Policy allows https://www.googletagmanager.com and https://www.google-analytics.com.');`}
-          </Script>
-        ) : null}
+        {/* No disabled warning: GA is injected whenever a measurement ID is present. */}
         {!gaMeasurementId && isDev ? (
           <Script
             id="ga-placeholder"
