@@ -77,6 +77,7 @@ export default function RootLayout({
 }>) {
   const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   const gaEnabled = gaMeasurementId && process.env.NEXT_PUBLIC_GA_ENABLED === "1";
+  const isDev = process.env.NODE_ENV === 'development';
 
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className="overflow-x-hidden" style={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
@@ -106,19 +107,19 @@ export default function RootLayout({
             <Script id="ga-setup" strategy="afterInteractive">
               {`
                 window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
+                function gtag(){dataLayer.push(arguments);} 
                 gtag('js', new Date());
                 gtag('config', '${gaMeasurementId}', { anonymize_ip: true });
               `}
             </Script>
           </>
         ) : null}
-        {!gaEnabled && gaMeasurementId ? (
+        {!gaEnabled && gaMeasurementId && isDev ? (
           <Script id="ga-disabled" strategy="afterInteractive">
             {`console.warn('Google Analytics detected but not injected. Set NEXT_PUBLIC_GA_ENABLED=1 and ensure your Content Security Policy allows https://www.googletagmanager.com and https://www.google-analytics.com.');`}
           </Script>
         ) : null}
-        {!gaMeasurementId ? (
+        {!gaMeasurementId && isDev ? (
           <Script
             id="ga-placeholder"
             strategy="afterInteractive"
