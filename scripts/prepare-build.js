@@ -63,6 +63,7 @@ if (isCapacitorBuild) {
   console.log('🌐 Preparing web build')
   console.log('  - Using server-side auth callback')
   console.log('  - Using dynamic pricing page')
+  console.log('  - Using web sign-in page')
 
   // Auth callback: Copy web route
   if (fs.existsSync(routeWebFile)) {
@@ -80,6 +81,17 @@ if (isCapacitorBuild) {
   } else {
     console.error('❌ Error: pricing/page.web.tsx not found')
     process.exit(1)
+  }
+
+  // Sign-in: Ensure web page is active for build
+  if (fs.existsSync(signinDir)) {
+    const signinWebFile = path.join(signinDir, 'page.web.tsx')
+    if (fs.existsSync(signinWebFile)) {
+      fs.copyFileSync(signinWebFile, signinPageFile)
+      console.log('✅ Sign-in: Copied page.web.tsx → page.tsx')
+    } else {
+      console.warn('⚠️  Warning: auth/signin/page.web.tsx not found; skipping copy')
+    }
   }
 }
 
