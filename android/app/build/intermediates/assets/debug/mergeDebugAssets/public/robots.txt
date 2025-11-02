@@ -1,0 +1,8 @@
+User-Agent: *
+Allow: /
+Disallow: /app
+Disallow: /auth
+Disallow: /api
+
+Host: https://radly.app
+Sitemap: https://radly.app/sitemap.xml

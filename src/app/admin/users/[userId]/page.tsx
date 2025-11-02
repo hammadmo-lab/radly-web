@@ -306,3 +306,5 @@ export default function UserDetailsPage() {
     </AdminGuard>
   )
 }
+
+// For static export (mobile build), no pre-rendered params

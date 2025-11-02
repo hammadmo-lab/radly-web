@@ -1,0 +1,263 @@
+/* Mobile Design Tokens */
+/* These CSS variables define mobile-specific sizing, spacing, and layout */
+
+@supports (padding: max(0px)) {
+  :root {
+    /* Safe Area Insets - for notches on modern devices */
+    --safe-area-top: env(safe-area-inset-top, 0);
+    --safe-area-bottom: env(safe-area-inset-bottom, 0);
+    --safe-area-left: env(safe-area-inset-left, 0);
+    --safe-area-right: env(safe-area-inset-right, 0);
+
+    /* Touch Target Sizes - minimum 44x44pt per iOS/Android guidelines */
+    --touch-target-min: 44px;
+    --touch-target-padding: 12px;
+    --touch-target-spacing: 8px;
+
+    /* Mobile Spacing Scale */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 12px;
+    --space-lg: 16px;
+    --space-xl: 20px;
+    --space-2xl: 24px;
+    --space-3xl: 32px;
+    --space-4xl: 40px;
+
+    /* Mobile Typography Scale */
+    --text-xs: 12px;
+    --text-sm: 14px;
+    --text-base: 16px;
+    --text-lg: 18px;
+    --text-xl: 20px;
+    --text-2xl: 24px;
+
+    /* Mobile Line Heights */
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+
+    /* Mobile Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 20px;
+  }
+}
+
+/* Mobile-Specific Utility Classes */
+
+/* Safe area padding - accounts for notches on iOS */
+.safe-area-pt {
+  padding-top: max(var(--safe-area-top), 16px);
+}
+
+.safe-area-pb {
+  padding-bottom: max(var(--safe-area-bottom), 16px);
+}
+
+.safe-area-px {
+  padding-left: max(var(--safe-area-left), 16px);
+  padding-right: max(var(--safe-area-right), 16px);
+}
+
+/* Bottom Navigation Spacing */
+.pb-safe-nav {
+  padding-bottom: calc(80px + var(--safe-area-bottom));
+}
+
+/* Touch Target Sizing */
+.touch-target {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  padding: var(--touch-target-padding);
+}
+
+.touch-target-sm {
+  min-height: 36px;
+  min-width: 36px;
+}
+
+.touch-target-lg {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* Mobile-Friendly Form Inputs */
+.mobile-input {
+  font-size: 16px; /* Prevents zoom on iOS focus */
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-lg);
+  min-height: var(--touch-target-min);
+}
+
+.mobile-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(38, 83, 255, 0.1);
+}
+
+/* Mobile Button Styles */
+.mobile-button {
+  font-size: var(--text-base);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-lg);
+  min-height: var(--touch-target-min);
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.mobile-button:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease-out;
+}
+
+/* Mobile Card Styles */
+.mobile-card {
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  background: hsl(var(--card));
+}
+
+.mobile-card:hover {
+  background: hsla(var(--card), 0.96);
+}
+
+/* Mobile Headings */
+.mobile-heading-1 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-lg);
+}
+
+.mobile-heading-2 {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-md);
+}
+
+.mobile-heading-3 {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-sm);
+}
+
+.mobile-body {
+  font-size: var(--text-base);
+  line-height: var(--line-height-normal);
+}
+
+.mobile-body-small {
+  font-size: var(--text-sm);
+  line-height: var(--line-height-normal);
+}
+
+/* Mobile Grid System */
+.mobile-grid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: 1fr;
+}
+
+.mobile-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.mobile-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Responsive Breakpoints */
+@media (min-width: 640px) {
+  .sm\:mobile-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sm\:mobile-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Disable text selection on interactive elements */
+.mobile-no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Prevent zoom on double tap */
+.mobile-no-double-tap-zoom {
+  touch-action: manipulation;
+}
+
+/* Hardware acceleration */
+.mobile-accelerated {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Smooth scrolling */
+.mobile-smooth-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbars but allow scrolling */
+.mobile-hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.mobile-hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Prevent body scroll when modal open */
+.mobile-overflow-hidden {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* Horizontal scroll container for cards/items */
+.mobile-horizontal-scroll {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  gap: var(--space-md);
+  padding: 0 var(--space-lg);
+}
+
+.mobile-horizontal-scroll > * {
+  flex: 0 0 auto;
+}
+
+/* Status bar spacing on iOS */
+.mobile-status-bar-spacing {
+  height: max(20px, var(--safe-area-top));
+}
+
+/* Bottom navigation safe area */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-bottom: var(--safe-area-bottom);
+  background: hsl(var(--background));
+  border-top: 1px solid hsl(var(--border));
+  z-index: 50;
+}
+
+/* Overlay for safe area on bottom */
+.mobile-bottom-nav-overlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--safe-area-bottom);
+  background: inherit;
+  pointer-events: none;
+}
+

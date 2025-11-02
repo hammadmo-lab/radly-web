@@ -12,7 +12,16 @@ export function getSupabaseClient() {
   try {
     const client = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: false,
+          flowType: 'pkce', // Enable PKCE flow for web OAuth
+          debug: false,
+        },
+      }
     )
 
     // If in test mode, override auth methods
@@ -32,6 +41,12 @@ export function getSupabaseClient() {
           }),
           signOut: async () => ({
             error: null,
+          }),
+          signInWithOAuth: async () => ({
+            error: new Error('Test mode: OAuth not available'),
+          }),
+          exchangeCodeForSession: async () => ({
+            error: new Error('Test mode: Code exchange not available'),
           }),
           onAuthStateChange: (callback: (event: string, session: Session | null) => void) => {
             // Immediately call the callback with the test session
@@ -54,6 +69,8 @@ export function getSupabaseClient() {
         getUser: async () => ({ data: { user: null }, error: null }),
         signOut: async () => ({ error: null }),
         onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+        signInWithOAuth: async () => ({ error: new Error('Mock client: OAuth not available') }),
+        exchangeCodeForSession: async () => ({ error: new Error('Mock client: Code exchange not available') }),
       },
     } as unknown as ReturnType<typeof createBrowserClient>
   }

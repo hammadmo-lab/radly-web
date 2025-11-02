@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/siteConfig";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
-import { AnimatedHomePage } from "@/components/marketing/AnimatedHomePage";
+import HomePageRenderer from "@/components/HomePageRenderer";
 
 export const dynamic = "force-static";
 
@@ -127,7 +127,7 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <AnimatedHomePage
+      <HomePageRenderer
         workflowSteps={workflowSteps}
         valuePillars={valuePillars}
         comparisonPoints={comparisonPoints}

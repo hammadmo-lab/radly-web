@@ -241,3 +241,5 @@ export default function JobDetailPage() {
     </div>
   );
 }
+
+// For static export (mobile build), do not pre-render any [id] pages

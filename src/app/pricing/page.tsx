@@ -8,7 +8,8 @@ import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { siteConfig } from "@/lib/siteConfig";
 import { MobileAppPricingRedirect } from "@/components/pricing/MobileAppPricingRedirect";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
+export const revalidate = 3600;
 
 type TierFeatures = {
   templates?: string;
@@ -62,8 +63,9 @@ function formatPrice(tier: Tier) {
   return `${tier.price_monthly.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${tier.currency}/month`;
 }
 
-export default async function PricingPage({ searchParams }: { searchParams?: Record<string, string | string[]> }) {
-  const regionParam = Array.isArray(searchParams?.region) ? searchParams?.region[0] : searchParams?.region;
+export default async function PricingPage({ searchParams }: { searchParams?: Promise<Record<string, string | string[]>> }) {
+  const sp = searchParams ? await searchParams : undefined;
+  const regionParam = Array.isArray(sp?.region) ? sp?.region[0] : sp?.region;
   const region = regionParam === "international" ? "international" : regionParam === "egypt" || !regionParam ? "egypt" : null;
 
   if (!region) {

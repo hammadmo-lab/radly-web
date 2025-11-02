@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, Suspense, lazy } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
@@ -13,6 +13,9 @@ import UsageWidget from '@/components/UsageWidget'
 import { useSubscription } from '@/hooks/useSubscription'
 import { formatSeconds, resolveAvgGenerationSeconds } from '@/utils/time'
 
+// Lazy load mobile dashboard for native app
+const MobileDashboard = lazy(() => import('./mobile.page'))
+
 function daysUntil(dateString?: string) {
   if (!dateString) return null
   const end = new Date(dateString).getTime()
@@ -21,7 +24,7 @@ function daysUntil(dateString?: string) {
   return Math.ceil(diff / (1000 * 60 * 60 * 24))
 }
 
-export default function DashboardPage() {
+function WebDashboardPage() {
   const router = useRouter()
   const { data: subscriptionData } = useSubscription()
   const [recentTemplate, setRecentTemplate] = useState<{ id: string; name: string | null } | null>(null)
@@ -318,4 +321,23 @@ export default function DashboardPage() {
       </div>
     </div>
   )
+}
+
+export default function DashboardPage() {
+  const [isNative, setIsNative] = useState(false)
+  useEffect(() => {
+    // Detect Capacitor native at runtime
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cap = (typeof window !== 'undefined' ? (window as any).Capacitor : undefined)
+    setIsNative(!!cap?.isNativePlatform?.())
+  }, [])
+
+  if (isNative) {
+    return (
+      <Suspense fallback={<div className="p-6 text-white">Loading mobile dashboard…</div>}>
+        <MobileDashboard />
+      </Suspense>
+    )
+  }
+  return <WebDashboardPage />
 }

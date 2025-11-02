@@ -1,0 +1,10 @@
+{
+	"appId": "com.radly.app",
+	"appName": "Radly",
+	"webDir": "out",
+	"server": {
+		"iosScheme": "capacitor",
+		"androidScheme": "https",
+		"hostname": "localhost"
+	}
+}

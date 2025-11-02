@@ -1,0 +1,422 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.radly.app"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="23"
+9        android:targetSdkVersion="35" />
+10
+11    <!-- Permissions -->
+12    <uses-permission android:name="android.permission.INTERNET" />
+12-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:49:5-67
+12-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:49:22-64
+13    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+13-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:50:5-77
+13-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:50:22-74
+14    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+14-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:22:5-79
+14-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:22:22-76
+15    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- Required by older versions of Google Play services to create IID tokens -->
+15-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:24:5-68
+15-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:24:22-65
+16    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+16-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:26:5-82
+16-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:26:22-79
+17    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+17-->[com.google.android.gms:play-services-measurement-api:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/c2deb5cb8fd9bc4ce3bd1b0a8bff2005/transformed/play-services-measurement-api-22.1.2/AndroidManifest.xml:25:5-79
+17-->[com.google.android.gms:play-services-measurement-api:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/c2deb5cb8fd9bc4ce3bd1b0a8bff2005/transformed/play-services-measurement-api-22.1.2/AndroidManifest.xml:25:22-76
+18    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION" />
+18-->[com.google.android.gms:play-services-measurement-api:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/c2deb5cb8fd9bc4ce3bd1b0a8bff2005/transformed/play-services-measurement-api-22.1.2/AndroidManifest.xml:26:5-88
+18-->[com.google.android.gms:play-services-measurement-api:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/c2deb5cb8fd9bc4ce3bd1b0a8bff2005/transformed/play-services-measurement-api-22.1.2/AndroidManifest.xml:26:22-85
+19    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID" />
+19-->[com.google.android.gms:play-services-measurement-api:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/c2deb5cb8fd9bc4ce3bd1b0a8bff2005/transformed/play-services-measurement-api-22.1.2/AndroidManifest.xml:27:5-82
+19-->[com.google.android.gms:play-services-measurement-api:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/c2deb5cb8fd9bc4ce3bd1b0a8bff2005/transformed/play-services-measurement-api-22.1.2/AndroidManifest.xml:27:22-79
+20    <uses-permission android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE" />
+20-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:26:5-110
+20-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:26:22-107
+21
+22    <permission
+22-->[androidx.core:core:1.15.0] /Users/idrmido/.gradle/caches/8.13/transforms/90ac8b1cc9aa701417a400dab50b9483/transformed/core-1.15.0/AndroidManifest.xml:22:5-24:47
+23        android:name="com.radly.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+23-->[androidx.core:core:1.15.0] /Users/idrmido/.gradle/caches/8.13/transforms/90ac8b1cc9aa701417a400dab50b9483/transformed/core-1.15.0/AndroidManifest.xml:23:9-81
+24        android:protectionLevel="signature" />
+24-->[androidx.core:core:1.15.0] /Users/idrmido/.gradle/caches/8.13/transforms/90ac8b1cc9aa701417a400dab50b9483/transformed/core-1.15.0/AndroidManifest.xml:24:9-44
+25
+26    <uses-permission android:name="com.radly.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+26-->[androidx.core:core:1.15.0] /Users/idrmido/.gradle/caches/8.13/transforms/90ac8b1cc9aa701417a400dab50b9483/transformed/core-1.15.0/AndroidManifest.xml:26:5-97
+26-->[androidx.core:core:1.15.0] /Users/idrmido/.gradle/caches/8.13/transforms/90ac8b1cc9aa701417a400dab50b9483/transformed/core-1.15.0/AndroidManifest.xml:26:22-94
+27
+28    <application
+28-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:4:5-46:19
+29        android:allowBackup="true"
+29-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:5:9-35
+30        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+30-->[androidx.core:core:1.15.0] /Users/idrmido/.gradle/caches/8.13/transforms/90ac8b1cc9aa701417a400dab50b9483/transformed/core-1.15.0/AndroidManifest.xml:28:18-86
+31        android:debuggable="true"
+32        android:extractNativeLibs="false"
+33        android:icon="@mipmap/ic_launcher"
+33-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:6:9-43
+34        android:label="@string/app_name"
+34-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:7:9-41
+35        android:roundIcon="@mipmap/ic_launcher_round"
+35-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:8:9-54
+36        android:supportsRtl="true"
+36-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:9:9-35
+37        android:testOnly="true"
+38        android:theme="@style/AppTheme"
+38-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:10:9-40
+39        android:usesCleartextTraffic="false" >
+39-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:11:9-45
+40        <activity
+40-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:13:9-35:20
+41            android:name="com.radly.app.MainActivity"
+41-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:15:13-41
+42            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation"
+42-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:14:13-140
+43            android:exported="true"
+43-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:19:13-36
+44            android:label="@string/title_activity_main"
+44-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:16:13-56
+45            android:launchMode="singleTask"
+45-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:18:13-44
+46            android:theme="@style/AppTheme.NoActionBarLaunch" >
+46-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:17:13-62
+47            <intent-filter>
+47-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:21:13-24:29
+48                <action android:name="android.intent.action.MAIN" />
+48-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:22:17-69
+48-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:22:25-66
+49
+50                <category android:name="android.intent.category.LAUNCHER" />
+50-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:23:17-77
+50-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:23:27-74
+51            </intent-filter>
+52
+53            <!-- Deep linking -->
+54            <intent-filter android:autoVerify="true" >
+54-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:27:13-33:29
+54-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:27:28-53
+55                <action android:name="android.intent.action.VIEW" />
+55-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:28:17-69
+55-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:28:25-66
+56
+57                <category android:name="android.intent.category.DEFAULT" />
+57-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:29:17-76
+57-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:29:27-73
+58                <category android:name="android.intent.category.BROWSABLE" />
+58-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:30:17-78
+58-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:30:27-75
+59
+60                <data
+60-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:31:17-73
+61                    android:host="radly.app"
+61-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:31:46-70
+62                    android:scheme="https" />
+62-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:31:23-45
+63                <data android:scheme="radly" />
+63-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:31:17-73
+63-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:31:23-45
+64            </intent-filter>
+65        </activity>
+66
+67        <provider
+68            android:name="androidx.core.content.FileProvider"
+68-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:38:13-62
+69            android:authorities="com.radly.app.fileprovider"
+69-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:39:13-64
+70            android:exported="false"
+70-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:40:13-37
+71            android:grantUriPermissions="true" >
+71-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:41:13-47
+72            <meta-data
+72-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:42:13-44:64
+73                android:name="android.support.FILE_PROVIDER_PATHS"
+73-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:43:17-67
+74                android:resource="@xml/file_paths" />
+74-->/Users/idrmido/Radly project/radly-frontend/android/app/src/main/AndroidManifest.xml:44:17-51
+75        </provider>
+76
+77        <service
+77-->[:capacitor-push-notifications] /Users/idrmido/Radly project/radly-frontend/node_modules/@capacitor/push-notifications/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:8:9-14:19
+78            android:name="com.capacitorjs.plugins.pushnotifications.MessagingService"
+78-->[:capacitor-push-notifications] /Users/idrmido/Radly project/radly-frontend/node_modules/@capacitor/push-notifications/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:9:13-86
+79            android:exported="false" >
+79-->[:capacitor-push-notifications] /Users/idrmido/Radly project/radly-frontend/node_modules/@capacitor/push-notifications/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:10:13-37
+80            <intent-filter>
+80-->[:capacitor-push-notifications] /Users/idrmido/Radly project/radly-frontend/node_modules/@capacitor/push-notifications/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:11:13-13:29
+81                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+81-->[:capacitor-push-notifications] /Users/idrmido/Radly project/radly-frontend/node_modules/@capacitor/push-notifications/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:12:17-78
+81-->[:capacitor-push-notifications] /Users/idrmido/Radly project/radly-frontend/node_modules/@capacitor/push-notifications/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:12:25-75
+82            </intent-filter>
+83        </service>
+84
+85        <receiver
+85-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:29:9-40:20
+86            android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver"
+86-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:30:13-78
+87            android:exported="true"
+87-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:31:13-36
+88            android:permission="com.google.android.c2dm.permission.SEND" >
+88-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:32:13-73
+89            <intent-filter>
+89-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:33:13-35:29
+90                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+90-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:34:17-81
+90-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:34:25-78
+91            </intent-filter>
+92
+93            <meta-data
+93-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:37:13-39:40
+94                android:name="com.google.android.gms.cloudmessaging.FINISHED_AFTER_HANDLED"
+94-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:38:17-92
+95                android:value="true" />
+95-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:39:17-37
+96        </receiver>
+97        <!--
+98             FirebaseMessagingService performs security checks at runtime,
+99             but set to not exported to explicitly avoid allowing another app to call it.
+100        -->
+101        <service
+101-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:46:9-53:19
+102            android:name="com.google.firebase.messaging.FirebaseMessagingService"
+102-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:47:13-82
+103            android:directBootAware="true"
+103-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:48:13-43
+104            android:exported="false" >
+104-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:49:13-37
+105            <intent-filter android:priority="-500" >
+105-->[:capacitor-push-notifications] /Users/idrmido/Radly project/radly-frontend/node_modules/@capacitor/push-notifications/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:11:13-13:29
+106                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+106-->[:capacitor-push-notifications] /Users/idrmido/Radly project/radly-frontend/node_modules/@capacitor/push-notifications/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:12:17-78
+106-->[:capacitor-push-notifications] /Users/idrmido/Radly project/radly-frontend/node_modules/@capacitor/push-notifications/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml:12:25-75
+107            </intent-filter>
+108        </service>
+109        <service
+109-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:54:9-63:19
+110            android:name="com.google.firebase.components.ComponentDiscoveryService"
+110-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:55:13-84
+111            android:directBootAware="true"
+111-->[com.google.firebase:firebase-common:21.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/c929a2436c0a6395c88d09c0859487f5/transformed/firebase-common-21.0.0/AndroidManifest.xml:32:13-43
+112            android:exported="false" >
+112-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:56:13-37
+113            <meta-data
+113-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:57:13-59:85
+114                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingKtxRegistrar"
+114-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:58:17-122
+115                android:value="com.google.firebase.components.ComponentRegistrar" />
+115-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:59:17-82
+116            <meta-data
+116-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:60:13-62:85
+117                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingRegistrar"
+117-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:61:17-119
+118                android:value="com.google.firebase.components.ComponentRegistrar" />
+118-->[com.google.firebase:firebase-messaging:24.1.0] /Users/idrmido/.gradle/caches/8.13/transforms/ae9cc3eec0ec3cc9f45f2384708315fc/transformed/firebase-messaging-24.1.0/AndroidManifest.xml:62:17-82
+119            <meta-data
+119-->[com.google.firebase:firebase-datatransport:18.2.0] /Users/idrmido/.gradle/caches/8.13/transforms/f908dbe83a36484b0fcae10a33c57a55/transformed/firebase-datatransport-18.2.0/AndroidManifest.xml:25:13-27:85
+120                android:name="com.google.firebase.components:com.google.firebase.datatransport.TransportRegistrar"
+120-->[com.google.firebase:firebase-datatransport:18.2.0] /Users/idrmido/.gradle/caches/8.13/transforms/f908dbe83a36484b0fcae10a33c57a55/transformed/firebase-datatransport-18.2.0/AndroidManifest.xml:26:17-115
+121                android:value="com.google.firebase.components.ComponentRegistrar" />
+121-->[com.google.firebase:firebase-datatransport:18.2.0] /Users/idrmido/.gradle/caches/8.13/transforms/f908dbe83a36484b0fcae10a33c57a55/transformed/firebase-datatransport-18.2.0/AndroidManifest.xml:27:17-82
+122            <meta-data
+122-->[com.google.android.gms:play-services-measurement-api:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/c2deb5cb8fd9bc4ce3bd1b0a8bff2005/transformed/play-services-measurement-api-22.1.2/AndroidManifest.xml:37:13-39:85
+123                android:name="com.google.firebase.components:com.google.firebase.analytics.connector.internal.AnalyticsConnectorRegistrar"
+123-->[com.google.android.gms:play-services-measurement-api:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/c2deb5cb8fd9bc4ce3bd1b0a8bff2005/transformed/play-services-measurement-api-22.1.2/AndroidManifest.xml:38:17-139
+124                android:value="com.google.firebase.components.ComponentRegistrar" />
+124-->[com.google.android.gms:play-services-measurement-api:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/c2deb5cb8fd9bc4ce3bd1b0a8bff2005/transformed/play-services-measurement-api-22.1.2/AndroidManifest.xml:39:17-82
+125            <meta-data
+125-->[com.google.firebase:firebase-installations:18.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/2a319cb6c7cab159c2ef15bbef3805e8/transformed/firebase-installations-18.0.0/AndroidManifest.xml:15:13-17:85
+126                android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsKtxRegistrar"
+126-->[com.google.firebase:firebase-installations:18.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/2a319cb6c7cab159c2ef15bbef3805e8/transformed/firebase-installations-18.0.0/AndroidManifest.xml:16:17-130
+127                android:value="com.google.firebase.components.ComponentRegistrar" />
+127-->[com.google.firebase:firebase-installations:18.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/2a319cb6c7cab159c2ef15bbef3805e8/transformed/firebase-installations-18.0.0/AndroidManifest.xml:17:17-82
+128            <meta-data
+128-->[com.google.firebase:firebase-installations:18.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/2a319cb6c7cab159c2ef15bbef3805e8/transformed/firebase-installations-18.0.0/AndroidManifest.xml:18:13-20:85
+129                android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsRegistrar"
+129-->[com.google.firebase:firebase-installations:18.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/2a319cb6c7cab159c2ef15bbef3805e8/transformed/firebase-installations-18.0.0/AndroidManifest.xml:19:17-127
+130                android:value="com.google.firebase.components.ComponentRegistrar" />
+130-->[com.google.firebase:firebase-installations:18.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/2a319cb6c7cab159c2ef15bbef3805e8/transformed/firebase-installations-18.0.0/AndroidManifest.xml:20:17-82
+131            <meta-data
+131-->[com.google.firebase:firebase-common-ktx:21.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/e4d030b9cfc2ff2c06fe33dae4768fae/transformed/firebase-common-ktx-21.0.0/AndroidManifest.xml:12:13-14:85
+132                android:name="com.google.firebase.components:com.google.firebase.ktx.FirebaseCommonLegacyRegistrar"
+132-->[com.google.firebase:firebase-common-ktx:21.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/e4d030b9cfc2ff2c06fe33dae4768fae/transformed/firebase-common-ktx-21.0.0/AndroidManifest.xml:13:17-116
+133                android:value="com.google.firebase.components.ComponentRegistrar" />
+133-->[com.google.firebase:firebase-common-ktx:21.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/e4d030b9cfc2ff2c06fe33dae4768fae/transformed/firebase-common-ktx-21.0.0/AndroidManifest.xml:14:17-82
+134            <meta-data
+134-->[com.google.firebase:firebase-common:21.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/c929a2436c0a6395c88d09c0859487f5/transformed/firebase-common-21.0.0/AndroidManifest.xml:35:13-37:85
+135                android:name="com.google.firebase.components:com.google.firebase.FirebaseCommonKtxRegistrar"
+135-->[com.google.firebase:firebase-common:21.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/c929a2436c0a6395c88d09c0859487f5/transformed/firebase-common-21.0.0/AndroidManifest.xml:36:17-109
+136                android:value="com.google.firebase.components.ComponentRegistrar" />
+136-->[com.google.firebase:firebase-common:21.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/c929a2436c0a6395c88d09c0859487f5/transformed/firebase-common-21.0.0/AndroidManifest.xml:37:17-82
+137        </service>
+138        <service
+138-->[com.google.android.datatransport:transport-backend-cct:3.1.9] /Users/idrmido/.gradle/caches/8.13/transforms/99256adccddbe337f8b20734bb4a76b8/transformed/transport-backend-cct-3.1.9/AndroidManifest.xml:28:9-34:19
+139            android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery"
+139-->[com.google.android.datatransport:transport-backend-cct:3.1.9] /Users/idrmido/.gradle/caches/8.13/transforms/99256adccddbe337f8b20734bb4a76b8/transformed/transport-backend-cct-3.1.9/AndroidManifest.xml:29:13-103
+140            android:exported="false" >
+140-->[com.google.android.datatransport:transport-backend-cct:3.1.9] /Users/idrmido/.gradle/caches/8.13/transforms/99256adccddbe337f8b20734bb4a76b8/transformed/transport-backend-cct-3.1.9/AndroidManifest.xml:30:13-37
+141            <meta-data
+141-->[com.google.android.datatransport:transport-backend-cct:3.1.9] /Users/idrmido/.gradle/caches/8.13/transforms/99256adccddbe337f8b20734bb4a76b8/transformed/transport-backend-cct-3.1.9/AndroidManifest.xml:31:13-33:39
+142                android:name="backend:com.google.android.datatransport.cct.CctBackendFactory"
+142-->[com.google.android.datatransport:transport-backend-cct:3.1.9] /Users/idrmido/.gradle/caches/8.13/transforms/99256adccddbe337f8b20734bb4a76b8/transformed/transport-backend-cct-3.1.9/AndroidManifest.xml:32:17-94
+143                android:value="cct" />
+143-->[com.google.android.datatransport:transport-backend-cct:3.1.9] /Users/idrmido/.gradle/caches/8.13/transforms/99256adccddbe337f8b20734bb4a76b8/transformed/transport-backend-cct-3.1.9/AndroidManifest.xml:33:17-36
+144        </service>
+145        <service
+145-->[com.google.android.datatransport:transport-runtime:3.1.9] /Users/idrmido/.gradle/caches/8.13/transforms/8b4f3a68696c4b4fe84b7ff5998e2001/transformed/transport-runtime-3.1.9/AndroidManifest.xml:26:9-30:19
+146            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService"
+146-->[com.google.android.datatransport:transport-runtime:3.1.9] /Users/idrmido/.gradle/caches/8.13/transforms/8b4f3a68696c4b4fe84b7ff5998e2001/transformed/transport-runtime-3.1.9/AndroidManifest.xml:27:13-117
+147            android:exported="false"
+147-->[com.google.android.datatransport:transport-runtime:3.1.9] /Users/idrmido/.gradle/caches/8.13/transforms/8b4f3a68696c4b4fe84b7ff5998e2001/transformed/transport-runtime-3.1.9/AndroidManifest.xml:28:13-37
+148            android:permission="android.permission.BIND_JOB_SERVICE" >
+148-->[com.google.android.datatransport:transport-runtime:3.1.9] /Users/idrmido/.gradle/caches/8.13/transforms/8b4f3a68696c4b4fe84b7ff5998e2001/transformed/transport-runtime-3.1.9/AndroidManifest.xml:29:13-69
+149        </service>
+150
+151        <receiver
+151-->[com.google.android.datatransport:transport-runtime:3.1.9] /Users/idrmido/.gradle/caches/8.13/transforms/8b4f3a68696c4b4fe84b7ff5998e2001/transformed/transport-runtime-3.1.9/AndroidManifest.xml:32:9-34:40
+152            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver"
+152-->[com.google.android.datatransport:transport-runtime:3.1.9] /Users/idrmido/.gradle/caches/8.13/transforms/8b4f3a68696c4b4fe84b7ff5998e2001/transformed/transport-runtime-3.1.9/AndroidManifest.xml:33:13-132
+153            android:exported="false" />
+153-->[com.google.android.datatransport:transport-runtime:3.1.9] /Users/idrmido/.gradle/caches/8.13/transforms/8b4f3a68696c4b4fe84b7ff5998e2001/transformed/transport-runtime-3.1.9/AndroidManifest.xml:34:13-37
+154
+155        <property
+155-->[com.google.android.gms:play-services-measurement-api:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/c2deb5cb8fd9bc4ce3bd1b0a8bff2005/transformed/play-services-measurement-api-22.1.2/AndroidManifest.xml:30:9-32:61
+156            android:name="android.adservices.AD_SERVICES_CONFIG"
+156-->[com.google.android.gms:play-services-measurement-api:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/c2deb5cb8fd9bc4ce3bd1b0a8bff2005/transformed/play-services-measurement-api-22.1.2/AndroidManifest.xml:31:13-65
+157            android:resource="@xml/ga_ad_services_config" />
+157-->[com.google.android.gms:play-services-measurement-api:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/c2deb5cb8fd9bc4ce3bd1b0a8bff2005/transformed/play-services-measurement-api-22.1.2/AndroidManifest.xml:32:13-58
+158
+159        <provider
+159-->[com.google.firebase:firebase-common:21.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/c929a2436c0a6395c88d09c0859487f5/transformed/firebase-common-21.0.0/AndroidManifest.xml:23:9-28:39
+160            android:name="com.google.firebase.provider.FirebaseInitProvider"
+160-->[com.google.firebase:firebase-common:21.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/c929a2436c0a6395c88d09c0859487f5/transformed/firebase-common-21.0.0/AndroidManifest.xml:24:13-77
+161            android:authorities="com.radly.app.firebaseinitprovider"
+161-->[com.google.firebase:firebase-common:21.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/c929a2436c0a6395c88d09c0859487f5/transformed/firebase-common-21.0.0/AndroidManifest.xml:25:13-72
+162            android:directBootAware="true"
+162-->[com.google.firebase:firebase-common:21.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/c929a2436c0a6395c88d09c0859487f5/transformed/firebase-common-21.0.0/AndroidManifest.xml:26:13-43
+163            android:exported="false"
+163-->[com.google.firebase:firebase-common:21.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/c929a2436c0a6395c88d09c0859487f5/transformed/firebase-common-21.0.0/AndroidManifest.xml:27:13-37
+164            android:initOrder="100" />
+164-->[com.google.firebase:firebase-common:21.0.0] /Users/idrmido/.gradle/caches/8.13/transforms/c929a2436c0a6395c88d09c0859487f5/transformed/firebase-common-21.0.0/AndroidManifest.xml:28:13-36
+165
+166        <receiver
+166-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:29:9-33:20
+167            android:name="com.google.android.gms.measurement.AppMeasurementReceiver"
+167-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:30:13-85
+168            android:enabled="true"
+168-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:31:13-35
+169            android:exported="false" >
+169-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:32:13-37
+170        </receiver>
+171
+172        <service
+172-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:35:9-38:40
+173            android:name="com.google.android.gms.measurement.AppMeasurementService"
+173-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:36:13-84
+174            android:enabled="true"
+174-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:37:13-35
+175            android:exported="false" />
+175-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:38:13-37
+176        <service
+176-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:39:9-43:72
+177            android:name="com.google.android.gms.measurement.AppMeasurementJobService"
+177-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:40:13-87
+178            android:enabled="true"
+178-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:41:13-35
+179            android:exported="false"
+179-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:42:13-37
+180            android:permission="android.permission.BIND_JOB_SERVICE" />
+180-->[com.google.android.gms:play-services-measurement:22.1.2] /Users/idrmido/.gradle/caches/8.13/transforms/ba20f9f1b3d42edf1c8d94bf05828b05/transformed/play-services-measurement-22.1.2/AndroidManifest.xml:43:13-69
+181
+182        <activity
+182-->[com.google.android.gms:play-services-base:18.5.0] /Users/idrmido/.gradle/caches/8.13/transforms/19ab4058f05a647d4f0900577065a6e9/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:9-173
+183            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+183-->[com.google.android.gms:play-services-base:18.5.0] /Users/idrmido/.gradle/caches/8.13/transforms/19ab4058f05a647d4f0900577065a6e9/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:19-85
+184            android:exported="false"
+184-->[com.google.android.gms:play-services-base:18.5.0] /Users/idrmido/.gradle/caches/8.13/transforms/19ab4058f05a647d4f0900577065a6e9/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:146-170
+185            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+185-->[com.google.android.gms:play-services-base:18.5.0] /Users/idrmido/.gradle/caches/8.13/transforms/19ab4058f05a647d4f0900577065a6e9/transformed/play-services-base-18.5.0/AndroidManifest.xml:5:86-145
+186
+187        <uses-library
+187-->[androidx.privacysandbox.ads:ads-adservices:1.0.0-beta05] /Users/idrmido/.gradle/caches/8.13/transforms/afcc210c6680804a2ba062563eb8ece5/transformed/ads-adservices-1.0.0-beta05/AndroidManifest.xml:23:9-25:40
+188            android:name="android.ext.adservices"
+188-->[androidx.privacysandbox.ads:ads-adservices:1.0.0-beta05] /Users/idrmido/.gradle/caches/8.13/transforms/afcc210c6680804a2ba062563eb8ece5/transformed/ads-adservices-1.0.0-beta05/AndroidManifest.xml:24:13-50
+189            android:required="false" />
+189-->[androidx.privacysandbox.ads:ads-adservices:1.0.0-beta05] /Users/idrmido/.gradle/caches/8.13/transforms/afcc210c6680804a2ba062563eb8ece5/transformed/ads-adservices-1.0.0-beta05/AndroidManifest.xml:25:13-37
+190
+191        <provider
+191-->[androidx.emoji2:emoji2:1.3.0] /Users/idrmido/.gradle/caches/8.13/transforms/9486775e45f54e51d5c71ac476795f47/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+192            android:name="androidx.startup.InitializationProvider"
+192-->[androidx.emoji2:emoji2:1.3.0] /Users/idrmido/.gradle/caches/8.13/transforms/9486775e45f54e51d5c71ac476795f47/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+193            android:authorities="com.radly.app.androidx-startup"
+193-->[androidx.emoji2:emoji2:1.3.0] /Users/idrmido/.gradle/caches/8.13/transforms/9486775e45f54e51d5c71ac476795f47/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+194            android:exported="false" >
+194-->[androidx.emoji2:emoji2:1.3.0] /Users/idrmido/.gradle/caches/8.13/transforms/9486775e45f54e51d5c71ac476795f47/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+195            <meta-data
+195-->[androidx.emoji2:emoji2:1.3.0] /Users/idrmido/.gradle/caches/8.13/transforms/9486775e45f54e51d5c71ac476795f47/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+196                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+196-->[androidx.emoji2:emoji2:1.3.0] /Users/idrmido/.gradle/caches/8.13/transforms/9486775e45f54e51d5c71ac476795f47/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+197                android:value="androidx.startup" />
+197-->[androidx.emoji2:emoji2:1.3.0] /Users/idrmido/.gradle/caches/8.13/transforms/9486775e45f54e51d5c71ac476795f47/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+198            <meta-data
+198-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/idrmido/.gradle/caches/8.13/transforms/12b15047bf3ef769769ae8dc9573485e/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:29:13-31:52
+199                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+199-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/idrmido/.gradle/caches/8.13/transforms/12b15047bf3ef769769ae8dc9573485e/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:30:17-78
+200                android:value="androidx.startup" />
+200-->[androidx.lifecycle:lifecycle-process:2.6.2] /Users/idrmido/.gradle/caches/8.13/transforms/12b15047bf3ef769769ae8dc9573485e/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:31:17-49
+201            <meta-data
+201-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+202                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+202-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+203                android:value="androidx.startup" />
+203-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+204        </provider>
+205
+206        <meta-data
+206-->[com.google.android.gms:play-services-basement:18.4.0] /Users/idrmido/.gradle/caches/8.13/transforms/e9c4e7b50359eaac54786a23a8d12dc7/transformed/play-services-basement-18.4.0/AndroidManifest.xml:6:9-122
+207            android:name="com.google.android.gms.version"
+207-->[com.google.android.gms:play-services-basement:18.4.0] /Users/idrmido/.gradle/caches/8.13/transforms/e9c4e7b50359eaac54786a23a8d12dc7/transformed/play-services-basement-18.4.0/AndroidManifest.xml:6:20-65
+208            android:value="@integer/google_play_services_version" />
+208-->[com.google.android.gms:play-services-basement:18.4.0] /Users/idrmido/.gradle/caches/8.13/transforms/e9c4e7b50359eaac54786a23a8d12dc7/transformed/play-services-basement-18.4.0/AndroidManifest.xml:6:66-119
+209
+210        <receiver
+210-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+211            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+211-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+212            android:directBootAware="false"
+212-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+213            android:enabled="true"
+213-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+214            android:exported="true"
+214-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+215            android:permission="android.permission.DUMP" >
+215-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+216            <intent-filter>
+216-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+217                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+217-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+217-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+218            </intent-filter>
+219            <intent-filter>
+219-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+220                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+220-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+220-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+221            </intent-filter>
+222            <intent-filter>
+222-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+223                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+223-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+223-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+224            </intent-filter>
+225            <intent-filter>
+225-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+226                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+226-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+226-->[androidx.profileinstaller:profileinstaller:1.3.1] /Users/idrmido/.gradle/caches/8.13/transforms/e1676f28944c003faa44ca32e6dc09db/transformed/profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+227            </intent-filter>
+228        </receiver>
+229    </application>
+230
+231</manifest>

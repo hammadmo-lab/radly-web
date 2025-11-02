@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createBrowserSupabase } from '@/lib/supabase/client'
 import { sanitizeNext } from '@/lib/redirect'
@@ -8,6 +8,7 @@ import { storeAuthOrigin } from '@/lib/auth-origin'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CheckCircle2, Mail, Sparkles } from 'lucide-react'
+import MobileSignIn from '@/components/mobile/MobileSignIn'
 
 const allowMagic = process.env.NEXT_PUBLIC_ALLOW_MAGIC_LINK === '1'
 const allowGoogle = process.env.NEXT_PUBLIC_ALLOW_GOOGLE === '1'
@@ -232,6 +233,18 @@ function SignInContent() {
 }
 
 export default function SignInPage() {
+  const [isNative, setIsNative] = useState(false)
+  useEffect(() => {
+    // Detect Capacitor native at runtime
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cap = (typeof window !== 'undefined' ? (window as any).Capacitor : undefined)
+    setIsNative(!!cap?.isNativePlatform?.())
+  }, [])
+
+  if (isNative) {
+    return <MobileSignIn />
+  }
+
   return (
     <Suspense fallback={
       <main className="relative min-h-screen overflow-hidden bg-[var(--ds-bg-gradient)] text-white">

@@ -1,0 +1,11 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="200" fill="#127C99"/>
+  
+  <!-- Medical cross -->
+  <rect x="236" y="156" width="40" height="200" fill="white"/>
+  <rect x="156" y="236" width="200" height="40" fill="white"/>
+  
+  <!-- Brand text -->
+  <text x="256" y="400" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="bold">R</text>
+</svg>

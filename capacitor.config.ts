@@ -9,7 +9,9 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
     hostname: 'localhost',
   },
+  ios: {
+    packageClassList: ['App.RadlyGoogleAuth'],
+  },
 };
 
 export default config;
-
