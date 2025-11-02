@@ -1,12 +1,13 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createBrowserSupabase } from '@/lib/supabase/client'
 import { isTestMode, getTestSession } from '@/lib/test-mode'
+import { Capacitor } from '@capacitor/core'
+import type { Session } from '@supabase/supabase-js'
 
 export function useAuthSession() {
-  const supabase = useMemo(() => createBrowserSupabase(), []);
   const [mounted, setMounted] = useState(false);
-  const [session, setSession] = useState<Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]>(null);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     // Return test session in test mode
@@ -17,12 +18,30 @@ export function useAuthSession() {
     }
 
     let unsub = () => {};
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
-    unsub = () => sub?.subscription?.unsubscribe?.();
-    setMounted(true);
+
+    async function initAuth() {
+      if (Capacitor.isNativePlatform()) {
+        // Use singleton client for native platforms
+        const { getSupabaseClient } = await import('@/lib/supabase-singleton')
+        const supabase = await getSupabaseClient()
+        const { data } = await supabase.auth.getSession()
+        setSession(data.session)
+        const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
+        unsub = () => sub?.subscription?.unsubscribe?.()
+      } else {
+        // Use browser client for web
+        const supabase = createBrowserSupabase()
+        const { data } = await supabase.auth.getSession()
+        setSession(data.session)
+        const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
+        unsub = () => sub?.subscription?.unsubscribe?.()
+      }
+      setMounted(true)
+    }
+
+    initAuth()
     return () => unsub();
-  }, [supabase]);
+  }, []);
 
   return { session, isAuthed: !!session, mounted };
 }

@@ -26,12 +26,22 @@ type CapLike = {
 }
 
 export default function HomePageRenderer(props: Props) {
-  const [isNative, setIsNative] = useState(false)
+  const [isNative, setIsNative] = useState<boolean | null>(null)
+
   useEffect(() => {
     const w = (typeof window !== 'undefined' ? (window as unknown as CapLike) : undefined)
     const isCap = !!w?.Capacitor?.isNativePlatform?.()
     setIsNative(isCap)
   }, [])
+
+  // Prevent flash: wait for platform detection
+  if (isNative === null) {
+    return (
+      <div className="bg-[var(--ds-bg-gradient)] min-h-screen flex items-center justify-center">
+        {/* Silent loading - no spinner needed, happens instantly */}
+      </div>
+    )
+  }
 
   if (isNative) return <MobileHomePage />
   return <AnimatedHomePage {...props} />
