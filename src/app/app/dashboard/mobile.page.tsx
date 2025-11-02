@@ -1,19 +1,17 @@
 'use client'
 
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Plus, FileText, BookTemplate, TrendingUp, Clock,
-  Sparkles, ArrowRight, Activity, Settings,
-  CreditCard, Menu, X, LogOut, User as UserIcon
+  Sparkles, Activity, Settings,
+  CreditCard, Menu, X, LogOut, User as UserIcon,
+  ChevronRight, AlertCircle
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import UsageWidget from '@/components/UsageWidget'
-import { useSubscription } from '@/hooks/useSubscription'
 import { useAuth } from '@/components/auth-provider'
+import { useSubscription } from '@/hooks/useSubscription'
 import { formatSeconds, resolveAvgGenerationSeconds } from '@/utils/time'
 
 function daysUntil(dateString?: string) {
@@ -27,456 +25,419 @@ function daysUntil(dateString?: string) {
 export default function MobileDashboardPage() {
   const router = useRouter()
   const { user, signOut } = useAuth()
-  const { data: subscriptionData } = useSubscription()
-  const [recentTemplate, setRecentTemplate] = useState<{ id: string; name: string | null } | null>(null)
+  const { data: subscriptionData, isLoading, error } = useSubscription()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '/app/dashboard'
-
-  // Use actual user email from auth context, with fallback to localStorage for test mode
-  const userEmail = user?.email || (typeof window !== 'undefined' ? localStorage.getItem('user-email') : null)
-
-  const navItems = [
-    { href: '/app/dashboard', icon: Activity, label: 'Dashboard' },
-    { href: '/app/templates', icon: BookTemplate, label: 'Templates' },
-    { href: '/app/reports', icon: FileText, label: 'Reports' },
-  ]
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const id = localStorage.getItem('recent-template-id')
-    const name = localStorage.getItem('recent-template-name')
-    if (id) {
-      setRecentTemplate({
-        id,
-        name,
-      })
-    }
-  }, [])
 
   const stats = useMemo(() => {
     const sub = subscriptionData?.subscription
     const usageStats = subscriptionData?.usage_stats
     const avgGenerationSeconds = resolveAvgGenerationSeconds(usageStats)
-    const hasAvgGenerationData =
-      avgGenerationSeconds != null && avgGenerationSeconds >= 0.5
+    const hasAvgGenerationData = avgGenerationSeconds != null && avgGenerationSeconds >= 0.5
     const resetDays = daysUntil(sub?.period_end)
 
     return [
       {
         label: 'Reports used',
         value: sub ? `${sub.reports_used}/${sub.reports_limit}` : '—',
-        change: sub ? `${sub.reports_remaining} remaining` : '',
+        subtitle: sub ? `${sub.reports_remaining} left` : '',
         icon: FileText,
-        bgClass: 'bg-gradient-to-br from-[#4B8EFF]/20 to-[#2653FF]/10',
-        iconColor: 'text-[#4B8EFF]',
-        onClick: () => router.push('/app/reports'),
+        color: '#4B8EFF',
+        gradient: 'from-[#4B8EFF]/20 via-[#2653FF]/10 to-transparent',
       },
       {
         label: 'Avg. time',
         value: hasAvgGenerationData ? formatSeconds(avgGenerationSeconds) : '—',
-        change: hasAvgGenerationData
-          ? 'Last 30 days'
-          : usageStats
-          ? 'Data coming soon'
-          : '',
+        subtitle: hasAvgGenerationData ? 'Per report' : '',
         icon: Clock,
-        bgClass: 'bg-gradient-to-br from-[#8F82FF]/20 to-[#4B8EFF]/10',
-        iconColor: 'text-[#8F82FF]',
-        onClick: () => {},
+        color: '#8F82FF',
+        gradient: 'from-[#8F82FF]/20 via-[#4B8EFF]/10 to-transparent',
       },
       {
         label: 'Plan',
         value: sub?.tier_display_name ?? '—',
-        change: sub ? sub.status : '',
+        subtitle: sub?.status ?? '',
         icon: CreditCard,
-        bgClass: 'bg-gradient-to-br from-[#3FBF8C]/20 to-[#8F82FF]/10',
-        iconColor: 'text-[#3FBF8C]',
-        onClick: () => router.push('/app/settings?tab=subscription'),
+        color: '#3FBF8C',
+        gradient: 'from-[#3FBF8C]/20 via-[#8F82FF]/10 to-transparent',
       },
       {
         label: 'Resets in',
-        value: resetDays != null ? `${resetDays}d` : '—',
-        change: sub?.period_end ? new Date(sub.period_end).toLocaleDateString() : '',
+        value: resetDays != null ? `${resetDays} days` : '—',
+        subtitle: sub?.period_end ? new Date(sub.period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '',
         icon: TrendingUp,
-        bgClass: 'bg-gradient-to-br from-[#F8B74D]/20 to-[#FF6B6B]/10',
-        iconColor: 'text-[#F8B74D]',
-        onClick: () => {},
+        color: '#F8B74D',
+        gradient: 'from-[#F8B74D]/20 via-[#FF6B6B]/10 to-transparent',
       },
     ]
-  }, [subscriptionData, router])
+  }, [subscriptionData])
 
-  const quickActions = useMemo(() => {
-    
-    const recentTitle = recentTemplate?.name
-      ? recentTemplate.name.length > 32
-        ? `${recentTemplate.name.slice(0, 29)}…`
-        : recentTemplate.name
-      : null
+  const usagePercentage = subscriptionData?.subscription
+    ? (subscriptionData.subscription.reports_used / subscriptionData.subscription.reports_limit) * 100
+    : 0
 
-    return [
-      recentTemplate
-        ? {
-            icon: Plus,
-            title: recentTitle ? `Resume ${recentTitle}` : 'Resume recent draft',
-            description: 'Pick up where you left off',
-            href: `/app/generate?templateId=${encodeURIComponent(recentTemplate.id)}`,
-            gradient: 'from-[#4B8EFF] to-[#8F82FF]',
-            badge: 'Draft saved',
-            cta: 'Continue',
-          }
-        : {
-            icon: Plus,
-            title: 'Choose a Template',
-            description: 'Start a fresh report from our library',
-            href: '/app/templates',
-            gradient: 'from-[#4B8EFF] to-[#3FBF8C]',
-            cta: 'Get started',
-          },
-      {
-        icon: BookTemplate,
-        title: 'Browse Templates',
-        description: 'View all available report templates',
-        href: '/app/templates',
-        gradient: 'from-[#8F82FF] to-[#4B8EFF]',
-        cta: 'Browse',
-      },
-      {
-        icon: Activity,
-        title: 'View Reports',
-        description: 'Access your generated reports',
-        href: '/app/reports',
-        gradient: 'from-[#3FBF8C] to-[#4B8EFF]',
-        cta: 'Open reports',
-      },
-    ]
-  }, [recentTemplate])
+  const handleSignOut = async () => {
+    await signOut()
+    setIsMenuOpen(false)
+  }
 
-  return (
-    <div className="flex flex-col h-screen w-full bg-[var(--ds-bg-gradient)] text-white">
-      {/* FIXED HEADER */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-40 border-b border-[rgba(255,255,255,0.08)] backdrop-blur-md bg-[rgba(8,12,22,0.75)]"
-        style={{
-          paddingTop: 'max(var(--safe-area-top), 0px)'
-        }}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-10 w-10 p-0 text-[rgba(255,255,255,0.7)] hover:text-white hover:bg-[rgba(255,255,255,0.08)]"
-              onClick={() => setIsMenuOpen(true)}
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
-            <div className="p-2 rounded-xl bg-gradient-to-br from-[#4B8EFF]/20 to-[#8F82FF]/20 border border-[rgba(75,142,255,0.3)]">
-              <Sparkles className="w-6 h-6 text-[#4B8EFF]" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white">Dashboard</h1>
-              <p className="text-xs text-[rgba(255,255,255,0.6)]">Welcome back</p>
-            </div>
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#0a0e1a] via-[#0c1018] to-[#0a0e1a] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#4B8EFF] to-[#8F82FF] flex items-center justify-center animate-pulse">
+            <Sparkles className="w-8 h-8 text-white" />
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-10 w-10 p-0 text-[rgba(255,255,255,0.7)] hover:text-white hover:bg-[rgba(255,255,255,0.08)]"
-              onClick={() => router.push('/app/settings')}
+          <p className="text-white/60 text-sm">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error/Unauthenticated state
+  if (error || !subscriptionData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#0a0e1a] via-[#0c1018] to-[#0a0e1a] flex items-center justify-center p-6">
+        <div className="w-full max-w-sm">
+          <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-[rgba(255,255,255,0.08)] rounded-3xl p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[#FF6B6B]/20 to-[#F8B74D]/20 border border-[rgba(255,107,107,0.3)] flex items-center justify-center">
+              <AlertCircle className="w-8 h-8 text-[#FF6B6B]" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Unable to load</h3>
+            <p className="text-white/60 text-sm mb-6">
+              {!user ? 'Please sign in to view your dashboard' : 'Unable to fetch subscription data'}
+            </p>
+            <button
+              onClick={() => router.push('/auth/signin')}
+              className="w-full py-3 px-6 bg-gradient-to-r from-[#4B8EFF] to-[#2653FF] rounded-2xl text-white font-semibold"
             >
-              <Settings className="w-5 h-5" />
-            </Button>
+              Sign In
+            </button>
           </div>
         </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0e1a] via-[#0c1018] to-[#0a0e1a] text-white" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+      {/* Header - Not sticky to avoid notch overlap */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="px-4 py-6 flex items-center justify-between"
+      >
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center active:scale-95 transition-transform touch-manipulation"
+          >
+            <Menu className="w-6 h-6 text-white/80" />
+          </button>
+          <div>
+            <h1 className="text-xl font-bold text-white">Dashboard</h1>
+            <p className="text-sm text-white/60">Welcome back</p>
+          </div>
+        </div>
+        <button
+          onClick={() => router.push('/app/settings')}
+          className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center active:scale-95 transition-transform touch-manipulation"
+        >
+          <Settings className="w-6 h-6 text-white/80" />
+        </button>
       </motion.div>
 
-      {/* SCROLLABLE CONTENT */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 pb-20 w-full" style={{
-        WebkitOverflowScrolling: 'touch',
-        maxHeight: 'calc(100dvh - 200px)' // Account for header and nav
-      }}>
-        {/* USAGE WIDGET */}
+      {/* Main Content */}
+      <div className="px-4 py-6 space-y-6 pb-32">
+        {/* Usage Card - iOS Native Style */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
+          className="bg-gradient-to-br from-[#4B8EFF]/15 via-[rgba(255,255,255,0.03)] to-transparent backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
         >
-          <UsageWidget />
-        </motion.div>
-
-        {/* PLAN STATUS CARD */}
-        {subscriptionData?.subscription && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="aurora-card rounded-2xl border border-[rgba(75,142,255,0.28)] bg-[rgba(38,83,255,0.12)] p-4"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <CreditCard className="w-4 h-4 text-[#4B8EFF]" />
-                  <span className="text-xs font-medium text-[#4B8EFF] uppercase tracking-wide">
-                    {subscriptionData.subscription.tier_display_name}
-                  </span>
-                </div>
-                <p className="text-sm font-semibold text-white mb-1">
-                  {subscriptionData.subscription.reports_remaining} reports remaining
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#4B8EFF] to-[#2653FF] flex items-center justify-center shadow-lg">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-xs text-white/50 uppercase tracking-wider font-medium">
+                  {subscriptionData.subscription.tier_display_name}
                 </p>
-                <p className="text-xs text-[rgba(255,255,255,0.6)]">
-                  Resets in {daysUntil(subscriptionData.subscription.period_end)} days
+                <p className="text-sm font-semibold text-white">
+                  {subscriptionData.subscription.reports_used} of {subscriptionData.subscription.reports_limit} used
                 </p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-9 px-3 text-xs font-semibold text-[#4B8EFF] border-[#4B8EFF]/40 hover:bg-[rgba(75,142,255,0.12)] shrink-0"
-                onClick={() => router.push('/pricing')}
-              >
-                Upgrade
-              </Button>
             </div>
-          </motion.div>
-        )}
+            <Link href="/pricing">
+              <button className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-xs font-semibold text-white active:scale-95 transition-transform">
+                Upgrade
+              </button>
+            </Link>
+          </div>
 
-        {/* STATS GRID - Mobile Optimized */}
+          {/* Progress Bar */}
+          <div className="relative h-2 bg-white/10 rounded-full overflow-hidden mb-2">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.min(usagePercentage, 100)}%` }}
+              transition={{ duration: 1, ease: 'easeOut' }}
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#4B8EFF] to-[#8F82FF] rounded-full"
+            />
+          </div>
+          <p className="text-xs text-white/50 text-right">
+            {subscriptionData.subscription.reports_remaining} reports remaining
+          </p>
+        </motion.div>
+
+        {/* Stats Grid - iOS Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.15 }}
           className="grid grid-cols-2 gap-3"
         >
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 + index * 0.05 }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 active:scale-95 transition-transform"
             >
-              <Card
-                className="aurora-card rounded-xl border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] overflow-hidden touch-manipulation"
-                onClick={stat.onClick}
-              >
-                <CardContent className="p-4">
-                  <div className={`inline-flex p-2 rounded-lg mb-3 ${stat.bgClass}`}>
-                    <stat.icon className={`w-5 h-5 ${stat.iconColor}`} />
-                  </div>
-                  <p className="text-xs text-[rgba(255,255,255,0.6)] font-medium mb-1 truncate">
-                    {stat.label}
-                  </p>
-                  <p className="text-lg font-bold text-white">{stat.value}</p>
-                  {stat.change && (
-                    <p className="text-xs text-[rgba(255,255,255,0.4)] mt-1 truncate">
-                      {stat.change}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.gradient} border border-white/10 flex items-center justify-center mb-3`}>
+                <stat.icon className="w-5 h-5" style={{ color: stat.color }} />
+              </div>
+              <p className="text-xs text-white/50 font-medium mb-1">{stat.label}</p>
+              <p className="text-xl font-bold text-white mb-0.5">{stat.value}</p>
+              {stat.subtitle && (
+                <p className="text-xs text-white/40">{stat.subtitle}</p>
+              )}
             </motion.div>
           ))}
         </motion.div>
 
-        {/* QUICK ACTIONS */}
+        {/* Quick Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
+          transition={{ delay: 0.2 }}
+          className="space-y-3"
         >
-          <div className="grid grid-cols-1 gap-3">
-            {quickActions.map((action, idx) => (
-              <motion.div
-                key={action.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 * idx }}
-              >
-                <Link
-                  href={action.href}
-                  className="group flex items-center justify-between rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] p-4 hover:border-[rgba(75,142,255,0.35)] hover:bg-[rgba(75,142,255,0.08)] transition-all"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${action.gradient} text-white shadow-[0_18px_42px_rgba(31,64,175,0.22)]`}>
-                      <action.icon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-base font-semibold text-white">{action.title}</h3>
-                        {action.badge && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.12)] text-[rgba(255,255,255,0.8)] border border-[rgba(255,255,255,0.18)]">
-                            {action.badge}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-[rgba(255,255,255,0.6)]">{action.description}</p>
-                    </div>
+          <h2 className="text-base font-semibold text-white/90 px-1">Quick Actions</h2>
+
+          {/* New Report - Primary Action */}
+          <Link href="/app/templates">
+            <div className="bg-gradient-to-br from-[#4B8EFF] to-[#2653FF] rounded-2xl p-5 active:scale-[0.98] transition-transform shadow-[0_8px_24px_rgba(75,142,255,0.3)]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                    <Plus className="w-6 h-6 text-white" />
                   </div>
-                  <div className="flex items-center gap-2 text-[rgba(255,255,255,0.7)] group-hover:text-white">
-                    <span className="text-xs font-semibold">{action.cta}</span>
-                    <ArrowRight className="w-4 h-4" />
+                  <div>
+                    <h3 className="text-lg font-bold text-white">New Report</h3>
+                    <p className="text-sm text-white/80">Choose a template to start</p>
                   </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-white/60" />
+              </div>
+            </div>
+          </Link>
+
+          {/* Templates */}
+          <Link href="/app/templates">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 active:scale-[0.98] transition-transform">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#8F82FF]/20 to-transparent rounded-xl flex items-center justify-center border border-white/10">
+                    <BookTemplate className="w-5 h-5 text-[#8F82FF]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">Browse Templates</h3>
+                    <p className="text-xs text-white/50">View all available templates</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-white/40" />
+              </div>
+            </div>
+          </Link>
+
+          {/* Reports */}
+          <Link href="/app/reports">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 active:scale-[0.98] transition-transform">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#3FBF8C]/20 to-transparent rounded-xl flex items-center justify-center border border-white/10">
+                    <FileText className="w-5 h-5 text-[#3FBF8C]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">My Reports</h3>
+                    <p className="text-xs text-white/50">Access your generated reports</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-white/40" />
+              </div>
+            </div>
+          </Link>
         </motion.div>
 
-        {/* RECENT ACTIVITY / TEMPLATES */}
-        {recentTemplate && (
+        {/* Warning if approaching limit */}
+        {usagePercentage >= 80 && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] p-4"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.25 }}
+            className="bg-gradient-to-br from-[#F8B74D]/15 via-[rgba(255,255,255,0.03)] to-transparent backdrop-blur-xl border border-[#F8B74D]/30 rounded-2xl p-4"
           >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-white">Recent Template</h3>
-              <Link
-                href={`/app/generate?templateId=${encodeURIComponent(recentTemplate.id)}`}
-                className="text-xs text-[rgba(75,142,255,0.9)] hover:text-[#4B8EFF]"
-              >
-                Resume
-              </Link>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-[#F8B74D]/20 rounded-xl flex items-center justify-center shrink-0">
+                <AlertCircle className="w-5 h-5 text-[#F8B74D]" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-white mb-1">
+                  {usagePercentage >= 100 ? 'Limit reached' : 'Approaching limit'}
+                </h3>
+                <p className="text-xs text-white/70 mb-3">
+                  {usagePercentage >= 100
+                    ? `Upgrade to continue or wait ${daysUntil(subscriptionData.subscription.period_end)} days`
+                    : 'Consider upgrading for more reports'}
+                </p>
+                <Link href="/pricing">
+                  <button className="px-4 py-2 bg-[#F8B74D]/20 border border-[#F8B74D]/40 rounded-xl text-xs font-semibold text-[#F8B74D] active:scale-95 transition-transform">
+                    View Plans
+                  </button>
+                </Link>
+              </div>
             </div>
-            <p className="text-sm text-[rgba(255,255,255,0.8)]">{recentTemplate.name || 'Untitled template'}</p>
           </motion.div>
         )}
       </div>
 
-      {/* BOTTOM NAVIGATION */}
+      {/* Bottom Navigation */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 border-t border-[rgba(255,255,255,0.08)] bg-[rgba(8,12,22,0.85)] backdrop-blur-sm"
-        style={{
-          paddingBottom: 'max(var(--safe-area-bottom), 0px)'
-        }}
+        className="fixed bottom-0 left-0 right-0 z-50 bg-[rgba(10,14,26,0.95)] backdrop-blur-xl border-t border-white/10"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <div className="flex items-center justify-around h-16">
-          {navItems.map(item => {
-            const isActive = pathname.startsWith(item.href)
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex flex-col items-center justify-center w-16 h-16 gap-1 ${isActive ? 'text-white' : 'text-white/65 hover:text-white'}`}
-              >
-                <item.icon className="w-5 h-5" />
-                <span className="text-[11px] font-medium">{item.label}</span>
-              </Link>
-            )
-          })}
+        <div className="flex items-center justify-around h-20 px-2">
+          <Link href="/app/dashboard" className="flex flex-col items-center justify-center flex-1 gap-1 py-2">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4B8EFF] to-[#2653FF] flex items-center justify-center shadow-lg">
+              <Activity className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-[10px] font-semibold text-white">Home</span>
+          </Link>
+          <Link href="/app/templates" className="flex flex-col items-center justify-center flex-1 gap-1 py-2">
+            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+              <BookTemplate className="w-5 h-5 text-white/60" />
+            </div>
+            <span className="text-[10px] font-medium text-white/50">Templates</span>
+          </Link>
+          <Link href="/app/reports" className="flex flex-col items-center justify-center flex-1 gap-1 py-2">
+            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-white/60" />
+            </div>
+            <span className="text-[10px] font-medium text-white/50">Reports</span>
+          </Link>
         </div>
       </div>
 
-      {/* SIDE MENU OVERLAY */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)} />
-      )}
-
-      {/* SIDE MENU */}
-      <div
-        className={`fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 ease-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
-        style={{
-          width: 'min(80vw, 320px)',
-          paddingTop: 'max(12px, var(--safe-area-top, 0px))'
-        }}
-      >
-        <div className="relative h-full w-80 max-w-[88vw] bg-[rgba(8,12,22,0.96)] border-r border-[rgba(75,142,255,0.25)] shadow-[0_30px_80px_rgba(10,14,24,0.75)]">
-          <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.08)] p-4 safe-area-inset-top">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#2653FF_0%,#4B8EFF_60%,#8F82FF_100%)] shadow-[0_18px_42px_rgba(31,64,175,0.42)]">
-                <FileText className="h-5 w-5 text-white" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm uppercase tracking-[0.24em] text-[rgba(207,207,207,0.45)]">
-                  Radly
-                </span>
-                <span className="text-xl font-semibold text-white">Assistant</span>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
+      {/* Side Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               onClick={() => setIsMenuOpen(false)}
-              aria-label="Close navigation menu"
-              className="text-[rgba(207,207,207,0.7)] hover:text-white"
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-sm bg-[#0a0e1a] border-r border-white/10 shadow-2xl"
+              style={{ paddingTop: 'env(safe-area-inset-top)' }}
             >
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
-
-          {/* Navigation items */}
-          <nav className="space-y-3 p-4">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsMenuOpen(false)}
-                className="flex items-center gap-3 rounded-xl border border-[rgba(255,255,255,0.08)] px-4 py-3 text-sm font-medium transition-all duration-200 min-h-[44px] touch-manipulation text-[rgba(207,207,207,0.7)] bg-[rgba(12,16,28,0.72)] hover:border-[rgba(75,142,255,0.32)] hover:bg-[rgba(75,142,255,0.12)] hover:text-white hover:shadow-[0_14px_30px_rgba(31,64,175,0.35)]"
-                style={{
-                  borderColor: pathname.startsWith(item.href) ? 'rgba(75,142,255,0.45)' : 'rgba(255,255,255,0.08)',
-                  backgroundColor: pathname.startsWith(item.href) ? 'rgba(75,142,255,0.16)' : 'rgba(12,16,28,0.72)',
-                  color: pathname.startsWith(item.href) ? 'white' : 'rgba(207,207,207,0.7)'
-                }}
-              >
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[rgba(255,255,255,0.08)] bg-[rgba(18,22,36,0.85)]"
-                  style={{
-                    borderColor: pathname.startsWith(item.href) ? 'rgba(75,142,255,0.35)' : 'rgba(255,255,255,0.08)',
-                    backgroundColor: pathname.startsWith(item.href) ? 'rgba(75,142,255,0.2)' : 'rgba(18,22,36,0.85)',
-                    color: pathname.startsWith(item.href) ? '#D7E3FF' : 'rgba(207,207,207,0.7)'
-                  }}
-                >
-                  <item.icon className="h-4.5 w-4.5" />
+              {/* Menu Header */}
+              <div className="p-6 border-b border-white/10">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4B8EFF] to-[#2653FF] flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-white/50 uppercase tracking-wider">Radly</p>
+                      <p className="text-base font-bold text-white">Assistant</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center active:scale-95 transition-transform"
+                  >
+                    <X className="w-5 h-5 text-white/70" />
+                  </button>
                 </div>
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </nav>
 
-          {/* User info and sign out */}
-          <div className="absolute inset-x-0 bottom-0 border-t border-[rgba(255,255,255,0.08)] bg-[rgba(6,10,18,0.95)] p-4">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.7)]">
-                <UserIcon className="h-4.5 w-4.5" />
+                {/* User Info */}
+                <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#4B8EFF] to-[#8F82FF] flex items-center justify-center">
+                    <UserIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white truncate">
+                      {user?.email || 'User'}
+                    </p>
+                    <p className="text-xs text-white/50">
+                      {subscriptionData?.subscription.tier_display_name}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="truncate text-sm font-medium text-white">
-                  {user?.email || userEmail || 'Loading...'}
-                </p>
+
+              {/* Menu Items */}
+              <div className="p-4 space-y-2">
+                <Link href="/app/dashboard" onClick={() => setIsMenuOpen(false)}>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 active:scale-95 transition-transform">
+                    <Activity className="w-5 h-5 text-[#4B8EFF]" />
+                    <span className="text-sm font-medium text-white">Dashboard</span>
+                  </div>
+                </Link>
+                <Link href="/app/templates" onClick={() => setIsMenuOpen(false)}>
+                  <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 active:scale-95 transition-transform">
+                    <BookTemplate className="w-5 h-5 text-white/60" />
+                    <span className="text-sm font-medium text-white/80">Templates</span>
+                  </div>
+                </Link>
+                <Link href="/app/reports" onClick={() => setIsMenuOpen(false)}>
+                  <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 active:scale-95 transition-transform">
+                    <FileText className="w-5 h-5 text-white/60" />
+                    <span className="text-sm font-medium text-white/80">Reports</span>
+                  </div>
+                </Link>
+                <Link href="/app/settings" onClick={() => setIsMenuOpen(false)}>
+                  <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 active:scale-95 transition-transform">
+                    <Settings className="w-5 h-5 text-white/60" />
+                    <span className="text-sm font-medium text-white/80">Settings</span>
+                  </div>
+                </Link>
               </div>
-            </div>
-            <Button
-              variant="ghost"
-              onClick={async () => {
-                try {
-                  // Proper sign out using Supabase auth
-                  await signOut()
 
-                  // Clear local storage (but not everything)
-                  localStorage.removeItem('user-email')
-                  localStorage.removeItem('recent-template-id')
-                  localStorage.removeItem('recent-template-name')
-
-                  // Navigate to sign in
-                  router.push('/auth/signin')
-                  setIsMenuOpen(false)
-                } catch (error) {
-                  console.error('Error signing out:', error)
-                  // Fallback to clear everything if sign out fails
-                  localStorage.clear()
-                  router.push('/auth/signin')
-                  setIsMenuOpen(false)
-                }
-              }}
-              className="w-full justify-center rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.72)] text-[rgba(207,207,207,0.75)] hover:border-[rgba(255,107,107,0.35)] hover:bg-[rgba(255,107,107,0.16)] hover:text-[#FFD1D1]"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign out
-            </Button>
-          </div>
-        </div>
-      </div>
+              {/* Sign Out Button */}
+              <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10 bg-[#0a0e1a]" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center justify-center gap-2 p-3 bg-white/5 border border-white/10 rounded-xl text-white/80 hover:bg-white/10 active:scale-95 transition-all"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="text-sm font-medium">Sign Out</span>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -323,6 +323,15 @@ function WebDashboardPage() {
   )
 }
 
+// Native dashboard wrapper that bypasses layout navigation
+function NativeDashboardWrapper() {
+  return (
+    <Suspense fallback={<div className="p-6 text-white">Loading mobile dashboard…</div>}>
+      <MobileDashboard />
+    </Suspense>
+  )
+}
+
 export default function DashboardPage() {
   const [isNative, setIsNative] = useState(false)
   useEffect(() => {
@@ -333,11 +342,7 @@ export default function DashboardPage() {
   }, [])
 
   if (isNative) {
-    return (
-      <Suspense fallback={<div className="p-6 text-white">Loading mobile dashboard…</div>}>
-        <MobileDashboard />
-      </Suspense>
-    )
+    return <NativeDashboardWrapper />
   }
   return <WebDashboardPage />
 }
