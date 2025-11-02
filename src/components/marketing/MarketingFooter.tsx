@@ -31,6 +31,9 @@ export function MarketingFooter() {
           <Link className="transition-colors hover:text-white" href="/instructions">
             Instructions
           </Link>
+          <Link className="transition-colors hover:text-white" href="/accessibility">
+            Accessibility
+          </Link>
         </div>
       </div>
       <div className="mx-auto mt-6 w-full max-w-6xl text-center text-xs uppercase tracking-[0.24em] text-[rgba(207,207,207,0.4)]">

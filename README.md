@@ -285,7 +285,7 @@ npm run analyze:server  # Server bundle only
 ### Public Routes
 - `/` - Landing page
 - `/pricing` - Pricing plans
-- `/legal/privacy` - Privacy policy
+- `/privacy` - Privacy policy
 - `/legal/terms` - Terms of service
 - `/security` - Security information
 - `/auth/signin` - Sign-in page

@@ -3,9 +3,11 @@
 import { useAuth } from '@/components/auth-provider'
 import { AuthGuard } from '@/components/auth-guard'
 import { DesktopNav, MobileNav, BottomNav } from '@/components/layout/Navigation'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { isTestMode } from '@/lib/test-mode'
+import { Capacitor } from '@capacitor/core'
+import { useState, useEffect } from 'react'
 
 export default function AppLayout({
   children,
@@ -14,15 +16,32 @@ export default function AppLayout({
 }) {
   const { user, signOut } = useAuth()
   const pathname = usePathname()
+  const router = useRouter()
   const testMode = isTestMode()
+  const [isNative, setIsNative] = useState(false)
+
+  useEffect(() => {
+    // Detect Capacitor native at runtime
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cap = (typeof window !== 'undefined' ? (window as any).Capacitor : undefined)
+    setIsNative(!!cap?.isNativePlatform?.())
+  }, [])
+
+  // Check if we're on the dashboard page in native mode
+  const isNativeDashboard = isNative && pathname === '/app/dashboard'
 
   const handleSignOut = async () => {
     try {
       await signOut()
       toast.success('Signed out successfully')
-      // Return the user to the marketing homepage on the SAME origin
-      // so the cleared session is respected. From there, the CTA goes to /auth/signin.
-      window.location.assign('/')
+
+      // On native platforms, use Next.js router to stay in the app
+      // On web, use full page navigation to clear session state
+      if (Capacitor.isNativePlatform()) {
+        router.push('/auth/signin')
+      } else {
+        window.location.assign('/')
+      }
     } catch {
       toast.error('Failed to sign out')
     }
@@ -37,22 +56,28 @@ export default function AppLayout({
             🧪 Test Mode Active
           </div>
         )}
-        
-        {/* Header */}
-        <DesktopNav user={testMode ? { email: 'test@radly.test' } : user} onSignOut={handleSignOut} />
-        
-        {/* Mobile Navigation */}
-        <MobileNav user={testMode ? { email: 'test@radly.test' } : user} onSignOut={handleSignOut} />
 
-        {/* Main Content */}
-        <main className="container max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pb-24 md:pb-12 neon-page-stack w-full">
-          <div className="neon-shell p-6 sm:p-8 md:p-10 backdrop-blur-lg">
+        {/* Header - Only show if not native dashboard */}
+        {!isNativeDashboard && (
+          <DesktopNav user={testMode ? { email: 'test@radly.test' } : user} onSignOut={handleSignOut} />
+        )}
+
+        {/* Mobile Navigation - Only show if not native dashboard */}
+        {!isNativeDashboard && (
+          <MobileNav user={testMode ? { email: 'test@radly.test' } : user} onSignOut={handleSignOut} />
+        )}
+
+        {/* Main Content - Adjust padding for native dashboard */}
+        <main className={`container max-w-6xl mx-auto px-4 sm:px-6 neon-page-stack w-full ${
+          isNativeDashboard ? 'py-0' : 'py-8 sm:py-12 pb-24 md:pb-12'
+        }`}>
+          <div className={`${isNativeDashboard ? '' : 'neon-shell p-6 sm:p-8 md:p-10 backdrop-blur-lg'}`}>
             {children}
           </div>
         </main>
 
-        {/* Bottom Navigation for Mobile */}
-        <BottomNav pathname={pathname} />
+        {/* Bottom Navigation for Mobile - Only show if not native dashboard */}
+        {!isNativeDashboard && <BottomNav pathname={pathname} />}
       </div>
     </AuthGuard>
   )
