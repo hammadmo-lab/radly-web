@@ -210,7 +210,7 @@ export default function TemplatesPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch">
         {isLoading ? (
           Array.from({ length: 6 }).map((_, index) => <TemplateCardSkeleton key={index} />)
         ) : filteredTemplates.length === 0 ? (
@@ -242,7 +242,7 @@ export default function TemplatesPage() {
           filteredTemplates.map((template) => (
             <Card
               key={template.id}
-              className="aurora-card group relative border border-[rgba(255,255,255,0.08)] p-5 sm:p-6 cursor-pointer active:scale-[0.98] transition-transform duration-150"
+              className="aurora-card group relative border border-[rgba(255,255,255,0.08)] p-5 sm:p-6 cursor-pointer active:scale-[0.98] transition-transform duration-150 flex flex-col h-full"
               onClick={() => router.push(`/app/generate?templateId=${template.id}`)}
             >
               <button
@@ -259,7 +259,7 @@ export default function TemplatesPage() {
                 <Settings className="w-5 h-5" />
               </button>
 
-              <div className="space-y-3">
+              <div className="flex flex-col flex-1 space-y-3">
                 <div className="flex flex-wrap gap-2">
                   {template.modality && (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[rgba(75,142,255,0.18)] text-[#D7E3FF]">
@@ -282,7 +282,9 @@ export default function TemplatesPage() {
                     {template.description}
                   </p>
                 )}
+              </div>
 
+              <div className="mt-auto pt-3">
                 <Button
                   className="w-full h-10 sm:h-11 bg-[#2653FF] text-white hover:bg-[#4B8EFF]"
                   onClick={(e) => {
