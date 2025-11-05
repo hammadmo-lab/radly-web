@@ -251,8 +251,8 @@ export function NotificationCenter() {
           )}
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex w-full max-w-lg max-h-[85vh] flex-col overflow-hidden rounded-3xl border border-[rgba(255,255,255,0.08)] bg-[rgba(12,12,14,0.95)] p-0 shadow-[0_24px_48px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-        <div className="border-b border-[rgba(255,255,255,0.08)] bg-[linear-gradient(135deg,rgba(38,83,255,0.4)0%,rgba(12,12,14,0.9)70%)] px-6 py-5">
+      <DialogContent className="flex w-full max-w-lg max-h-[85vh] flex-col overflow-hidden rounded-3xl border border-[rgba(255,255,255,0.08)] bg-[rgba(12,12,14,0.95)] p-0 shadow-[0_24px_48px_rgba(0,0,0,0.6)] backdrop-blur-xl safe-area-inset-top">
+        <div className="border-b border-[rgba(255,255,255,0.08)] bg-[linear-gradient(135deg,rgba(38,83,255,0.4)0%,rgba(12,12,14,0.9)70%)] px-6 py-5 safe-area-pt safe-area-px">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-[rgba(207,207,207,0.75)]">
@@ -271,7 +271,7 @@ export function NotificationCenter() {
           </div>
         </div>
 
-        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
+        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5 safe-area-px safe-area-pb">
           {subscriptionLoading && notifications.length === 0 ? (
             <div className="space-y-3">
               <Skeleton className="h-20 w-full rounded-2xl" />

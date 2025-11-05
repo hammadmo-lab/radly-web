@@ -46,6 +46,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
                   backdropFilter: 'blur(12px)',
                   maxWidth: '500px',
                   wordBreak: 'break-word',
+                  marginTop: 'max(env(safe-area-inset-top), 16px)',
+                  marginLeft: 'max(env(safe-area-inset-left), 16px)',
+                  marginRight: 'max(env(safe-area-inset-right), 16px)',
                 },
                 className: 'sonner-toast',
               }}

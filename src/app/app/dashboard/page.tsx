@@ -336,9 +336,12 @@ export default function DashboardPage() {
   const [isNative, setIsNative] = useState(false)
   useEffect(() => {
     // Detect Capacitor native at runtime
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cap = (typeof window !== 'undefined' ? (window as any).Capacitor : undefined)
-    setIsNative(!!cap?.isNativePlatform?.())
+    if (typeof window !== 'undefined') {
+      // Import Capacitor dynamically to avoid SSR issues
+      import('@capacitor/core').then(({ Capacitor }) => {
+        setIsNative(Capacitor.isNativePlatform())
+      })
+    }
   }, [])
 
   if (isNative) {

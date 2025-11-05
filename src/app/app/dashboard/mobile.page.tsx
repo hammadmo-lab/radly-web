@@ -71,9 +71,9 @@ export default function MobileDashboardPage() {
     ]
   }, [subscriptionData])
 
-  const usagePercentage = subscriptionData?.subscription
-    ? (subscriptionData.subscription.reports_used / subscriptionData.subscription.reports_limit) * 100
-    : 0
+  const usageLimit = subscriptionData?.subscription?.reports_limit ?? 0
+  const usageUsed = subscriptionData?.subscription?.reports_used ?? 0
+  const usagePercentage = usageLimit > 0 ? (usageUsed / usageLimit) * 100 : 0
 
   const handleSignOut = async () => {
     await signOut()
@@ -83,7 +83,7 @@ export default function MobileDashboardPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#0a0e1a] via-[#0c1018] to-[#0a0e1a] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--ds-bg-gradient)] flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#4B8EFF] to-[#8F82FF] flex items-center justify-center animate-pulse">
             <Sparkles className="w-8 h-8 text-white" />
@@ -97,7 +97,7 @@ export default function MobileDashboardPage() {
   // Error/Unauthenticated state
   if (error || !subscriptionData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#0a0e1a] via-[#0c1018] to-[#0a0e1a] flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[var(--ds-bg-gradient)] flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
           <div className="bg-[rgba(255,255,255,0.03)] backdrop-blur-xl border border-[rgba(255,255,255,0.08)] rounded-3xl p-8 text-center">
             <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[#FF6B6B]/20 to-[#F8B74D]/20 border border-[rgba(255,107,107,0.3)] flex items-center justify-center">
@@ -120,12 +120,15 @@ export default function MobileDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0e1a] via-[#0c1018] to-[#0a0e1a] text-white" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-      {/* Header - Not sticky to avoid notch overlap */}
+    <div className="min-h-screen bg-[var(--ds-bg-gradient)] text-white">
+      {/* Safe Area Spacer for Notch */}
+      <div className="h-16 bg-[#0a0e1a]" />
+
+      {/* Header - Sticky with safe area for notch */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="px-4 py-6 flex items-center justify-between"
+        className="sticky top-16 z-50 bg-gradient-to-b from-[#0a0e1a] to-transparent px-4 pb-4 pt-4 flex items-center justify-between border-b border-white/10"
       >
         <div className="flex items-center gap-3">
           <button
@@ -170,10 +173,11 @@ export default function MobileDashboardPage() {
                 </p>
               </div>
             </div>
-            <Link href="/pricing">
-              <button className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-xs font-semibold text-white active:scale-95 transition-transform">
-                Upgrade
-              </button>
+            <Link
+              href="/pricing"
+              className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-xs font-semibold text-white active:scale-95 transition-transform inline-flex items-center justify-center"
+            >
+              Upgrade
             </Link>
           </div>
 
@@ -303,10 +307,11 @@ export default function MobileDashboardPage() {
                     ? `Upgrade to continue or wait ${daysUntil(subscriptionData.subscription.period_end)} days`
                     : 'Consider upgrading for more reports'}
                 </p>
-                <Link href="/pricing">
-                  <button className="px-4 py-2 bg-[#F8B74D]/20 border border-[#F8B74D]/40 rounded-xl text-xs font-semibold text-[#F8B74D] active:scale-95 transition-transform">
-                    View Plans
-                  </button>
+                <Link
+                  href="/pricing"
+                  className="px-4 py-2 bg-[#F8B74D]/20 border border-[#F8B74D]/40 rounded-xl text-xs font-semibold text-[#F8B74D] active:scale-95 transition-transform inline-flex items-center justify-center"
+                >
+                  View Plans
                 </Link>
               </div>
             </div>
@@ -317,24 +322,24 @@ export default function MobileDashboardPage() {
       {/* Bottom Navigation */}
       <div
         className="fixed bottom-0 left-0 right-0 z-50 bg-[rgba(10,14,26,0.95)] backdrop-blur-xl border-t border-white/10"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.5rem)' }}
       >
-        <div className="flex items-center justify-around h-20 px-2">
-          <Link href="/app/dashboard" className="flex flex-col items-center justify-center flex-1 gap-1 py-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4B8EFF] to-[#2653FF] flex items-center justify-center shadow-lg">
-              <Activity className="w-5 h-5 text-white" />
+        <div className="flex items-center justify-around px-2 pt-3 pb-2">
+          <Link href="/app/dashboard" className="flex flex-col items-center justify-center flex-1 gap-1 py-2 min-h-[44px] touch-manipulation">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#4B8EFF] to-[#2653FF] flex items-center justify-center shadow-lg">
+              <Activity className="w-6 h-6 text-white" />
             </div>
             <span className="text-[10px] font-semibold text-white">Home</span>
           </Link>
-          <Link href="/app/templates" className="flex flex-col items-center justify-center flex-1 gap-1 py-2">
-            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
-              <BookTemplate className="w-5 h-5 text-white/60" />
+          <Link href="/app/templates" className="flex flex-col items-center justify-center flex-1 gap-1 py-2 min-h-[44px] touch-manipulation">
+            <div className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center">
+              <BookTemplate className="w-6 h-6 text-white/60" />
             </div>
             <span className="text-[10px] font-medium text-white/50">Templates</span>
           </Link>
-          <Link href="/app/reports" className="flex flex-col items-center justify-center flex-1 gap-1 py-2">
-            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-white/60" />
+          <Link href="/app/reports" className="flex flex-col items-center justify-center flex-1 gap-1 py-2 min-h-[44px] touch-manipulation">
+            <div className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center">
+              <FileText className="w-6 h-6 text-white/60" />
             </div>
             <span className="text-[10px] font-medium text-white/50">Reports</span>
           </Link>
@@ -357,11 +362,11 @@ export default function MobileDashboardPage() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-sm bg-[#0a0e1a] border-r border-white/10 shadow-2xl"
-              style={{ paddingTop: 'env(safe-area-inset-top)' }}
-            >
+              className="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-sm bg-[rgba(10,14,26,0.98)] backdrop-blur-xl border-r border-white/10 shadow-2xl flex flex-col"
+            style={{ paddingTop: 'max(env(safe-area-inset-top), 1.5rem)' }}
+          >
               {/* Menu Header */}
-              <div className="p-6 border-b border-white/10">
+              <div className="p-6 border-b border-white/10" style={{ paddingTop: 'max(env(safe-area-inset-top), 1.5rem)' }}>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4B8EFF] to-[#2653FF] flex items-center justify-center">
@@ -397,41 +402,41 @@ export default function MobileDashboardPage() {
               </div>
 
               {/* Menu Items */}
-              <div className="p-4 space-y-2">
+              <div className="p-4 space-y-2 flex-1 overflow-y-auto">
                 <Link href="/app/dashboard" onClick={() => setIsMenuOpen(false)}>
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 active:scale-95 transition-transform">
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 active:scale-95 transition-transform min-h-[56px] touch-manipulation">
                     <Activity className="w-5 h-5 text-[#4B8EFF]" />
-                    <span className="text-sm font-medium text-white">Dashboard</span>
+                    <span className="text-base font-medium text-white">Dashboard</span>
                   </div>
                 </Link>
                 <Link href="/app/templates" onClick={() => setIsMenuOpen(false)}>
-                  <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 active:scale-95 transition-transform">
+                  <div className="flex items-center gap-3 p-4 rounded-xl hover:bg-white/5 active:scale-95 transition-transform min-h-[56px] touch-manipulation">
                     <BookTemplate className="w-5 h-5 text-white/60" />
-                    <span className="text-sm font-medium text-white/80">Templates</span>
+                    <span className="text-base font-medium text-white/80">Templates</span>
                   </div>
                 </Link>
                 <Link href="/app/reports" onClick={() => setIsMenuOpen(false)}>
-                  <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 active:scale-95 transition-transform">
+                  <div className="flex items-center gap-3 p-4 rounded-xl hover:bg-white/5 active:scale-95 transition-transform min-h-[56px] touch-manipulation">
                     <FileText className="w-5 h-5 text-white/60" />
-                    <span className="text-sm font-medium text-white/80">Reports</span>
+                    <span className="text-base font-medium text-white/80">Reports</span>
                   </div>
                 </Link>
                 <Link href="/app/settings" onClick={() => setIsMenuOpen(false)}>
-                  <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 active:scale-95 transition-transform">
+                  <div className="flex items-center gap-3 p-4 rounded-xl hover:bg-white/5 active:scale-95 transition-transform min-h-[56px] touch-manipulation">
                     <Settings className="w-5 h-5 text-white/60" />
-                    <span className="text-sm font-medium text-white/80">Settings</span>
+                    <span className="text-base font-medium text-white/80">Settings</span>
                   </div>
                 </Link>
               </div>
 
               {/* Sign Out Button */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10 bg-[#0a0e1a]" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
+              <div className="p-4 border-t border-white/10 bg-[#0a0e1a]" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 1rem)' }}>
                 <button
                   onClick={handleSignOut}
-                  className="w-full flex items-center justify-center gap-2 p-3 bg-white/5 border border-white/10 rounded-xl text-white/80 hover:bg-white/10 active:scale-95 transition-all"
+                  className="w-full flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-xl text-white/80 hover:bg-white/10 active:scale-95 transition-all min-h-[56px] touch-manipulation"
                 >
-                  <LogOut className="w-4 h-4" />
-                  <span className="text-sm font-medium">Sign Out</span>
+                  <LogOut className="w-5 h-5" />
+                  <span className="text-base font-medium">Sign Out</span>
                 </button>
               </div>
             </motion.div>

@@ -1,8 +1,10 @@
 // Voice recording hook with WebSocket streaming
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { useAuth } from '@/components/auth-provider';
 import { createTranscriptionWebSocket, TranscriptionWebSocket } from '@/lib/websocket';
+import { useIosPcmRecorder } from './useIosPcmRecorder';
 import type {
   RecordingState,
   WebSocketMessage,
@@ -54,6 +56,21 @@ export function useVoiceRecording(
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const durationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const chunkTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // iOS PCM recorder hook
+  const iosRecorder = useIosPcmRecorder(options.onTranscript);
+
+  // Check if we're on iOS
+  const isIos = Capacitor.getPlatform() === 'ios';
+
+  // Log platform detection on mount
+  useEffect(() => {
+    console.log('🔍 Platform detection:', {
+      platform: Capacitor.getPlatform(),
+      isNative: Capacitor.isNativePlatform(),
+      isIos,
+    });
+  }, [isIos]);
 
   // Get API base URL from environment or use default
   const apiBase = options.apiBase || process.env.NEXT_PUBLIC_API_BASE || 'http://localhost';
@@ -162,19 +179,18 @@ export function useVoiceRecording(
   );
 
   const startRecording = useCallback(async () => {
+    console.log('🎙️ [useVoiceRecording] startRecording called');
+    console.log('🎙️ [useVoiceRecording] Platform check:', {
+      isIos,
+      platform: Capacitor.getPlatform(),
+      isNative: Capacitor.isNativePlatform(),
+      hasSession: !!session?.access_token,
+    });
+
     try {
       // Check authentication
       if (!session?.access_token) {
         throw new Error('Authentication required');
-      }
-
-      // Check browser support
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Browser does not support audio recording');
-      }
-
-      if (!window.MediaRecorder) {
-        throw new Error('Browser does not support MediaRecorder');
       }
 
       // Reset state
@@ -184,181 +200,200 @@ export function useVoiceRecording(
       setDuration(0);
       setState('connecting');
 
-      // Request microphone access
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          channelCount: 1,
-          sampleRate: 16000,
-          echoCancellation: true,
-          noiseSuppression: true,
-        },
-      });
+      // Use iOS PCM approach for iOS devices
+      if (isIos) {
+        console.log('📱 [useVoiceRecording] Using iOS PCM audio worklet approach');
+        console.log('📱 [useVoiceRecording] API base:', apiBase);
 
-      mediaStreamRef.current = stream;
+        // Build backend WebSocket URL for iOS
+        // iOS will send PCM data as binary to backend, backend routes to Deepgram
+        const wsProtocol = apiBase.startsWith('https') ? 'wss' : 'ws';
+        const wsBaseUrl = apiBase.replace(/^https?:\/\//, '');
+        const wsUrl = `${wsProtocol}://${wsBaseUrl}/v1/transcribe/stream`;
+        const wsUrlWithToken = (() => {
+          try {
+            const url = new URL(wsUrl);
+            url.searchParams.set('token', session.access_token);
+            return url.toString();
+          } catch {
+            console.warn('⚠️ [useVoiceRecording] Failed to construct URL object, falling back to query concat');
+            const separator = wsUrl.includes('?') ? '&' : '?';
+            return `${wsUrl}${separator}token=${encodeURIComponent(session.access_token)}`;
+          }
+        })();
 
-      // Verify audio tracks
-      const audioTracks = stream.getAudioTracks();
-      console.log('🎤 Audio tracks:', {
-        count: audioTracks.length,
-        enabled: audioTracks[0]?.enabled,
-        muted: audioTracks[0]?.muted,
-        readyState: audioTracks[0]?.readyState,
-        label: audioTracks[0]?.label,
-        settings: audioTracks[0]?.getSettings(),
-      });
+        console.log('📱 [useVoiceRecording] Connecting to backend WebSocket:', wsUrlWithToken);
 
-      if (audioTracks.length === 0) {
-        throw new Error('No audio tracks found in media stream');
-      }
+        // Start iOS PCM recorder with backend WebSocket URL and auth token
+        await iosRecorder.start(wsUrlWithToken, session.access_token);
 
-      if (!audioTracks[0]?.enabled || audioTracks[0]?.readyState !== 'live') {
-        throw new Error('Audio track is not enabled or not live');
-      }
+        // For iOS, set max duration manually since we're not getting it from backend
+        setMaxDuration(300); // 5 minutes default
+        setState('recording');
+        startDurationTimer();
+        console.log('✅ [useVoiceRecording] iOS recording started successfully');
 
-      // Determine MIME type
-      let mimeType = 'audio/webm';
-      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-        mimeType = 'audio/webm;codecs=opus';
-      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
-        mimeType = 'audio/webm';
-      } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
-        mimeType = 'audio/ogg;codecs=opus';
-      }
+      } else {
+        console.log('🌐 Using web MediaRecorder API');
 
-      console.log('🎙️ Selected MIME type:', mimeType, 'Supported:', MediaRecorder.isTypeSupported(mimeType));
+        // Check browser support
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Browser does not support audio recording');
+        }
 
-      // Create MediaRecorder but don't start yet
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType,
-      });
+        if (!window.MediaRecorder) {
+          throw new Error('Browser does not support MediaRecorder');
+        }
 
-      console.log('📼 MediaRecorder created:', {
-        state: mediaRecorder.state,
-        mimeType: mediaRecorder.mimeType,
-        audioBitsPerSecond: mediaRecorder.audioBitsPerSecond,
-      });
-
-      mediaRecorderRef.current = mediaRecorder;
-
-      mediaRecorder.ondataavailable = (event) => {
-        const blobSize = event.data.size;
-        const blobType = event.data.type;
-
-        console.log('🎵 Audio chunk available:', {
-          size: blobSize,
-          type: blobType,
-          isEmpty: blobSize === 0,
-          recorderState: mediaRecorderRef.current?.state,
-          wsOpen: wsRef.current?.isOpen,
-          wsConnecting: wsRef.current?.isConnecting,
-          wsClosed: wsRef.current?.isClosed,
+        // Request microphone access
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            channelCount: 1,
+            sampleRate: 16000,
+            echoCancellation: true,
+            noiseSuppression: true,
+          },
         });
 
-        // Log warning if blob is empty
-        if (blobSize === 0) {
-          console.warn('⚠️ Empty audio blob received! Possible causes:');
-          console.warn('   1. MediaRecorder started but no audio data captured yet');
-          console.warn('   2. Audio track is muted or disabled');
-          console.warn('   3. requestData() called too quickly after start()');
-          console.warn('   Current recorder state:', mediaRecorderRef.current?.state);
+        mediaStreamRef.current = stream;
 
-          // Check if audio track is still active
-          if (mediaStreamRef.current) {
-            const tracks = mediaStreamRef.current.getAudioTracks();
-            console.warn('   Audio track status:', {
-              enabled: tracks[0]?.enabled,
-              muted: tracks[0]?.muted,
-              readyState: tracks[0]?.readyState,
-            });
-          }
+        // Verify audio tracks
+        const audioTracks = stream.getAudioTracks();
+        console.log('🎤 Audio tracks:', {
+          count: audioTracks.length,
+          enabled: audioTracks[0]?.enabled,
+          muted: audioTracks[0]?.muted,
+          readyState: audioTracks[0]?.readyState,
+          label: audioTracks[0]?.label,
+          settings: audioTracks[0]?.getSettings(),
+        });
+
+        if (audioTracks.length === 0) {
+          throw new Error('No audio tracks found in media stream');
         }
 
-        // Send all chunks, even empty ones, to keep Deepgram connection alive
-        const ws = wsRef.current;
-        const recorderState = mediaRecorderRef.current?.state;
-
-        if (!ws || !ws.isOpen) {
-          if (recorderState === 'recording') {
-            console.error('❌ Cannot send audio: WebSocket is not open', {
-              wsExists: !!ws,
-              wsOpen: ws?.isOpen,
-              wsConnecting: ws?.isConnecting,
-              wsClosed: ws?.isClosed,
-            });
-          } else {
-            console.log('ℹ️ Skipping audio chunk because recording has stopped');
-          }
-          return;
+        if (!audioTracks[0]?.enabled || audioTracks[0]?.readyState !== 'live') {
+          throw new Error('Audio track is not enabled or not live');
         }
 
-        if (ws.isOpen) {
-          if (blobSize > 0) {
-            console.log('📤 Sending audio chunk to WebSocket:', blobSize, 'bytes');
-            ws.send(event.data);
-            console.log('✅ Audio chunk sent successfully');
-          } else {
-            console.log('⏭️ Skipping empty audio chunk (0 bytes)');
-          }
+        // Determine MIME type
+        let mimeType = 'audio/webm';
+        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+          mimeType = 'audio/webm;codecs=opus';
+        } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+          mimeType = 'audio/webm';
+        } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
+          mimeType = 'audio/ogg;codecs=opus';
         }
-      };
 
-      mediaRecorder.onerror = (event) => {
-        console.error('❌ MediaRecorder error:', event);
-        handleError('Recording error occurred');
-      };
+        console.log('🎙️ Selected MIME type:', mimeType, 'Supported:', MediaRecorder.isTypeSupported(mimeType));
 
-      // Create WebSocket connection
-      const ws = createTranscriptionWebSocket(
-        apiBase,
-        session.access_token,
-        {
-          onOpen: () => {
-            console.log('🔌 WebSocket opened, waiting for connection_established...');
-            // Connection established, waiting for connection_established message
-          },
-          onMessage: (message) => {
-            handleWebSocketMessage(message);
+        // Create MediaRecorder but don't start yet
+        const mediaRecorder = new MediaRecorder(stream, {
+          mimeType,
+        });
 
-            // Start recording only after receiving connection_established
-            if (message.type === 'connection_established') {
-              console.log('🎤 Attempting to start MediaRecorder...', {
-                recorderExists: !!mediaRecorderRef.current,
-                recorderState: mediaRecorderRef.current?.state,
+        console.log('📼 MediaRecorder created:', {
+          state: mediaRecorder.state,
+          mimeType: mediaRecorder.mimeType,
+          audioBitsPerSecond: mediaRecorder.audioBitsPerSecond,
+        });
+
+        mediaRecorderRef.current = mediaRecorder;
+
+        mediaRecorder.ondataavailable = (event) => {
+          const blobSize = event.data.size;
+          const blobType = event.data.type;
+
+          console.log('🎵 Audio chunk available:', {
+            size: blobSize,
+            type: blobType,
+            isEmpty: blobSize === 0,
+            recorderState: mediaRecorderRef.current?.state,
+            wsOpen: wsRef.current?.isOpen,
+            wsConnecting: wsRef.current?.isConnecting,
+            wsClosed: wsRef.current?.isClosed,
+          });
+
+          // Send all chunks, even empty ones, to keep Deepgram connection alive
+          const ws = wsRef.current;
+          const recorderState = mediaRecorderRef.current?.state;
+
+          if (!ws || !ws.isOpen) {
+            if (recorderState === 'recording') {
+              console.error('❌ Cannot send audio: WebSocket is not open', {
+                wsExists: !!ws,
+                wsOpen: ws?.isOpen,
+                wsConnecting: ws?.isConnecting,
+                wsClosed: ws?.isClosed,
               });
-              if (mediaRecorderRef.current?.state === 'inactive') {
-                console.log('🎙️ Starting MediaRecorder with 250ms timeslice...');
-                // Start with 250ms timeslice - recommended for Deepgram
-                // This will emit ondataavailable events naturally every 250ms with audio data
-                mediaRecorderRef.current.start(250);
-                console.log('✅ MediaRecorder.start(250) called, state:', mediaRecorderRef.current.state);
+            } else {
+              console.log('ℹ️ Skipping audio chunk because recording has stopped');
+            }
+            return;
+          }
 
-                // Start timer to occasionally request data (every 1000ms) as a backup
-                // in case the browser doesn't respect the timeslice parameter
-                startChunkTimer();
-                console.log('✅ Chunk timer started (1000ms interval) as backup');
-              } else {
-                console.error('❌ Cannot start MediaRecorder, state:', mediaRecorderRef.current?.state);
+          if (ws.isOpen) {
+            if (blobSize > 0) {
+              console.log('📤 Sending audio chunk to WebSocket:', blobSize, 'bytes');
+              ws.send(event.data);
+              console.log('✅ Audio chunk sent successfully');
+            } else {
+              console.log('⏭️ Skipping empty audio chunk (0 bytes)');
+            }
+          }
+        };
+
+        mediaRecorder.onerror = (event) => {
+          console.error('❌ MediaRecorder error:', event);
+          handleError('Recording error occurred');
+        };
+
+        // Create WebSocket connection
+        const ws = createTranscriptionWebSocket(
+          apiBase,
+          session.access_token,
+          {
+            onOpen: () => {
+              console.log('🔌 WebSocket opened, waiting for connection_established...');
+            },
+            onMessage: (message) => {
+              handleWebSocketMessage(message);
+
+              // Start recording only after receiving connection_established
+              if (message.type === 'connection_established') {
+                console.log('🎤 Attempting to start MediaRecorder...', {
+                  recorderExists: !!mediaRecorderRef.current,
+                  recorderState: mediaRecorderRef.current?.state,
+                });
+                if (mediaRecorderRef.current?.state === 'inactive') {
+                  console.log('🎙️ Starting MediaRecorder with 250ms timeslice...');
+                  mediaRecorderRef.current.start(250);
+                  console.log('✅ MediaRecorder.start(250) called, state:', mediaRecorderRef.current?.state);
+                  startChunkTimer();
+                  console.log('✅ Chunk timer started (1000ms interval) as backup');
+                } else {
+                  console.error('❌ Cannot start MediaRecorder, state:', mediaRecorderRef.current?.state);
+                }
               }
-            }
-          },
-          onError: (err) => {
-            handleError(err);
-          },
-          onClose: (code, reason) => {
-            if (code === 1008) {
-              // Authentication or access denied
-              handleError(reason || 'Access denied. Please check your subscription plan.');
-            } else if (code !== 1000 && state === 'recording') {
-              // Unexpected close
-              handleError('Connection lost');
-            }
-          },
-          reconnect: false, // Don't auto-reconnect during recording
-        }
-      );
+            },
+            onError: (err) => {
+              handleError(err);
+            },
+            onClose: (code, reason) => {
+              if (code === 1008) {
+                handleError(reason || 'Access denied. Please check your subscription plan.');
+              } else if (code !== 1000 && state === 'recording') {
+                handleError('Connection lost');
+              }
+            },
+            reconnect: false,
+          }
+        );
 
-      wsRef.current = ws;
-      ws.connect();
+        wsRef.current = ws;
+        ws.connect();
+      }
     } catch (err) {
       if (err instanceof Error) {
         if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
@@ -372,27 +407,36 @@ export function useVoiceRecording(
         handleError('Failed to start recording');
       }
     }
-  }, [session, apiBase, state, handleWebSocketMessage, handleError, startChunkTimer]);
+  }, [session, apiBase, state, handleWebSocketMessage, handleError, startChunkTimer, startDurationTimer, isIos, iosRecorder]);
 
   const stopRecording = useCallback(() => {
+    console.log('🛑 [useVoiceRecording] stopRecording called, isIos:', isIos, 'iosRecorder.isRecording:', iosRecorder.isRecording);
+
     stopDurationTimer();
     stopChunkTimer();
 
-    // Stop media recorder
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-    }
+    // Stop iOS PCM recorder if active
+    if (isIos && iosRecorder.isRecording) {
+      console.log('📱 [useVoiceRecording] Stopping iOS PCM audio recording');
+      iosRecorder.stop();
+    } else {
+      console.log('🌐 [useVoiceRecording] Stopping web MediaRecorder');
+      // Stop media recorder
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+      }
 
-    // Stop media stream
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-      mediaStreamRef.current = null;
-    }
+      // Stop media stream
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+      }
 
-    // Close WebSocket
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
+      // Close WebSocket
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
     }
 
     // Update state
@@ -401,7 +445,8 @@ export function useVoiceRecording(
     }
 
     mediaRecorderRef.current = null;
-  }, [state, stopDurationTimer, stopChunkTimer]);
+    console.log('✅ [useVoiceRecording] Recording stopped');
+  }, [state, stopDurationTimer, stopChunkTimer, isIos, iosRecorder]);
 
   const clearTranscript = useCallback(() => {
     setTranscript('');
@@ -425,7 +470,7 @@ export function useVoiceRecording(
     error,
 
     // Recording info
-    isRecording: state === 'recording',
+    isRecording: isIos ? iosRecorder.isRecording : state === 'recording',
     duration,
     maxDuration,
     timeRemaining,
