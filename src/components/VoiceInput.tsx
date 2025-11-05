@@ -16,6 +16,7 @@ export interface VoiceInputProps {
   onUpgradeRequired?: (tier: SubscriptionTier) => void;
   disabled?: boolean;
   className?: string;
+  showLabel?: boolean;
 }
 
 export function VoiceInput({
@@ -24,6 +25,7 @@ export function VoiceInput({
   onUpgradeRequired,
   disabled = false,
   className,
+  showLabel = true,
 }: VoiceInputProps) {
   const {
     state,
@@ -143,9 +145,11 @@ export function VoiceInput({
           )}
         >
           {getIcon()}
-          <span className="ml-2">
-            {error ? 'Retry' : isRecording ? 'Stop' : 'Voice Dictation'}
-          </span>
+          {showLabel && (
+            <span className="ml-2">
+              {error ? 'Retry' : isRecording ? 'Stop' : 'Voice Dictation'}
+            </span>
+          )}
 
           {/* Recording indicator */}
           {isRecording && (

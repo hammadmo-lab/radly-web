@@ -1,6 +1,7 @@
 // src/lib/api.ts
 "use client";
 
+import { Capacitor } from "@capacitor/core";
 import { createSupabaseBrowser } from "@/utils/supabase/browser";
 import { JobDoneResult, PatientBlock } from "@/lib/types";
 import { Signature } from "@/types/report";
@@ -9,10 +10,26 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 const CLIENT_KEY = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY!;
 const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY!;
 
+async function getAccessToken(): Promise<string | null> {
+  try {
+    if (Capacitor.isNativePlatform()) {
+      const { getSupabaseClient } = await import("@/lib/supabase-singleton");
+      const supabase = await getSupabaseClient();
+      const { data } = await supabase.auth.getSession();
+      return data.session?.access_token ?? null;
+    }
+
+    const supabase = createSupabaseBrowser();
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token ?? null;
+  } catch (error) {
+    console.error("Failed to resolve auth token:", error);
+    return null;
+  }
+}
+
 export async function apiFetch(path: string, init: RequestInit = {}) {
-  const supabase = createSupabaseBrowser();
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
+  const token = await getAccessToken();
 
   const headers = new Headers(init.headers || {});
   if (!headers.has("content-type")) headers.set("content-type", "application/json");

@@ -1,0 +1,79 @@
+// Radly iOS Build Settings Configuration
+// This file contains recommended build settings for security and performance
+// These settings address Xcode build warnings
+
+// ============================================================================
+// SECURITY SETTINGS
+// ============================================================================
+
+// User Script Sandboxing - Prevents build scripts from arbitrary file access
+// Recommended: YES for all configurations
+ENABLE_USER_SCRIPT_SANDBOXING = YES
+
+// ============================================================================
+// ASSET CATALOG COMPILER SETTINGS
+// ============================================================================
+
+// Generate Asset Symbol Extensions - Type-safe asset references
+// Recommended: YES for all configurations
+ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOL_EXTENSIONS = YES
+ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES
+
+// ============================================================================
+// CODE VERIFICATION SETTINGS
+// ============================================================================
+
+// Enable Module Verifier - Catches module-related issues
+// Note: Disabled due to incompatibility with GTMSessionFetcher pod
+// The pod uses double-quoted includes which the verifier treats as errors
+// Re-enable after pod is updated or if errors are resolved
+ENABLE_MODULE_VERIFIER[config=Release] = NO
+ENABLE_MODULE_VERIFIER[config=Debug] = NO
+
+// Suppress warnings about quoted includes in framework headers
+// Required for third-party pods that use legacy include styles
+CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO
+
+// ============================================================================
+// OPTIMIZATION SETTINGS
+// ============================================================================
+
+// Dead Code Stripping - Removes unused code from binary
+// Recommended: YES for Release, NO for Debug (better debugging)
+DEAD_CODE_STRIPPING[config=Release] = YES
+DEAD_CODE_STRIPPING[config=Debug] = NO
+
+// Optimization Level for C/C++/Objective-C
+// Release: Optimize for size (-Os)
+// Debug: No optimization for better debugging
+GCC_OPTIMIZATION_LEVEL[config=Release] = s
+GCC_OPTIMIZATION_LEVEL[config=Debug] = 0
+
+// Swift Optimization Level
+// Release: Optimize (-O)
+// Debug: No optimization for better debugging
+SWIFT_OPTIMIZATION_LEVEL[config=Release] = -O
+SWIFT_OPTIMIZATION_LEVEL[config=Debug] = -Onone
+
+// ============================================================================
+// ADDITIONAL RECOMMENDED SETTINGS
+// ============================================================================
+
+// Enable Testability - Allows testing of internal classes
+// Only enable for Debug to prevent exposing internal APIs in Release
+ENABLE_TESTABILITY[config=Debug] = YES
+ENABLE_TESTABILITY[config=Release] = NO
+
+// Strip Swift Symbols - Reduces binary size
+// Only for Release builds
+STRIP_SWIFT_SYMBOLS[config=Release] = YES
+STRIP_SWIFT_SYMBOLS[config=Debug] = NO
+
+// Deployment Postprocessing - Final optimizations
+DEPLOYMENT_POSTPROCESSING[config=Release] = YES
+DEPLOYMENT_POSTPROCESSING[config=Debug] = NO
+
+// Validate Product - Ensures app meets App Store requirements
+// Enable for Release builds
+VALIDATE_PRODUCT[config=Release] = YES
+VALIDATE_PRODUCT[config=Debug] = NO

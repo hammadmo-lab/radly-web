@@ -1,16 +1,42 @@
 import UIKit
 import Capacitor
+import WebKit
+import AVFoundation
 
-@UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
-
+@main
+class AppDelegate: UIResponder, UIApplicationDelegate, WKUIDelegate {
   var window: UIWindow?
+  private var didAttachUIDelegate = false
 
-  func application(
-    _ application: UIApplication,
-    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
-  ) -> Bool {
+  func application(_ application: UIApplication,
+                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    let session = AVAudioSession.sharedInstance()
+    try? session.setCategory(.playAndRecord, options: [.defaultToSpeaker, .allowBluetooth])
+    try? session.setActive(true)
     return true
+  }
+
+  func applicationDidBecomeActive(_ application: UIApplication) {
+    if !didAttachUIDelegate,
+       let vc = self.window?.rootViewController as? CAPBridgeViewController {
+      vc.webView?.uiDelegate = self
+      didAttachUIDelegate = true
+    }
+  }
+
+  @available(iOS 15.0, *)
+  func webView(_ webView: WKWebView,
+               requestMediaCapturePermissionFor origin: WKSecurityOrigin,
+               initiatedByFrame frame: WKFrameInfo,
+               type: WKMediaCaptureType,
+               decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+    if type == .microphone || type == .cameraAndMicrophone {
+      AVAudioSession.sharedInstance().requestRecordPermission { granted in
+        DispatchQueue.main.async { decisionHandler(granted ? .grant : .deny) }
+      }
+    } else {
+      decisionHandler(.grant)
+    }
   }
 
   func application(

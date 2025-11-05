@@ -11,10 +11,13 @@ install! 'cocoapods', :disable_input_output_paths => true
 def capacitor_pods
   pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
   pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
+  pod 'CapacitorFilesystem', :path => '../../node_modules/@capacitor/filesystem'
+  pod 'CapacitorHaptics', :path => '../../node_modules/@capacitor/haptics'
   pod 'CapacitorPreferences', :path => '../../node_modules/@capacitor/preferences'
   pod 'CapacitorSplashScreen', :path => '../../node_modules/@capacitor/splash-screen'
   pod 'CapgoCapacitorSocialLogin', :path => '../../node_modules/@capgo/capacitor-social-login'
   pod 'RadlyCapacitorGoogleAuth', :path => '../../../radly-google-auth'
+  pod 'CapacitorVoiceRecorder', :path => '../../node_modules/capacitor-voice-recorder'
 end
 
 target 'App' do
@@ -32,6 +35,7 @@ post_install do |installer|
       bc.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
       bc.build_settings['CLANG_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
       bc.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
+      bc.build_settings['ENABLE_MODULE_VERIFIER'] = 'NO'  # Disable for pods to avoid GTMSessionFetcher errors
       # Silence third-party Pods warnings to keep Xcode output clean
       bc.build_settings['SWIFT_SUPPRESS_WARNINGS'] = 'YES'
       bc.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = 'YES'

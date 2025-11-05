@@ -120,9 +120,9 @@ export function MobileNav({ user, onSignOut }: MobileNavProps) {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          className="relative h-full w-80 max-w-[88vw] bg-[rgba(8,12,22,0.96)] border-r border-[rgba(75,142,255,0.25)] shadow-[0_30px_80px_rgba(10,14,24,0.75)]"
+          className="relative h-full w-80 max-w-[88vw] bg-[rgba(8,12,22,0.96)] border-r border-[rgba(75,142,255,0.25)] shadow-[0_30px_80px_rgba(10,14,24,0.75)] safe-area-inset-top"
         >
-            <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.08)] p-4">
+            <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.08)] p-4 safe-area-pt">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#2653FF_0%,#4B8EFF_60%,#8F82FF_100%)] shadow-[0_18px_42px_rgba(31,64,175,0.42)]">
                   <FileText className="h-5 w-5 text-white" />
@@ -219,8 +219,8 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[rgba(12,12,14,0.92)] border-b border-[rgba(255,255,255,0.05)] shadow-[0_1px_2px_rgba(255,255,255,0.05)]">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[rgba(12,12,14,0.92)] border-b border-[rgba(255,255,255,0.05)] shadow-[0_1px_2px_rgba(255,255,255,0.05)] safe-area-inset-top">
+      <div className="container flex h-16 items-center justify-between px-4 md:px-6 safe-area-px">
         {/* Enhanced Logo with gradient and animation */}
         <Link href="/app/dashboard" className="flex items-center gap-3 group">
           <div className="relative">

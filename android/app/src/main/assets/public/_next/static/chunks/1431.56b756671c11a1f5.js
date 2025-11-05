@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[1431],{71431:(e,s,a)=>{a.r(s),a.d(s,{SplashScreenWeb:()=>n});var c=a(32587);class n extends c.WebPlugin{async show(e){}async hide(e){}}}}]);

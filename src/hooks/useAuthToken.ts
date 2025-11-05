@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Capacitor } from '@capacitor/core'
 import { createBrowserSupabase } from '@/lib/supabase/client'
 import { isTestMode, getTestSession } from '@/lib/test-mode'
 
@@ -22,30 +23,44 @@ export function useAuthToken() {
     }
 
     let cancelled = false;
-    const supabase = createBrowserSupabase();
+    let subscription: { unsubscribe?: () => void } | null = null;
 
     const init = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (cancelled) return;
-      const t = data.session?.access_token ?? null;
-      setToken(t);
-      setUserId(data.session?.user?.id ?? null);
-      setStatus(t ? "authenticated" : "signed_out");
+      try {
+        const supabase = Capacitor.isNativePlatform()
+          ? await (await import('@/lib/supabase-singleton')).getSupabaseClient()
+          : createBrowserSupabase();
+
+        const { data } = await supabase.auth.getSession();
+        if (cancelled) return;
+        const t = data.session?.access_token ?? null;
+        setToken(t);
+        setUserId(data.session?.user?.id ?? null);
+        setStatus(t ? "authenticated" : "signed_out");
+
+        const { data: sub } = supabase.auth.onAuthStateChange((_evt, session) => {
+          if (cancelled) return;
+          const nextToken = session?.access_token ?? null;
+          setToken(nextToken);
+          setUserId(session?.user?.id ?? null);
+          setStatus(nextToken ? "authenticated" : "signed_out");
+        });
+        subscription = sub?.subscription ?? null;
+      } catch (error) {
+        console.error('Failed to initialize auth token hook:', error);
+        if (!cancelled) {
+          setToken(null);
+          setUserId(null);
+          setStatus("signed_out");
+        }
+      }
     };
 
     init();
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_evt, session) => {
-      if (cancelled) return;
-      const t = session?.access_token ?? null;
-      setToken(t);
-      setUserId(session?.user?.id ?? null);
-      setStatus(t ? "authenticated" : "signed_out");
-    });
-
     return () => {
       cancelled = true;
-      sub.subscription.unsubscribe();
+      subscription?.unsubscribe?.();
     };
   }, []);
 

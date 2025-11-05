@@ -24,6 +24,7 @@ function MobileSignInContent() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
   const hasProviders = allowGoogle || allowApple
 
   // Initialize Supabase client
@@ -54,12 +55,6 @@ function MobileSignInContent() {
   // Default to dashboard for mobile app
   const next = '/app/dashboard'
 
-  console.log('🔐 Mobile Auth flow:', {
-    isNative,
-    next,
-    platform: isNative ? 'native' : 'web'
-  })
-
   async function signInWithGoogle() {
     if (!supabase) {
       setError('Authentication not initialized')
@@ -68,24 +63,12 @@ function MobileSignInContent() {
 
     setLoading(true)
     setError(null)
+    setMessage(null)
     try {
       if (isNative) {
-        // Native sign-in on iOS/Android
-        console.log('🔵 Using native Google Sign-In')
-        const signInResult = await signInWithGoogleNative()
-
-        console.log('🔵 Sign-in completed successfully:', {
-          user: signInResult.user?.email,
-          hasSession: !!signInResult.session,
-        })
-
-        // The native auth function already verifies session persistence
-        // If we get here, the session is already valid and stored
-        console.log('🔵 Session verified by native auth, redirecting to dashboard')
+        await signInWithGoogleNative()
         router.push(next)
       } else {
-        // Fallback to web OAuth
-        console.log('🔵 Using web-based Google OAuth as fallback')
         storeAuthOrigin(next)
         const redirectTo = `${window.location.origin}/auth/callback`
 
@@ -95,9 +78,9 @@ function MobileSignInContent() {
         })
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Google Sign-In failed'
-      console.error('🔵 Google Sign-In error:', err)
-      setError(message)
+      const messageText = err instanceof Error ? err.message : 'Google Sign-In failed'
+      console.error('Google Sign-In error:', err)
+      setError(messageText)
     } finally {
       setLoading(false)
     }
@@ -111,24 +94,12 @@ function MobileSignInContent() {
 
     setLoading(true)
     setError(null)
+    setMessage(null)
     try {
       if (isNative) {
-        // Native sign-in on iOS
-        console.log('🍎 Using native Apple Sign-In')
-        const signInResult = await signInWithAppleNative()
-
-        console.log('🍎 Sign-in completed successfully:', {
-          user: signInResult.user?.email,
-          hasSession: !!signInResult.session,
-        })
-
-        // The native auth function already verifies session persistence
-        // If we get here, the session is already valid and stored
-        console.log('🍎 Session verified by native auth, redirecting to dashboard')
+        await signInWithAppleNative()
         router.push(next)
       } else {
-        // Fallback to web OAuth
-        console.log('🍎 Using web-based Apple OAuth as fallback')
         storeAuthOrigin(next)
         const redirectTo = `${window.location.origin}/auth/callback`
 
@@ -138,9 +109,9 @@ function MobileSignInContent() {
         })
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Apple Sign-In failed'
-      console.error('🍎 Apple Sign-In error:', err)
-      setError(message)
+      const messageText = err instanceof Error ? err.message : 'Apple Sign-In failed'
+      console.error('Apple Sign-In error:', err)
+      setError(messageText)
     } finally {
       setLoading(false)
     }
@@ -154,30 +125,26 @@ function MobileSignInContent() {
       return
     }
     setLoading(true)
+    setError(null)
+    setMessage(null)
     try {
-      // Store next path in cookie
       storeAuthOrigin(next)
-
-      // Use Universal Link (https) for magic link on mobile, configurable via env
       const emailRedirectTo = getMobileMagicRedirectUrl()
 
-      console.log('🔐 Sending magic link:', {
-        email,
-        emailRedirectTo,
-        next
-      })
-
-      const { error } = await (supabase as SupabaseClient).auth.signInWithOtp({
+      const { error: otpError } = await (supabase as SupabaseClient).auth.signInWithOtp({
         email,
         options: {
           emailRedirectTo,
         },
       })
-      if (error) {
-        setError(error.message)
+      if (otpError) {
+        setError(otpError.message)
       } else {
-        setError('Check your email for the magic link.')
+        setMessage('Check your email for the magic link.')
       }
+    } catch (err) {
+      const messageText = err instanceof Error ? err.message : 'Failed to send magic link'
+      setError(messageText)
     } finally {
       setLoading(false)
     }
@@ -214,6 +181,11 @@ function MobileSignInContent() {
               {error && (
                 <div className="text-xs text-red-400 bg-[rgba(255,107,107,0.1)] px-3 py-2 rounded-lg border border-red-500/30">
                   {error}
+                </div>
+              )}
+              {message && (
+                <div className="text-xs text-[rgba(111,231,183,0.85)] bg-[rgba(111,231,183,0.15)] px-3 py-2 rounded-lg border border-[rgba(111,231,183,0.3)]">
+                  {message}
                 </div>
               )}
             </div>
