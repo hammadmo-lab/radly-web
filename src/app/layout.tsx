@@ -108,9 +108,14 @@ export default function RootLayout({
     ]
   };
 
+  const fbAppId = process.env.NEXT_PUBLIC_FB_APP_ID;
+
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className="overflow-x-hidden">
       <head>
+        {/* Facebook App ID for social sharing - required for proper Open Graph rendering */}
+        {fbAppId && <meta property="fb:app_id" content={fbAppId} />}
+
         <script
           id="organization-schema"
           type="application/ld+json"
