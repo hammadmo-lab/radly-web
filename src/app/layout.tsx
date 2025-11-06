@@ -113,7 +113,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className="overflow-x-hidden">
       <head>
-        {/* Facebook App ID for social sharing - required for proper Open Graph rendering */}
+        {/* Open Graph and Facebook metadata */}
+        <meta property="og:type" content="website" />
         {fbAppId && <meta property="fb:app_id" content={fbAppId} />}
 
         <script
