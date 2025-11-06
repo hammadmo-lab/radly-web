@@ -86,22 +86,33 @@ const faq = [
   },
 ];
 
+const metadataDescription = "Learn how to generate structured radiology reports with Radly. 4-step workflow: choose template, capture findings, review assistant draft, export. Median time: 2 minutes.";
+
 export const metadata: Metadata = {
-  title: "Instructions | Radly assistant walkthrough",
-  description:
-    "Step-by-step guide to using Radly’s voice-supported reporting workflow, including keyboard alternatives and validation links.",
+  title: "Instructions | Radly assistant walkthrough | Radly Assistant",
+  description: metadataDescription,
+  alternates: {
+    canonical: "https://radly.app/instructions",
+  },
   openGraph: {
-    title: "Radly Instructions",
-    description:
-      "Learn how to capture findings, review the assistant draft, and export structured reports with Radly.",
+    title: "Voice-Supported Reporting in 4 Clear Stages",
+    description: metadataDescription,
+    url: "https://radly.app/instructions",
+    type: "article",
     images: [
       {
-        url: siteConfig.ogImage,
+        url: "https://radly.app/og-default.png",
         width: 1200,
         height: 630,
-        alt: "Radly instructions overview",
+        alt: "Radly voice-supported reporting workflow - 4 step process",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "How to Use Radly - Step-by-Step Guide",
+    description: "Voice-supported reporting workflow for radiology",
+    images: ["https://radly.app/og-default.png"],
   },
 };
 
@@ -115,8 +126,58 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 }
 
 export default function InstructionsPage() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faq.map((item) => ({
+      "@type": "Question",
+      "name": item.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.answer
+      }
+    }))
+  };
+
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Voice-supported reporting in four clear stages",
+    "description": metadataDescription,
+    "image": "https://radly.app/og-default.png",
+    "datePublished": "2025-11-05",
+    "dateModified": new Date().toISOString().split('T')[0],
+    "author": {
+      "@type": "Organization",
+      "name": "Radly",
+      "url": "https://radly.app"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Radly",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://radly.app/icon-512.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://radly.app/instructions"
+    }
+  };
+
   return (
     <div className="bg-[var(--ds-bg-gradient)] text-white">
+      <script
+        id="instructions-faq-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        id="instructions-article-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
       <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-20 px-5 py-16">
         <header className="space-y-6 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgba(207,207,207,0.55)]">Radly assistant walkthrough</p>

@@ -1,11 +1,37 @@
-"use client"
-
+import type { Metadata } from "next";
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText } from 'lucide-react'
 
-// Static page - no need for force-dynamic
+const metadataDescription = "Radly Privacy Policy: encrypted data handling, secure processing, no data sharing. Your medical information is never sold or shared.";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | Radly Assistant",
+  description: metadataDescription,
+  alternates: {
+    canonical: "https://radly.app/privacy",
+  },
+  openGraph: {
+    title: "Radly Privacy Policy",
+    description: metadataDescription,
+    url: "https://radly.app/privacy",
+    type: "website",
+    images: [
+      {
+        url: "https://radly.app/og-default.png",
+        width: 1200,
+        height: 630,
+        alt: "Radly Privacy Policy",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "Radly Privacy Policy",
+    description: metadataDescription,
+  },
+};
 
 export default function PrivacyPage() {
   return (

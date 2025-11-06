@@ -32,20 +32,33 @@ const regions = [
   { id: "international", label: "International (USD)" },
 ] as const;
 
+const metadataDescription = "Radly pricing: free tier + paid plans with full template library, priority processing, and enterprise support. Compare now. Includes 5 complimentary reports.";
+
 export const metadata: Metadata = {
-  title: "Pricing | Radly assistant plans",
-  description: "Compare Radly plans, report limits, and support options. Five complimentary reports included for new teams.",
+  title: "Pricing | Radly assistant plans | Radly Assistant",
+  description: metadataDescription,
+  alternates: {
+    canonical: "https://radly.app/pricing",
+  },
   openGraph: {
-    title: "Radly Pricing",
-    description: "Compare Radly assistant plans and choose the right coverage for your team.",
+    title: "Radly Pricing Plans - Free and Paid Tiers",
+    description: metadataDescription,
+    url: "https://radly.app/pricing",
+    type: "website",
     images: [
       {
-        url: siteConfig.ogImage,
+        url: "https://radly.app/og-default.png",
         width: 1200,
         height: 630,
-        alt: "Radly pricing overview",
+        alt: "Radly pricing plans - compare free, starter, professional, and premium tiers",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Radly Pricing Plans",
+    description: "Compare Radly assistant plans and report limits for your team",
+    images: ["https://radly.app/og-default.png"],
   },
 };
 
@@ -74,8 +87,33 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
 
   const tiers = await marketingGet<Tier[]>(`/v1/subscription/tiers?region=${region}`);
 
+  // Build ProductCollection schema from pricing tiers
+  const pricingSchema = {
+    "@context": "https://schema.org",
+    "@type": "Collection",
+    "name": "Radly Pricing Plans",
+    "description": metadataDescription,
+    "url": "https://radly.app/pricing",
+    "offers": tiers.map((tier) => ({
+      "@type": "Offer",
+      "name": tier.tier_display_name,
+      "description": `${tier.monthly_report_limit} reports per month with ${formatPrice(tier)}`,
+      "price": tier.price_monthly.toString(),
+      "priceCurrency": tier.currency,
+      "availability": "https://schema.org/InStock",
+      "url": tier.tier_name === "free"
+        ? "https://radly.app/auth/signin"
+        : `https://radly.app/pricing/checkout?tier=${tier.tier_name}&region=${region}`
+    }))
+  };
+
   return (
     <div className="bg-[var(--ds-bg-gradient)] text-white">
+      <script
+        id="pricing-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingSchema) }}
+      />
       {/* Show redirect message for mobile app users */}
       <MobileAppPricingRedirect />
 
