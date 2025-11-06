@@ -77,8 +77,46 @@ export default function RootLayout({
   const gaEnabled = !!gaMeasurementId;
   const isDev = process.env.NODE_ENV === 'development';
 
+  // Organization Schema for SEO
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Radly",
+    "alternateName": "Radly Assistant",
+    "url": "https://radly.app",
+    "description": "Voice-supported AI assistant for structured radiology reporting",
+    "logo": "https://radly.app/icon-512.png",
+    "sameAs": [
+      "https://www.facebook.com/radlyapp"
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+201005556212",
+      "contactType": "Customer Support",
+      "email": "support@radly.app"
+    },
+    "areaServed": {
+      "@type": "Country",
+      "name": ["Worldwide", "Egypt"]
+    },
+    "knowsAbout": [
+      "Radiology",
+      "Medical AI",
+      "Clinical Documentation",
+      "Voice Recognition",
+      "Healthcare Technology"
+    ]
+  };
+
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth" className="overflow-x-hidden">
+      <head>
+        <script
+          id="organization-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+      </head>
       <body className={`${inter.variable} font-sans min-h-screen bg-background text-foreground antialiased overflow-x-hidden`}>
         <Providers>
           {children}

@@ -1,8 +1,34 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ReactNode } from "react";
 
-export const metadata = {
-  title: "Terms of Service | Radly",
+const metadataDescription = "Radly Terms of Service: clinical oversight, acceptable use, data handling. Radiologists remain accountable for all reports generated with Radly.";
+
+export const metadata: Metadata = {
+  title: "Terms of Service | Radly Assistant",
+  description: metadataDescription,
+  alternates: {
+    canonical: "https://radly.app/terms",
+  },
+  openGraph: {
+    title: "Radly Terms of Service",
+    description: metadataDescription,
+    url: "https://radly.app/terms",
+    type: "website",
+    images: [
+      {
+        url: "https://radly.app/og-default.png",
+        width: 1200,
+        height: 630,
+        alt: "Radly Terms of Service",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "Radly Terms of Service",
+    description: metadataDescription,
+  },
 };
 
 export default function TermsPage() {

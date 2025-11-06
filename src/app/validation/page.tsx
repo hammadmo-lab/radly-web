@@ -6,14 +6,33 @@ import { ClipboardSignature, Mic, FileText, CheckCircle2 } from "lucide-react";
 
 export const dynamic = "force-static";
 
-const metadataDescription = "Radly validation summary covering datasets, transcription accuracy, workflow timing, and limitations.";
+const metadataDescription = "Review Radly's validation testing with 180 anonymized cases. Median draft time under 2 minutes. Full methodology transparency including limitations.";
 
 export const metadata: Metadata = {
-  title: "Validation | Radly internal testing overview",
+  title: "Validation | Radly internal testing overview | Radly Assistant",
   description: metadataDescription,
+  alternates: {
+    canonical: "https://radly.app/validation",
+  },
   openGraph: {
-    title: "Radly Validation",
+    title: "How Radly Validates Assistant Accuracy",
     description: metadataDescription,
+    url: "https://radly.app/validation",
+    type: "article",
+    images: [
+      {
+        url: "https://radly.app/og-default.png",
+        width: 1200,
+        height: 630,
+        alt: "Radly Validation Testing Data - 180 anonymized cases, median draft time under 2 minutes",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Radly Validation: Real Testing Data",
+    description: "How we validate radiology report generation accuracy",
+    images: ["https://radly.app/og-default.png"],
   },
 };
 
@@ -44,8 +63,40 @@ const limitations = [
 ];
 
 export default function ValidationPage() {
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "How we validate Radly's assistant workflow",
+    "description": metadataDescription,
+    "image": "https://radly.app/og-default.png",
+    "datePublished": "2025-11-05",
+    "dateModified": new Date().toISOString().split('T')[0],
+    "author": {
+      "@type": "Organization",
+      "name": "Radly",
+      "url": "https://radly.app"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Radly",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://radly.app/icon-512.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://radly.app/validation"
+    }
+  };
+
   return (
     <div className="bg-[var(--ds-bg-gradient)] text-white">
+      <script
+        id="validation-article-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
       <main className="mx-auto max-w-4xl px-5 py-16">
         <header className="space-y-4">
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgba(207,207,207,0.55)]">Validation summary</p>

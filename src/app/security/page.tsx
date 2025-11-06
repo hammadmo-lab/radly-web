@@ -24,20 +24,71 @@ const commitments = [
   },
 ];
 
-const metadataDescription = "Security overview for Radly: encryption, access controls, retention options, and data subject request contacts.";
+const metadataDescription = "Enterprise-grade security controls. TLS 1.2+ encryption, AES-256 at-rest, role-based access, SSO, 90-day audit logs. HIPAA-ready architecture.";
 
 export const metadata: Metadata = {
-  title: "Security | Radly controls and safeguards",
+  title: "Security | Radly controls and safeguards | Radly Assistant",
   description: metadataDescription,
+  alternates: {
+    canonical: "https://radly.app/security",
+  },
   openGraph: {
-    title: "Radly Security",
+    title: "Radly Security & Compliance",
     description: metadataDescription,
+    url: "https://radly.app/security",
+    type: "article",
+    images: [
+      {
+        url: "https://radly.app/og-default.png",
+        width: 1200,
+        height: 630,
+        alt: "Radly Security Controls - Enterprise-grade encryption and compliance",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Radly Security & Data Protection",
+    description: "Enterprise security controls for healthcare data",
+    images: ["https://radly.app/og-default.png"],
   },
 };
 
 export default function SecurityPage() {
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "How Radly protects clinician and patient data",
+    "description": metadataDescription,
+    "image": "https://radly.app/og-default.png",
+    "datePublished": "2025-11-05",
+    "dateModified": new Date().toISOString().split('T')[0],
+    "author": {
+      "@type": "Organization",
+      "name": "Radly",
+      "url": "https://radly.app"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Radly",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://radly.app/icon-512.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://radly.app/security"
+    }
+  };
+
   return (
     <div className="bg-[var(--ds-bg-gradient)] text-white">
+      <script
+        id="security-article-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
       <main className="mx-auto max-w-4xl px-5 py-16">
         <header className="space-y-4">
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgba(207,207,207,0.55)]">Security and compliance</p>
