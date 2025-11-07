@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/marketing/Breadcrumb";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
@@ -235,11 +236,15 @@ export default function AboutPage() {
             <div className="grid gap-8 lg:grid-cols-2 items-start">
               {/* Avatar placeholder - in production this would be an actual image */}
               <div className="flex flex-col items-center space-y-4">
-                <div className="w-48 h-48 rounded-2xl bg-gradient-to-br from-[rgba(143,130,255,0.3)] to-[rgba(143,130,255,0.1)] border border-[rgba(143,130,255,0.3)] flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-6xl mb-2">👨‍⚕️</div>
-                    <div className="text-sm text-[rgba(207,207,207,0.55)]">Dr. Mohamed A. Hammad</div>
-                  </div>
+                <div className="w-48 h-48 rounded-2xl overflow-hidden border border-[rgba(143,130,255,0.3)]">
+                  <Image
+                    src="/team/mohamed-hammad.jpg"
+                    alt="Dr. Mohamed A. Hammad"
+                    width={192}
+                    height={192}
+                    className="w-full h-full object-cover"
+                    priority
+                  />
                 </div>
                 <div className="flex gap-3">
                   <a
