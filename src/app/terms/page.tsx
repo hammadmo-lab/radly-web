@@ -33,8 +33,33 @@ export const metadata: Metadata = {
 };
 
 export default function TermsPage() {
+  const webPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://radly.app/terms",
+    "name": "Terms of Service | Radly Assistant",
+    "description": metadataDescription,
+    "url": "https://radly.app/terms",
+    "isPartOf": {
+      "@id": "https://radly.app/#organization"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Radly",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://radly.app/icon-512.png"
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[var(--ds-bg-gradient)] text-white">
+      <script
+        id="terms-webpage-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+      />
       <main className="mx-auto max-w-4xl px-6 py-16 sm:py-20 lg:py-24 space-y-10">
         <div className="space-y-3">
           <Breadcrumb items={[

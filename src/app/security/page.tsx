@@ -56,6 +56,26 @@ export const metadata: Metadata = {
 };
 
 export default function SecurityPage() {
+  const webPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://radly.app/security",
+    "name": "Security | Radly controls and safeguards",
+    "description": metadataDescription,
+    "url": "https://radly.app/security",
+    "isPartOf": {
+      "@id": "https://radly.app/#organization"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Radly",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://radly.app/icon-512.png"
+      }
+    }
+  };
+
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -85,6 +105,11 @@ export default function SecurityPage() {
 
   return (
     <div className="bg-[var(--ds-bg-gradient)] text-white">
+      <script
+        id="security-webpage-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+      />
       <script
         id="security-article-schema"
         type="application/ld+json"
