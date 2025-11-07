@@ -1,6 +1,6 @@
 "use client";
 
-import { PrimaryCTA } from "@/components/marketing/PrimaryCTA";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 export function ContactForm() {
@@ -120,9 +120,13 @@ export function ContactForm() {
           </label>
         </div>
 
-        <PrimaryCTA type="submit" ariaLabel="Send message">
+        <Button
+          type="submit"
+          size="lg"
+          className="cta-primary h-12 sm:h-13 rounded-2xl px-6 sm:px-8 text-sm sm:text-base font-semibold shadow-[0_24px_64px_rgba(38,83,255,0.42)] w-full sm:w-auto min-h-[44px] touch-manipulation"
+        >
           Send Message
-        </PrimaryCTA>
+        </Button>
       </form>
     </div>
   );
