@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useSafeClickHandler } from '@/hooks/useButtonResponsiveness'
+import { triggerHaptic } from '@/utils/haptics'
 import { 
   BookTemplate, 
   Settings, 
@@ -39,11 +40,16 @@ interface NavLinkProps {
 }
 
 const NavLink = ({ href, icon: Icon, label, isActive }: NavLinkProps) => {
+  const handleNavClick = () => {
+    triggerHaptic('light')
+  }
+
   return (
     <Link
       href={href}
+      onClick={handleNavClick}
       className={cn(
-        "flex items-center gap-3 rounded-xl border border-[rgba(255,255,255,0.08)] px-4 py-3 text-sm font-medium transition-all duration-200",
+        "flex items-center gap-3 rounded-xl border border-[rgba(255,255,255,0.08)] px-4 py-3 text-sm font-medium transition-all duration-200 active:scale-95",
         "min-h-[44px] touch-manipulation text-[rgba(207,207,207,0.7)] bg-[rgba(12,16,28,0.72)] hover:border-[rgba(75,142,255,0.32)] hover:bg-[rgba(75,142,255,0.12)] hover:text-white hover:shadow-[0_14px_30px_rgba(31,64,175,0.35)]",
         isActive &&
           "border-[rgba(75,142,255,0.45)] bg-[rgba(75,142,255,0.16)] text-white shadow-[0_18px_42px_rgba(31,64,175,0.4)]"
@@ -72,6 +78,11 @@ export function MobileNav({ user, onSignOut }: MobileNavProps) {
   const pathname = usePathname()
   const { isAuthenticated: isAdmin } = useAdminAuth()
 
+  const handleMenuToggle = (open: boolean) => {
+    setIsOpen(open)
+    triggerHaptic('light')
+  }
+
   const navItems = [
     { href: '/app/dashboard', icon: Activity, label: 'Dashboard' },
     { href: '/app/templates', icon: BookTemplate, label: 'Templates' },
@@ -93,8 +104,8 @@ export function MobileNav({ user, onSignOut }: MobileNavProps) {
       <Button
         variant="ghost"
         size="icon"
-        className="md:hidden"
-        onClick={() => setIsOpen(true)}
+        className="md:hidden active:scale-95 transition-transform"
+        onClick={() => handleMenuToggle(true)}
         aria-label="Open navigation menu"
       >
         <Menu className="w-5 h-5" />
@@ -137,9 +148,9 @@ export function MobileNav({ user, onSignOut }: MobileNavProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsOpen(false)}
+                onClick={() => handleMenuToggle(false)}
                 aria-label="Close navigation menu"
-                className="text-[rgba(207,207,207,0.7)] hover:text-white"
+                className="text-[rgba(207,207,207,0.7)] hover:text-white active:scale-95 transition-transform"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -148,13 +159,17 @@ export function MobileNav({ user, onSignOut }: MobileNavProps) {
             {/* Navigation items */}
             <nav className="space-y-3 p-4">
               {navItems.map((item) => (
-                <NavLink
+                <div
                   key={item.href}
-                  href={item.href}
-                  icon={item.icon}
-                  label={item.label}
-                  isActive={pathname.startsWith(item.href)}
-                />
+                  onClick={() => handleMenuToggle(false)}
+                >
+                  <NavLink
+                    href={item.href}
+                    icon={item.icon}
+                    label={item.label}
+                    isActive={pathname.startsWith(item.href)}
+                  />
+                </div>
               ))}
             </nav>
 
@@ -361,11 +376,15 @@ export function BottomNav({ pathname }: BottomNavProps) {
       <div className="flex justify-around items-center h-16 px-2">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href)
+          const handleNavClick = () => {
+            triggerHaptic('light')
+          }
           return (
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center justify-center gap-1 flex-1 h-full relative group"
+              onClick={handleNavClick}
+              className="flex flex-col items-center justify-center gap-1 flex-1 h-full relative group active:opacity-75 transition-opacity"
             >
               {/* Top indicator for active state */}
               {isActive && (
@@ -375,10 +394,10 @@ export function BottomNav({ pathname }: BottomNavProps) {
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
-              
+
               {/* Icon container with scale animation and minimum touch target */}
               <motion.div
-                whileTap={{ scale: 0.9 }}
+                whileTap={{ scale: 0.85 }}
                 className={cn(
                   "p-3 rounded-xl transition-all duration-200",
                   "min-w-[44px] min-h-[44px] flex items-center justify-center",
@@ -394,12 +413,12 @@ export function BottomNav({ pathname }: BottomNavProps) {
                   )}
                 />
               </motion.div>
-              
+
               {/* Label */}
               <span className={cn(
                 "text-xs font-medium transition-colors",
-                isActive 
-                  ? "text-[#3A82F7]" 
+                isActive
+                  ? "text-[#3A82F7]"
                   : "text-[rgba(207,207,207,0.7)]"
               )}>
                 {item.label}
