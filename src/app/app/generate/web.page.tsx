@@ -412,8 +412,8 @@ export default function GeneratePage() {
       // Clear the draft after successful submission
       clearDraft()
 
-      // Trigger success celebration
-      celebrateSuccess()
+      // Trigger success celebration (fire and forget)
+      celebrateSuccess().catch(console.error)
 
       // Add optimistic row to localStorage with user-specific key
       try {

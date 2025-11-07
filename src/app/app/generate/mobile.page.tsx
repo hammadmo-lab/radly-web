@@ -422,8 +422,8 @@ export default function MobileGeneratePage() {
       const createResp = await enqueueJob(payload)
       const jobId = createResp.job_id
 
-      // Trigger success celebration (non-blocking)
-      celebrateSuccess()
+      // Trigger success celebration (non-blocking, fire and forget)
+      celebrateSuccess().catch(console.error)
 
       // Clear persisted draft after successful submission
       if (typeof window !== 'undefined') {
