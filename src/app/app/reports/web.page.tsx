@@ -464,8 +464,9 @@ export default function ReportsPage() {
             onClick={() => {
               setStatusFilter(null);
               setCurrentPage(1);
+              triggerHaptic('light');
             }}
-            className={`px-4 h-10 rounded-lg border transition-colors text-sm font-medium ${
+            className={`px-4 py-2 min-h-[44px] rounded-lg border transition-colors text-sm font-medium touch-manipulation active:scale-95 ${
               statusFilter === null
                 ? 'border-[#4B8EFF] bg-[rgba(75,142,255,0.12)] text-[#D7E3FF]'
                 : 'border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.75)] hover:border-[rgba(75,142,255,0.4)] hover:text-white'
@@ -480,8 +481,9 @@ export default function ReportsPage() {
               onClick={() => {
                 setStatusFilter(statusFilter === status ? null : status);
                 setCurrentPage(1);
+                triggerHaptic('light');
               }}
-              className={`px-4 h-10 rounded-lg border transition-colors text-sm font-medium ${
+              className={`px-4 py-2 min-h-[44px] rounded-lg border transition-colors text-sm font-medium touch-manipulation active:scale-95 ${
                 statusFilter === status
                   ? badgeClass.replace('bg-', 'bg-').replace('border', 'border') + ' border-current'
                   : 'border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.75)] hover:border-[rgba(255,255,255,0.2)] hover:text-white'
@@ -554,7 +556,7 @@ export default function ReportsPage() {
                       toggleSelection(r.job_id);
                       triggerHaptic('light');
                     }}
-                    className="flex-shrink-0 p-1 rounded hover:bg-[rgba(75,142,255,0.12)] transition-colors"
+                    className="flex-shrink-0 p-2 min-h-[44px] min-w-[44px] rounded hover:bg-[rgba(75,142,255,0.12)] transition-colors active:scale-95 flex items-center justify-center touch-manipulation"
                     aria-label={`Select report ${r.job_id}`}
                   >
                     {isSelected(r.job_id) ? (
@@ -582,7 +584,7 @@ export default function ReportsPage() {
                             copy(r.job_id);
                             triggerHaptic('light');
                           }}
-                          className="p-1 rounded hover:bg-[rgba(75,142,255,0.12)] transition-colors"
+                          className="p-2 min-h-[44px] min-w-[44px] rounded hover:bg-[rgba(75,142,255,0.12)] transition-colors active:scale-95 flex items-center justify-center touch-manipulation"
                           title="Copy Job ID"
                           aria-label="Copy Job ID"
                         >
