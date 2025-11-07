@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { httpPost } from "@/lib/http";
+import { httpPost, httpGet } from "@/lib/http";
 import { toast } from "sonner";
 import { MessageSquare, Send, Loader2, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useJobStatusPolling } from "@/hooks/useSafePolling";
 
 interface RefineFindingsProps {
   reportId: string;
@@ -25,12 +26,50 @@ export function RefineFindings({ reportId, sections }: RefineFindingsProps) {
   const [selectedSection, setSelectedSection] = useState<string>("");
   const [refinementPrompt, setRefinementPrompt] = useState("");
   const [isRefining, setIsRefining] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const jobIdRef = useRef<string | null>(null);
 
   const sectionOptions = [
     { value: "findings", label: "Findings", description: "Main observations and measurements" },
     { value: "impression", label: "Impression", description: "Clinical interpretation and diagnosis" },
     { value: "recommendations", label: "Recommendations", description: "Follow-up suggestions" },
   ];
+
+  // Poll for job completion
+  const { isPolling } = useJobStatusPolling(
+    async () => {
+      if (!jobIdRef.current) return;
+
+      try {
+        const response = await httpGet<{ status: string }>(
+          `/v1/jobs/${jobIdRef.current}`
+        );
+
+        if (response.status === "completed") {
+          // Job completed successfully
+          router.refresh();
+          toast.success(
+            `${selectedSection.charAt(0).toUpperCase() + selectedSection.slice(1)} section refined successfully!`
+          );
+          setRefinementPrompt("");
+          setSelectedSection("");
+          setJobId(null);
+          jobIdRef.current = null;
+          // Stop polling by returning (hook detects job completion)
+          throw new Error("Job completed");
+        }
+      } catch (error) {
+        // If we get a 404 or other error, the job may have completed already
+        // This will trigger cleanup
+        throw error;
+      }
+    },
+    {
+      pauseWhenHidden: true,
+      immediate: false, // Don't poll until we have a job ID
+      cleanupOnError: false, // Don't stop polling on transient errors
+    }
+  );
 
   const handleRefine = async () => {
     if (!selectedSection || !refinementPrompt.trim()) {
@@ -40,7 +79,7 @@ export function RefineFindings({ reportId, sections }: RefineFindingsProps) {
 
     setIsRefining(true);
     try {
-      await httpPost<
+      const response = await httpPost<
         { section: string; refinement_prompt: string },
         { job_id: string }
       >(`/v1/reports/${reportId}/refine`, {
@@ -48,17 +87,11 @@ export function RefineFindings({ reportId, sections }: RefineFindingsProps) {
         refinement_prompt: refinementPrompt,
       });
 
-      toast.success("Section refinement started!");
+      const newJobId = response.job_id;
+      jobIdRef.current = newJobId;
+      setJobId(newJobId);
 
-      // TODO: Implement polling for job completion
-      // For now, just refresh after a delay
-      setTimeout(() => {
-        router.refresh();
-        toast.success(`${selectedSection.charAt(0).toUpperCase() + selectedSection.slice(1)} section refined successfully!`);
-        setRefinementPrompt("");
-        setSelectedSection("");
-      }, 5000);
-
+      toast.success("Section refinement started! Polling for completion...");
     } catch (error) {
       console.error("Failed to refine section:", error);
       toast.error("Failed to refine section");
