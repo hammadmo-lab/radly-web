@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect, Suspense, lazy } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
-  Plus, FileText, BookTemplate, Clock,
+  Plus, FileText, BookTemplate, TrendingUp, Clock,
   Sparkles, Zap, ArrowRight, Activity
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
