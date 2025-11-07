@@ -26,7 +26,6 @@ export function RefineFindings({ reportId, sections }: RefineFindingsProps) {
   const [selectedSection, setSelectedSection] = useState<string>("");
   const [refinementPrompt, setRefinementPrompt] = useState("");
   const [isRefining, setIsRefining] = useState(false);
-  const [jobId, setJobId] = useState<string | null>(null);
   const jobIdRef = useRef<string | null>(null);
 
   const sectionOptions = [
@@ -36,7 +35,7 @@ export function RefineFindings({ reportId, sections }: RefineFindingsProps) {
   ];
 
   // Poll for job completion
-  const { isPolling } = useJobStatusPolling(
+  useJobStatusPolling(
     async () => {
       if (!jobIdRef.current) return;
 
@@ -53,7 +52,6 @@ export function RefineFindings({ reportId, sections }: RefineFindingsProps) {
           );
           setRefinementPrompt("");
           setSelectedSection("");
-          setJobId(null);
           jobIdRef.current = null;
           // Stop polling by returning (hook detects job completion)
           throw new Error("Job completed");
@@ -89,7 +87,6 @@ export function RefineFindings({ reportId, sections }: RefineFindingsProps) {
 
       const newJobId = response.job_id;
       jobIdRef.current = newJobId;
-      setJobId(newJobId);
 
       toast.success("Section refinement started! Polling for completion...");
     } catch (error) {

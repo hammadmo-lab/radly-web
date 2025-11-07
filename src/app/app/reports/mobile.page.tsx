@@ -148,7 +148,7 @@ export default function MobileReportsPage() {
     return sorted
   }, [showArrivalToast])
 
-  const fetchRemoteReports = useCallback(async (jobsKey: string): Promise<MobileReportRow[]> => {
+  const fetchRemoteReports = useCallback(async (): Promise<MobileReportRow[]> => {
     try {
       const remote = await getRecentReportsClient(50)
       let normalized = remote?.map((report) => {
@@ -205,7 +205,7 @@ export default function MobileReportsPage() {
 
       const stored = localStorage.getItem(jobsKey)
       if (!stored) {
-        const remoteRows = await fetchRemoteReports(jobsKey)
+        const remoteRows = await fetchRemoteReports()
         applyRows(remoteRows, jobsKey)
         return
       }
@@ -213,7 +213,7 @@ export default function MobileReportsPage() {
       const localJobs: StoredJob[] = JSON.parse(stored)
 
       if (localJobs.length === 0) {
-        const remoteRows = await fetchRemoteReports(jobsKey)
+        const remoteRows = await fetchRemoteReports()
         applyRows(remoteRows, jobsKey)
         return
       }
@@ -239,7 +239,7 @@ export default function MobileReportsPage() {
       const sortedJobs = applyRows(jobs, jobsKey)
 
       if (showLoading) {
-        const remoteRows = await fetchRemoteReports(jobsKey)
+        const remoteRows = await fetchRemoteReports()
         if (remoteRows.length) {
           const mergedMap = new Map<string, MobileReportRow>()
           sortedJobs.forEach((job) => mergedMap.set(job.job_id, job))
@@ -385,7 +385,7 @@ export default function MobileReportsPage() {
             </button>
           </div>
         ) : (
-          rows.map((row, index) => {
+          rows.map((row) => {
             const statusConfig = STATUS_CONFIG[row.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.error
             const StatusIcon = statusConfig.icon
 

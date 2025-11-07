@@ -37,7 +37,7 @@ import { ButtonProps, buttonVariants } from "@/components/ui/button"
 /**
  * Pagination - Container for pagination controls
  */
-const Pagination = ({ className, ...props }: React.HTMLAttributes<HTMLNav>) => (
+const Pagination = ({ className, ...props }: React.HTMLAttributes<HTMLElement>) => (
   <nav
     role="navigation"
     aria-label="Pagination Navigation"

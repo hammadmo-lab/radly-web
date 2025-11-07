@@ -24,7 +24,6 @@ export function RegenerateWithTone({ reportId }: RegenerateWithToneProps) {
   const router = useRouter();
   const [selectedTone, setSelectedTone] = useState<string>("standard");
   const [isRegenerating, setIsRegenerating] = useState(false);
-  const [jobId, setJobId] = useState<string | null>(null);
   const jobIdRef = useRef<string | null>(null);
 
   const tones = [
@@ -36,7 +35,7 @@ export function RegenerateWithTone({ reportId }: RegenerateWithToneProps) {
   ];
 
   // Poll for job completion
-  const { isPolling } = useJobStatusPolling(
+  useJobStatusPolling(
     async () => {
       if (!jobIdRef.current) return;
 
@@ -50,7 +49,6 @@ export function RegenerateWithTone({ reportId }: RegenerateWithToneProps) {
           router.refresh();
           toast.success("Report regenerated successfully!");
           setSelectedTone("standard");
-          setJobId(null);
           jobIdRef.current = null;
           // Stop polling by throwing (hook detects job completion)
           throw new Error("Job completed");
@@ -82,7 +80,6 @@ export function RegenerateWithTone({ reportId }: RegenerateWithToneProps) {
 
       const newJobId = response.job_id;
       jobIdRef.current = newJobId;
-      setJobId(newJobId);
 
       toast.success("Report regeneration started! Polling for completion...");
     } catch (error) {
