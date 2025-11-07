@@ -105,14 +105,14 @@ export default function ReportsPage() {
     try {
       setLoading(true);
       setErr(null);
-      
+
       // Don't load if no user ID
       if (!userId) {
         setRows([]);
         setErr(null);
         return;
       }
-      
+
       // Get user-specific localStorage key
       const userJobsKey = getUserJobsKey();
       if (!userJobsKey) {
@@ -120,14 +120,45 @@ export default function ReportsPage() {
         setErr(null);
         return;
       }
-      
+
       // Since /v1/jobs/recent doesn't exist, we'll use localStorage as the primary source
       // and try to get recent jobs from there
       const localJobs = JSON.parse(localStorage.getItem(userJobsKey) || '[]');
-      
+
       if (localJobs.length > 0) {
+        // Validate that jobs still exist on backend - clean up orphaned jobs
+        const validJobs: LocalStorageJob[] = [];
+        const orphanedJobs: string[] = [];
+
+        // Check all jobs in parallel
+        const validationResults = await Promise.allSettled(
+          localJobs.map(job => getJob(job.job_id))
+        );
+
+        validationResults.forEach((result, index) => {
+          const job = localJobs[index];
+          if (result.status === 'fulfilled') {
+            // Job exists on backend - keep it
+            validJobs.push(job);
+          } else {
+            // Job doesn't exist on backend (404 or other error) - mark for removal
+            const error = result.reason;
+            if (error?.status === 404) {
+              orphanedJobs.push(job.job_id);
+            } else {
+              // For other errors (network, etc.), keep the job to avoid data loss
+              validJobs.push(job);
+            }
+          }
+        });
+
+        // Clean up orphaned jobs from localStorage
+        if (orphanedJobs.length > 0) {
+          localStorage.setItem(userJobsKey, JSON.stringify(validJobs));
+        }
+
         // Convert localStorage format to RecentJobRow format
-        const formattedJobs: RecentJobRow[] = localJobs.map((job: LocalStorageJob) => ({
+        const formattedJobs: RecentJobRow[] = validJobs.map((job: LocalStorageJob) => ({
           job_id: job.job_id,
           status: job.status || 'queued',
           template_id: job.template_id || job.title || '—'
