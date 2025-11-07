@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
 import { marketingGet } from "@/lib/http/marketing";
 import { PrimaryCTA, SecondaryCTA } from "@/components/marketing/PrimaryCTA";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
@@ -222,6 +222,17 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
           <p className="text-xs uppercase tracking-[0.24em] text-[rgba(207,207,207,0.55)]">
             Includes five complimentary reports • No billing setup required to evaluate
           </p>
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-xs">
+            <Link href="/instructions" className="inline-flex items-center gap-1 text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">
+              See workflow guide
+              <ArrowRight className="h-3 w-3" aria-hidden />
+            </Link>
+            <span className="hidden sm:inline text-[rgba(207,207,207,0.3)]">•</span>
+            <Link href="/security" className="inline-flex items-center gap-1 text-[rgba(111,231,183,0.85)] underline-offset-4 hover:underline">
+              Security & compliance
+              <ArrowRight className="h-3 w-3" aria-hidden />
+            </Link>
+          </div>
         </section>
 
         <noscript>

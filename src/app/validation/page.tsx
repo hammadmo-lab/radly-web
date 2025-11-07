@@ -156,6 +156,17 @@ export default function ValidationPage() {
               Request full validation pack
             </SecondaryCTA>
           </div>
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-xs">
+            <Link href="/instructions" className="inline-flex items-center gap-1 text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">
+              See workflow guide
+              <ArrowRight className="h-3 w-3" aria-hidden />
+            </Link>
+            <span className="hidden sm:inline text-[rgba(207,207,207,0.3)]">•</span>
+            <Link href="/security" className="inline-flex items-center gap-1 text-[rgba(111,231,183,0.85)] underline-offset-4 hover:underline">
+              Security details
+              <ArrowRight className="h-3 w-3" aria-hidden />
+            </Link>
+          </div>
         </section>
       </main>
 
