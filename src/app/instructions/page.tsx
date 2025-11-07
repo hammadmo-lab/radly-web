@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Brain, Mic, Radio, ShieldCheck } from "lucide-react";
 import { PrimaryCTA, SecondaryCTA } from "@/components/marketing/PrimaryCTA";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { Breadcrumb } from "@/components/marketing/Breadcrumb";
 import { siteConfig } from "@/lib/siteConfig";
 
 export const dynamic = "force-static";
@@ -180,6 +181,10 @@ export default function InstructionsPage() {
       />
       <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-20 px-5 py-16">
         <header className="space-y-6 text-center">
+          <Breadcrumb items={[
+            { label: "Home", url: "/" },
+            { label: "Instructions", url: "/instructions" }
+          ]} />
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgba(207,207,207,0.55)]">Radly assistant walkthrough</p>
           <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">Voice-supported reporting in four clear stages</h1>
           <p className="mx-auto max-w-3xl text-sm text-[rgba(207,207,207,0.75)] sm:text-base">

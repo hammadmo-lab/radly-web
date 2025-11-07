@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText } from 'lucide-react'
+import { Breadcrumb } from '@/components/marketing/Breadcrumb'
 
 const metadataDescription = "Radly Privacy Policy: encrypted data handling, secure processing, no data sharing. Your medical information is never sold or shared.";
 
@@ -52,6 +53,12 @@ export default function PrivacyPage() {
       </header>
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="mb-6">
+          <Breadcrumb items={[
+            { label: "Home", url: "/" },
+            { label: "Privacy", url: "/privacy" }
+          ]} />
+        </div>
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">Radly Assistant – Privacy Policy</CardTitle>

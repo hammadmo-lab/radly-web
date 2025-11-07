@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ReactNode } from "react";
+import { Breadcrumb } from "@/components/marketing/Breadcrumb";
 
 const metadataDescription = "Radly Terms of Service: clinical oversight, acceptable use, data handling. Radiologists remain accountable for all reports generated with Radly.";
 
@@ -36,6 +37,10 @@ export default function TermsPage() {
     <div className="min-h-screen bg-[var(--ds-bg-gradient)] text-white">
       <main className="mx-auto max-w-4xl px-6 py-16 sm:py-20 lg:py-24 space-y-10">
         <div className="space-y-3">
+          <Breadcrumb items={[
+            { label: "Home", url: "/" },
+            { label: "Terms", url: "/terms" }
+          ]} />
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[rgba(207,207,207,0.55)]">
             Using Radly
           </p>

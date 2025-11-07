@@ -5,6 +5,7 @@ import { Check, ArrowRight } from "lucide-react";
 import { marketingGet } from "@/lib/http/marketing";
 import { PrimaryCTA, SecondaryCTA } from "@/components/marketing/PrimaryCTA";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { Breadcrumb } from "@/components/marketing/Breadcrumb";
 import { siteConfig } from "@/lib/siteConfig";
 import { MobileAppPricingRedirect } from "@/components/pricing/MobileAppPricingRedirect";
 
@@ -118,9 +119,15 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
       <MobileAppPricingRedirect />
 
       <main className="mx-auto max-w-6xl px-5 py-16">
-        <header className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgba(207,207,207,0.55)]">Radly plans</p>
-          <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">Choose the plan that fits your reporting volume</h1>
+        <header className="text-center space-y-4">
+          <Breadcrumb items={[
+            { label: "Home", url: "/" },
+            { label: "Pricing", url: "/pricing" }
+          ]} />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgba(207,207,207,0.55)]">Radly plans</p>
+            <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">Choose the plan that fits your reporting volume</h1>
+          </div>
           <p className="mt-4 text-sm text-[rgba(207,207,207,0.75)] sm:text-base">
             All plans include five complimentary reports to evaluate the assistant. Detailed validation notes are available for compliance teams.
           </p>
