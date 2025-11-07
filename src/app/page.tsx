@@ -93,6 +93,38 @@ const jsonLd = {
   url: siteConfig.url,
 };
 
+const searchActionSchema = {
+  "@context": "https://schema.org",
+  "@type": "SearchAction",
+  "target": {
+    "@type": "EntryPoint",
+    "urlTemplate": "https://radly.app/?search={search_term_string}"
+  },
+  "query-input": "required name=search_term_string"
+};
+
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Radly Assistant",
+  "description": "Voice-supported AI assistant for structured radiology report generation",
+  "provider": {
+    "@type": "Organization",
+    "name": "Radly",
+    "url": "https://radly.app"
+  },
+  "areaServed": "Global",
+  "serviceType": "Healthcare IT Service",
+  "applicationCategory": "HealthApplication",
+  "offers": {
+    "@type": "Offer",
+    "priceCurrency": "USD",
+    "price": "0",
+    "description": "Free tier with 5 complimentary reports monthly"
+  },
+  "url": "https://radly.app"
+};
+
 export const metadata: Metadata = {
   title: "Radly Assistant | Voice-supported radiology reporting",
   description:
@@ -123,8 +155,19 @@ export default function Home() {
   return (
     <div className="bg-[var(--ds-bg-gradient)] text-white overflow-x-hidden">
       <script
+        id="home-software-app-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        id="home-search-action-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(searchActionSchema) }}
+      />
+      <script
+        id="home-service-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
       />
 
       <HomePageRenderer
