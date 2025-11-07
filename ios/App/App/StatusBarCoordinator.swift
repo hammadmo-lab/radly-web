@@ -13,19 +13,19 @@ class StatusBarCoordinator {
         }
     }
 
-    /// Publishes safe area changes to the Capacitor bridge
+    /// Publishes safe area changes via NotificationCenter
     func notifySafeAreaChanged(in view: UIView) {
         guard let safeAreaInsets = view.window?.safeAreaInsets else { return }
 
-        let data: JSObject = [
+        let data: [String: CGFloat] = [
             "top": safeAreaInsets.top,
             "bottom": safeAreaInsets.bottom,
             "left": safeAreaInsets.left,
             "right": safeAreaInsets.right
         ]
 
-        // Notify JS layer of safe area changes via Capacitor
-        // This will be picked up by SafeAreaView component on the web layer
+        // Notify observers of safe area changes
+        // This can be picked up by JS layer via Capacitor bridge when needed
         NotificationCenter.default.post(
             name: NSNotification.Name(rawValue: "SafeAreaDidChange"),
             object: nil,

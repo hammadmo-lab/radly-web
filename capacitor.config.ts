@@ -9,6 +9,14 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
     hostname: 'localhost',
   },
+  plugins: {
+    SplashScreen: {
+      launchShowDuration: 2000,
+      launchAutoHide: true,
+      androidScaleType: 'FIT_CENTER',
+      showSpinner: false,
+    },
+  },
 };
 
 export default config;

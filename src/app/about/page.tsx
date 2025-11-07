@@ -236,12 +236,12 @@ export default function AboutPage() {
             <div className="grid gap-8 lg:grid-cols-2 items-start">
               {/* Avatar placeholder - in production this would be an actual image */}
               <div className="flex flex-col items-center space-y-4">
-                <div className="w-48 h-48 rounded-2xl overflow-hidden border border-[rgba(143,130,255,0.3)]">
+                <div className="w-64 h-64 sm:w-72 sm:h-72 rounded-2xl overflow-hidden border border-[rgba(143,130,255,0.3)]">
                   <Image
                     src="/team/mohamed-hammad.jpg"
                     alt="Dr. Mohamed A. Hammad"
-                    width={192}
-                    height={192}
+                    width={288}
+                    height={288}
                     className="w-full h-full object-cover"
                     priority
                   />

@@ -11,7 +11,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKUIDelegate {
   func application(_ application: UIApplication,
                    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     let session = AVAudioSession.sharedInstance()
-    try? session.setCategory(.playAndRecord, options: [.defaultToSpeaker, .allowBluetooth])
+    try? session.setCategory(.playAndRecord, options: [.defaultToSpeaker, .allowBluetoothHFP])
     try? session.setActive(true)
     return true
   }

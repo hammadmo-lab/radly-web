@@ -9,14 +9,6 @@ extension UIView {
         return .zero
     }
 
-    /// Observe safe area changes (for handling notch, Dynamic Island, rotation)
-    func observeSafeAreaChanges(_ handler: @escaping (UIEdgeInsets) -> Void) {
-        // Use KVO to observe safe area insets changes
-        addObserver(forKeyPath: "safeAreaInsets", options: [.new, .old]) { (change) in
-            handler(self.currentSafeAreaInsets)
-        }
-    }
-
     /// Safe area as a dictionary for bridge messages
     var safeAreaInsetsDict: [String: CGFloat] {
         let insets = currentSafeAreaInsets

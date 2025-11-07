@@ -7,12 +7,27 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2F0377962EBBE63D003FC5C0 /* StatusBarCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F0377952EBBE63D003FC5C0 /* StatusBarCoordinator.swift */; };
+		2F0377972EBBE63D003FC5C0 /* NativeHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F0377942EBBE63D003FC5C0 /* NativeHostingController.swift */; };
+		2F0377982EBBE63D003FC5C0 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F0377932EBBE63D003FC5C0 /* DesignTokens.swift */; };
+		2F03779D2EBBE834003FC5C0 /* UIView+SafeAreas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F03779C2EBBE834003FC5C0 /* UIView+SafeAreas.swift */; };
+		2F681BB42EBC12BA00A3FB59 /* NativeNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F681BB32EBC12BA00A3FB59 /* NativeNavigationController.swift */; };
+		2F681BB52EBC12BA00A3FB59 /* BridgedNavigationPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F681BB22EBC12BA00A3FB59 /* BridgedNavigationPlugin.swift */; };
+		2F681BB72EBC12CF00A3FB59 /* UIViewController+Navigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F681BB62EBC12CF00A3FB59 /* UIViewController+Navigation.swift */; };
+		2F681BBB2EBC157800A3FB59 /* ModalBridgePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F681BB82EBC157800A3FB59 /* ModalBridgePlugin.swift */; };
+		2F681BBC2EBC157800A3FB59 /* ModalTransitioningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F681BB92EBC157800A3FB59 /* ModalTransitioningDelegate.swift */; };
+		2F681BBD2EBC157800A3FB59 /* NativeModalController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F681BBA2EBC157800A3FB59 /* NativeModalController.swift */; };
+		2F681BC02EBC164A00A3FB59 /* HapticsBridgePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F681BBE2EBC164A00A3FB59 /* HapticsBridgePlugin.swift */; };
+		2F681BC12EBC164A00A3FB59 /* HapticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F681BBF2EBC164A00A3FB59 /* HapticsManager.swift */; };
+		2F681BC42EBC16E500A3FB59 /* GestureCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F681BC32EBC16E500A3FB59 /* GestureCoordinator.swift */; };
+		2F681BC52EBC16E500A3FB59 /* GestureBridgePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F681BC22EBC16E500A3FB59 /* GestureBridgePlugin.swift */; };
+		2F681BC72EBC179D00A3FB59 /* MotionConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F681BC62EBC179D00A3FB59 /* MotionConfig.swift */; };
 		2F7DBFDF2EB6CC550075AB8E /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2F7DBFDE2EB6CC550075AB8E /* StoreKit.framework */; };
+		2FA2D5072EBC3DCE003FAAB4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2FA2D5062EBC3DCE003FAAB4 /* Assets.xcassets */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
 		504EC30D1FED79650016851F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30B1FED79650016851F /* Main.storyboard */; };
-		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
 		E5577ED6CB68220BED086C24 /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F376FF12B9A4D88AC5C9EBD /* Pods_App.framework */; };
@@ -20,16 +35,31 @@
 
 /* Begin PBXFileReference section */
 		0F376FF12B9A4D88AC5C9EBD /* Pods_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2F0377932EBBE63D003FC5C0 /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignTokens.swift; sourceTree = "<group>"; };
+		2F0377942EBBE63D003FC5C0 /* NativeHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeHostingController.swift; sourceTree = "<group>"; };
+		2F0377952EBBE63D003FC5C0 /* StatusBarCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarCoordinator.swift; sourceTree = "<group>"; };
+		2F03779C2EBBE834003FC5C0 /* UIView+SafeAreas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+SafeAreas.swift"; sourceTree = "<group>"; };
 		2F2F948D2EB6DCAB004EBF87 /* AppDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AppDebug.entitlements; sourceTree = "<group>"; };
+		2F681BB22EBC12BA00A3FB59 /* BridgedNavigationPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgedNavigationPlugin.swift; sourceTree = "<group>"; };
+		2F681BB32EBC12BA00A3FB59 /* NativeNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeNavigationController.swift; sourceTree = "<group>"; };
+		2F681BB62EBC12CF00A3FB59 /* UIViewController+Navigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Navigation.swift"; sourceTree = "<group>"; };
+		2F681BB82EBC157800A3FB59 /* ModalBridgePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalBridgePlugin.swift; sourceTree = "<group>"; };
+		2F681BB92EBC157800A3FB59 /* ModalTransitioningDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalTransitioningDelegate.swift; sourceTree = "<group>"; };
+		2F681BBA2EBC157800A3FB59 /* NativeModalController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeModalController.swift; sourceTree = "<group>"; };
+		2F681BBE2EBC164A00A3FB59 /* HapticsBridgePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsBridgePlugin.swift; sourceTree = "<group>"; };
+		2F681BBF2EBC164A00A3FB59 /* HapticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsManager.swift; sourceTree = "<group>"; };
+		2F681BC22EBC16E500A3FB59 /* GestureBridgePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureBridgePlugin.swift; sourceTree = "<group>"; };
+		2F681BC32EBC16E500A3FB59 /* GestureCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureCoordinator.swift; sourceTree = "<group>"; };
+		2F681BC62EBC179D00A3FB59 /* MotionConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionConfig.swift; sourceTree = "<group>"; };
 		2F7DBFDD2EB6CC300075AB8E /* AppRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AppRelease.entitlements; sourceTree = "<group>"; };
 		2F7DBFDE2EB6CC550075AB8E /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		2FA2D5062EBC3DCE003FAAB4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = App/Assets.xcassets; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		2FC6C9A62EB978DE004E913D /* App-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "App-Bridging-Header.h"; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		504EC30C1FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		504EC30E1FED79650016851F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
@@ -62,6 +92,7 @@
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
+				2FA2D5062EBC3DCE003FAAB4 /* Assets.xcassets */,
 				504EC3061FED79650016851F /* App */,
 				504EC3051FED79650016851F /* Products */,
 				27E2DDA53C4D2A4D1A88CE4A /* Frameworks */,
@@ -80,12 +111,26 @@
 		504EC3061FED79650016851F /* App */ = {
 			isa = PBXGroup;
 			children = (
+				2F681BC62EBC179D00A3FB59 /* MotionConfig.swift */,
+				2F681BC22EBC16E500A3FB59 /* GestureBridgePlugin.swift */,
+				2F681BC32EBC16E500A3FB59 /* GestureCoordinator.swift */,
+				2F681BBE2EBC164A00A3FB59 /* HapticsBridgePlugin.swift */,
+				2F681BBF2EBC164A00A3FB59 /* HapticsManager.swift */,
+				2F681BB82EBC157800A3FB59 /* ModalBridgePlugin.swift */,
+				2F681BB92EBC157800A3FB59 /* ModalTransitioningDelegate.swift */,
+				2F681BBA2EBC157800A3FB59 /* NativeModalController.swift */,
+				2F681BB62EBC12CF00A3FB59 /* UIViewController+Navigation.swift */,
+				2F681BB22EBC12BA00A3FB59 /* BridgedNavigationPlugin.swift */,
+				2F681BB32EBC12BA00A3FB59 /* NativeNavigationController.swift */,
+				2F03779C2EBBE834003FC5C0 /* UIView+SafeAreas.swift */,
+				2F0377932EBBE63D003FC5C0 /* DesignTokens.swift */,
+				2F0377942EBBE63D003FC5C0 /* NativeHostingController.swift */,
+				2F0377952EBBE63D003FC5C0 /* StatusBarCoordinator.swift */,
 				2F2F948D2EB6DCAB004EBF87 /* AppDebug.entitlements */,
 				2F7DBFDD2EB6CC300075AB8E /* AppRelease.entitlements */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
-				504EC30E1FED79650016851F /* Assets.xcassets */,
 				504EC3101FED79650016851F /* LaunchScreen.storyboard */,
 				504EC3131FED79650016851F /* Info.plist */,
 				2FAD9762203C412B000D30F8 /* config.xml */,
@@ -133,7 +178,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastSwiftUpdateCheck = 0920;
+				LastSwiftUpdateCheck = 920;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					504EC3031FED79650016851F = {
@@ -166,9 +211,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2FA2D5072EBC3DCE003FAAB4 /* Assets.xcassets in Resources */,
 				504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */,
 				50B271D11FEDC1A000F3C39B /* public in Resources */,
-				504EC30F1FED79650016851F /* Assets.xcassets in Resources */,
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
@@ -222,6 +267,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2F681BBB2EBC157800A3FB59 /* ModalBridgePlugin.swift in Sources */,
+				2F681BBC2EBC157800A3FB59 /* ModalTransitioningDelegate.swift in Sources */,
+				2F681BC02EBC164A00A3FB59 /* HapticsBridgePlugin.swift in Sources */,
+				2F681BC12EBC164A00A3FB59 /* HapticsManager.swift in Sources */,
+				2F681BBD2EBC157800A3FB59 /* NativeModalController.swift in Sources */,
+				2F681BC42EBC16E500A3FB59 /* GestureCoordinator.swift in Sources */,
+				2F681BC52EBC16E500A3FB59 /* GestureBridgePlugin.swift in Sources */,
+				2F0377962EBBE63D003FC5C0 /* StatusBarCoordinator.swift in Sources */,
+				2F0377972EBBE63D003FC5C0 /* NativeHostingController.swift in Sources */,
+				2F681BC72EBC179D00A3FB59 /* MotionConfig.swift in Sources */,
+				2F03779D2EBBE834003FC5C0 /* UIView+SafeAreas.swift in Sources */,
+				2F0377982EBBE63D003FC5C0 /* DesignTokens.swift in Sources */,
+				2F681BB72EBC12CF00A3FB59 /* UIViewController+Navigation.swift in Sources */,
+				2F681BB42EBC12BA00A3FB59 /* NativeNavigationController.swift in Sources */,
+				2F681BB52EBC12BA00A3FB59 /* BridgedNavigationPlugin.swift in Sources */,
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -380,6 +440,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = App/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Radly Assistant";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -415,6 +476,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = App/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Radly Assistant";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
