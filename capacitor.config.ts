@@ -8,6 +8,9 @@ const config: CapacitorConfig = {
     iosScheme: 'capacitor',
     androidScheme: 'https',
     hostname: 'localhost',
+    // Enable client-side routing fallback
+    cleartext: true,
+    allowNavigation: ['*'],
   },
   plugins: {
     SplashScreen: {
