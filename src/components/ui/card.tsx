@@ -1,7 +1,42 @@
+/**
+ * Card Components
+ *
+ * A flexible card container with compound sub-components for organizing content.
+ * Use Card and its sub-components to create consistent content containers.
+ *
+ * @example
+ * ```tsx
+ * <Card>
+ *   <CardHeader>
+ *     <CardTitle>Card Title</CardTitle>
+ *     <CardDescription>Card description goes here</CardDescription>
+ *   </CardHeader>
+ *   <CardContent>
+ *     Main content of the card
+ *   </CardContent>
+ *   <CardFooter>
+ *     <Button>Action</Button>
+ *   </CardFooter>
+ * </Card>
+ * ```
+ *
+ * Components:
+ * - Card: Main container
+ * - CardHeader: Header section with padding
+ * - CardTitle: Heading element (h3)
+ * - CardDescription: Subtitle/description text
+ * - CardContent: Main content area
+ * - CardFooter: Footer action area
+ */
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Card - Main card container component
+ * Provides base styling for border, background, and shadow
+ */
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>

@@ -1,8 +1,35 @@
+/**
+ * Badge Component
+ *
+ * A small, inline label or status indicator with multiple style variants.
+ * Use badges to highlight status, categories, or tags.
+ *
+ * @example
+ * ```tsx
+ * // Default badge
+ * <Badge>Active</Badge>
+ *
+ * // Different variants
+ * <Badge variant="secondary">Secondary</Badge>
+ * <Badge variant="destructive">Error</Badge>
+ * <Badge variant="outline">Outline</Badge>
+ * ```
+ *
+ * @component
+ */
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Badge variants
+ * - default: Primary colored badge
+ * - secondary: Secondary colored badge
+ * - destructive: Red error badge
+ * - outline: Transparent outline badge
+ */
 const badgeVariants = cva(
   "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
