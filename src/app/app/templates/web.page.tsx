@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { Plus, Search, Filter, ChevronDown, X, Settings } from 'lucide-react'
+import { Plus, Search, Filter, ChevronDown, X, Settings, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
@@ -17,6 +17,7 @@ import { httpGet } from '@/lib/http'
 import { fetchTemplates } from '@/lib/templates'
 import { TemplateCardSkeleton } from '@/components/loading/TemplateCardSkeleton'
 import { CustomizeTemplateModal } from '@/components/features/CustomizeTemplateModal'
+import { useFavoriteTemplates } from '@/hooks/useFavoriteTemplates'
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +28,9 @@ export default function TemplatesPage() {
   const [selectedAnatomy, setSelectedAnatomy] = useState<string | null>(null)
   const [customizeModalOpen, setCustomizeModalOpen] = useState(false)
   const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string } | null>(null)
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+
+  const { isFavorite, toggleFavorite, count: favoriteCount } = useFavoriteTemplates()
 
   // Clear selected anatomy when modality changes
   const handleModalityChange = (modality: string | null) => {
@@ -69,23 +73,26 @@ export default function TemplatesPage() {
   // Filter templates based on search query and selected filters
   const filteredTemplates = useMemo(() => {
     if (!templates) return []
-    
+
     return templates.filter(template => {
+      // Favorites filter
+      const favoritesMatch = !showFavoritesOnly || isFavorite(template.id)
+
       // Search filter
-      const searchMatch = !searchQuery || 
+      const searchMatch = !searchQuery ||
         template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (template.modality && template.modality.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (template.anatomy && template.anatomy.toLowerCase().includes(searchQuery.toLowerCase()))
-      
+
       // Modality filter
       const modalityMatch = !selectedModality || template.modality === selectedModality
-      
+
       // Anatomy filter
       const anatomyMatch = !selectedAnatomy || template.anatomy === selectedAnatomy
-      
-      return searchMatch && modalityMatch && anatomyMatch
+
+      return favoritesMatch && searchMatch && modalityMatch && anatomyMatch
     })
-  }, [templates, searchQuery, selectedModality, selectedAnatomy])
+  }, [templates, searchQuery, selectedModality, selectedAnatomy, showFavoritesOnly, isFavorite])
 
   return (
     <div className="space-y-8">
@@ -125,17 +132,47 @@ export default function TemplatesPage() {
       </div>
 
       <div className="aurora-card border border-[rgba(255,255,255,0.08)] p-5 sm:p-6 md:p-7 space-y-5">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[rgba(207,207,207,0.45)]" />
-          <Input
-            type="search"
-            placeholder="Search templates by name, modality, or body system..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 h-12 sm:h-13 bg-[rgba(18,22,36,0.85)] border border-[rgba(255,255,255,0.08)] text-white placeholder:text-[rgba(207,207,207,0.45)] focus-visible:ring-[#4B8EFF]"
-          />
+        <div className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[rgba(207,207,207,0.45)]" />
+            <Input
+              type="search"
+              placeholder="Search templates by name, modality, or body system..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-12 h-12 sm:h-13 bg-[rgba(18,22,36,0.85)] border border-[rgba(255,255,255,0.08)] text-white placeholder:text-[rgba(207,207,207,0.45)] focus-visible:ring-[#4B8EFF]"
+            />
+          </div>
+
+          {/* Favorites Tab */}
+          {favoriteCount > 0 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                className={`flex items-center gap-2 px-3 h-10 rounded-lg border transition-colors ${
+                  showFavoritesOnly
+                    ? 'border-[#FFB800] bg-[rgba(255,184,0,0.12)] text-[#FFD700]'
+                    : 'border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.75)] hover:border-[rgba(255,184,0,0.4)] hover:text-white'
+                }`}
+              >
+                <Star className="w-4 h-4" />
+                <span className="text-sm font-medium">Favorites</span>
+                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-[rgba(255,184,0,0.2)] text-[#FFD700]">
+                  {favoriteCount}
+                </span>
+              </button>
+              {showFavoritesOnly && (
+                <button
+                  onClick={() => setShowFavoritesOnly(false)}
+                  className="text-xs text-[rgba(207,207,207,0.65)] hover:text-white underline"
+                >
+                  Show All
+                </button>
+              )}
+            </div>
+          )}
         </div>
-        
+
         <div className="flex flex-col sm:flex-row gap-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -245,19 +282,34 @@ export default function TemplatesPage() {
               className="aurora-card group relative border border-[rgba(255,255,255,0.08)] p-5 sm:p-6 cursor-pointer active:scale-[0.98] transition-transform duration-150 flex flex-col h-full"
               onClick={() => router.push(`/app/generate?templateId=${template.id}`)}
             >
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  setSelectedTemplate({ id: template.id, name: template.title || 'Untitled Template' })
-                  setCustomizeModalOpen(true)
-                }}
-                className="absolute top-3 right-3 z-10 min-w-[44px] min-h-[44px] w-10 h-10 flex items-center justify-center rounded-lg bg-[rgba(18,22,36,0.95)] border border-[rgba(255,255,255,0.15)] text-[rgba(207,207,207,0.75)] hover:text-white hover:border-[rgba(143,130,255,0.45)] active:scale-95 transition-colors touch-manipulation"
-                aria-label="Customize template settings"
-              >
-                <Settings className="w-5 h-5" />
-              </button>
+              <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    toggleFavorite(template.id)
+                  }}
+                  className="min-w-[44px] min-h-[44px] w-10 h-10 flex items-center justify-center rounded-lg bg-[rgba(18,22,36,0.95)] border border-[rgba(255,255,255,0.15)] text-[rgba(207,207,207,0.75)] hover:text-white hover:border-[rgba(255,184,0,0.45)] active:scale-95 transition-colors touch-manipulation"
+                  aria-label={isFavorite(template.id) ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                  <Star className={`w-5 h-5 ${isFavorite(template.id) ? 'fill-[#FFD700] text-[#FFD700]' : ''}`} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setSelectedTemplate({ id: template.id, name: template.title || 'Untitled Template' })
+                    setCustomizeModalOpen(true)
+                  }}
+                  className="min-w-[44px] min-h-[44px] w-10 h-10 flex items-center justify-center rounded-lg bg-[rgba(18,22,36,0.95)] border border-[rgba(255,255,255,0.15)] text-[rgba(207,207,207,0.75)] hover:text-white hover:border-[rgba(143,130,255,0.45)] active:scale-95 transition-colors touch-manipulation"
+                  aria-label="Customize template settings"
+                >
+                  <Settings className="w-5 h-5" />
+                </button>
+              </div>
 
               <div className="flex flex-col flex-1 space-y-3">
                 <div className="flex flex-wrap gap-2">
