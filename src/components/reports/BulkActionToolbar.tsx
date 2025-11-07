@@ -19,7 +19,6 @@ interface BulkActionToolbarProps {
   onCopyJobIds: () => void;
   onBulkDelete?: (deletedIds: string[]) => void;
   onBulkExport?: () => void;
-  isDeleting?: boolean;
 }
 
 export function BulkActionToolbar({
@@ -31,7 +30,6 @@ export function BulkActionToolbar({
   onCopyJobIds,
   onBulkDelete,
   onBulkExport,
-  isDeleting = false,
 }: BulkActionToolbarProps) {
   const { copy, isCopied } = useCopyToClipboard();
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);

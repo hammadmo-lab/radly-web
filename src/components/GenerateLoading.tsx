@@ -9,6 +9,7 @@ import { GenerationSteps } from './loading/GenerationSteps'
 import { MedicalTrivia } from './loading/MedicalTrivia'
 import { StatsDisplay } from './loading/StatsDisplay'
 import { ReportSkeleton } from './loading/ReportSkeleton'
+import { QueuePositionDisplay } from './loading/QueuePositionDisplay'
 import { triggerCelebration, isCelebrationEnabled } from '@/utils/celebration'
 
 interface GenerateLoadingProps {
@@ -189,20 +190,12 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime, jobStatus
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="aurora-card border border-[rgba(75,142,255,0.28)] bg-[rgba(12,16,28,0.65)] p-4 sm:p-6"
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[0.65rem] sm:text-xs uppercase tracking-[0.12em] sm:tracking-[0.18em] text-[rgba(207,207,207,0.5)]">Queue position</p>
-                        <p className="text-2xl sm:text-3xl font-semibold text-white">#{queuePosition}</p>
-                      </div>
-                      {estimatedTime && (
-                        <div className="text-right">
-                          <p className="text-[0.65rem] sm:text-xs uppercase tracking-[0.12em] sm:tracking-[0.18em] text-[rgba(207,207,207,0.5)]">Estimated wait</p>
-                          <p className="text-xl sm:text-2xl font-semibold text-white">{estimatedTime}</p>
-                        </div>
-                      )}
-                    </div>
+                    <QueuePositionDisplay
+                      queuePosition={queuePosition}
+                      estimatedTime={estimatedTime}
+                      variant="detailed"
+                    />
                   </motion.div>
                 )}
               </div>

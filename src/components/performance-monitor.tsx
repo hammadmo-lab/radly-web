@@ -29,9 +29,9 @@ export function PerformanceMonitor() {
         observer.observe({ entryTypes: ['longtask'] })
 
         return () => observer.disconnect()
-      } catch (err) {
+      } catch {
         // PerformanceObserver not supported or feature unavailable
-        console.debug('PerformanceObserver not available:', err)
+        // Silently ignore - browser may not support this feature
       }
     }
   }, [])
@@ -77,7 +77,7 @@ function getLCP(): number | null {
   try {
     const entries = performance.getEntriesByType('largest-contentful-paint')
     return entries.length > 0 ? entries[entries.length - 1].startTime : null
-  } catch (err) {
+  } catch {
     return null
   }
 }
@@ -87,7 +87,7 @@ function getINP(): number | null {
     // INP is calculated differently - this is a simplified version
     // In a real implementation, you'd use the web-vitals library
     return null
-  } catch (err) {
+  } catch {
     return null
   }
 }
@@ -105,7 +105,7 @@ function getCLS(): number {
     }
 
     return clsValue
-  } catch (err) {
+  } catch {
     return 0
   }
 }

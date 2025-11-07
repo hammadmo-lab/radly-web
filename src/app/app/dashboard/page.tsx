@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect, Suspense, lazy } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
-  Plus, FileText, BookTemplate, TrendingUp, Clock,
+  Plus, FileText, BookTemplate, Clock,
   Sparkles, Zap, ArrowRight, Activity
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import UsageWidget from '@/components/UsageWidget'
 import { useSubscription } from '@/hooks/useSubscription'
 import { formatSeconds, resolveAvgGenerationSeconds } from '@/utils/time'
+import { DashboardStatsSkeleton } from '@/components/loading/DashboardStatsSkeleton'
+import { GridCardsSkeleton } from '@/components/loading/GridCardsSkeleton'
 
 // Lazy load mobile dashboard for native app
 const MobileDashboard = lazy(() => import('./mobile.page'))
@@ -248,77 +250,81 @@ function WebDashboardPage() {
       </motion.div>
 
       {/* STATS GRID - Animated Cards with mobile overflow protection */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full max-w-full">
-        {stats.map((stat) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -4 }}
-          >
-            <Card className="aurora-card card-modern touch-target">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`p-3 rounded-xl border border-[rgba(255,255,255,0.08)] ${stat.bgClass}`}>
-                    <stat.icon className={`w-6 h-6 ${stat.iconClass}`} />
-                  </div>
-                  {stat.change ? (
-                    <span className="text-xs text-[#3FBF8C] bg-[rgba(63,191,140,0.18)] px-2 py-1 rounded-full font-medium">
-                      {stat.change}
-                    </span>
-                  ) : null}
-                </div>
-                <p className="text-sm text-[rgba(207,207,207,0.75)] font-medium mb-1">{stat.label}</p>
-                <p className="text-3xl font-bold text-white">{stat.value}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* QUICK ACTIONS - Interactive Cards */}
-      <div className="w-full max-w-full">
-        <div className="flex items-center gap-2 mb-6">
-          <Zap className="w-5 h-5 text-[#4B8EFF]" />
-          <h2
-            className="text-2xl font-bold text-white"
-            style={{
-              textShadow: '0 0 20px rgba(75, 142, 255, 0.3)'
-            }}
-          >
-            Quick Actions
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 w-full max-w-full">
-          {quickActions.map((action) => (
-            <Card
-              key={action.title}
-              className="aurora-card card-interactive group touch-manipulation w-full max-w-full"
-              onClick={() => router.push(action.href)}
+      <Suspense fallback={<DashboardStatsSkeleton count={4} />}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full max-w-full">
+          {stats.map((stat) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -4 }}
             >
-              <CardContent className="p-6 w-full">
-                <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${action.gradient} mb-4 shadow-[0_0_16px_rgba(75,142,255,0.35)] group-hover:scale-110 transition-transform`}>
-                  <action.icon className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-[#4B8EFF] transition-colors break-words">
-                  {action.title}
-                </h3>
-                <p className="text-sm sm:text-base text-[rgba(207,207,207,0.75)] mb-4 break-words">{action.description}</p>
-                <div className="flex items-center text-[#4B8EFF] font-medium">
-                  {action.badge ? (
-                    <span className="mr-2 rounded-full bg-[rgba(63,191,140,0.2)] px-2 py-0.5 text-xs font-semibold text-[#B6F2DB]">
-                      {action.badge}
-                    </span>
-                  ) : null}
-                  <span>{action.cta ?? 'Get started'}</span>
-                  <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </CardContent>
-            </Card>
+              <Card className="aurora-card card-modern touch-target">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`p-3 rounded-xl border border-[rgba(255,255,255,0.08)] ${stat.bgClass}`}>
+                      <stat.icon className={`w-6 h-6 ${stat.iconClass}`} />
+                    </div>
+                    {stat.change ? (
+                      <span className="text-xs text-[#3FBF8C] bg-[rgba(63,191,140,0.18)] px-2 py-1 rounded-full font-medium">
+                        {stat.change}
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="text-sm text-[rgba(207,207,207,0.75)] font-medium mb-1">{stat.label}</p>
+                  <p className="text-3xl font-bold text-white">{stat.value}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </Suspense>
+
+      {/* QUICK ACTIONS - Interactive Cards */}
+      <Suspense fallback={<GridCardsSkeleton count={3} columns={1} variant="card" />}>
+        <div className="w-full max-w-full">
+          <div className="flex items-center gap-2 mb-6">
+            <Zap className="w-5 h-5 text-[#4B8EFF]" />
+            <h2
+              className="text-2xl font-bold text-white"
+              style={{
+                textShadow: '0 0 20px rgba(75, 142, 255, 0.3)'
+              }}
+            >
+              Quick Actions
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 w-full max-w-full">
+            {quickActions.map((action) => (
+              <Card
+                key={action.title}
+                className="aurora-card card-interactive group touch-manipulation w-full max-w-full"
+                onClick={() => router.push(action.href)}
+              >
+                <CardContent className="p-6 w-full">
+                  <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${action.gradient} mb-4 shadow-[0_0_16px_rgba(75,142,255,0.35)] group-hover:scale-110 transition-transform`}>
+                    <action.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-[#4B8EFF] transition-colors break-words">
+                    {action.title}
+                  </h3>
+                  <p className="text-sm sm:text-base text-[rgba(207,207,207,0.75)] mb-4 break-words">{action.description}</p>
+                  <div className="flex items-center text-[#4B8EFF] font-medium">
+                    {action.badge ? (
+                      <span className="mr-2 rounded-full bg-[rgba(63,191,140,0.2)] px-2 py-0.5 text-xs font-semibold text-[#B6F2DB]">
+                        {action.badge}
+                      </span>
+                    ) : null}
+                    <span>{action.cta ?? 'Get started'}</span>
+                    <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </Suspense>
     </div>
   )
 }
