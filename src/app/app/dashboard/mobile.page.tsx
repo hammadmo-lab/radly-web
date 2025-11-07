@@ -8,7 +8,7 @@ import {
   Plus, FileText, BookTemplate, TrendingUp, Clock,
   Sparkles, Activity, Settings,
   CreditCard, Menu, X, LogOut, User as UserIcon,
-  ChevronRight, AlertCircle
+  ChevronRight, AlertCircle,
 } from 'lucide-react'
 import { useAuth } from '@/components/auth-provider'
 import { useSubscription } from '@/hooks/useSubscription'
@@ -325,12 +325,6 @@ export default function MobileDashboardPage() {
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.5rem)' }}
       >
         <div className="flex items-center justify-around px-2 pt-3 pb-2">
-          <Link href="/app/dashboard" className="flex flex-col items-center justify-center flex-1 gap-1 py-2 min-h-[44px] touch-manipulation">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#4B8EFF] to-[#2653FF] flex items-center justify-center shadow-lg">
-              <Activity className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-[10px] font-semibold text-white">Home</span>
-          </Link>
           <Link href="/app/templates" className="flex flex-col items-center justify-center flex-1 gap-1 py-2 min-h-[44px] touch-manipulation">
             <div className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center">
               <BookTemplate className="w-6 h-6 text-white/60" />
