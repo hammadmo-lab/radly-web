@@ -16,6 +16,15 @@ export function MarketingFooter() {
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-4 text-xs uppercase tracking-[0.28em] text-[rgba(207,207,207,0.55)] sm:justify-end">
+          <Link className="transition-colors hover:text-white" href="/about">
+            About
+          </Link>
+          <Link className="transition-colors hover:text-white" href="/faq">
+            FAQ
+          </Link>
+          <Link className="transition-colors hover:text-white" href="/contact">
+            Contact
+          </Link>
           <Link className="transition-colors hover:text-white" href="/privacy">
             Privacy
           </Link>
