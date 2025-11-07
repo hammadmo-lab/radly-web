@@ -179,10 +179,15 @@ export function AnimatedHomePage({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.4, duration: 0.6 }}
-              className="mt-4 text-sm text-[rgba(207,207,207,0.72)]"
+              className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-[rgba(207,207,207,0.72)]"
             >
               <Link href="/pricing" className="inline-flex items-center gap-1 text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline transition-colors">
                 View pricing
+                <ArrowRight className="h-3 w-3" aria-hidden />
+              </Link>
+              <span className="hidden sm:inline text-[rgba(207,207,207,0.3)]">•</span>
+              <Link href="/instructions" className="inline-flex items-center gap-1 text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline transition-colors">
+                How it works
                 <ArrowRight className="h-3 w-3" aria-hidden />
               </Link>
             </motion.div>
@@ -560,6 +565,23 @@ export function AnimatedHomePage({
           >
             Includes keyboard-only path • No commitment
           </motion.p>
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 1.0, duration: 0.5 }}
+            className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-xs"
+          >
+            <Link href="/security" className="inline-flex items-center gap-1 text-[rgba(111,231,183,0.85)] underline-offset-4 hover:underline transition-colors">
+              Security & compliance
+              <ArrowRight className="h-3 w-3" aria-hidden />
+            </Link>
+            <span className="hidden sm:inline text-[rgba(207,207,207,0.3)]">•</span>
+            <Link href="/validation" className="inline-flex items-center gap-1 text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline transition-colors">
+              View validation
+              <ArrowRight className="h-3 w-3" aria-hidden />
+            </Link>
+          </motion.div>
         </div>
       </motion.section>
     </main>

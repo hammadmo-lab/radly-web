@@ -152,6 +152,17 @@ export default function SecurityPage() {
               Contact security team
             </SecondaryCTA>
           </div>
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-xs">
+            <Link href="/validation" className="inline-flex items-center gap-1 text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">
+              Review validation
+              <ArrowRight className="h-3 w-3" aria-hidden />
+            </Link>
+            <span className="hidden sm:inline text-[rgba(207,207,207,0.3)]">•</span>
+            <Link href="/instructions" className="inline-flex items-center gap-1 text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">
+              See how it works
+              <ArrowRight className="h-3 w-3" aria-hidden />
+            </Link>
+          </div>
         </section>
       </main>
 
