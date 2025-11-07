@@ -50,7 +50,6 @@ export function useIosPcmRecorder(onTranscript?: TranscriptHandler) {
   const streamRef = useRef<MediaStream | null>(null);
   const stRef = useRef<ResampleState>(createResampleState());
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const start = useCallback(async (wsUrl: string, _authToken: string) => {
     console.log('🎤 [iOS PCM] Starting recording with WebSocket URL:', wsUrl);
 

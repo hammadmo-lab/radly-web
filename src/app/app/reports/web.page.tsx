@@ -73,7 +73,6 @@ export default function ReportsPage() {
 
   // Multi-select state
   const {
-    selectedIds,
     toggleSelection,
     toggleSelectAll,
     clearSelection,
@@ -132,7 +131,7 @@ export default function ReportsPage() {
 
         // Check all jobs in parallel
         const validationResults = await Promise.allSettled(
-          localJobs.map(job => getJob(job.job_id))
+          localJobs.map((job: LocalStorageJob) => getJob(job.job_id))
         );
 
         validationResults.forEach((result, index) => {

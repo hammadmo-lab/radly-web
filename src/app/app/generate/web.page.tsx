@@ -200,7 +200,8 @@ export default function GeneratePage() {
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       // Only warn if form has unsaved changes and we haven't just submitted
-      if (isDirty && !formIsSubmitting) {
+      // Also don't warn if user intentionally submitted the form
+      if (isDirty && !formIsSubmitting && !intentionalSubmit && !isSubmitting) {
         e.preventDefault()
         // Modern browsers ignore custom messages, but we still need to set returnValue
         e.returnValue = ''
@@ -210,7 +211,7 @@ export default function GeneratePage() {
 
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [isDirty, formIsSubmitting])
+  }, [isDirty, formIsSubmitting, intentionalSubmit, isSubmitting])
 
   const handleNext = useCallback(async () => {
     if (currentStep === 1) {

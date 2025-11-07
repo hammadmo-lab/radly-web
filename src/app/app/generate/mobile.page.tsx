@@ -20,8 +20,7 @@ import {
   Stethoscope,
   X,
   Eye,
-  ChevronLeft,
-  Loader2
+  ChevronLeft
 } from 'lucide-react'
 import { useAuth } from '@/components/auth-provider'
 import { useSubscription } from '@/hooks/useSubscription'
@@ -99,37 +98,26 @@ export default function MobileGeneratePage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const patientSheetRef = useRef<HTMLDivElement>(null)
   const nameInputRef = useRef<HTMLInputElement>(null)
-  const [keyboardHeight, setKeyboardHeight] = useState(0)
   const [showTranscriptionPreview, setShowTranscriptionPreview] = useState(false)
   const [pendingTranscription, setPendingTranscription] = useState('')
+  const [expandedCards, setExpandedCards] = useState({
+    template: false,
+    patient: false,
+    indication: false,
+    findings: true
+  })
+  const [indication, setIndication] = useState('')
+  const [findings, setFindings] = useState('')
+  const [patientData, setPatientData] = useState<PatientData>({
+    name: '',
+    age: '',
+    gender: ''
+  })
 
-  // Remove legacy draft entries that used timestamped keys
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    try {
-      Object.keys(localStorage)
-        .filter((key) => key.startsWith('draft_'))
-        .forEach((key) => localStorage.removeItem(key))
-    } catch (cleanupError) {
-      console.error('Failed to clean legacy drafts:', cleanupError)
-    }
-  }, [])
-
-  // Detect keyboard visibility
-  useEffect(() => {
-    const handleResize = () => {
-      if (typeof window !== 'undefined' && window.visualViewport) {
-        const vh = window.visualViewport.height
-        const keyboardH = window.innerHeight - vh
-        setKeyboardHeight(Math.max(keyboardH, 0))
-      }
-    }
-
-    window.visualViewport?.addEventListener('resize', handleResize)
-    return () => {
-      window.visualViewport?.removeEventListener('resize', handleResize)
-    }
-  }, [])
+  const templateId = searchParams.get('templateId')
+  const { userId } = useAuthToken()
+  const { isNative } = usePlatform()
+  const draftKey = useMemo(() => `mobile-generate-draft-${templateId || 'default'}`, [templateId])
 
   // Auto-scroll to input when keyboard appears
   const scrollToInput = (inputElement: HTMLInputElement | null) => {
@@ -152,30 +140,24 @@ export default function MobileGeneratePage() {
     autoExpandTextarea(e.target)
   }
 
+  // Remove legacy draft entries that used timestamped keys
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      Object.keys(localStorage)
+        .filter((key) => key.startsWith('draft_'))
+        .forEach((key) => localStorage.removeItem(key))
+    } catch (cleanupError) {
+      console.error('Failed to clean legacy drafts:', cleanupError)
+    }
+  }, [])
+
   // Auto-expand on mount if findings exist
   useEffect(() => {
     if (textareaRef.current && findings) {
       autoExpandTextarea(textareaRef.current)
     }
-  }, [])
-  const [expandedCards, setExpandedCards] = useState({
-    template: false,
-    patient: false,
-    indication: false,
-    findings: true
-  })
-
-  const templateId = searchParams.get('templateId')
-  const { userId } = useAuthToken()
-  const { isNative } = usePlatform()
-  const draftKey = useMemo(() => `mobile-generate-draft-${templateId || 'default'}`, [templateId])
-  const [indication, setIndication] = useState('')
-  const [findings, setFindings] = useState('')
-  const [patientData, setPatientData] = useState<PatientData>({
-    name: '',
-    age: '',
-    gender: ''
-  })
+  }, [findings])
 
   const { data: templates, isLoading } = useQuery({
     queryKey: ['templates'],

@@ -5,7 +5,8 @@
  * Used across the design system for consistency and reusability.
  */
 
-import { ButtonHTMLAttributes, HTMLAttributes, InputHTMLAttributes, TextareaHTMLAttributes } from 'react'
+import * as React from 'react'
+import { HTMLAttributes, InputHTMLAttributes, TextareaHTMLAttributes } from 'react'
 import { VariantProps } from 'class-variance-authority'
 import { buttonVariants } from '@/components/ui/button'
 import { badgeVariants } from '@/components/ui/badge'
@@ -53,7 +54,7 @@ export interface AsChildProps {
 /**
  * Props for components with variant styling
  */
-export interface VariantComponentProps<T extends Record<string, any>> {
+export interface VariantComponentProps {
   /**
    * CSS class names to merge with variant styles
    */
@@ -63,7 +64,7 @@ export interface VariantComponentProps<T extends Record<string, any>> {
 /**
  * Props for form input components
  */
-export interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface FormInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   /**
    * Optional error state for validation styling
    */
@@ -143,11 +144,13 @@ export type ExtractVariantProps<T> = T extends VariantProps<infer U> ? U : never
  * Utility type for components with forward refs
  * @example
  * type ButtonRef = React.ForwardedRef<HTMLButtonElement>
+ *
+ * Note: This type is currently not in use and has been simplified
  */
-export type ForwardRefComponent<T extends keyof JSX.IntrinsicElements> =
-  React.ForwardRefExoticComponent<
-    React.PropsWithoutRef<JSX.IntrinsicElements[T]> & React.RefAttributes<HTMLElementTagNameMap[T]>
-  >
+// export type ForwardRefComponent<T extends keyof React.JSX.IntrinsicElements> =
+//   React.ForwardRefExoticComponent<
+//     React.PropsWithoutRef<React.JSX.IntrinsicElements[T]> & React.RefAttributes<HTMLElementTagNameMap[T]>
+//   >
 
 /**
  * Color palette type for themed components

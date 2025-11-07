@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils"
  * - default: Standard input (h-10, text-sm)
  * - lg: Large input (h-12, text-base)
  */
-const inputVariants = cva(
+export const inputVariants = cva(
   "flex w-full rounded-md border bg-background ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
   {
     variants: {
@@ -57,7 +57,7 @@ const inputVariants = cva(
 )
 
 export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement>,
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
     VariantProps<typeof inputVariants> {}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(

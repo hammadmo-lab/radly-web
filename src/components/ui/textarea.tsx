@@ -32,7 +32,7 @@ import { cn } from "@/lib/utils"
  * Sizes: sm (60px), default (80px), lg (120px)
  * States: default, error (red), success (green), warning (orange)
  */
-const textareaVariants = cva(
+export const textareaVariants = cva(
   "flex w-full rounded-md border bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors resize-none",
   {
     variants: {
@@ -70,4 +70,4 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 )
 Textarea.displayName = "Textarea"
 
-export { Textarea, textareaVariants }
+export { Textarea }

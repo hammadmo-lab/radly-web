@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils'
 
 export interface EnhancedEmptyStateProps {
   /** Icon type or custom icon */
-  icon?: 'reports' | 'templates' | 'search' | 'inbox' | 'error' | React.ComponentType<any>
+  icon?: 'reports' | 'templates' | 'search' | 'inbox' | 'error' | React.ComponentType<React.SVGProps<SVGSVGElement>>
   /** Main heading text */
   title: string
   /** Description text (optional) */
@@ -55,7 +55,7 @@ export function EnhancedEmptyState({
   ctaVariant = 'default',
   className,
 }: EnhancedEmptyStateProps) {
-  let IconComponent: React.ComponentType<any> | null = null
+  let IconComponent: React.ComponentType<React.SVGProps<SVGSVGElement>> | null = null
 
   if (typeof icon === 'string' && icon in IconMap) {
     IconComponent = IconMap[icon]

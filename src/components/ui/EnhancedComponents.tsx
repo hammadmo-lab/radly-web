@@ -90,7 +90,7 @@ export function EnhancedCard({
 }
 
 // Enhanced Input with focus animations
-interface EnhancedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface EnhancedInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string
   error?: string
   success?: boolean
