@@ -1,9 +1,56 @@
+/**
+ * Button Component
+ *
+ * A versatile button component with multiple style variants and sizes.
+ * Supports keyboard navigation, focus states, and disabled states.
+ *
+ * @example
+ * ```tsx
+ * // Default button
+ * <Button>Click me</Button>
+ *
+ * // Different variants
+ * <Button variant="outline">Outline</Button>
+ * <Button variant="destructive">Delete</Button>
+ * <Button variant="ghost">Ghost</Button>
+ * <Button variant="link">Link</Button>
+ *
+ * // Different sizes
+ * <Button size="sm">Small</Button>
+ * <Button size="lg">Large</Button>
+ * <Button size="icon"><ChevronRight /></Button>
+ *
+ * // As child component
+ * <Button asChild>
+ *   <a href="/path">Navigate</a>
+ * </Button>
+ * ```
+ *
+ * @component
+ */
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Button variants powered by CVA
+ * Variants:
+ * - default: Primary gradient button
+ * - destructive: Red destructive action button
+ * - outline: Glassmorphic outline button
+ * - secondary: Soft secondary button
+ * - ghost: Transparent ghost button
+ * - link: Text link button
+ *
+ * Sizes:
+ * - default: Standard button
+ * - sm: Small button
+ * - lg: Large button
+ * - icon: Icon-only square button
+ */
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {

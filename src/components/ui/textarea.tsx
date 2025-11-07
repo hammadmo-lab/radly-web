@@ -1,8 +1,37 @@
+/**
+ * Textarea Component
+ *
+ * A flexible textarea component with support for multiple sizes and validation states.
+ * Built with CVA for type-safe variant management and smooth transitions.
+ *
+ * @example
+ * ```tsx
+ * // Basic textarea
+ * <Textarea placeholder="Enter your message..." />
+ *
+ * // With size variant
+ * <Textarea size="lg" placeholder="Large textarea" />
+ *
+ * // With error state
+ * <Textarea state="error" placeholder="Error message" />
+ *
+ * // With rows
+ * <Textarea rows={6} placeholder="Custom height" />
+ * ```
+ *
+ * @component
+ */
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Textarea size and state variants
+ * Sizes: sm (60px), default (80px), lg (120px)
+ * States: default, error (red), success (green), warning (orange)
+ */
 const textareaVariants = cva(
   "flex w-full rounded-md border bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors resize-none",
   {
