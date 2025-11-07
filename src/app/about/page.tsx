@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Breadcrumb } from "@/components/marketing/Breadcrumb";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { PrimaryCTA, SecondaryCTA } from "@/components/marketing/PrimaryCTA";
-import { Linkedin, Mail, Shield, Heart } from "lucide-react";
+import { Linkedin } from "lucide-react";
 
 const metadataDescription = "About Radly: Built by clinicians for clinicians. Our mission is to generate clear, structured reports that respect radiologist time and patient privacy.";
 

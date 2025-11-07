@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Breadcrumb } from "@/components/marketing/Breadcrumb";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { PrimaryCTA } from "@/components/marketing/PrimaryCTA";
-import { Search } from "lucide-react";
 
 const metadataDescription = "Radly FAQ: Answers to common questions about voice dictation, templates, modalities, security, pricing, and workflow integration.";
 
