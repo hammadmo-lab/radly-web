@@ -1,10 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, Copy, Download, AlertCircle, Trash2 } from 'lucide-react';
+import { X, Copy, Download, AlertCircle, Trash2, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
 import { triggerHaptic } from '@/utils/haptics';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { bulkDeleteReports, bulkExportReports } from '@/lib/bulk-operations';
 
 interface BulkActionToolbarProps {
   selectedCount: number;
@@ -13,7 +17,8 @@ interface BulkActionToolbarProps {
   onClearSelection: () => void;
   onSelectAll: () => void;
   onCopyJobIds: () => void;
-  onBulkDelete?: () => void;
+  onBulkDelete?: (deletedIds: string[]) => void;
+  onBulkExport?: () => void;
   isDeleting?: boolean;
 }
 
@@ -25,9 +30,12 @@ export function BulkActionToolbar({
   onSelectAll,
   onCopyJobIds,
   onBulkDelete,
+  onBulkExport,
   isDeleting = false,
 }: BulkActionToolbarProps) {
   const { copy, isCopied } = useCopyToClipboard();
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const isAllSelected = selectedCount === totalCount && totalCount > 0;
 
   const handleCopy = () => {
@@ -35,6 +43,75 @@ export function BulkActionToolbar({
     copy(idsText);
     triggerHaptic('light');
     onCopyJobIds();
+  };
+
+  const handleBulkDelete = async () => {
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsProcessing(true);
+    try {
+      const result = await bulkDeleteReports(selectedIds);
+
+      triggerHaptic('success');
+
+      if (result.failed_count > 0) {
+        toast.warning(
+          `Deleted ${result.deleted_count} reports (${result.failed_count} failed)`
+        );
+      } else {
+        toast.success(`Successfully deleted ${result.deleted_count} reports`);
+      }
+
+      // Notify parent that deletion succeeded
+      if (onBulkDelete) {
+        onBulkDelete(result.failed_ids);
+      }
+
+      onClearSelection();
+    } catch (error) {
+      triggerHaptic('error');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete reports';
+      toast.error(errorMessage);
+    } finally {
+      setIsProcessing(false);
+      setDeleteConfirmOpen(false);
+    }
+  };
+
+  const handleBulkExport = async () => {
+    setIsProcessing(true);
+    try {
+      const result = await bulkExportReports(selectedIds);
+
+      triggerHaptic('success');
+
+      if (result.failed_count > 0) {
+        toast.warning(
+          `Exported ${result.exported_count} reports (${result.failed_count} skipped)`
+        );
+      } else {
+        toast.success(`Exported ${result.exported_count} reports`);
+      }
+
+      // Trigger download
+      const link = document.createElement('a');
+      link.href = result.download_url;
+      link.download = `reports-export-${Date.now()}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      onBulkExport?.();
+      onClearSelection();
+    } catch (error) {
+      triggerHaptic('error');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to export reports';
+      toast.error(errorMessage);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -111,38 +188,74 @@ export function BulkActionToolbar({
           {/* Spacer */}
           <div className="flex-1 hidden sm:block" />
 
-          {/* Bulk Delete - Commented out until backend support */}
-          {onBulkDelete && (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => {
-                onBulkDelete();
-                triggerHaptic('light');
-              }}
-              disabled={isDeleting}
-              className="text-xs sm:text-sm h-8 sm:h-9"
-            >
-              {isDeleting ? (
-                <>
-                  <span className="animate-spin">⏳</span>
-                  <span className="hidden sm:inline ml-1">Deleting...</span>
-                </>
-              ) : (
-                <>
-                  <Trash2 className="w-3.5 h-3.5 sm:mr-1.5" />
-                  <span className="hidden sm:inline">Delete Selected</span>
-                </>
-              )}
-            </Button>
-          )}
+            {/* Bulk Export */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              handleBulkExport();
+              triggerHaptic('light');
+            }}
+            disabled={isProcessing}
+            className="text-xs sm:text-sm h-8 sm:h-9"
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin sm:mr-1.5" />
+                <span className="hidden sm:inline">Exporting...</span>
+              </>
+            ) : (
+              <>
+                <Download className="w-3.5 h-3.5 sm:mr-1.5" />
+                <span className="hidden sm:inline">Export ZIP</span>
+                <span className="sm:hidden">Export</span>
+              </>
+            )}
+          </Button>
+
+          {/* Bulk Delete */}
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => {
+              handleBulkDelete();
+              triggerHaptic('light');
+            }}
+            disabled={isProcessing}
+            className="text-xs sm:text-sm h-8 sm:h-9"
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin sm:mr-1.5" />
+                <span className="hidden sm:inline">Deleting...</span>
+              </>
+            ) : (
+              <>
+                <Trash2 className="w-3.5 h-3.5 sm:mr-1.5" />
+                <span className="hidden sm:inline">Delete Selected</span>
+              </>
+            )}
+          </Button>
         </div>
 
         {/* Hint */}
         <div className="text-xs text-[rgba(207,207,207,0.5)]">
-          💡 Selected reports are marked with a checkbox. Bulk actions coming soon!
+          💡 Bulk operations: Export as ZIP or permanently delete selected reports.
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Delete Reports?"
+        description={`This will permanently delete ${selectedCount} ${selectedCount === 1 ? 'report' : 'reports'}. This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+        isLoading={isProcessing}
+        onConfirm={handleConfirmDelete}
+      />
     </motion.div>
   );
 }
