@@ -188,6 +188,9 @@ export default function ReportsPage() {
         queuedOrRunningJobs.map(job => getJob(job.job_id))
       );
 
+      // Track jobs to remove (404s - no longer exist on backend)
+      const jobsToRemove: string[] = [];
+
       let hasFailures = false;
       results.forEach((result, index) => {
         const job = queuedOrRunningJobs[index];
@@ -198,10 +201,33 @@ export default function ReportsPage() {
             updateJobStatus(job.job_id, jobStatus.status);
           }
         } else {
-          hasFailures = true;
-          console.debug('Failed to fetch job status:', result.reason);
+          // Check if it's a 404 (job no longer exists on backend)
+          const error = result.reason;
+          if (error?.status === 404) {
+            // Job doesn't exist on backend anymore - remove from list
+            jobsToRemove.push(job.job_id);
+          } else {
+            hasFailures = true;
+            console.debug('Failed to fetch job status:', error);
+          }
         }
       });
+
+      // Remove jobs that no longer exist on backend (404s)
+      if (jobsToRemove.length > 0) {
+        const userJobsKey = getUserJobsKey();
+        if (userJobsKey) {
+          // Remove from localStorage
+          const localJobs = JSON.parse(localStorage.getItem(userJobsKey) || '[]');
+          const updatedJobs = localJobs.filter((job: LocalStorageJob) =>
+            !jobsToRemove.includes(job.job_id)
+          );
+          localStorage.setItem(userJobsKey, JSON.stringify(updatedJobs));
+        }
+
+        // Remove from state
+        setRows(prevRows => prevRows.filter(row => !jobsToRemove.includes(row.job_id)));
+      }
 
       // Reset or increment failure counter based on results
       if (hasFailures) {
