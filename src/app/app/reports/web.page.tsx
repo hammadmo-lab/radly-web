@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Eye, Search, ChevronLeft, ChevronRight, Plus, FileText } from 'lucide-react';
+import { Eye, Search, ChevronLeft, ChevronRight, Plus, FileText, Filter, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getJob } from '@/lib/jobs';
@@ -54,10 +54,11 @@ export default function ReportsPage() {
   const [err, setErr] = useState<string | null>(null);
   const [pollingFailures, setPollingFailures] = useState(0);
 
-  // Pagination, search, and sort state
+  // Pagination, search, sort, and filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'status'>('newest');
   const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const itemsPerPage = 20;
 
   // Authentication guard
@@ -189,8 +190,12 @@ export default function ReportsPage() {
 
   // Filter, sort, and paginate rows
   const { filteredAndSortedRows, totalPages, paginatedRows } = useMemo(() => {
-    // Filter by search query
+    // Filter by search query and status
     const filtered = rows.filter(row => {
+      // Status filter
+      if (statusFilter && row.status !== statusFilter) return false;
+
+      // Search filter
       if (!searchQuery) return true;
       const query = searchQuery.toLowerCase();
       return (
@@ -226,7 +231,7 @@ export default function ReportsPage() {
       totalPages: total,
       paginatedRows: paginated,
     };
-  }, [rows, searchQuery, sortBy, currentPage, itemsPerPage]);
+  }, [rows, searchQuery, sortBy, currentPage, itemsPerPage, statusFilter]);
 
   const handleRefresh = useCallback(async () => {
     triggerHaptic('light');
@@ -354,6 +359,41 @@ export default function ReportsPage() {
               <SelectItem value="status">By Status</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Status Filter Tabs */}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => {
+              setStatusFilter(null);
+              setCurrentPage(1);
+            }}
+            className={`px-4 h-10 rounded-lg border transition-colors text-sm font-medium ${
+              statusFilter === null
+                ? 'border-[#4B8EFF] bg-[rgba(75,142,255,0.12)] text-[#D7E3FF]'
+                : 'border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.75)] hover:border-[rgba(75,142,255,0.4)] hover:text-white'
+            }`}
+            aria-label="Show all reports"
+          >
+            All Reports
+          </button>
+          {Object.entries(STATUS_STYLES).map(([status, { label, badgeClass }]) => (
+            <button
+              key={status}
+              onClick={() => {
+                setStatusFilter(statusFilter === status ? null : status);
+                setCurrentPage(1);
+              }}
+              className={`px-4 h-10 rounded-lg border transition-colors text-sm font-medium ${
+                statusFilter === status
+                  ? badgeClass.replace('bg-', 'bg-').replace('border', 'border') + ' border-current'
+                  : 'border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.75)] hover:border-[rgba(255,255,255,0.2)] hover:text-white'
+              }`}
+              aria-label={`Filter by ${label.toLowerCase()}`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
         {searchQuery && (
