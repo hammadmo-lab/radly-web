@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Eye, Search, ChevronLeft, ChevronRight, Plus, FileText, Filter, X, Copy, Check, Trash2 } from 'lucide-react';
+import { Eye, Search, ChevronLeft, ChevronRight, Plus, FileText, Filter, X, Copy, Check, Trash2, CheckCircle2, Circle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getJob } from '@/lib/jobs';
@@ -11,11 +11,13 @@ import type { RecentJobRow } from '@/lib/jobs';
 import { createSupabaseBrowser } from "@/utils/supabase/browser";
 import { useAuthToken } from '@/hooks/useAuthToken';
 import { useJobStatusPolling } from "@/hooks/useSafePolling";
+import { useReportSelection } from '@/hooks/useReportSelection';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PullToRefresh } from '@/components/shared/PullToRefresh';
 import { EnhancedEmptyState } from '@/components/shared/EnhancedEmptyState';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { BulkActionToolbar } from '@/components/reports/BulkActionToolbar';
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
 import { triggerHaptic } from '@/utils/haptics';
 
@@ -68,6 +70,17 @@ export default function ReportsPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Multi-select state
+  const {
+    selectedIds,
+    toggleSelection,
+    toggleSelectAll,
+    clearSelection,
+    isSelected,
+    getSelectedIds,
+    getSelectedCount,
+  } = useReportSelection(userId);
 
   // Copy to clipboard
   const { copy, isCopied } = useCopyToClipboard();
@@ -443,15 +456,57 @@ export default function ReportsPage() {
           </div>
         )}
 
+        {/* Bulk Actions Toolbar */}
+        {getSelectedCount() > 0 && (
+          <BulkActionToolbar
+            selectedCount={getSelectedCount()}
+            totalCount={filteredAndSortedRows.length}
+            selectedIds={getSelectedIds()}
+            onClearSelection={clearSelection}
+            onSelectAll={() => {
+              toggleSelectAll(filteredAndSortedRows.map(r => r.job_id));
+              triggerHaptic('light');
+            }}
+            onCopyJobIds={() => {}}
+            onBulkDelete={(failedIds) => {
+              // Remove deleted reports from the list
+              setRows(prevRows =>
+                prevRows.filter(row => !getSelectedIds().includes(row.job_id) || failedIds.includes(row.job_id))
+              );
+            }}
+            onBulkExport={() => {}}
+          />
+        )}
+
         <ul className="space-y-4">
           {paginatedRows.map((r) => {
             const statusStyle = STATUS_STYLES[r.status] ?? STATUS_STYLES.queued
             return (
               <li
                 key={r.job_id}
-                className="aurora-card border border-[rgba(255,255,255,0.05)] p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(75,142,255,0.35)] hover:shadow-[0_18px_42px_rgba(20,28,45,0.55)]"
+                className={`aurora-card border transition-all duration-300 hover:-translate-y-1 p-5 sm:p-6 ${
+                  isSelected(r.job_id)
+                    ? 'border-[rgba(75,142,255,0.5)] bg-[rgba(75,142,255,0.1)]'
+                    : 'border-[rgba(255,255,255,0.05)] hover:border-[rgba(75,142,255,0.35)] hover:shadow-[0_18px_42px_rgba(20,28,45,0.55)]'
+                }`}
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  {/* Checkbox */}
+                  <button
+                    onClick={() => {
+                      toggleSelection(r.job_id);
+                      triggerHaptic('light');
+                    }}
+                    className="flex-shrink-0 p-1 rounded hover:bg-[rgba(75,142,255,0.12)] transition-colors"
+                    aria-label={`Select report ${r.job_id}`}
+                  >
+                    {isSelected(r.job_id) ? (
+                      <CheckCircle2 className="h-5 w-5 text-[#4B8EFF]" />
+                    ) : (
+                      <Circle className="h-5 w-5 text-[rgba(207,207,207,0.4)]" />
+                    )}
+                  </button>
+
                   <div className="flex-1 space-y-2 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-lg font-semibold text-white tracking-tight">
