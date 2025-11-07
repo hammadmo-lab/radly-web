@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Eye, Search, ChevronLeft, ChevronRight, Plus, FileText, Filter, X } from 'lucide-react';
+import { Eye, Search, ChevronLeft, ChevronRight, Plus, FileText, Filter, X, Copy, Check, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getJob } from '@/lib/jobs';
@@ -14,6 +14,9 @@ import { useJobStatusPolling } from "@/hooks/useSafePolling";
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PullToRefresh } from '@/components/shared/PullToRefresh';
+import { EnhancedEmptyState } from '@/components/shared/EnhancedEmptyState';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
 import { triggerHaptic } from '@/utils/haptics';
 
 // Interface for localStorage job format
@@ -60,6 +63,14 @@ export default function ReportsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const itemsPerPage = 20;
+
+  // Delete confirmation state
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Copy to clipboard
+  const { copy, isCopied } = useCopyToClipboard();
 
   // Authentication guard
   useEffect(() => {
@@ -239,6 +250,29 @@ export default function ReportsPage() {
     triggerHaptic('success');
   }, [load]);
 
+  const handleDeleteJob = useCallback(async () => {
+    if (!jobToDelete || !userId) return;
+
+    setIsDeleting(true);
+    try {
+      const userJobsKey = `radly_recent_jobs_local_${userId}`;
+      const localJobs = JSON.parse(localStorage.getItem(userJobsKey) || '[]');
+      const updatedJobs = localJobs.filter((job: LocalStorageJob) => job.job_id !== jobToDelete);
+      localStorage.setItem(userJobsKey, JSON.stringify(updatedJobs));
+
+      // Update rows state
+      setRows(prevRows => prevRows.filter(row => row.job_id !== jobToDelete));
+      triggerHaptic('success');
+    } catch (error) {
+      console.error('Failed to delete report:', error);
+      triggerHaptic('error');
+    } finally {
+      setIsDeleting(false);
+      setJobToDelete(null);
+      setDeleteConfirmOpen(false);
+    }
+  }, [jobToDelete, userId]);
+
   if (loading) {
     return (
       <div className="p-6">
@@ -289,22 +323,15 @@ export default function ReportsPage() {
 
   if (!rows.length) {
     return (
-      <div className="p-6 text-center space-y-6">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-            <FileText className="w-8 h-8 text-muted-foreground" />
-          </div>
-          <div className="text-muted-foreground">
-            <p className="text-lg font-semibold mb-2">No reports yet</p>
-            <p className="text-sm max-w-md mx-auto">
-              Your generated reports will appear here after generation completes. Start by selecting a template and generating your first report.
-            </p>
-          </div>
-        </div>
-        <Button onClick={() => router.push('/app/templates')} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Generate Your First Report
-        </Button>
+      <div className="neon-shell space-y-6 p-5 sm:p-8 md:p-10">
+        <Breadcrumb items={[{ label: 'Reports' }]} />
+        <EnhancedEmptyState
+          icon="reports"
+          title="No reports yet"
+          description="Your generated reports will appear here after generation completes. Start by selecting a template and generating your first report."
+          ctaText="Generate Your First Report"
+          onCta={() => router.push('/app/templates')}
+        />
       </div>
     );
   }
@@ -425,7 +452,7 @@ export default function ReportsPage() {
                 className="aurora-card border border-[rgba(255,255,255,0.05)] p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(75,142,255,0.35)] hover:shadow-[0_18px_42px_rgba(20,28,45,0.55)]"
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex-1 space-y-2">
+                  <div className="flex-1 space-y-2 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-lg font-semibold text-white tracking-tight">
                         {(r.template_id ?? 'Untitled Report').replace(/_/g, ' ')}
@@ -434,19 +461,52 @@ export default function ReportsPage() {
                         {statusStyle.label}
                       </span>
                     </div>
-                    <div className="text-xs text-[rgba(207,207,207,0.55)]">
-                      <span className="uppercase tracking-[0.28em] text-[rgba(207,207,207,0.4)] mr-2">Job ID</span>
-                      <span className="font-mono text-[rgba(207,207,207,0.75)] truncate block sm:inline">{r.job_id}</span>
+                    <div className="text-xs text-[rgba(207,207,207,0.55)] space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="uppercase tracking-[0.28em] text-[rgba(207,207,207,0.4)]">Job ID</span>
+                        <span className="font-mono text-[rgba(207,207,207,0.75)] truncate">{r.job_id}</span>
+                        <button
+                          onClick={() => {
+                            copy(r.job_id);
+                            triggerHaptic('light');
+                          }}
+                          className="p-1 rounded hover:bg-[rgba(75,142,255,0.12)] transition-colors"
+                          title="Copy Job ID"
+                          aria-label="Copy Job ID"
+                        >
+                          {isCopied && jobToDelete === r.job_id ? (
+                            <Check className="h-4 w-4 text-[#3FBF8C]" />
+                          ) : (
+                            <Copy className="h-4 w-4 text-[rgba(207,207,207,0.5)] hover:text-[#4B8EFF]" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <Link
-                    href={`/app/report/${r.job_id}`}
-                    className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[linear-gradient(90deg,#2653FF_0%,#4B8EFF_100%)] text-white shadow-[0_10px_24px_rgba(75,142,255,0.35)] hover:shadow-[0_16px_28px_rgba(75,142,255,0.45)] transition-all touch-target"
-                    onClick={() => triggerHaptic('light')}
-                  >
-                    <Eye className="h-4 w-4" />
-                    <span>View Report</span>
-                  </Link>
+
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <Link
+                      href={`/app/report/${r.job_id}`}
+                      className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[linear-gradient(90deg,#2653FF_0%,#4B8EFF_100%)] text-white shadow-[0_10px_24px_rgba(75,142,255,0.35)] hover:shadow-[0_16px_28px_rgba(75,142,255,0.45)] transition-all touch-target text-sm"
+                      onClick={() => triggerHaptic('light')}
+                    >
+                      <Eye className="h-4 w-4" />
+                      <span>View</span>
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setJobToDelete(r.job_id);
+                        setDeleteConfirmOpen(true);
+                        triggerHaptic('light');
+                      }}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-[rgba(255,107,107,0.3)] bg-[rgba(255,107,107,0.08)] text-[rgba(255,107,107,0.9)] hover:bg-[rgba(255,107,107,0.15)] transition-colors touch-target text-sm min-h-[44px]"
+                      title="Delete report"
+                      aria-label="Delete report"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="hidden sm:inline">Delete</span>
+                    </button>
+                  </div>
                 </div>
               </li>
             )
@@ -483,6 +543,19 @@ export default function ReportsPage() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Delete Report?"
+        description="This report will be permanently removed from your list. You can still access it through the Radly archive if needed."
+        confirmText="Delete Report"
+        cancelText="Cancel"
+        variant="destructive"
+        isLoading={isDeleting}
+        onConfirm={handleDeleteJob}
+      />
     </PullToRefresh>
   );
 }
