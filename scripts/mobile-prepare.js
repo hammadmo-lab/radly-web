@@ -15,6 +15,12 @@ for (const rel of toBackup) {
   const p = path.join(ROOT, rel)
   if (fs.existsSync(p)) {
     const dest = path.join(backupDir, rel.replace(/[\/]/g, '__'))
+
+    // Remove existing backup if it exists to avoid ENOTEMPTY error
+    if (fs.existsSync(dest)) {
+      fs.rmSync(dest, { recursive: true, force: true })
+    }
+
     fs.mkdirSync(path.dirname(dest), { recursive: true })
     fs.renameSync(p, dest)
     console.log('📦 Mobile build: temporarily moved', rel)
