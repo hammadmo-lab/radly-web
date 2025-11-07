@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Eye, Search, ChevronLeft, ChevronRight, Plus, FileText, Filter, X, Copy, Check, Trash2, CheckCircle2, Circle } from 'lucide-react';
+import { Eye, Search, ChevronLeft, ChevronRight, Copy, Check, Trash2, CheckCircle2, Circle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getJob } from '@/lib/jobs';
