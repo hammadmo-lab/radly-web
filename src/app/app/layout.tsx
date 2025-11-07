@@ -72,7 +72,7 @@ export default function AppLayout({
         <main className={`container max-w-6xl mx-auto px-4 sm:px-6 neon-page-stack w-full ${
           isNativeMobilePage ? 'py-0' : 'py-8 sm:py-12 pb-24 md:pb-12'
         }`}>
-          <div className={`${isNativeMobilePage ? '' : 'neon-shell p-6 sm:p-8 md:p-10 backdrop-blur-lg'}`}>
+          <div className={`${isNativeMobilePage ? '' : 'neon-shell p-6 sm:p-8 md:p-10 md:backdrop-blur-lg'}`}>
             {children}
           </div>
         </main>
