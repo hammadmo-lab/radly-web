@@ -14,20 +14,25 @@ export function PerformanceMonitor() {
   useEffect(() => {
     // Only in development
     if (process.env.NODE_ENV !== 'development') return
-    
-    // Monitor long tasks
+
+    // Monitor long tasks (only log if very long > 200ms)
     if ('PerformanceObserver' in window) {
-      const observer = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          if (entry.duration > 50) {
-            console.warn('Long task detected:', entry)
+      try {
+        const observer = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            if (entry.duration > 200) {
+              console.debug('Long task detected:', entry)
+            }
           }
-        }
-      })
-      
-      observer.observe({ entryTypes: ['longtask'] })
-      
-      return () => observer.disconnect()
+        })
+
+        observer.observe({ entryTypes: ['longtask'] })
+
+        return () => observer.disconnect()
+      } catch (err) {
+        // PerformanceObserver not supported or feature unavailable
+        console.debug('PerformanceObserver not available:', err)
+      }
     }
   }, [])
   
@@ -69,28 +74,40 @@ export function PerformanceMonitor() {
 }
 
 function getLCP(): number | null {
-  const entries = performance.getEntriesByType('largest-contentful-paint')
-  return entries.length > 0 ? entries[entries.length - 1].startTime : null
+  try {
+    const entries = performance.getEntriesByType('largest-contentful-paint')
+    return entries.length > 0 ? entries[entries.length - 1].startTime : null
+  } catch (err) {
+    return null
+  }
 }
 
 function getINP(): number | null {
-  // INP is calculated differently - this is a simplified version
-  // In a real implementation, you'd use the web-vitals library
-  return null
+  try {
+    // INP is calculated differently - this is a simplified version
+    // In a real implementation, you'd use the web-vitals library
+    return null
+  } catch (err) {
+    return null
+  }
 }
 
 function getCLS(): number {
-  let clsValue = 0
-  const entries = performance.getEntriesByType('layout-shift')
-  
-  for (const entry of entries) {
-    const layoutShiftEntry = entry as PerformanceEntry & { hadRecentInput?: boolean; value?: number }
-    if (!layoutShiftEntry.hadRecentInput) {
-      clsValue += layoutShiftEntry.value || 0
+  try {
+    let clsValue = 0
+    const entries = performance.getEntriesByType('layout-shift')
+
+    for (const entry of entries) {
+      const layoutShiftEntry = entry as PerformanceEntry & { hadRecentInput?: boolean; value?: number }
+      if (!layoutShiftEntry.hadRecentInput) {
+        clsValue += layoutShiftEntry.value || 0
+      }
     }
+
+    return clsValue
+  } catch (err) {
+    return 0
   }
-  
-  return clsValue
 }
 
 function getFCP(): number | null {
