@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { httpPost } from "@/lib/http";
+import { httpPost, httpGet } from "@/lib/http";
 import { toast } from "sonner";
 import { RotateCcw, Loader2, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useJobStatusPolling } from "@/hooks/useSafePolling";
 
 interface RegenerateWithToneProps {
   reportId: string;
@@ -23,6 +24,8 @@ export function RegenerateWithTone({ reportId }: RegenerateWithToneProps) {
   const router = useRouter();
   const [selectedTone, setSelectedTone] = useState<string>("standard");
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const jobIdRef = useRef<string | null>(null);
 
   const tones = [
     { value: "standard", label: "Standard", description: "Balanced clinical language" },
@@ -32,6 +35,38 @@ export function RegenerateWithTone({ reportId }: RegenerateWithToneProps) {
     { value: "formal", label: "Formal", description: "Highly professional language" },
   ];
 
+  // Poll for job completion
+  const { isPolling } = useJobStatusPolling(
+    async () => {
+      if (!jobIdRef.current) return;
+
+      try {
+        const response = await httpGet<{ status: string }>(
+          `/v1/jobs/${jobIdRef.current}`
+        );
+
+        if (response.status === "completed") {
+          // Job completed successfully
+          router.refresh();
+          toast.success("Report regenerated successfully!");
+          setSelectedTone("standard");
+          setJobId(null);
+          jobIdRef.current = null;
+          // Stop polling by throwing (hook detects job completion)
+          throw new Error("Job completed");
+        }
+      } catch (error) {
+        // If we get a 404 or other error, the job may have completed already
+        throw error;
+      }
+    },
+    {
+      pauseWhenHidden: true,
+      immediate: false, // Don't poll until we have a job ID
+      cleanupOnError: false, // Don't stop polling on transient errors
+    }
+  );
+
   const handleRegenerate = async () => {
     if (selectedTone === "standard") {
       toast.error("Please select a different tone");
@@ -40,20 +75,16 @@ export function RegenerateWithTone({ reportId }: RegenerateWithToneProps) {
 
     setIsRegenerating(true);
     try {
-      await httpPost<{ tone: string }, { job_id: string }>(
+      const response = await httpPost<{ tone: string }, { job_id: string }>(
         `/v1/reports/${reportId}/regenerate`,
         { tone: selectedTone }
       );
 
-      toast.success("Report regeneration started!");
+      const newJobId = response.job_id;
+      jobIdRef.current = newJobId;
+      setJobId(newJobId);
 
-      // TODO: Implement polling for job completion
-      // For now, just refresh after a delay
-      setTimeout(() => {
-        router.refresh();
-        toast.success("Report regenerated successfully!");
-      }, 5000);
-
+      toast.success("Report regeneration started! Polling for completion...");
     } catch (error) {
       console.error("Failed to regenerate report:", error);
       toast.error("Failed to regenerate report");
