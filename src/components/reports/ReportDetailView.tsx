@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { GenerateLoading } from '@/components/GenerateLoading';
 import ReportRenderer from '@/components/ReportRenderer';
 import { FormattingProfileSelector } from '@/components/formatting/FormattingProfileSelector';
+import { ReportMetadataSidebar } from '@/components/reports/ReportMetadataSidebar';
 import { useAuth } from '@/components/auth-provider';
 import { Button } from '@/components/ui/button';
 import { useSafeClickHandler } from '@/hooks/useButtonResponsiveness';
@@ -238,33 +239,47 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
 
   return (
     <div className="py-8">
-      <div className="max-w-3xl mx-auto mb-6 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-          <div className="flex-1 w-full">
-            <FormattingProfileSelector
-              value={selectedFormattingProfile}
-              onChange={setSelectedFormattingProfile}
-              userTier={userTier}
-            />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Controls - Full width */}
+        <div className="mb-6 space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+            <div className="flex-1 w-full">
+              <FormattingProfileSelector
+                value={selectedFormattingProfile}
+                onChange={setSelectedFormattingProfile}
+                userTier={userTier}
+              />
+            </div>
+            <Button
+              onClick={handleExportDocx}
+              disabled={isExporting}
+              variant="outline"
+              className="flex items-center gap-2 w-full sm:w-auto"
+              aria-label="Download report as DOCX"
+            >
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              {isExporting ? 'Exporting...' : 'Download DOCX'}
+            </Button>
           </div>
-          <Button
-            onClick={handleExportDocx}
-            disabled={isExporting}
-            variant="outline"
-            className="flex items-center gap-2 w-full sm:w-auto"
-            aria-label="Download report as DOCX"
-          >
-            {isExporting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Download className="h-4 w-4" />
-            )}
-            {isExporting ? 'Exporting...' : 'Download DOCX'}
-          </Button>
+        </div>
+
+        {/* Content Grid - Report + Sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 lg:gap-6">
+          {/* Report - Left column */}
+          <div>
+            <ReportRenderer report={resultReport} patient={resultPatient} signature={resultSignature} />
+          </div>
+
+          {/* Metadata Sidebar - Right column, hidden on mobile */}
+          <aside className="hidden lg:block">
+            <ReportMetadataSidebar jobStatus={jobStatus} />
+          </aside>
         </div>
       </div>
-
-      <ReportRenderer report={resultReport} patient={resultPatient} signature={resultSignature} />
     </div>
   );
 }
