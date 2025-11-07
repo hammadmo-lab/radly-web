@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/marketing/Breadcrumb";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
-import { Mail, MessageSquare, Building2, Facebook } from "lucide-react";
+import { Mail, MessageSquare, Building2, Facebook, Briefcase } from "lucide-react";
 
 const metadataDescription = "Contact Radly: Reach out for support, sales inquiries, partnerships, or career opportunities. We're here to help.";
 
@@ -53,7 +53,7 @@ const contactChannels = [
     description: "Enterprise plans, integrations, collaboration opportunities",
   },
   {
-    icon: Linkedin,
+    icon: Briefcase,
     title: "Careers",
     email: "careers@radly.app",
     description: "Job opportunities and career inquiries",
