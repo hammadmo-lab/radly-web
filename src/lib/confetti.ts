@@ -1,17 +1,20 @@
-import confetti from 'canvas-confetti'
-
 /**
  * Trigger a success celebration confetti animation
  * Called when a report generation job is successfully enqueued
+ *
+ * Lazy-loads canvas-confetti to reduce initial bundle size
  */
-export function celebrateSuccess() {
+export async function celebrateSuccess() {
+  // Dynamically import only when needed
+  const confetti = (await import('canvas-confetti')).default
+
   const count = 200
   const defaults = {
     origin: { y: 0.7 },
     zIndex: 9999,
   }
 
-  function fire(particleRatio: number, opts: confetti.Options) {
+  function fire(particleRatio: number, opts: any) {
     confetti({
       ...defaults,
       ...opts,
