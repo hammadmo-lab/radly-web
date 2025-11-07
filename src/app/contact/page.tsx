@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/marketing/Breadcrumb";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
-import { ContactForm } from "./ContactForm";
-import { Mail, Linkedin, MessageSquare, Building2 } from "lucide-react";
+import { Mail, MessageSquare, Building2, Facebook } from "lucide-react";
 
 const metadataDescription = "Contact Radly: Reach out for support, sales inquiries, partnerships, or career opportunities. We're here to help.";
 
@@ -193,36 +192,22 @@ export default function ContactPage() {
           </div>
         </section>
 
-        {/* Contact Form */}
-        <section className="mb-20 space-y-8">
-          <h2 className="text-3xl font-semibold">Send us a Message</h2>
-          <ContactForm />
-        </section>
 
         {/* Social Links */}
         <section className="mb-20 space-y-6 rounded-3xl border border-[rgba(255,255,255,0.1)] bg-[rgba(12,16,28,0.65)] p-8">
           <h2 className="text-2xl font-semibold">Connect With Us</h2>
           <p className="text-[rgba(207,207,207,0.75)]">
-            Follow Radly on social media for updates, insights, and company news.
+            Follow Radly on Facebook for updates, insights, and company news.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <a
-              href="https://www.linkedin.com/company/radly"
+              href="https://facebook.com/radlyapp"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-6 py-3 rounded-lg bg-[rgba(143,130,255,0.15)] border border-[rgba(143,130,255,0.3)] text-[rgba(143,130,255,0.85)] hover:bg-[rgba(143,130,255,0.25)] transition-colors font-semibold"
             >
-              <Linkedin className="w-5 h-5" />
-              LinkedIn
-            </a>
-            <a
-              href="https://twitter.com/RadlyHealth"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-6 py-3 rounded-lg bg-[rgba(143,130,255,0.15)] border border-[rgba(143,130,255,0.3)] text-[rgba(143,130,255,0.85)] hover:bg-[rgba(143,130,255,0.25)] transition-colors font-semibold"
-            >
-              𝕏
-              <span>Twitter</span>
+              <Facebook className="w-5 h-5" />
+              Facebook
             </a>
           </div>
         </section>
