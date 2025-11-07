@@ -35,8 +35,33 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPage() {
+  const webPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://radly.app/privacy",
+    "name": "Privacy Policy | Radly Assistant",
+    "description": metadataDescription,
+    "url": "https://radly.app/privacy",
+    "isPartOf": {
+      "@id": "https://radly.app/#organization"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Radly",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://radly.app/icon-512.png"
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-muted to-background">
+      <script
+        id="privacy-webpage-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+      />
       {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">

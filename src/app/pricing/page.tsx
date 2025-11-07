@@ -88,6 +88,27 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
 
   const tiers = await marketingGet<Tier[]>(`/v1/subscription/tiers?region=${region}`);
 
+  // Build WebPage schema
+  const webPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://radly.app/pricing",
+    "name": "Pricing | Radly assistant plans",
+    "description": metadataDescription,
+    "url": "https://radly.app/pricing",
+    "isPartOf": {
+      "@id": "https://radly.app/#organization"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Radly",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://radly.app/icon-512.png"
+      }
+    }
+  };
+
   // Build ProductCollection schema from pricing tiers
   const pricingSchema = {
     "@context": "https://schema.org",
@@ -110,6 +131,11 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
 
   return (
     <div className="bg-[var(--ds-bg-gradient)] text-white">
+      <script
+        id="pricing-webpage-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+      />
       <script
         id="pricing-schema"
         type="application/ld+json"

@@ -140,6 +140,26 @@ export default function InstructionsPage() {
     }))
   };
 
+  const webPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://radly.app/instructions",
+    "name": "Instructions | Radly assistant walkthrough",
+    "description": metadataDescription,
+    "url": "https://radly.app/instructions",
+    "isPartOf": {
+      "@id": "https://radly.app/#organization"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Radly",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://radly.app/icon-512.png"
+      }
+    }
+  };
+
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -169,6 +189,11 @@ export default function InstructionsPage() {
 
   return (
     <div className="bg-[var(--ds-bg-gradient)] text-white">
+      <script
+        id="instructions-webpage-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+      />
       <script
         id="instructions-faq-schema"
         type="application/ld+json"

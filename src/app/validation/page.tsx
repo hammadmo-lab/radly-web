@@ -64,6 +64,26 @@ const limitations = [
 ];
 
 export default function ValidationPage() {
+  const webPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://radly.app/validation",
+    "name": "Validation | Radly internal testing overview",
+    "description": metadataDescription,
+    "url": "https://radly.app/validation",
+    "isPartOf": {
+      "@id": "https://radly.app/#organization"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Radly",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://radly.app/icon-512.png"
+      }
+    }
+  };
+
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -93,6 +113,11 @@ export default function ValidationPage() {
 
   return (
     <div className="bg-[var(--ds-bg-gradient)] text-white">
+      <script
+        id="validation-webpage-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
+      />
       <script
         id="validation-article-schema"
         type="application/ld+json"
