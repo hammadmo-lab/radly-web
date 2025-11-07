@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ShieldCheck, Lock, ClipboardList, Archive } from "lucide-react";
+import { ShieldCheck, Lock, ClipboardList, Archive, ArrowRight } from "lucide-react";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { PrimaryCTA, SecondaryCTA } from "@/components/marketing/PrimaryCTA";
+import { Breadcrumb } from "@/components/marketing/Breadcrumb";
 
 export const dynamic = "force-static";
 
@@ -91,6 +92,10 @@ export default function SecurityPage() {
       />
       <main className="mx-auto max-w-4xl px-5 py-16">
         <header className="space-y-4">
+          <Breadcrumb items={[
+            { label: "Home", url: "/" },
+            { label: "Security", url: "/security" }
+          ]} />
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgba(207,207,207,0.55)]">Security and compliance</p>
           <h1 className="text-4xl font-semibold leading-tight">How Radly protects clinician and patient data</h1>
           <p className="text-sm text-[rgba(207,207,207,0.75)] sm:text-base">

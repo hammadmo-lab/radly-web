@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { PrimaryCTA, SecondaryCTA } from "@/components/marketing/PrimaryCTA";
-import { ClipboardSignature, Mic, FileText, CheckCircle2 } from "lucide-react";
+import { Breadcrumb } from "@/components/marketing/Breadcrumb";
+import { ClipboardSignature, Mic, FileText, CheckCircle2, ArrowRight } from "lucide-react";
 
 export const dynamic = "force-static";
 
@@ -99,8 +100,12 @@ export default function ValidationPage() {
       />
       <main className="mx-auto max-w-4xl px-5 py-16">
         <header className="space-y-4">
+          <Breadcrumb items={[
+            { label: "Home", url: "/" },
+            { label: "Validation", url: "/validation" }
+          ]} />
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgba(207,207,207,0.55)]">Validation summary</p>
-          <h1 className="text-4xl font-semibold leading-tight">How we validate Radly’s assistant workflow</h1>
+          <h1 className="text-4xl font-semibold leading-tight">How we validate Radly's assistant workflow</h1>
           <p className="text-sm text-[rgba(207,207,207,0.75)] sm:text-base">
             Radly assists clinicians. Radiologists review and finalise every report. This page outlines the datasets, metrics, and limitations informing that workflow.
           </p>
