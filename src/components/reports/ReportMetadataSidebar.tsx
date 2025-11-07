@@ -3,7 +3,7 @@
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
 import { JobStatusResponse } from '@/lib/jobs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Copy, Check, Zap, Clock, Code, Cpu } from 'lucide-react';
+import { Copy, Check, Clock, Code, Cpu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ReportMetadataSidebarProps {

@@ -6,7 +6,6 @@ import { marketingGet } from "@/lib/http/marketing";
 import { PrimaryCTA, SecondaryCTA } from "@/components/marketing/PrimaryCTA";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { Breadcrumb } from "@/components/marketing/Breadcrumb";
-import { siteConfig } from "@/lib/siteConfig";
 import { MobileAppPricingRedirect } from "@/components/pricing/MobileAppPricingRedirect";
 
 export const dynamic = "force-static";
