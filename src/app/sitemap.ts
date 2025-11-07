@@ -11,8 +11,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     if (path === "/") return 1.0;          // Homepage - highest priority
     if (path === "/pricing") return 0.9;   // Key conversion page
     if (path === "/instructions") return 0.9; // Key onboarding page
+    if (path === "/about") return 0.85;    // Authority/trust building
+    if (path === "/faq") return 0.85;      // Authority/trust building
     if (path === "/security") return 0.8;  // Trust-building page
     if (path === "/validation") return 0.8; // Trust-building page
+    if (path === "/contact") return 0.8;   // Trust-building page
     return 0.7;                             // Other pages
   };
 

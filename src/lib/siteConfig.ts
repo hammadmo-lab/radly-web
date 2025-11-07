@@ -21,4 +21,7 @@ export const marketingPaths = [
   "/terms",
   "/security",
   "/validation",
+  "/about",
+  "/faq",
+  "/contact",
 ];
