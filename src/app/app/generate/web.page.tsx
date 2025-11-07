@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { FormField } from '@/components/ui/form-field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { generateFormSchema, GenerateFormValues } from '@/lib/schemas'
 import { httpGet } from '@/lib/http'
@@ -762,8 +763,12 @@ export default function GeneratePage() {
 
                 <div className="space-y-4 p-5 sm:p-6">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="patient.name" className="text-[rgba(207,207,207,0.75)]">Patient Name (optional)</Label>
+                    <FormField
+                      label="Patient Name"
+                      optional
+                      htmlFor="patient.name"
+                      error={errors.patient?.name?.message}
+                    >
                       <Input
                         id="patient.name"
                         inputMode="text"
@@ -773,9 +778,13 @@ export default function GeneratePage() {
                         placeholder="John Doe"
                         className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] input-mobile"
                       />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="patient.mrn" className="text-[rgba(207,207,207,0.75)]">Medical Record Number (optional)</Label>
+                    </FormField>
+                    <FormField
+                      label="Medical Record Number"
+                      optional
+                      htmlFor="patient.mrn"
+                      error={errors.patient?.mrn?.message}
+                    >
                       <Input
                         id="patient.mrn"
                         inputMode="text"
@@ -785,9 +794,13 @@ export default function GeneratePage() {
                         placeholder="MRN123456"
                         className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] input-mobile"
                       />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="patient.age" className="text-[rgba(207,207,207,0.75)]">Age (required)</Label>
+                    </FormField>
+                    <FormField
+                      label="Age"
+                      required
+                      htmlFor="patient.age"
+                      error={errors.patient?.age?.message}
+                    >
                       <Input
                         id="patient.age"
                         type="number"
@@ -797,12 +810,13 @@ export default function GeneratePage() {
                         placeholder="45"
                         className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] input-mobile"
                       />
-                      {errors.patient?.age && (
-                        <p className="text-sm text-[#FF9F9F]">{errors.patient.age.message}</p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="patient.sex" className="text-[rgba(207,207,207,0.75)]">Sex (required)</Label>
+                    </FormField>
+                    <FormField
+                      label="Sex"
+                      required
+                      htmlFor="patient.sex"
+                      error={errors.patient?.sex?.message}
+                    >
                       <Select
                         value={watch('patient.sex') || ''}
                         onValueChange={(value) =>
@@ -821,10 +835,7 @@ export default function GeneratePage() {
                           <SelectItem value="O">Other</SelectItem>
                         </SelectContent>
                       </Select>
-                      {errors.patient?.sex && (
-                        <p className="text-sm text-[#FF9F9F]">{errors.patient.sex.message}</p>
-                      )}
-                    </div>
+                    </FormField>
                   </div>
                 </div>
               </div>
@@ -847,12 +858,26 @@ export default function GeneratePage() {
 
                 <TooltipProvider>
                   <div className="space-y-4 p-5 sm:p-6 sm:space-y-6">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="indication" className="text-[rgba(207,207,207,0.75)]">Indication / Clinical history (required)</Label>
+                    <FormField
+                      label="Indication / Clinical History"
+                      required
+                      htmlFor="indication"
+                      error={errors.indication?.message}
+                      helpText="The clinical reason for ordering this study. Include relevant symptoms, prior diagnoses, or follow-up information."
+                    >
+                      <div className="flex items-start gap-2">
+                        <Textarea
+                          id="indication"
+                          inputMode="text"
+                          autoCapitalize="sentences"
+                          {...register('indication')}
+                          placeholder="Reason for study..."
+                          rows={3}
+                          className="flex-1 border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] textarea-mobile"
+                        />
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <button className="inline-flex items-center justify-center" type="button">
+                            <button className="inline-flex items-center justify-center flex-shrink-0 mt-0.5" type="button">
                               <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
                             </button>
                           </TooltipTrigger>
@@ -861,60 +886,43 @@ export default function GeneratePage() {
                           </TooltipContent>
                         </Tooltip>
                       </div>
-                      <Textarea
-                        id="indication"
-                        inputMode="text"
-                        autoCapitalize="sentences"
-                        {...register('indication')}
-                        placeholder="Reason for study..."
-                        rows={3}
-                        className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] textarea-mobile"
-                      />
-                      {errors.indication && (
-                        <p className="text-sm text-[#FF9F9F]">{errors.indication.message}</p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor="findings" className="text-[rgba(207,207,207,0.75)]">Findings (required)</Label>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button className="inline-flex items-center justify-center" type="button">
-                              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-xs">
-                            <p>Your radiological observations. Can be bulleted or free text. This will be organized into the findings section of the report.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                      {errors.findings && (
-                        <p className="text-sm text-[#FF9F9F] flex items-center gap-1.5">
-                          <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                          {errors.findings.message}
-                        </p>
-                      )}
-                      <Textarea
-                        id="findings"
-                        inputMode="text"
-                        autoCapitalize="sentences"
-                        {...register('findings')}
-                        placeholder="Enter your findings here. You can type bullet points, write in free text format, or use voice dictation."
-                        rows={6}
-                        className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] textarea-mobile"
-                      />
-                      <p className="text-xs text-[rgba(207,207,207,0.45)]">Tip: Press Enter for a new line, or use the Voice Dictation button below for hands-free input.</p>
+                    </FormField>
 
-                      {/* Voice Input Integration */}
-                      <VoiceInput
-                        onTranscript={handleVoiceTranscript}
-                        onError={handleVoiceError}
-                        onUpgradeRequired={handleUpgradeRequired}
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="technique" className="text-[rgba(207,207,207,0.75)]">Technique (optional)</Label>
+                    <FormField
+                      label="Findings"
+                      required
+                      htmlFor="findings"
+                      error={errors.findings?.message}
+                      helpText="Your radiological observations. Can be bulleted or free text. This will be organized into the findings section of the report."
+                    >
+                      <div className="space-y-2">
+                        <Textarea
+                          id="findings"
+                          inputMode="text"
+                          autoCapitalize="sentences"
+                          {...register('findings')}
+                          placeholder="Enter your findings here. You can type bullet points, write in free text format, or use voice dictation."
+                          rows={6}
+                          className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] textarea-mobile"
+                        />
+                        <p className="text-xs text-[rgba(207,207,207,0.45)]">Tip: Press Enter for a new line, or use the Voice Dictation button below for hands-free input.</p>
+
+                        {/* Voice Input Integration */}
+                        <VoiceInput
+                          onTranscript={handleVoiceTranscript}
+                          onError={handleVoiceError}
+                          onUpgradeRequired={handleUpgradeRequired}
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                    </FormField>
+
+                    <FormField
+                      label="Technique"
+                      optional
+                      htmlFor="technique"
+                      error={errors.technique?.message}
+                    >
                       <Input
                         id="technique"
                         inputMode="text"
@@ -923,7 +931,7 @@ export default function GeneratePage() {
                         placeholder="Portal venous phase..."
                         className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] input-mobile"
                       />
-                    </div>
+                    </FormField>
                   </div>
                 </TooltipProvider>
               </div>
@@ -948,8 +956,12 @@ export default function GeneratePage() {
                   {/* Form Fields */}
                   <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="signature.name" className="text-[rgba(207,207,207,0.75)]">Signature Name</Label>
+                      <FormField
+                        label="Signature Name"
+                        optional
+                        htmlFor="signature.name"
+                        error={errors.signature?.name?.message}
+                      >
                         <Input
                           id="signature.name"
                           {...register('signature.name')}
@@ -961,12 +973,13 @@ export default function GeneratePage() {
                             }
                           }}
                         />
-                        {errors.signature?.name && (
-                          <p className="text-sm text-[#FF9F9F]">{errors.signature.name.message}</p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="signature.date" className="text-[rgba(207,207,207,0.75)]">Date</Label>
+                      </FormField>
+                      <FormField
+                        label="Date"
+                        optional
+                        htmlFor="signature.date"
+                        error={errors.signature?.date?.message}
+                      >
                         <Input
                           id="signature.date"
                           {...register('signature.date')}
@@ -978,10 +991,7 @@ export default function GeneratePage() {
                             }
                           }}
                         />
-                        {errors.signature?.date && (
-                          <p className="text-sm text-[#FF9F9F]">{errors.signature.date.message}</p>
-                        )}
-                      </div>
+                      </FormField>
                     </div>
                     
                     {/* Summary */}
