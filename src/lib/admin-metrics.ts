@@ -1,17 +1,43 @@
 /**
  * src/lib/admin-metrics.ts
  * Fetches metrics from the protected backend endpoints.
- * Uses the same API configuration as other admin endpoints.
+ * Must be called from admin pages where AdminAuthProvider has authenticated credentials.
+ * Use AdminApiClient for all admin endpoint calls.
  */
-import { apiFetch } from './api';
+import { AdminApiClient } from './admin-api';
 
-export async function fetchLLMMetrics() {
-  const res = await apiFetch('/admin/metrics/llm');
-  if (!res.ok) {
-    const txt = await res.text().catch(() => 'no body');
+/**
+ * Helper to create fetch headers with admin credentials
+ */
+function getAdminHeaders(adminClient: AdminApiClient) {
+  // Access private credentials through the public instance
+  const credentials = (adminClient as any).credentials;
+  if (!credentials?.adminKey || !credentials?.apiKey) {
+    throw new Error('Admin credentials not available. Please log in first.');
+  }
+
+  return {
+    'Content-Type': 'application/json',
+    'x-admin-key': credentials.adminKey,
+    'Authorization': `Bearer ${credentials.apiKey}`,
+    'X-Request-Id': crypto.randomUUID(),
+  };
+}
+
+export async function fetchLLMMetrics(adminClient: AdminApiClient) {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000';
+
+  const response = await fetch(`${baseUrl}/v1/admin/metrics/llm`, {
+    method: 'GET',
+    headers: getAdminHeaders(adminClient),
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const txt = await response.text().catch(() => 'no body');
     throw new Error('Failed to fetch LLM metrics: ' + txt);
   }
-  return res.json();
+  return response.json();
 }
 
 // Dashboard metrics types
@@ -122,11 +148,18 @@ export interface DashboardMetrics {
   range?: string;
 }
 
-export async function fetchDashboardMetrics(timeRange: string = '5m'): Promise<DashboardMetrics> {
-  const res = await apiFetch(`/admin/metrics/dashboard?range=${timeRange}`);
-  if (!res.ok) {
-    const txt = await res.text().catch(() => 'no body');
+export async function fetchDashboardMetrics(adminClient: AdminApiClient, timeRange: string = '5m'): Promise<DashboardMetrics> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000';
+
+  const response = await fetch(`${baseUrl}/v1/admin/metrics/dashboard?range=${timeRange}`, {
+    method: 'GET',
+    headers: getAdminHeaders(adminClient),
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const txt = await response.text().catch(() => 'no body');
     throw new Error('Failed to fetch dashboard metrics: ' + txt);
   }
-  return res.json();
+  return response.json();
 }
