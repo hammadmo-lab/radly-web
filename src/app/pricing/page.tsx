@@ -273,7 +273,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
                 description={
                   <>
                     We only process the clinical text you submit to generate reports and retain exports for a limited window. Detailed handling is documented in our{" "}
-                    <Link href="/docs/privacy" className="text-[rgba(143,130,255,0.9)] underline-offset-4 hover:underline">
+                    <Link href="https://radly.app/privacy" className="text-[rgba(143,130,255,0.9)] underline-offset-4 hover:underline">
                       Privacy Policy
                     </Link>
                     , and questions are always welcome.
