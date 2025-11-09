@@ -7,7 +7,13 @@ const withBundleAnalyzer = bundleAnalyzer({
 });
 
 const apiBase = (process.env.NEXT_PUBLIC_API_BASE || 'https://edge.radly.app').replace(/\/+$/, '');
-const s3Domain = process.env.NEXT_PUBLIC_S3_DOMAIN || 's3.radly.app';
+
+// S3 domain must be configured via environment variable
+// Do not commit hardcoded bucket domains to avoid exposing storage infrastructure
+const s3Domain = process.env.NEXT_PUBLIC_S3_DOMAIN;
+if (!s3Domain) {
+  console.warn('Warning: NEXT_PUBLIC_S3_DOMAIN not set. Image optimization from S3 will be disabled.');
+}
 
 const securityHeaders = [
   {
@@ -74,7 +80,7 @@ const nextConfig: NextConfig = {
   
   // Image optimization
   images: {
-    domains: [s3Domain],
+    domains: s3Domain ? [s3Domain] : [],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
