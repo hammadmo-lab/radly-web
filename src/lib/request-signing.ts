@@ -1,16 +1,23 @@
 /**
  * Client-side request signing for sensitive operations
- * Matches backend HMAC-SHA256 signing implementation
+ *
+ * NOTE: Signing secrets should NEVER be exposed in client bundles.
+ * If you need request signing, perform it on a trusted server or edge function.
+ * This class is deprecated and kept for backwards compatibility only.
  */
 
 export class RequestSigner {
   private static signingSecret: string | null = null
 
   /**
-   * Initialize signing secret (from environment variable)
+   * Initialize signing secret
+   *
+   * DEPRECATED: Do not use NEXT_PUBLIC_API_SIGNING_SECRET.
+   * Signing must be done server-side only.
    */
   static initialize() {
-    this.signingSecret = process.env.NEXT_PUBLIC_API_SIGNING_SECRET || null
+    // Never load signing secrets from public environment variables
+    this.signingSecret = null
   }
 
   /**
