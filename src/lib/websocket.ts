@@ -57,6 +57,12 @@ export class TranscriptionWebSocket {
         throw new Error(`Invalid WebSocket URL provided: ${configured}`);
       }
 
+      // Map edge.radly.app to websocket endpoint if needed
+      // This should come from env config in production
+      if (urlBuilder.hostname === 'edge.radly.app') {
+        urlBuilder.hostname = 'api.radly.app';
+      }
+
       // Upgrade protocol to websocket variants
       urlBuilder.protocol = urlBuilder.protocol === 'http:' ? 'ws:' : 'wss:';
 
