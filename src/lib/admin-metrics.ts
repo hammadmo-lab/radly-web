@@ -4,7 +4,6 @@
  * Must be called from admin pages where AdminAuthProvider has authenticated credentials.
  * Use AdminApiClient for all admin endpoint calls.
  */
-import { AdminApiClient } from './admin-api';
 import { AdminCredentials } from '@/types/admin';
 
 /**
