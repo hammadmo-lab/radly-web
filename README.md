@@ -1,6 +1,6 @@
 # Radly Frontend
 
-> Modern, responsive Next.js application for intelligent report generation with real-time processing and multi-platform support.
+> Modern, responsive Next.js application for intelligent report generation with real-time processing.
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-19.1-61dafb?logo=react)](https://react.dev)
@@ -16,7 +16,7 @@ Radly Frontend is a cutting-edge web application that enables users to generate 
 
 - **4-Step Report Generation Flow** - Intuitive multi-step form for report creation
 - **Real-Time Status Polling** - Monitor report generation with smart polling and exponential backoff
-- **Multi-Platform Support** - Native web, iOS (via Capacitor), and Android support with platform-specific subscriptions
+- **Responsive Web Support** - Optimized for desktop and mobile browsers; native apps live in a separate Swift project
 - **Advanced Authentication** - Supabase-powered JWT authentication with OAuth (Google, Apple) and Magic Link
 - **Responsive Design** - Mobile-first design with dual navigation (bottom tabs for mobile, top nav for desktop)
 - **Admin Dashboard** - Comprehensive metrics, user management, and system monitoring
@@ -243,7 +243,6 @@ The application uses intelligent polling hooks for real-time updates:
 - **Chart.js** - Metrics visualization
 - **Canvas Confetti** - Celebration animations
 - **Date-fns** - Date manipulation
-- **Capacitor** - Cross-platform mobile support
 
 ## Development Commands
 
@@ -411,23 +410,13 @@ The admin dashboard provides comprehensive system monitoring:
 
 ## Platform Support
 
-The frontend supports multiple platforms:
+This repository now targets the web experience exclusively:
 
-### Web
 - Modern browsers (Chrome, Firefox, Safari, Edge)
-- Responsive design for all screen sizes
-- Stripe-based subscription management
+- Responsive layouts that adapt to tablets and phones
+- Stripe-based subscription management for billing
 
-### iOS & Android
-- Via Capacitor for native app integration
-- In-app purchase subscriptions
-- Push notifications support
-- Native file access
-
-**Platform Detection:**
-- Automatic detection via Capacitor API
-- Platform-specific subscription logic
-- Graceful fallback for unsupported features
+The legacy Capacitor wrappers have been removed. Native mobile clients are being rebuilt in a dedicated Swift repository to keep concerns separated.
 
 ## Contributing
 

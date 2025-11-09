@@ -26,18 +26,6 @@ export type Platform = 'web' | 'ios' | 'android'
 export type AppStore = 'apple' | 'google' | 'web'
 
 /**
- * Extended Window interface for Capacitor
- */
-declare global {
-  interface Window {
-    Capacitor?: {
-      getPlatform: () => string
-      isNativePlatform: () => boolean
-    }
-  }
-}
-
-/**
  * Get the current platform the app is running on.
  *
  * @returns Platform type: 'web', 'ios', or 'android'
@@ -51,20 +39,14 @@ declare global {
  * ```
  */
 export function getPlatform(): Platform {
-  // SSR safety check
-  if (typeof window === 'undefined') {
+  if (typeof navigator === 'undefined') {
     return 'web'
   }
 
-  // Check if Capacitor is available
-  if (window.Capacitor) {
-    const capacitorPlatform = window.Capacitor.getPlatform()
+  const ua = navigator.userAgent.toLowerCase()
+  if (/iphone|ipad|ipod/.test(ua)) return 'ios'
+  if (/android/.test(ua)) return 'android'
 
-    if (capacitorPlatform === 'ios') return 'ios'
-    if (capacitorPlatform === 'android') return 'android'
-  }
-
-  // Default to web
   return 'web'
 }
 
@@ -81,8 +63,7 @@ export function getPlatform(): Platform {
  * ```
  */
 export function isNativeApp(): boolean {
-  const platform = getPlatform()
-  return platform === 'ios' || platform === 'android'
+  return false
 }
 
 /**
@@ -151,7 +132,7 @@ export function shouldShowWebSubscriptions(): boolean {
  * ```
  */
 export function shouldShowMobileSubscriptions(): boolean {
-  return isNativeApp()
+  return false
 }
 
 /**
@@ -233,8 +214,7 @@ export function getSubscriptionManagementUrl(): string | null {
  * ```
  */
 export function supportsPushNotifications(): boolean {
-  // Push notifications are only supported on native apps
-  return isNativeApp()
+  return false
 }
 
 /**

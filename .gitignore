@@ -22,10 +22,14 @@
 
 # production
 /build
-
 # misc
 .DS_Store
 *.pem
+.mobile-backup/
+android/
+ios/
+resources/
+radly-google-auth/
 
 # debug
 npm-debug.log*

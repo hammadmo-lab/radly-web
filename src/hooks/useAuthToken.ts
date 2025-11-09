@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Capacitor } from '@capacitor/core'
 import { createBrowserSupabase } from '@/lib/supabase/client'
 import { isTestMode, getTestSession } from '@/lib/test-mode'
 
@@ -27,9 +26,7 @@ export function useAuthToken() {
 
     const init = async () => {
       try {
-        const supabase = Capacitor.isNativePlatform()
-          ? await (await import('@/lib/supabase-singleton')).getSupabaseClient()
-          : createBrowserSupabase();
+        const supabase = createBrowserSupabase();
 
         const { data } = await supabase.auth.getSession();
         if (cancelled) return;

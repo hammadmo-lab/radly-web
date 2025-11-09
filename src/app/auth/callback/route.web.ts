@@ -5,9 +5,6 @@ import { sanitizeNext } from '@/lib/redirect'
 import { getStoredAuthData, getDefaultOrigin } from '@/lib/auth-origin'
 
 export async function GET(request: Request) {
-  if (process.env.CAPACITOR_BUILD === 'true') {
-    return new NextResponse('Not available in mobile app', { status: 404 })
-  }
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
 

@@ -5,7 +5,6 @@
  * Used across the design system for consistency and reusability.
  */
 
-import * as React from 'react'
 import { HTMLAttributes, InputHTMLAttributes, TextareaHTMLAttributes } from 'react'
 import { VariantProps } from 'class-variance-authority'
 import { buttonVariants } from '@/components/ui/button'

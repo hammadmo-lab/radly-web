@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { createBrowserSupabase } from '@/lib/supabase/client'
 import { isTestMode, getTestSession } from '@/lib/test-mode'
-import { Capacitor } from '@capacitor/core'
 import type { Session } from '@supabase/supabase-js'
 
 export function useAuthSession() {
@@ -17,30 +16,22 @@ export function useAuthSession() {
       return
     }
 
-    let unsub = () => {};
+    let unsubscribe: (() => void) | undefined
 
-    async function initAuth() {
-      if (Capacitor.isNativePlatform()) {
-        // Use singleton client for native platforms
-        const { getSupabaseClient } = await import('@/lib/supabase-singleton')
-        const supabase = await getSupabaseClient()
-        const { data } = await supabase.auth.getSession()
-        setSession(data.session)
-        const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
-        unsub = () => sub?.subscription?.unsubscribe?.()
-      } else {
-        // Use browser client for web
-        const supabase = createBrowserSupabase()
-        const { data } = await supabase.auth.getSession()
-        setSession(data.session)
-        const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
-        unsub = () => sub?.subscription?.unsubscribe?.()
-      }
+    const init = async () => {
+      const supabase = createBrowserSupabase()
+      const { data } = await supabase.auth.getSession()
+      setSession(data.session)
+      const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
+      unsubscribe = () => sub?.subscription?.unsubscribe?.()
       setMounted(true)
     }
 
-    initAuth()
-    return () => unsub();
+    void init()
+
+    return () => {
+      unsubscribe?.()
+    }
   }, []);
 
   return { session, isAuthed: !!session, mounted };

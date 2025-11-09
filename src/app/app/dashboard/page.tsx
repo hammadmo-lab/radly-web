@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useEffect, Suspense, lazy } from 'react'
+import { useMemo, useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
@@ -14,9 +14,6 @@ import { useSubscription } from '@/hooks/useSubscription'
 import { formatSeconds, resolveAvgGenerationSeconds } from '@/utils/time'
 import { DashboardStatsSkeleton } from '@/components/loading/DashboardStatsSkeleton'
 import { GridCardsSkeleton } from '@/components/loading/GridCardsSkeleton'
-
-// Lazy load mobile dashboard for native app
-const MobileDashboard = lazy(() => import('./mobile.page'))
 
 function daysUntil(dateString?: string) {
   if (!dateString) return null
@@ -329,29 +326,6 @@ function WebDashboardPage() {
   )
 }
 
-// Native dashboard wrapper that bypasses layout navigation
-function NativeDashboardWrapper() {
-  return (
-    <Suspense fallback={<div className="p-6 text-white">Loading mobile dashboard…</div>}>
-      <MobileDashboard />
-    </Suspense>
-  )
-}
-
 export default function DashboardPage() {
-  const [isNative, setIsNative] = useState(false)
-  useEffect(() => {
-    // Detect Capacitor native at runtime
-    if (typeof window !== 'undefined') {
-      // Import Capacitor dynamically to avoid SSR issues
-      import('@capacitor/core').then(({ Capacitor }) => {
-        setIsNative(Capacitor.isNativePlatform())
-      })
-    }
-  }, [])
-
-  if (isNative) {
-    return <NativeDashboardWrapper />
-  }
   return <WebDashboardPage />
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getSupabaseClient } from '@/lib/supabase-singleton'
+import { getSupabaseClient } from '@/lib/supabase-client-test'
 import { getStoredAuthData, clearAuthOrigin } from '@/lib/auth-origin'
 
 export default function AuthCallbackPage() {
@@ -46,7 +46,7 @@ export default function AuthCallbackPage() {
       }
 
       try {
-        const supabase = await getSupabaseClient()
+        const supabase = getSupabaseClient()
 
         // First check if we already have a valid session (native flow case)
         const { data: sessionData } = await supabase.auth.getSession()

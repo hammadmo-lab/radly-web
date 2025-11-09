@@ -1,7 +1,6 @@
 // src/lib/api.ts
 "use client";
 
-import { Capacitor } from "@capacitor/core";
 import { createSupabaseBrowser } from "@/utils/supabase/browser";
 import { JobDoneResult, PatientBlock } from "@/lib/types";
 import { Signature } from "@/types/report";
@@ -12,13 +11,6 @@ const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY!;
 
 async function getAccessToken(): Promise<string | null> {
   try {
-    if (Capacitor.isNativePlatform()) {
-      const { getSupabaseClient } = await import("@/lib/supabase-singleton");
-      const supabase = await getSupabaseClient();
-      const { data } = await supabase.auth.getSession();
-      return data.session?.access_token ?? null;
-    }
-
     const supabase = createSupabaseBrowser();
     const { data } = await supabase.auth.getSession();
     return data.session?.access_token ?? null;
