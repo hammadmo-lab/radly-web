@@ -249,7 +249,6 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
               <p className="text-xs font-semibold uppercase tracking-[0.5em] text-[rgba(255,255,255,0.55)]">Compliance</p>
               <h2 className="mt-2 text-3xl font-semibold text-white">Digital Service Policies</h2>
               <p className="mt-3 text-base text-[rgba(207,207,207,0.78)] max-w-3xl">
-                Payment gateway reviewers can reference every Radly policy here without leaving this page. Content stays expanded on desktop and loads open on mobile for instant visibility.
               </p>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
