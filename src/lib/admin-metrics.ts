@@ -5,13 +5,12 @@
  * Use AdminApiClient for all admin endpoint calls.
  */
 import { AdminApiClient } from './admin-api';
+import { AdminCredentials } from '@/types/admin';
 
 /**
  * Helper to create fetch headers with admin credentials
  */
-function getAdminHeaders(adminClient: AdminApiClient) {
-  // Access private credentials through the public instance
-  const credentials = (adminClient as any).credentials;
+function getAdminHeaders(credentials: AdminCredentials) {
   if (!credentials?.adminKey || !credentials?.apiKey) {
     throw new Error('Admin credentials not available. Please log in first.');
   }
@@ -24,12 +23,12 @@ function getAdminHeaders(adminClient: AdminApiClient) {
   };
 }
 
-export async function fetchLLMMetrics(adminClient: AdminApiClient) {
+export async function fetchLLMMetrics(credentials: AdminCredentials) {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000';
 
   const response = await fetch(`${baseUrl}/v1/admin/metrics/llm`, {
     method: 'GET',
-    headers: getAdminHeaders(adminClient),
+    headers: getAdminHeaders(credentials),
     credentials: 'include',
   });
 
@@ -148,12 +147,12 @@ export interface DashboardMetrics {
   range?: string;
 }
 
-export async function fetchDashboardMetrics(adminClient: AdminApiClient, timeRange: string = '5m'): Promise<DashboardMetrics> {
+export async function fetchDashboardMetrics(credentials: AdminCredentials, timeRange: string = '5m'): Promise<DashboardMetrics> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000';
 
   const response = await fetch(`${baseUrl}/v1/admin/metrics/dashboard?range=${timeRange}`, {
     method: 'GET',
-    headers: getAdminHeaders(adminClient),
+    headers: getAdminHeaders(credentials),
     credentials: 'include',
   });
 
