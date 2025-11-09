@@ -1,5 +1,4 @@
 // lib/reports.ts
-import { Capacitor } from '@capacitor/core';
 import { createSupabaseBrowser } from '@/utils/supabase/browser';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -13,12 +12,7 @@ export type RecentReportRow = {
 
 let browserSupabase: SupabaseClient | null = null;
 
-async function getSupabaseClient(): Promise<SupabaseClient> {
-  if (Capacitor.isNativePlatform()) {
-    const { getSupabaseClient } = await import('@/lib/supabase-singleton');
-    return getSupabaseClient();
-  }
-
+function getSupabaseClient(): SupabaseClient {
   if (!browserSupabase) {
     browserSupabase = createSupabaseBrowser();
   }
@@ -30,7 +24,7 @@ async function getSupabaseClient(): Promise<SupabaseClient> {
  * Safe for 'use client' components. Never imports `next/headers`.
  */
 export async function getRecentReportsClient(limit = 50): Promise<RecentReportRow[]> {
-  const supabase = await getSupabaseClient();
+  const supabase = getSupabaseClient();
   const { data: auth, error: authErr } = await supabase.auth.getUser();
   if (authErr) throw new Error(`Auth error: ${authErr.message}`);
   if (!auth?.user) {

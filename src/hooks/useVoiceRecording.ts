@@ -1,10 +1,8 @@
 // Voice recording hook with WebSocket streaming
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Capacitor } from '@capacitor/core';
 import { useAuth } from '@/components/auth-provider';
 import { createTranscriptionWebSocket, TranscriptionWebSocket } from '@/lib/websocket';
-import { useIosPcmRecorder } from './useIosPcmRecorder';
 import type {
   RecordingState,
   WebSocketMessage,
@@ -56,21 +54,6 @@ export function useVoiceRecording(
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const durationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const chunkTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // iOS PCM recorder hook
-  const iosRecorder = useIosPcmRecorder(options.onTranscript);
-
-  // Check if we're on iOS
-  const isIos = Capacitor.getPlatform() === 'ios';
-
-  // Log platform detection on mount
-  useEffect(() => {
-    console.log('🔍 Platform detection:', {
-      platform: Capacitor.getPlatform(),
-      isNative: Capacitor.isNativePlatform(),
-      isIos,
-    });
-  }, [isIos]);
 
   // Get API base URL from environment or use default
   const apiBase = options.apiBase || process.env.NEXT_PUBLIC_API_BASE || 'http://localhost';
@@ -181,9 +164,6 @@ export function useVoiceRecording(
   const startRecording = useCallback(async () => {
     console.log('🎙️ [useVoiceRecording] startRecording called');
     console.log('🎙️ [useVoiceRecording] Platform check:', {
-      isIos,
-      platform: Capacitor.getPlatform(),
-      isNative: Capacitor.isNativePlatform(),
       hasSession: !!session?.access_token,
     });
 
@@ -200,64 +180,30 @@ export function useVoiceRecording(
       setDuration(0);
       setState('connecting');
 
-      // Use iOS PCM approach for iOS devices
-      if (isIos) {
-        console.log('📱 [useVoiceRecording] Using iOS PCM audio worklet approach');
-        console.log('📱 [useVoiceRecording] API base:', apiBase);
+      console.log('🌐 Using web MediaRecorder API');
 
-        // Build backend WebSocket URL for iOS
-        // iOS will send PCM data as binary to backend, backend routes to Deepgram
-        const wsProtocol = apiBase.startsWith('https') ? 'wss' : 'ws';
-        const wsBaseUrl = apiBase.replace(/^https?:\/\//, '');
-        const wsUrl = `${wsProtocol}://${wsBaseUrl}/v1/transcribe/stream`;
-        const wsUrlWithToken = (() => {
-          try {
-            const url = new URL(wsUrl);
-            url.searchParams.set('token', session.access_token);
-            return url.toString();
-          } catch {
-            console.warn('⚠️ [useVoiceRecording] Failed to construct URL object, falling back to query concat');
-            const separator = wsUrl.includes('?') ? '&' : '?';
-            return `${wsUrl}${separator}token=${encodeURIComponent(session.access_token)}`;
-          }
-        })();
+      // Check browser support
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Browser does not support audio recording');
+      }
 
-        console.log('📱 [useVoiceRecording] Connecting to backend WebSocket:', wsUrlWithToken);
+      if (!window.MediaRecorder) {
+        throw new Error('Browser does not support MediaRecorder');
+      }
 
-        // Start iOS PCM recorder with backend WebSocket URL and auth token
-        await iosRecorder.start(wsUrlWithToken, session.access_token);
+      // Request microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          sampleRate: 16000,
+          echoCancellation: true,
+          noiseSuppression: true,
+        },
+      });
 
-        // For iOS, set max duration manually since we're not getting it from backend
-        setMaxDuration(300); // 5 minutes default
-        setState('recording');
-        startDurationTimer();
-        console.log('✅ [useVoiceRecording] iOS recording started successfully');
+      mediaStreamRef.current = stream;
 
-      } else {
-        console.log('🌐 Using web MediaRecorder API');
-
-        // Check browser support
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          throw new Error('Browser does not support audio recording');
-        }
-
-        if (!window.MediaRecorder) {
-          throw new Error('Browser does not support MediaRecorder');
-        }
-
-        // Request microphone access
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            channelCount: 1,
-            sampleRate: 16000,
-            echoCancellation: true,
-            noiseSuppression: true,
-          },
-        });
-
-        mediaStreamRef.current = stream;
-
-        // Verify audio tracks
+      // Verify audio tracks
         const audioTracks = stream.getAudioTracks();
         console.log('🎤 Audio tracks:', {
           count: audioTracks.length,
@@ -393,7 +339,6 @@ export function useVoiceRecording(
 
         wsRef.current = ws;
         ws.connect();
-      }
     } catch (err) {
       if (err instanceof Error) {
         if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
@@ -407,36 +352,30 @@ export function useVoiceRecording(
         handleError('Failed to start recording');
       }
     }
-  }, [session, apiBase, state, handleWebSocketMessage, handleError, startChunkTimer, startDurationTimer, isIos, iosRecorder]);
+  }, [session, apiBase, state, handleWebSocketMessage, handleError, startChunkTimer]);
 
   const stopRecording = useCallback(() => {
-    console.log('🛑 [useVoiceRecording] stopRecording called, isIos:', isIos, 'iosRecorder.isRecording:', iosRecorder.isRecording);
+    console.log('🛑 [useVoiceRecording] stopRecording called');
 
     stopDurationTimer();
     stopChunkTimer();
 
-    // Stop iOS PCM recorder if active
-    if (isIos && iosRecorder.isRecording) {
-      console.log('📱 [useVoiceRecording] Stopping iOS PCM audio recording');
-      iosRecorder.stop();
-    } else {
-      console.log('🌐 [useVoiceRecording] Stopping web MediaRecorder');
-      // Stop media recorder
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-        mediaRecorderRef.current.stop();
-      }
+    console.log('🌐 [useVoiceRecording] Stopping web MediaRecorder');
+    // Stop media recorder
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
 
-      // Stop media stream
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-        mediaStreamRef.current = null;
-      }
+    // Stop media stream
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+    }
 
-      // Close WebSocket
-      if (wsRef.current) {
-        wsRef.current.close();
-        wsRef.current = null;
-      }
+    // Close WebSocket
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
     }
 
     // Update state
@@ -446,7 +385,7 @@ export function useVoiceRecording(
 
     mediaRecorderRef.current = null;
     console.log('✅ [useVoiceRecording] Recording stopped');
-  }, [state, stopDurationTimer, stopChunkTimer, isIos, iosRecorder]);
+  }, [state, stopDurationTimer, stopChunkTimer]);
 
   const clearTranscript = useCallback(() => {
     setTranscript('');
@@ -470,7 +409,7 @@ export function useVoiceRecording(
     error,
 
     // Recording info
-    isRecording: isIos ? iosRecorder.isRecording : state === 'recording',
+    isRecording: state === 'recording',
     duration,
     maxDuration,
     timeRemaining,

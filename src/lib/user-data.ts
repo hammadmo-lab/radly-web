@@ -1,7 +1,7 @@
 // src/lib/user-data.ts
 "use client"
 
-import { getSupabaseClient } from '@/lib/supabase-singleton'
+import { getSupabaseClient } from '@/lib/supabase-client-test'
 
 export interface UserProfile {
   id: string
@@ -31,7 +31,7 @@ export interface UserDataResponse {
  */
 export async function fetchUserData(userId: string): Promise<UserProfile> {
   try {
-    const supabase = await getSupabaseClient()
+    const supabase = getSupabaseClient()
     const { data: { user }, error } = await supabase.auth.getUser()
     
     if (error || !user) {
@@ -62,7 +62,7 @@ export async function updateUserData(
   updates: Partial<Pick<UserProfile, 'default_signature_name' | 'default_signature_date_format' | 'accepted_terms_at'>>
 ): Promise<void> {
   try {
-    const supabase = await getSupabaseClient()
+    const supabase = getSupabaseClient()
     
     // Update user metadata in Supabase
     const { error } = await supabase.auth.updateUser({

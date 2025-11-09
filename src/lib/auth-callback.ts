@@ -1,8 +1,8 @@
 /**
- * Helpers to build auth callback URLs for web and mobile.
+ * Helpers to build auth callback URLs for the web experience.
  *
- * Mobile default is Universal Links (https) which works across email clients.
- * Set NEXT_PUBLIC_MOBILE_MAGIC_SCHEME=capacitor to switch back to capacitor://.
+ * We rely exclusively on universal HTTPS links so magic links work across email clients
+ * on both desktop and mobile browsers.
  */
 
 function stripTrailingSlash(url: string): string {
@@ -23,13 +23,8 @@ export function getUniversalCallbackUrl(): string {
   return `${stripTrailingSlash(base)}/auth/callback`
 }
 
-export function getCapacitorCallbackUrl(): string {
-  return 'capacitor://localhost/auth/callback'
-}
-
 export function getMobileMagicRedirectUrl(): string {
-  const mode = (process.env.NEXT_PUBLIC_MOBILE_MAGIC_SCHEME || 'universal').toLowerCase()
-  return mode === 'capacitor' ? getCapacitorCallbackUrl() : getUniversalCallbackUrl()
+  return getUniversalCallbackUrl()
 }
 
 export function getWebCallbackUrl(): string {
@@ -41,4 +36,3 @@ export function getWebCallbackUrl(): string {
   }
   return fallback
 }
-

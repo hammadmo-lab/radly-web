@@ -2,9 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
-import { Capacitor } from '@capacitor/core'
-import { getSupabaseClient as getWebSupabaseClient } from '@/lib/supabase-client-test'
-import { getSupabaseClient as getNativeSupabaseClient } from '@/lib/supabase-singleton'
+import { getSupabaseClient } from '@/lib/supabase-client-test'
 
 interface AuthContextType {
   user: User | null
@@ -25,10 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const run = async () => {
       try {
-        const isNative = Capacitor.isNativePlatform()
-        const supabase = isNative
-          ? await getNativeSupabaseClient()
-          : getWebSupabaseClient()
+        const supabase = getSupabaseClient()
 
         // Initial session
         const { data: { session } } = await supabase.auth.getSession()
@@ -62,9 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      const supabase = Capacitor.isNativePlatform()
-        ? await getNativeSupabaseClient()
-        : getWebSupabaseClient()
+      const supabase = getSupabaseClient()
       await supabase.auth.signOut()
 
       // Clear the token cache on sign out
