@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, Briefcase, Truck, RotateCcw, Lock, Mail } from "lucide-react";
 import { marketingGet } from "@/lib/http/marketing";
 import { PrimaryCTA, SecondaryCTA } from "@/components/marketing/PrimaryCTA";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
@@ -154,7 +155,10 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
             <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">Choose the plan that fits your reporting volume</h1>
           </div>
           <p className="mt-4 text-sm text-[rgba(207,207,207,0.75)] sm:text-base">
-            All plans include five complimentary reports to evaluate the assistant. Detailed validation notes are available for compliance teams.
+            All plans include five complimentary reports to evaluate the assistant. Detailed validation notes are available for compliance teams.{" "}
+            <a href="#pricing-policies" className="text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">
+              Need policies?
+            </a>
           </p>
         </header>
 
@@ -236,6 +240,56 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
             );
           })}
         </section>
+        <section
+          id="pricing-policies"
+          className="mt-12 rounded-3xl border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.7)] p-8 shadow-[0_30px_80px_rgba(12,16,28,0.55)]"
+        >
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.5em] text-[rgba(255,255,255,0.55)]">Compliance</p>
+              <h2 className="mt-2 text-3xl font-semibold text-white">Digital Service Policies</h2>
+              <p className="mt-3 text-base text-[rgba(207,207,207,0.78)] max-w-3xl">
+                Payment gateway reviewers can reference every Radly policy here without leaving this page. Content stays expanded on desktop and loads open on mobile for instant visibility.
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <PolicyCard
+                icon={<Briefcase className="h-5 w-5 text-[rgba(111,231,183,0.9)]" aria-hidden />}
+                title="Services & Pricing"
+                description="Radly provides digital-only radiology report generation through monthly subscriptions. Tiers match the cards above: Free (5 reports/month), Starter (20 reports/month), Professional (100 reports/month), and Premium with enterprise-managed capacity and dedicated support. Every plan unlocks immediately after you create or upgrade an account."
+              />
+              <PolicyCard
+                icon={<Truck className="h-5 w-5 text-[rgba(143,130,255,0.9)]" aria-hidden />}
+                title="Delivery & Shipping"
+                description="Access is delivered online—no physical products, couriers, or shipping timelines. Subscribers can use both the dashboard and API as soon as their tier is active."
+              />
+              <PolicyCard
+                icon={<RotateCcw className="h-5 w-5 text-[rgba(248,183,77,0.9)]" aria-hidden />}
+                title="Returns & Refunds"
+                description="Because reports are generated digitally, they cannot be “returned.” You may cancel or downgrade before the next billing date to stop future charges. Refunds are only issued for duplicate billings or verified service outages reported to support within 7 days of the charge."
+              />
+              <PolicyCard
+                icon={<Lock className="h-5 w-5 text-[rgba(239,68,68,0.9)]" aria-hidden />}
+                title="Privacy"
+                description={
+                  <>
+                    We only process the clinical text you submit to generate reports and retain exports for a limited window. Detailed handling is documented in our{" "}
+                    <Link href="/docs/privacy" className="text-[rgba(143,130,255,0.9)] underline-offset-4 hover:underline">
+                      Privacy Policy
+                    </Link>
+                    , and questions are always welcome.
+                  </>
+                }
+              />
+              <PolicyCard
+                icon={<Mail className="h-5 w-5 text-[rgba(59,130,246,0.9)]" aria-hidden />}
+                title="Contact"
+                description="Email support@radly.app for billing or account questions, call 01090000773, or reach us on Facebook at www.facebook.com/radlyapp. We are based in Egypt."
+                fullWidth
+              />
+            </div>
+          </div>
+        </section>
 
         <section className="mt-16 space-y-4 rounded-3xl border border-[rgba(255,255,255,0.1)] bg-[rgba(12,16,28,0.65)] p-8 text-center">
           <h2 className="text-3xl font-semibold">Need a detailed comparison?</h2>
@@ -298,6 +352,27 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
       </main>
 
       <MarketingFooter />
+    </div>
+  );
+}
+
+type PolicyCardProps = {
+  icon: ReactNode;
+  title: string;
+  description: ReactNode;
+  fullWidth?: boolean;
+};
+
+function PolicyCard({ icon, title, description, fullWidth }: PolicyCardProps) {
+  return (
+    <div className={`flex gap-4 rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] p-5 ${fullWidth ? "md:col-span-2" : ""}`}>
+      <div className="rounded-2xl bg-[rgba(255,255,255,0.08)] p-3">
+        {icon}
+      </div>
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold text-white">{title}</h3>
+        <p className="text-[15px] leading-relaxed text-[rgba(207,207,207,0.82)]">{description}</p>
+      </div>
     </div>
   );
 }

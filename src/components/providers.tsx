@@ -3,8 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from 'next-themes'
 import { Toaster } from 'sonner'
-import { useEffect, useState } from 'react'
-import { hideSplashSafely } from '@/lib/native/splash'
+import { useState } from 'react'
 import { AuthProvider } from './auth-provider'
 import { AdminAuthProvider } from './admin/AdminAuthProvider'
 
@@ -28,8 +27,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
       >
         <AuthProvider>
           <AdminAuthProvider>
-            { /* Hide native splash once providers are mounted */ }
-            <HydrateSplash />
             {children}
             <Toaster
               position="top-center"
@@ -58,11 +55,4 @@ export function Providers({ children }: { children: React.ReactNode }) {
       </ThemeProvider>
     </QueryClientProvider>
   )
-}
-
-function HydrateSplash() {
-  useEffect(() => {
-    hideSplashSafely()
-  }, [])
-  return null
 }

@@ -1,6 +1,5 @@
 import type { ApiError } from '@/types/api';
 import { createBrowserSupabase } from '@/lib/supabase/client';
-import { Capacitor } from '@capacitor/core'
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE!;
 const CLIENT_KEY = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY!;
@@ -23,23 +22,10 @@ async function getAuthToken(): Promise<string | null> {
       return null
     }
 
-    let accessToken: string | null = null
-    let expiresAt: number = 0
-
-    if (Capacitor.isNativePlatform()) {
-      // Use the singleton client with Capacitor storage on native
-      const { getSupabaseClient } = await import('@/lib/supabase-singleton')
-      const supabase = await getSupabaseClient()
-      const { data: { session } } = await supabase.auth.getSession()
-      accessToken = session?.access_token || null
-      expiresAt = session?.expires_at ? session.expires_at * 1000 : 0
-    } else {
-      // Browser: keep using the SSR-aware client
-      const supabase = createBrowserSupabase();
-      const { data: { session } } = await supabase.auth.getSession();
-      accessToken = session?.access_token || null
-      expiresAt = session?.expires_at ? session.expires_at * 1000 : 0
-    }
+    const supabase = createBrowserSupabase();
+    const { data: { session } } = await supabase.auth.getSession();
+    const accessToken = session?.access_token || null
+    const expiresAt = session?.expires_at ? session.expires_at * 1000 : 0
 
     // Cache the token and expiry
     cachedToken = accessToken;

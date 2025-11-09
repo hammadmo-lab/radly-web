@@ -24,10 +24,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Exponential backoff for efficiency
   - Manual pause/resume controls
   - Automatic backoff reset on success
-- **Multi-Platform Support** - Web, iOS (Capacitor), and Android
-  - Platform detection via `src/lib/platform.ts`
-  - Platform-specific subscription management
-  - In-app purchase support for mobile
+- **Responsive Web Experience** - Desktop and mobile browser support with adaptive layouts
+  - Platform detection via `src/lib/platform.ts` (user-agent based)
+  - Stripe-powered subscription management
 - **Advanced Authentication** - Supabase-powered JWT authentication
   - OAuth integration (Google, Apple)
   - Magic Link email authentication
@@ -51,7 +50,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Subscription Management** - Multi-tier subscription system
   - Usage tracking and limits
   - Upgrade prompts and modals
-  - Cross-platform subscription coordination
   - Subscription status monitoring
 - **Responsive Mobile UI** - Mobile-first design
   - Dual navigation (bottom tabs + hamburger menu)
