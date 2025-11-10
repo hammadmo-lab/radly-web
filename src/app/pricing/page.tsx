@@ -9,8 +9,7 @@ import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { Breadcrumb } from "@/components/marketing/Breadcrumb";
 import { MobileAppPricingRedirect } from "@/components/pricing/MobileAppPricingRedirect";
 
-export const dynamic = "force-static";
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 type TierFeatures = {
   templates?: string;
