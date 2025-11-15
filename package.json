@@ -97,6 +97,7 @@
     "react-smooth": {
       "react": "$react",
       "react-dom": "$react-dom"
-    }
+    },
+    "js-yaml": "4.1.1"
   }
 }
