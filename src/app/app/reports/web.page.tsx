@@ -234,7 +234,7 @@ export default function ReportsPage() {
                   // Update formatted jobs for UI
                   const jobIndex = formattedJobs.findIndex(j => j.job_id === activeJobs[index].job_id);
                   if (jobIndex !== -1) {
-                    formattedJobs[jobIndex].status = backendStatus as any;
+                    formattedJobs[jobIndex].status = backendStatus as 'queued' | 'running' | 'done' | 'error';
                   }
                 }
               }
