@@ -25,8 +25,17 @@ function daysUntil(dateString?: string) {
 
 function WebDashboardPage() {
   const router = useRouter()
-  const { data: subscriptionData } = useSubscription()
+  const { data: subscriptionData, clearCache } = useSubscription()
   const [recentTemplate, setRecentTemplate] = useState<{ id: string; name: string | null } | null>(null)
+
+  // Clear cache on page load to ensure fresh subscription data
+  useEffect(() => {
+    const initializePage = async () => {
+      console.log('📄 DashboardPage: Initializing, clearing subscription cache...')
+      clearCache()
+    }
+    initializePage()
+  }, [clearCache])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
