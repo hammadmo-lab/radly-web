@@ -28,9 +28,45 @@ interface LocalStorageJob {
   template_id?: string;
   title?: string;
   created_at?: number;
+  completed_at?: number;
 }
 
 export const dynamic = 'force-dynamic';
+
+// Constants for cleanup
+const COMPLETED_JOB_CLEANUP_DELAY = 5 * 60 * 1000; // 5 minutes in milliseconds
+const REPORT_RETENTION_HOURS = 24; // 24 hours
+
+/**
+ * Cleans up old jobs from localStorage
+ * - Removes jobs completed more than 5 minutes ago
+ * - Removes jobs older than 24 hours regardless of status
+ * - Removes orphaned jobs (404s from backend)
+ */
+const cleanupJobs = (jobs: LocalStorageJob[]): { cleaned: LocalStorageJob[], removedCount: number } => {
+  const now = Date.now();
+  const twentyFourHoursAgo = now - (REPORT_RETENTION_HOURS * 60 * 60 * 1000);
+  const fiveMinutesAgo = now - COMPLETED_JOB_CLEANUP_DELAY;
+
+  const cleaned = jobs.filter(job => {
+    // Check if job is older than 24 hours
+    if (job.created_at && job.created_at < twentyFourHoursAgo) {
+      return false; // Remove job older than 24 hours
+    }
+
+    // Check if completed job is older than 5 minutes
+    if (job.status === 'done' && job.completed_at && job.completed_at < fiveMinutesAgo) {
+      return false; // Remove completed job after 5 minutes
+    }
+
+    return true; // Keep job
+  });
+
+  return {
+    cleaned,
+    removedCount: jobs.length - cleaned.length
+  };
+};
 
 const STATUS_STYLES: Record<string, { label: string; badgeClass: string }> = {
   done: {
@@ -151,17 +187,63 @@ export default function ReportsPage() {
           }
         });
 
+        // Apply cleanup logic to remove old and completed jobs
+        const { cleaned, removedCount } = cleanupJobs(validJobs);
+
+        // Log cleanup results
+        if (removedCount > 0) {
+          console.log(`Cleaned up ${removedCount} old/expired report(s)`);
+        }
+
         // Clean up orphaned jobs from localStorage
-        if (orphanedJobs.length > 0) {
-          localStorage.setItem(userJobsKey, JSON.stringify(validJobs));
+        if (orphanedJobs.length > 0 || removedCount > 0) {
+          localStorage.setItem(userJobsKey, JSON.stringify(cleaned));
         }
 
         // Convert localStorage format to RecentJobRow format
-        const formattedJobs: RecentJobRow[] = validJobs.map((job: LocalStorageJob) => ({
+        const formattedJobs: RecentJobRow[] = cleaned.map((job: LocalStorageJob) => ({
           job_id: job.job_id,
           status: job.status || 'queued',
           template_id: job.template_id || job.title || '—'
         }));
+
+        // Verify active jobs (queued/running) with backend on initial load
+        const activeJobs = formattedJobs.filter(job =>
+          job.status === 'queued' || job.status === 'running'
+        );
+
+        if (activeJobs.length > 0) {
+          try {
+            const verificationResults = await Promise.allSettled(
+              activeJobs.map(job => getJob(job.job_id))
+            );
+
+            verificationResults.forEach((result, index) => {
+              if (result.status === 'fulfilled') {
+                const backendStatus = result.value.status;
+                const localStatus = activeJobs[index].status;
+                if (backendStatus !== localStatus) {
+                  // Update localStorage
+                  const updatedJobs = cleaned.map((job: LocalStorageJob) =>
+                    job.job_id === activeJobs[index].job_id
+                      ? { ...job, status: backendStatus, completed_at: backendStatus === 'done' ? Date.now() : job.completed_at }
+                      : job
+                  );
+                  localStorage.setItem(userJobsKey, JSON.stringify(updatedJobs));
+
+                  // Update formatted jobs for UI
+                  const jobIndex = formattedJobs.findIndex(j => j.job_id === activeJobs[index].job_id);
+                  if (jobIndex !== -1) {
+                    formattedJobs[jobIndex].status = backendStatus as any;
+                  }
+                }
+              }
+            });
+          } catch (e) {
+            console.warn('Failed to verify active jobs:', e);
+          }
+        }
+
         setRows(formattedJobs);
         setErr(null);
       } else {
@@ -184,16 +266,21 @@ export default function ReportsPage() {
     try {
       const userJobsKey = getUserJobsKey();
       if (!userJobsKey) return;
-      
+
       const localJobs = JSON.parse(localStorage.getItem(userJobsKey) || '[]');
-      const updatedJobs = localJobs.map((job: LocalStorageJob) => 
-        job.job_id === jobId ? { ...job, status: newStatus } : job
-      );
+      const updatedJobs = localJobs.map((job: LocalStorageJob) => {
+        // Track completion timestamp when job transitions to 'done'
+        if (job.job_id === jobId && newStatus === 'done' && !job.completed_at) {
+          return { ...job, status: newStatus, completed_at: Date.now() };
+        }
+        return { ...job, status: newStatus };
+      });
+
       localStorage.setItem(userJobsKey, JSON.stringify(updatedJobs));
-      
-      // Update the current rows state
-      setRows(prevRows => 
-        prevRows.map(row => 
+
+      // Update the current rows state using functional update to avoid stale closures
+      setRows(prevRows =>
+        prevRows.map(row =>
           row.job_id === jobId ? { ...row, status: newStatus } : row
         )
       );
@@ -249,14 +336,37 @@ export default function ReportsPage() {
         if (userJobsKey) {
           // Remove from localStorage
           const localJobs = JSON.parse(localStorage.getItem(userJobsKey) || '[]');
-          const updatedJobs = localJobs.filter((job: LocalStorageJob) =>
+          const remainingJobs = localJobs.filter((job: LocalStorageJob) =>
             !jobsToRemove.includes(job.job_id)
           );
-          localStorage.setItem(userJobsKey, JSON.stringify(updatedJobs));
+
+          // Apply cleanup logic to remove old and completed jobs
+          const { cleaned, removedCount } = cleanupJobs(remainingJobs);
+
+          // Log cleanup results
+          if (removedCount > 0) {
+            console.log(`Auto-cleaned ${removedCount} old/expired report(s)`);
+          }
+
+          localStorage.setItem(userJobsKey, JSON.stringify(cleaned));
         }
 
         // Remove from state
         setRows(prevRows => prevRows.filter(row => !jobsToRemove.includes(row.job_id)));
+      }
+
+      // Additionally, run cleanup on all jobs periodically to catch any completed/old jobs
+      const userJobsKey = getUserJobsKey();
+      if (userJobsKey && queuedOrRunningJobs.length > 0) {
+        const localJobs = JSON.parse(localStorage.getItem(userJobsKey) || '[]');
+        const { cleaned, removedCount } = cleanupJobs(localJobs);
+        if (removedCount > 0) {
+          localStorage.setItem(userJobsKey, JSON.stringify(cleaned));
+          setRows(prevRows => prevRows.filter(row =>
+            cleaned.some((job: LocalStorageJob) => job.job_id === row.job_id)
+          ));
+          console.log(`Periodic cleanup: removed ${removedCount} expired report(s)`);
+        }
       }
 
       // Reset or increment failure counter based on results
