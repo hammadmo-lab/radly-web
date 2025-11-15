@@ -78,9 +78,51 @@ export function SubscriptionTable({
 }: SubscriptionTableProps) {
   const [searchValue, setSearchValue] = useState('')
 
+  // Deduplicate subscriptions - only show the most recent subscription per user
+  const deduplicatedSubscriptions = useMemo(() => {
+    if (!subscriptions || subscriptions.length === 0) {
+      return []
+    }
+
+    // Group subscriptions by user_id
+    const subscriptionsByUser = subscriptions.reduce((acc, sub) => {
+      const userId = sub.user_id
+      if (!userId) return acc
+
+      if (!acc[userId]) {
+        acc[userId] = []
+      }
+      acc[userId].push(sub)
+      return acc
+    }, {} as Record<string, Subscription[]>)
+
+    // For each user, get the most recent subscription
+    const result = Object.values(subscriptionsByUser).map((userSubs) => {
+      // Prioritize active subscriptions
+      const activeSub = userSubs.find(s => s.status === 'active')
+      if (activeSub) {
+        return activeSub
+      }
+
+      // Otherwise, return the subscription with the latest period_end
+      return userSubs.reduce((latest, current) => {
+        const latestTime = new Date(latest.period_end || 0).getTime()
+        const currentTime = new Date(current.period_end || 0).getTime()
+        return currentTime > latestTime ? current : latest
+      })
+    })
+
+    // Sort by most recent period_end descending
+    return result.sort((a, b) => {
+      const aTime = new Date(a.period_end || 0).getTime()
+      const bTime = new Date(b.period_end || 0).getTime()
+      return bTime - aTime
+    })
+  }, [subscriptions])
+
   const userIds = useMemo(
-    () => subscriptions?.map((s) => s.user_id).filter(Boolean) || [],
-    [subscriptions]
+    () => deduplicatedSubscriptions?.map((s) => s.user_id).filter(Boolean) || [],
+    [deduplicatedSubscriptions]
   )
   const { data: emailMap, isLoading: emailsLoading } = useUserEmails(userIds)
 
@@ -262,7 +304,7 @@ export function SubscriptionTable({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {subscriptions.map((subscription) => (
+                  {deduplicatedSubscriptions.map((subscription) => (
                     <motion.tr
                       key={subscription.subscription_id}
                       initial={{ opacity: 0, y: 12 }}

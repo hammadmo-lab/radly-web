@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { useAuth } from '@/components/auth-provider'
 import { fetchUserData, updateUserData, userDataQueryConfig } from '@/lib/user-data'
+import { useSubscription } from '@/hooks/useSubscription'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -31,6 +32,7 @@ export default function SettingsPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const currentTier = useSubscriptionTier() // Fetch real subscription tier
+  const { clearCache } = useSubscription() // Get cache clearing function
   const [defaultSignatureName, setDefaultSignatureName] = useState('')
   const [defaultDateFormat, setDefaultDateFormat] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -56,6 +58,16 @@ export default function SettingsPage() {
     ...userDataQueryConfig
   })
 
+  // Clear subscription cache on page load to ensure fresh data
+  useEffect(() => {
+    const initializePage = async () => {
+      console.log('📄 SettingsPage: Initializing, clearing subscription cache...')
+      clearCache()
+    }
+
+    initializePage()
+  }, [clearCache])
+
   useEffect(() => {
     if (profile) {
       setDefaultSignatureName(profile.default_signature_name || '')
@@ -79,15 +91,15 @@ export default function SettingsPage() {
         default_signature_name: defaultSignatureName,
         default_signature_date_format: defaultDateFormat,
       })
-      
+
       // Invalidate and refetch profile data
       await queryClient.invalidateQueries({ queryKey: ['profile', user.id] })
-      
+
       setLastSaved(new Date())
       setHasUnsavedChanges(false)
-      
+
       console.log('Settings saved successfully');
-      
+
       if (!silent) {
         toast.success('Settings saved successfully!')
       }
@@ -114,10 +126,10 @@ export default function SettingsPage() {
 
   // Track changes
   useEffect(() => {
-    const hasChanges = 
+    const hasChanges =
       defaultSignatureName !== (profile?.default_signature_name || '') ||
       defaultDateFormat !== (profile?.default_signature_date_format || 'MM/DD/YYYY')
-    
+
     setHasUnsavedChanges(hasChanges)
   }, [defaultSignatureName, defaultDateFormat, profile])
 
@@ -130,7 +142,7 @@ export default function SettingsPage() {
           setConnectivityStatus('error')
           return
         }
-        
+
         const response = await fetch(`${apiBase}/health`, {
           headers: {
             'X-Request-Id': crypto.randomUUID(),

@@ -1,13 +1,14 @@
 "use client"
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import { useAdminAuth } from '@/components/admin/AdminAuthProvider'
 import { AdminApiClient } from '@/lib/admin-api'
-import { 
-  SubscriptionListParams, 
-  ActivateSubscriptionData, 
-  CancelSubscriptionData 
+import {
+  SubscriptionListParams,
+  ActivateSubscriptionData,
+  CancelSubscriptionData
 } from '@/types/admin'
 
 export function useSubscriptions(params: SubscriptionListParams) {
@@ -36,8 +37,10 @@ export function useSubscriptions(params: SubscriptionListParams) {
 
 export function useUserSubscription(userId: string) {
   const { adminKey, apiKey } = useAdminAuth()
-  
-  return useQuery({
+  const queryClient = useQueryClient()
+  const lastRefreshTimeRef = useRef<number>(0)
+
+  const query = useQuery({
     queryKey: ['admin', 'subscription', 'user-id', userId],
     queryFn: async () => {
       if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
@@ -56,6 +59,54 @@ export function useUserSubscription(userId: string) {
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   })
+
+  // Force refresh function with cache busting
+  const forceRefresh = useCallback(async () => {
+    const now = Date.now()
+
+    // Throttle refreshes to prevent excessive requests
+    if (now - lastRefreshTimeRef.current < 2000) {
+      console.log('⏱️ Admin: Refresh throttled, skipping...')
+      return queryClient.getQueryData(['admin', 'subscription', 'user-id', userId])
+    }
+
+    lastRefreshTimeRef.current = now
+
+    try {
+      // Invalidate and refetch
+      await queryClient.invalidateQueries({
+        queryKey: ['admin', 'subscription', 'user-id', userId],
+        exact: true,
+      })
+
+      // Force a refetch
+      await queryClient.refetchQueries({
+        queryKey: ['admin', 'subscription', 'user-id', userId],
+        exact: true,
+        type: 'active',
+      })
+
+      console.log('✅ Admin: Subscription data refreshed successfully')
+      return queryClient.getQueryData(['admin', 'subscription', 'user-id', userId])
+    } catch (error) {
+      console.error('❌ Admin: Failed to refresh subscription data:', error)
+      throw error
+    }
+  }, [queryClient, userId])
+
+  // Clear all cached data for this user
+  const clearCache = useCallback(() => {
+    queryClient.removeQueries({
+      queryKey: ['admin', 'subscription', 'user-id', userId],
+    })
+    console.log('🗑️ Admin: Cache cleared for user', userId)
+  }, [queryClient, userId])
+
+  return {
+    ...query,
+    forceRefresh,
+    clearCache,
+  }
 }
 
 export function useActivateSubscription() {

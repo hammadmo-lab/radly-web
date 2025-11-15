@@ -1,14 +1,15 @@
 "use client"
 
 import { useParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   ArrowLeft,
   AlertCircle,
   Copy,
   LogOut,
   Trash2,
-  Settings
+  Settings,
+  RefreshCw
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -28,11 +29,39 @@ export default function UserDetailsPage() {
   const { logout } = useAdminAuth()
   const [isChangeTierOpen, setIsChangeTierOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const userId = params.userId as string
-  const { data, isLoading, error } = useUserSubscription(userId)
+  const { data, isLoading, error, forceRefresh, clearCache } = useUserSubscription(userId)
   const { data: emailMap } = useUserEmails([userId])
   const userEmail = emailMap?.[userId]
+
+  // Clear cache on page load to ensure fresh data
+  useEffect(() => {
+    const initializePage = async () => {
+      console.log('📄 Admin UserPage: Initializing, clearing cache...')
+      clearCache()
+    }
+    initializePage()
+  }, [clearCache])
+
+  // Handle manual refresh
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    try {
+      await forceRefresh()
+      toast.success('User subscription data refreshed', {
+        description: 'Latest tier and quota information loaded',
+      })
+    } catch (err) {
+      console.error('Refresh failed:', err)
+      toast.error('Failed to refresh subscription data', {
+        description: 'Please try again or check your connection',
+      })
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
 
   const handleBack = () => {
     router.push('/admin')
@@ -195,6 +224,17 @@ export default function UserDetailsPage() {
               >
                 <Copy className="h-4 w-4 mr-2" />
                 Copy ID
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isLoading || isRefreshing}
+                className="border-[rgba(255,255,255,0.12)] text-white hover:bg-[rgba(255,255,255,0.08)] disabled:opacity-40 min-h-[44px]"
+                title="Refresh subscription data"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Refresh
               </Button>
               <Button
                 variant="outline"

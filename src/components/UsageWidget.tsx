@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AlertCircle, Calendar, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -9,10 +9,12 @@ import { Progress } from '@/components/ui/progress'
 import { useAuthSession } from '@/hooks/useAuthSession'
 import { useSubscription } from '@/hooks/useSubscription'
 import { formatSeconds, resolveAvgGenerationSeconds } from '@/utils/time'
+import { toast } from 'sonner'
 
 export default function UsageWidget() {
   const { isAuthed } = useAuthSession()
-  const { data: usage, isLoading, error, refetch } = useSubscription()
+  const { data: usage, isLoading, error, forceRefresh, clearCache } = useSubscription()
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Debug: Log when data changes
   useEffect(() => {
@@ -20,10 +22,39 @@ export default function UsageWidget() {
       console.log('📊 UsageWidget: Data updated:', {
         reportsUsed: usage.subscription.reports_used,
         reportsLimit: usage.subscription.reports_limit,
-        reportsRemaining: usage.subscription.reports_remaining
+        reportsRemaining: usage.subscription.reports_remaining,
+        tier: usage.subscription.tier,
+        status: usage.subscription.status,
       })
     }
   }, [usage])
+
+  // Handle manual refresh with enhanced feedback
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    try {
+      console.log('🔄 UsageWidget: Manual refresh triggered')
+      await forceRefresh()
+      toast.success('Subscription data refreshed', {
+        description: 'Latest quota and tier information loaded',
+      })
+    } catch (err) {
+      console.error('Refresh failed:', err)
+      toast.error('Failed to refresh subscription data', {
+        description: 'Please try again or check your connection',
+      })
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
+  // Handle cache clear
+  const handleClearCache = () => {
+    clearCache()
+    toast.success('Cache cleared', {
+      description: 'Subscription data will be refetched on next access',
+    })
+  }
 
   if (isLoading) {
     return (
@@ -70,6 +101,13 @@ export default function UsageWidget() {
                         Sign In Again
                       </Button>
                     </Link>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleClearCache}
+                    >
+                      Clear Cache & Retry
+                    </Button>
                     <Link href="/pricing">
                       <Button variant="outline" size="sm">
                         View Pricing Plans
@@ -93,10 +131,46 @@ export default function UsageWidget() {
     : null
   const totalReports = Number(usageStats?.total_reports ?? 0)
   const usagePercentage = (subscription.reports_used / subscription.reports_limit) * 100
-  
+
   const daysUntilReset = Math.ceil(
     (new Date(subscription.period_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
   )
+
+  // Get status-based styling
+  const getStatusIndicator = () => {
+    const isActive = subscription.status === 'active'
+    const isExpired = subscription.status === 'expired'
+    const isCancelled = subscription.status === 'cancelled'
+
+    if (isExpired) {
+      return (
+        <div className="flex items-center gap-2 text-xs text-[rgba(248,183,77,0.85)]">
+          <AlertCircle className="w-3 h-3" />
+          <span>Expired - Now on Free plan</span>
+        </div>
+      )
+    }
+
+    if (isCancelled) {
+      return (
+        <div className="flex items-center gap-2 text-xs text-[rgba(75,142,255,0.85)]">
+          <AlertCircle className="w-3 h-3" />
+          <span>Access until {new Date(subscription.period_end).toLocaleDateString()}</span>
+        </div>
+      )
+    }
+
+    if (isActive) {
+      return (
+        <div className="flex items-center gap-2 text-xs text-[rgba(63,191,140,0.85)]">
+          <div className="w-2 h-2 rounded-full bg-[rgba(63,191,140,0.85)]" />
+          <span>Active</span>
+        </div>
+      )
+    }
+
+    return null
+  }
 
   return (
     <Card className="aurora-card border-none backdrop-blur-xl w-full max-w-full">
@@ -111,18 +185,18 @@ export default function UsageWidget() {
                 {subscription.price_monthly} {subscription.currency}/month
               </p>
             )}
+            {getStatusIndicator()}
           </div>
           <div className="flex gap-2 shrink-0">
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="text-[rgba(207,207,207,0.75)] hover:text-white"
-              onClick={() => {
-                console.log('🔄 Manual refresh triggered')
-                refetch()
-              }}
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              title="Refresh subscription data"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
             <Link href="/pricing">
               <Button variant="ghost" size="sm" className="text-[rgba(207,207,207,0.75)] hover:text-white">
@@ -147,9 +221,9 @@ export default function UsageWidget() {
 
           {/* Progress Bar */}
           <div className="relative">
-            <Progress 
-              value={Math.min(usagePercentage, 100)} 
-            />
+            <div className={usagePercentage >= 90 ? '[&>div]:bg-[#F8B74D]' : ''}>
+              <Progress value={Math.min(usagePercentage, 100)} />
+            </div>
           </div>
         </div>
 
@@ -157,7 +231,8 @@ export default function UsageWidget() {
         <div className="flex items-center text-sm text-[rgba(207,207,207,0.65)] w-full max-w-full">
           <Calendar className="w-4 h-4 mr-2 text-[#4B8EFF] shrink-0" />
           <span className="break-words">
-            Resets in {daysUntilReset} day{daysUntilReset !== 1 ? 's' : ''}
+            {subscription.status === 'active' ? 'Renews' : 'Expires'} in{' '}
+            {daysUntilReset} day{daysUntilReset !== 1 ? 's' : ''}
             {' '}({new Date(subscription.period_end).toLocaleDateString()})
           </span>
         </div>
