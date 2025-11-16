@@ -1,6 +1,6 @@
 /**
  * Test mode utilities for E2E testing
- * 
+ *
  * Test mode allows bypassing authentication and other checks
  * for automated testing purposes.
  */

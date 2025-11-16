@@ -4,9 +4,9 @@
 import { createSupabaseBrowser } from "@/utils/supabase/browser";
 import { JobDoneResult, PatientBlock } from "@/lib/types";
 import { Signature } from "@/types/report";
+import { API_BASE, RADLY_CLIENT_KEY } from "@/lib/config";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
-const CLIENT_KEY = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY!;
+const CLIENT_KEY = RADLY_CLIENT_KEY;
 
 async function getAccessToken(): Promise<string | null> {
   try {
@@ -18,6 +18,9 @@ async function getAccessToken(): Promise<string | null> {
     return null;
   }
 }
+
+// Export both as api and apiFetch for backward compatibility
+export const api = apiFetch;
 
 export async function apiFetch(path: string, init: RequestInit = {}) {
   // Admin endpoints should use AdminApiClient instead of apiFetch
