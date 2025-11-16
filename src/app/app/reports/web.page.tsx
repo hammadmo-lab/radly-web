@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Eye, Search, ChevronLeft, ChevronRight, Copy, Check, Trash2, CheckCircle2, Circle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getJob } from '@/lib/jobs';
+import { getJob, getRecentJobs } from '@/lib/jobs';
 import type { RecentJobRow } from '@/lib/jobs';
 import { createSupabaseBrowser } from "@/utils/supabase/browser";
 import { useAuthToken } from '@/hooks/useAuthToken';
@@ -156,101 +156,127 @@ export default function ReportsPage() {
         return;
       }
 
-      // Since /v1/jobs/recent doesn't exist, we'll use localStorage as the primary source
-      // and try to get recent jobs from there
+      let allJobs: RecentJobRow[] = [];
+
+      // Try to fetch from backend API first (this will show reports from all devices)
+      try {
+        const backendJobs = await getRecentJobs(100);
+        allJobs = backendJobs;
+        console.log(`Loaded ${backendJobs.length} reports from server`);
+      } catch (error) {
+        console.warn('Failed to fetch reports from server:', error);
+        // Continue with localStorage if API fails
+      }
+
+      // Also load from localStorage for optimistic updates (jobs created on this device)
       const localJobs = JSON.parse(localStorage.getItem(userJobsKey) || '[]');
 
-      if (localJobs.length > 0) {
-        // Validate that jobs still exist on backend - clean up orphaned jobs
-        const validJobs: LocalStorageJob[] = [];
-        const orphanedJobs: string[] = [];
+      // Merge backend and local data, avoiding duplicates
+      const jobMap = new Map<string, RecentJobRow>();
 
-        // Check all jobs in parallel
-        const validationResults = await Promise.allSettled(
-          localJobs.map((job: LocalStorageJob) => getJob(job.job_id))
-        );
+      // Add backend jobs first
+      allJobs.forEach(job => {
+        jobMap.set(job.job_id, job);
+      });
 
-        validationResults.forEach((result, index) => {
-          const job = localJobs[index];
-          if (result.status === 'fulfilled') {
-            // Job exists on backend - keep it
-            validJobs.push(job);
-          } else {
-            // Job doesn't exist on backend (404 or other error) - mark for removal
-            const error = result.reason;
-            if (error?.status === 404) {
-              orphanedJobs.push(job.job_id);
-            } else {
-              // For other errors (network, etc.), keep the job to avoid data loss
-              validJobs.push(job);
-            }
+      // Add/merge local jobs (these might be newer than backend)
+      localJobs.forEach((job: LocalStorageJob) => {
+        const existingJob = jobMap.get(job.job_id);
+        if (existingJob) {
+          // Update status if local job has more recent info
+          if (job.status && job.status !== existingJob.status) {
+            existingJob.status = job.status;
           }
-        });
-
-        // Apply cleanup logic to remove old and completed jobs
-        const { cleaned, removedCount } = cleanupJobs(validJobs);
-
-        // Log cleanup results
-        if (removedCount > 0) {
-          console.log(`Cleaned up ${removedCount} old/expired report(s)`);
+        } else {
+          // New job from localStorage (optimistic update)
+          jobMap.set(job.job_id, {
+            job_id: job.job_id,
+            status: job.status || 'queued',
+            template_id: job.template_id || job.title || '—'
+          });
         }
+      });
 
-        // Clean up orphaned jobs from localStorage
-        if (orphanedJobs.length > 0 || removedCount > 0) {
-          localStorage.setItem(userJobsKey, JSON.stringify(cleaned));
+      // Convert to array
+      const mergedJobs = Array.from(jobMap.values());
+
+      // Validate that jobs still exist on backend - clean up orphaned jobs
+      const validJobs: RecentJobRow[] = [];
+      const orphanedJobs: string[] = [];
+
+      // Check all jobs in parallel
+      const validationResults = await Promise.allSettled(
+        mergedJobs.map(job => getJob(job.job_id))
+      );
+
+      validationResults.forEach((result, index) => {
+        const job = mergedJobs[index];
+        if (result.status === 'fulfilled') {
+          // Job exists on backend - keep it and update status
+          validJobs.push({
+            ...job,
+            status: result.value.status
+          });
+        } else {
+          // Job doesn't exist on backend (404 or other error) - remove
+          const error = result.reason;
+          if (error?.status === 404) {
+            orphanedJobs.push(job.job_id);
+          } else {
+            // For other errors (network, etc.), keep the job
+            validJobs.push(job);
+          }
         }
+      });
 
-        // Convert localStorage format to RecentJobRow format
-        const formattedJobs: RecentJobRow[] = cleaned.map((job: LocalStorageJob) => ({
-          job_id: job.job_id,
-          status: job.status || 'queued',
-          template_id: job.template_id || job.title || '—'
-        }));
-
-        // Verify active jobs (queued/running) with backend on initial load
-        const activeJobs = formattedJobs.filter(job =>
-          job.status === 'queued' || job.status === 'running'
+      // Clean up orphaned jobs from localStorage
+      if (orphanedJobs.length > 0) {
+        const remainingLocalJobs = localJobs.filter((job: LocalStorageJob) =>
+          !orphanedJobs.includes(job.job_id)
         );
+        localStorage.setItem(userJobsKey, JSON.stringify(remainingLocalJobs));
+        console.log(`Removed ${orphanedJobs.length} orphaned report(s) from local storage`);
+      }
 
-        if (activeJobs.length > 0) {
-          try {
-            const verificationResults = await Promise.allSettled(
-              activeJobs.map(job => getJob(job.job_id))
-            );
+      // Verify active jobs (queued/running) with backend on initial load
+      const activeJobs = validJobs.filter(job =>
+        job.status === 'queued' || job.status === 'running'
+      );
 
-            verificationResults.forEach((result, index) => {
-              if (result.status === 'fulfilled') {
-                const backendStatus = result.value.status;
-                const localStatus = activeJobs[index].status;
-                if (backendStatus !== localStatus) {
-                  // Update localStorage
-                  const updatedJobs = cleaned.map((job: LocalStorageJob) =>
-                    job.job_id === activeJobs[index].job_id
-                      ? { ...job, status: backendStatus, completed_at: backendStatus === 'done' ? Date.now() : job.completed_at }
-                      : job
-                  );
-                  localStorage.setItem(userJobsKey, JSON.stringify(updatedJobs));
+      if (activeJobs.length > 0) {
+        try {
+          const verificationResults = await Promise.allSettled(
+            activeJobs.map(job => getJob(job.job_id))
+          );
 
-                  // Update formatted jobs for UI
-                  const jobIndex = formattedJobs.findIndex(j => j.job_id === activeJobs[index].job_id);
-                  if (jobIndex !== -1) {
-                    formattedJobs[jobIndex].status = backendStatus as 'queued' | 'running' | 'done' | 'error';
-                  }
+          verificationResults.forEach((result, index) => {
+            if (result.status === 'fulfilled') {
+              const backendStatus = result.value.status;
+              const localStatus = activeJobs[index].status;
+              if (backendStatus !== localStatus) {
+                // Update localStorage
+                const updatedLocalJobs = localJobs.map((job: LocalStorageJob) =>
+                  job.job_id === activeJobs[index].job_id
+                    ? { ...job, status: backendStatus, completed_at: backendStatus === 'done' ? Date.now() : job.completed_at }
+                    : job
+                );
+                localStorage.setItem(userJobsKey, JSON.stringify(updatedLocalJobs));
+
+                // Update valid jobs for UI
+                const jobIndex = validJobs.findIndex(j => j.job_id === activeJobs[index].job_id);
+                if (jobIndex !== -1) {
+                  validJobs[jobIndex].status = backendStatus as 'queued' | 'running' | 'done' | 'error';
                 }
               }
-            });
-          } catch (e) {
-            console.warn('Failed to verify active jobs:', e);
-          }
+            }
+          });
+        } catch (e) {
+          console.warn('Failed to verify active jobs:', e);
         }
-
-        setRows(formattedJobs);
-        setErr(null);
-      } else {
-        // If no localStorage data, show empty state
-        setRows([]);
-        setErr(null);
       }
+
+      setRows(validJobs);
+      setErr(null);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Failed to load reports';
       console.warn('Failed to load reports:', message);
@@ -375,6 +401,57 @@ export default function ReportsPage() {
       } else {
         setPollingFailures(0);
       }
+    }
+
+    // Periodically refresh from backend API to sync cross-device reports
+    // This runs every polling cycle to keep data fresh
+    try {
+      const backendJobs = await getRecentJobs(100);
+      if (backendJobs.length > 0) {
+        // Merge with existing rows, preserving local optimistic updates
+        const userJobsKey = getUserJobsKey();
+        const localJobs = userJobsKey ? JSON.parse(localStorage.getItem(userJobsKey) || '[]') : [];
+
+        const jobMap = new Map<string, RecentJobRow>();
+
+        // Add backend jobs
+        backendJobs.forEach(job => {
+          jobMap.set(job.job_id, job);
+        });
+
+        // Merge local jobs (for optimistic updates)
+        localJobs.forEach((job: LocalStorageJob) => {
+          const existing = jobMap.get(job.job_id);
+          if (existing) {
+            // Update status if different
+            if (job.status && job.status !== existing.status) {
+              existing.status = job.status;
+            }
+          } else {
+            // New local job
+            jobMap.set(job.job_id, {
+              job_id: job.job_id,
+              status: job.status || 'queued',
+              template_id: job.template_id || job.title || '—'
+            });
+          }
+        });
+
+        const mergedJobs = Array.from(jobMap.values());
+
+        // Only update if there are changes
+        if (mergedJobs.length !== rows.length ||
+            mergedJobs.some(job => {
+              const existingRow = rows.find(r => r.job_id === job.job_id);
+              return !existingRow || existingRow.status !== job.status;
+            })) {
+          setRows(mergedJobs);
+          console.log(`Synced ${mergedJobs.length} reports from server`);
+        }
+      }
+    } catch (error) {
+      console.debug('Failed to sync from server during polling:', error);
+      // Silently fail - this is just a sync attempt
     }
   }, { immediate: false });
 
