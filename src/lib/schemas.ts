@@ -50,7 +50,7 @@ export const signatureSchema = z.object({
     .or(z.literal('')),
   date: z.string()
     .trim()
-    .regex(/^(\d{4}-\d{2}-\d{2})?$/, "Date must be in YYYY-MM-DD format")
+    .regex(/^(\d{2}\/\d{2}\/\d{4})?$/, "Date must be in DD/MM/YYYY format")
     .optional()
     .or(z.literal('')),
 })
