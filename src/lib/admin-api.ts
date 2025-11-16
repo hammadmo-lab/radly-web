@@ -1,6 +1,6 @@
-import { 
-  AdminCredentials, 
-  SubscriptionListParams, 
+import {
+  AdminCredentials,
+  SubscriptionListParams,
   SubscriptionListResponse,
   UserSubscriptionResponse,
   ActivateSubscriptionData,
@@ -8,6 +8,7 @@ import {
   UsageAnalytics,
   RevenueAnalytics
 } from '@/types/admin'
+import { API_BASE } from '@/lib/config'
 
 export class AdminApiClient {
   private credentials: AdminCredentials
@@ -15,7 +16,7 @@ export class AdminApiClient {
 
   constructor(credentials: AdminCredentials) {
     this.credentials = credentials
-    this.baseUrl = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'
+    this.baseUrl = API_BASE
   }
 
   private getHeaders() {

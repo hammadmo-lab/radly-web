@@ -54,10 +54,18 @@ export function useSafePolling(
   const [isPolling, setIsPolling] = useState(true)
   const [isVisible, setIsVisible] = useState(true)
   const [currentInterval, setCurrentInterval] = useState(baseInterval)
-  
+
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const backoffCountRef = useRef(0)
   const isMountedRef = useRef(true)
+
+  // Store callback in ref to avoid stale closures
+  const callbackRef = useRef(callback)
+
+  // Update callback ref when callback changes
+  useEffect(() => {
+    callbackRef.current = callback
+  }, [callback])
 
   const clearCurrentTimeout = useCallback(() => {
     if (timeoutRef.current) {
@@ -72,24 +80,24 @@ export function useSafePolling(
     }
 
     clearCurrentTimeout()
-    
+
     timeoutRef.current = setTimeout(async () => {
       if (!isMountedRef.current) return
 
       try {
-        await callback()
-        
+        await callbackRef.current()
+
         // Reset backoff on successful request
         if (resetBackoffOnSuccess) {
           backoffCountRef.current = 0
           setCurrentInterval(baseInterval)
         }
-        
+
         // Schedule next poll
         scheduleNextPoll()
       } catch (error) {
         console.error('Polling callback error:', error)
-        
+
         // Apply exponential backoff on error
         backoffCountRef.current++
         const newInterval = Math.min(
@@ -108,7 +116,7 @@ export function useSafePolling(
         scheduleNextPoll()
       }
     }, currentInterval)
-  }, [callback, isPolling, isVisible, pauseWhenHidden, currentInterval, baseInterval, maxInterval, backoffMultiplier, resetBackoffOnSuccess, cleanupOnError, clearCurrentTimeout])
+  }, [isPolling, isVisible, pauseWhenHidden, currentInterval, baseInterval, maxInterval, backoffMultiplier, resetBackoffOnSuccess, cleanupOnError, clearCurrentTimeout])
 
   // Track tab visibility
   useEffect(() => {
@@ -145,7 +153,7 @@ export function useSafePolling(
     if (isPolling && (isVisible || !pauseWhenHidden)) {
       if (immediate) {
         // Run immediately on mount/resume
-        Promise.resolve(callback()).catch(console.error)
+        Promise.resolve(callbackRef.current()).catch(console.error)
       }
       scheduleNextPoll()
     } else {
@@ -153,11 +161,11 @@ export function useSafePolling(
     }
 
     return clearCurrentTimeout
-  }, [isPolling, isVisible, pauseWhenHidden, immediate, callback, scheduleNextPoll, clearCurrentTimeout])
+  }, [isPolling, isVisible, pauseWhenHidden, immediate, scheduleNextPoll, clearCurrentTimeout])
 
   const triggerPoll = useCallback(async () => {
     try {
-      await callback()
+      await callbackRef.current()
       // Reset backoff on manual trigger success
       if (resetBackoffOnSuccess) {
         backoffCountRef.current = 0
@@ -166,7 +174,7 @@ export function useSafePolling(
     } catch (error) {
       console.error('Manual poll error:', error)
     }
-  }, [callback, resetBackoffOnSuccess, baseInterval])
+  }, [resetBackoffOnSuccess, baseInterval])
 
   const pause = useCallback(() => {
     setIsPolling(false)
