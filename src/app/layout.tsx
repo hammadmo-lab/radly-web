@@ -7,6 +7,7 @@ import { PerformanceMonitor } from "@/components/performance-monitor";
 import { ClientPerformanceSetup } from "@/components/client-performance-setup";
 import { TestModeIndicator } from "@/components/test-mode-indicator";
 import { OfflineIndicator } from "@/components/shared/OfflineIndicator";
+import { RootErrorBoundary } from "@/components/RootErrorBoundary";
 import { siteConfig } from "@/lib/siteConfig";
 
 const inter = Inter({
@@ -124,9 +125,11 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} font-sans min-h-screen bg-background text-foreground antialiased overflow-x-hidden`}>
-        <Providers>
-          {children}
-        </Providers>
+        <RootErrorBoundary>
+          <Providers>
+            {children}
+          </Providers>
+        </RootErrorBoundary>
         <ClientPerformanceSetup />
         <PerformanceMonitor />
         <TestModeIndicator />

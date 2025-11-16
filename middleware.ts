@@ -1,13 +1,14 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/config';
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
-  
+
   try {
     const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY,
       {
         cookies: {
           getAll() {
@@ -49,8 +50,15 @@ export async function middleware(req: NextRequest) {
     // This prevents the "page can't be reached" error on first load
     
   } catch (error) {
-    console.error('Middleware error:', error);
-    // If there's an error, just continue without redirects
+    // CRITICAL: Only catch session lookup errors
+    // Re-throw configuration/setup errors to fail closed
+    if (error instanceof Error && error.message.includes('session')) {
+      console.error('Session lookup failed:', error);
+      // Continue without session - this is expected behavior
+    } else {
+      // Re-throw configuration errors
+      throw error;
+    }
   }
 
   return res;
