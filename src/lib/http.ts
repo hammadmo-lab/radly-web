@@ -12,6 +12,11 @@ const DEFAULT_TIMEOUT_MS = 30000;
 let cachedToken: string | null = null;
 let tokenExpiry: number = 0;
 
+/**
+ * Get authentication token from Supabase session
+ * Caches token with 5-minute buffer before expiry to avoid frequent SDK calls
+ * @returns Promise that resolves to JWT token or null if not authenticated
+ */
 async function getAuthToken(): Promise<string | null> {
   try {
     const now = Date.now();
@@ -67,7 +72,10 @@ async function getAuthToken(): Promise<string | null> {
   }
 }
 
-// Export function to clear token cache (useful for sign out)
+/**
+ * Clear authentication token cache
+ * Useful for sign out or when token becomes invalid
+ */
 export function clearTokenCache(): void {
   cachedToken = null;
   tokenExpiry = 0;
@@ -107,6 +115,12 @@ async function fetchWithTimeout(
   }
 }
 
+/**
+ * Process HTTP response and handle errors
+ * @param res - The fetch Response object
+ * @returns Parsed JSON data or undefined
+ * @throws ApiError on non-2xx status codes
+ */
 async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const body = await res.text().catch(() => '');
@@ -120,68 +134,82 @@ async function handle<T>(res: Response): Promise<T> {
   return (await res.json()) as T;
 }
 
-export async function httpGet<T = unknown>(path: string): Promise<T> {
-  const token = await getAuthToken();
-
+/**
+ * Build common HTTP headers for API requests
+ * @param token - Optional authentication token
+ * @param contentType - Content-Type header value (default: application/json)
+ * @returns Headers object
+ */
+function buildHeaders(token: string | null, contentType: string = 'application/json'): Record<string, string> {
   const headers: Record<string, string> = {
     'x-client-key': CLIENT_KEY,
     'X-Request-Id': crypto.randomUUID(),
   };
 
+  if (contentType) {
+    headers['content-type'] = contentType;
+  }
+
   if (token) {
     headers['authorization'] = `Bearer ${token}`;
   }
 
+  return headers;
+}
+
+/**
+ * Make HTTP request with timeout and authentication
+ * @param path - API endpoint path
+ * @param options - Request options (method, body, etc.)
+ * @returns Promise that resolves to parsed response data
+ */
+async function makeRequest<T>(path: string, options: RequestInit): Promise<T> {
+  const token = await getAuthToken();
+  const headers = buildHeaders(token, options.body ? 'application/json' : '');
+
   const res = await fetchWithTimeout(`${BASE_URL}${path}`, {
-    method: 'GET',
+    ...options,
     headers,
     credentials: 'include',
-    cache: 'no-store',
   });
 
   return handle<T>(res);
 }
 
-export async function httpPost<TBody, TResp = unknown>(path: string, body: TBody): Promise<TResp> {
-  const token = await getAuthToken();
-
-  const headers: Record<string, string> = {
-    'content-type': 'application/json',
-    'x-client-key': CLIENT_KEY,
-    'X-Request-Id': crypto.randomUUID(),
-  };
-
-  if (token) {
-    headers['authorization'] = `Bearer ${token}`;
-  }
-
-  const res = await fetchWithTimeout(`${BASE_URL}${path}`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body),
-    credentials: 'include',
+/**
+ * Make GET request to API endpoint
+ * @param path - API endpoint path
+ * @returns Promise that resolves to response data
+ */
+export async function httpGet<T = unknown>(path: string): Promise<T> {
+  return makeRequest<T>(path, {
+    method: 'GET',
+    cache: 'no-store',
   });
-  return handle<TResp>(res);
 }
 
-export async function httpPut<TBody, TResp = unknown>(path: string, body: TBody): Promise<TResp> {
-  const token = await getAuthToken();
-
-  const headers: Record<string, string> = {
-    'content-type': 'application/json',
-    'x-client-key': CLIENT_KEY,
-    'X-Request-Id': crypto.randomUUID(),
-  };
-
-  if (token) {
-    headers['authorization'] = `Bearer ${token}`;
-  }
-
-  const res = await fetchWithTimeout(`${BASE_URL}${path}`, {
-    method: 'PUT',
-    headers,
+/**
+ * Make POST request to API endpoint
+ * @param path - API endpoint path
+ * @param body - Request body
+ * @returns Promise that resolves to response data
+ */
+export async function httpPost<TBody, TResp = unknown>(path: string, body: TBody): Promise<TResp> {
+  return makeRequest<TResp>(path, {
+    method: 'POST',
     body: JSON.stringify(body),
-    credentials: 'include',
   });
-  return handle<TResp>(res);
+}
+
+/**
+ * Make PUT request to API endpoint
+ * @param path - API endpoint path
+ * @param body - Request body
+ * @returns Promise that resolves to response data
+ */
+export async function httpPut<TBody, TResp = unknown>(path: string, body: TBody): Promise<TResp> {
+  return makeRequest<TResp>(path, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
 }
