@@ -57,8 +57,33 @@ export async function enqueueJob(input: EnqueueInput): Promise<{ job_id: string 
   return httpPost<Record<string, unknown>, { job_id: string }>('/v1/generate/async', body);
 }
 
-export const getRecentJobs = (limit = 50) =>
-  httpGet<RecentJobRow[]>(`/v1/jobs/recent?limit=${limit}`);
+// Backend API response type for recent jobs endpoint
+interface RecentJobsResponse {
+  jobs: Array<{
+    job_id: string;
+    template_id: string;
+    status: 'done' | 'queued' | 'processing' | 'error';
+    created_at: string;
+    completed_at?: string;
+    processing_time_ms?: number;
+  }>;
+  count: number;
+}
+
+/**
+ * Fetch recent jobs from backend API
+ * Note: Backend returns wrapped object with 'jobs' array
+ */
+export const getRecentJobs = (limit = 50): Promise<RecentJobRow[]> =>
+  httpGet<RecentJobsResponse>(`/v1/jobs/recent?limit=${limit}`)
+    .then(response => {
+      // Extract jobs array from wrapper
+      return response.jobs.map(job => ({
+        job_id: job.job_id,
+        status: job.status,
+        template_id: job.template_id,
+      }));
+    });
 
 export const getJob = (id: string) =>
   httpGet<JobStatusResponse>(`/v1/jobs/${encodeURIComponent(id)}`);
