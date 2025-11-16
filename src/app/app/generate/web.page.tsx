@@ -609,8 +609,8 @@ export default function GeneratePage() {
                 size="sm"
                 onClick={() => {
                   Object.entries(draftData).forEach(([key, value]) => {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    setValue(key as any, value, { shouldValidate: false })
+                    // Dynamic form field restoration from draft - safe to use 'any' for value
+                    setValue(key as keyof GenerateFormValues, value as never, { shouldValidate: false })
                   })
                   setShowDraftNotification(false)
                   toast.success('Draft restored successfully')
