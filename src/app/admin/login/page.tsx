@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useAdminAuth } from '@/components/admin/AdminAuthProvider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,49 +12,51 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Shield, Loader2, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { adminLoginSchema, type AdminLoginData } from '@/lib/schemas'
+import { API_BASE } from '@/lib/config'
 
 export default function AdminLoginPage() {
   const router = useRouter()
   const { login } = useAdminAuth()
-  
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+
   const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors }
+  } = useForm<AdminLoginData>({
+    resolver: zodResolver(adminLoginSchema),
+    mode: 'onSubmit',
+  })
 
   // Load saved username on component mount
   useEffect(() => {
     const savedUsername = localStorage.getItem('admin_username')
     if (savedUsername) {
-      setUsername(savedUsername)
+      setValue('username', savedUsername)
       setRememberMe(true)
     }
-  }, [])
+  }, [setValue])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSubmit = async (data: AdminLoginData) => {
     setError('')
-    
-    if (!username || !password) {
-      setError('Please enter both username and password')
-      return
-    }
-
     setIsLoading(true)
 
     try {
       // Call the backend login endpoint
-      const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'https://edge.radly.app'
-      const response = await fetch(`${apiBase}/v1/admin/auth/login`, {
+      const response = await fetch(`${API_BASE}/v1/admin/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Request-Id': crypto.randomUUID(),
         },
         body: JSON.stringify({
-          username,
-          password,
+          username: data.username,
+          password: data.password,
         }),
       })
 
@@ -61,21 +65,21 @@ export default function AdminLoginPage() {
         throw new Error(errorData.detail || 'Invalid credentials')
       }
 
-      const data = await response.json()
-      
+      const responseData = await response.json()
+
       // Store the returned keys
-      login(data.admin_key, data.api_key)
-      
+      login(responseData.admin_key, responseData.api_key)
+
       // Handle remember me functionality
       if (rememberMe) {
-        localStorage.setItem('admin_username', username)
+        localStorage.setItem('admin_username', data.username)
       } else {
         localStorage.removeItem('admin_username')
       }
-      
+
       toast.success('Login successful!')
       router.push('/admin')
-      
+
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed'
       setError(errorMessage)
@@ -101,43 +105,49 @@ export default function AdminLoginPage() {
             Enter your credentials to access the admin dashboard
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {error && (
               <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
+                <AlertCircle className="h-4 h-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
+
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
                 type="text"
                 placeholder="Enter your username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                {...register('username')}
                 disabled={isLoading}
                 autoComplete="username"
                 autoFocus
+                aria-invalid={errors.username ? 'true' : 'false'}
               />
+              {errors.username && (
+                <p className="text-sm text-destructive">{errors.username.message}</p>
+              )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
                 placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register('password')}
                 disabled={isLoading}
                 autoComplete="current-password"
+                aria-invalid={errors.password ? 'true' : 'false'}
               />
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password.message}</p>
+              )}
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -151,7 +161,7 @@ export default function AdminLoginPage() {
                 Remember username
               </Label>
             </div>
-            
+
             <Button
               type="submit"
               className="w-full"
@@ -167,7 +177,7 @@ export default function AdminLoginPage() {
               )}
             </Button>
           </form>
-          
+
           <div className="mt-4 text-center text-sm text-muted-foreground">
             <p>Authorized personnel only</p>
           </div>

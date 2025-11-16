@@ -392,7 +392,7 @@ export default function GeneratePage() {
         name: data.patient.name || undefined,
         mrn: data.patient.mrn || undefined,
         age: data.patient.age ?? undefined,
-        sex: data.patient.sex || undefined, // Now using string directly
+        sex: data.patient.sex || undefined,
       }
 
       // Build payload for enqueueJob - flattened structure
@@ -401,7 +401,7 @@ export default function GeneratePage() {
         indication: data.indication,
         findings: data.findings,
         impression: data.indication, // mapping indication to impression
-        technique: data.technique,
+        technique: data.technique || '',
         patient: patient,
         signature: data.signature,
       }
