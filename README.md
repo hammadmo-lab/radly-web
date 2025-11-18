@@ -29,35 +29,47 @@ Radly Frontend is a cutting-edge web application that enables users to generate 
 
 ### Prerequisites
 
-- **Node.js** 20+ and npm 10+
-- **.env.local** file with required environment variables
+- **Node.js** 20 or higher
+- **npm** 10 or higher
+- **Git** for version control
+- Access to required environment variables (Supabase credentials, API keys)
 
 ### Installation
 
-```bash
-# Clone the repository
-git clone <repository-url>
-cd radly-frontend
+Follow these steps to set up the project locally:
 
-# Install dependencies
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd radly-web
+
+# 2. Install dependencies
 npm install
 
-# Configure environment
+# 3. Configure environment variables
 cp .env.example .env.local
-# Edit .env.local with your credentials
+
+# 4. Edit .env.local with your credentials
+# See "Environment Configuration" section below for required variables
 ```
 
 ### Development
 
+Start the development server:
+
 ```bash
-# Start development server with Turbopack (fast rebuilds)
+# Start development server with Turbopack (recommended - faster rebuilds)
 npm run dev
 
-# Open http://localhost:3000 in your browser
-# The app will auto-reload when you save changes
+# Alternative: Clean cache and start fresh (useful for build issues)
+npm run dev:clean
 ```
 
+The application will be available at **http://localhost:3000**. The page automatically reloads when you save changes.
+
 ### Production Build
+
+Build and run the production version:
 
 ```bash
 # Create optimized production build
@@ -66,7 +78,7 @@ npm run build
 # Start production server
 npm run start
 
-# Or analyze bundle size before deploying
+# Optional: Analyze bundle size before deploying
 npm run analyze
 ```
 
@@ -75,17 +87,23 @@ npm run analyze
 Create a `.env.local` file in the project root with the following variables:
 
 ```env
-# Supabase Configuration
+# Supabase Configuration (Authentication)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...  # Supabase anonymous key from dashboard
 
-# API Configuration
-NEXT_PUBLIC_API_BASE=https://edge.radly.app
-NEXT_PUBLIC_RADLY_CLIENT_KEY=your_64_character_public_api_key
+# Backend API Configuration
+NEXT_PUBLIC_API_BASE=https://edge.radly.app  # Production API endpoint
+NEXT_PUBLIC_RADLY_CLIENT_KEY=your_64_character_public_api_key  # API rate limiting key
 
-# Site Configuration
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+# Application Configuration
+NEXT_PUBLIC_SITE_URL=http://localhost:3000  # Use https://your-domain.com in production
 ```
+
+**Important Notes:**
+- All variables prefixed with `NEXT_PUBLIC_` are exposed to the browser
+- Never commit `.env.local` to version control
+- Use `.env.example` as a template for required variables
+- For production deployments, set these variables in your hosting platform (e.g., Vercel dashboard)
 
 ## Project Architecture
 
@@ -136,73 +154,98 @@ src/
 
 #### State Management
 
-The application uses a **layered state management** approach:
+The application uses a **layered state management** approach to separate concerns and optimize performance:
 
 1. **Authentication State** - React Context (`AuthProvider`)
-   - Managed via `useAuth()` hook
-   - Provides user session and sign-out method
-   - Persisted via Supabase session cookies
+   - Managed through the `useAuth()` hook
+   - Provides user session, authentication status, and sign-out functionality
+   - Session persisted securely via Supabase HTTP-only cookies
 
 2. **Server State** - TanStack React Query
-   - API data fetching and caching
-   - Automatic retries with exponential backoff
-   - Configured stale time: 1 minute (configurable per query)
+   - Handles all API data fetching, caching, and synchronization
+   - Automatic retries with exponential backoff for failed requests
+   - Default stale time: 1 minute (configurable per query)
+   - Retry logic skips 401/403/404 errors (do not retry auth failures or not-found resources)
 
 3. **Form State** - React Hook Form + Zod
-   - Type-safe form validation
-   - Schemas defined in `src/lib/schemas.ts`
+   - Type-safe form validation with runtime schema checking
+   - All validation schemas defined in `src/lib/schemas.ts`
+   - Automatic error messaging and field-level validation
 
-4. **UI State** - Local `useState`
-   - Modal visibility, step tracking, toggles
-   - Component-level, ephemeral state
+4. **UI State** - Local `useState` and `useReducer`
+   - Modal visibility, step tracking, toggles, and other transient UI states
+   - Component-level ephemeral state (not persisted)
 
 5. **Client Storage** - localStorage
-   - Recent jobs, user preferences
-   - Accessed via `src/lib/secure-storage.ts` (encrypted)
+   - Non-sensitive data only: recent jobs, user preferences, UI settings
+   - Accessed via `src/lib/secure-storage.ts` (provides encryption utilities)
+   - **Never** stores Protected Health Information (PHI) or authentication tokens
 
 #### API Integration
 
-All API calls go through the HTTP client in `src/lib/http.ts`:
+All API calls flow through a centralized HTTP client located in `src/lib/http.ts`. This client provides three type-safe methods:
 
 ```typescript
-// Type-safe HTTP methods
+// Type-safe HTTP methods with automatic error handling
 httpGet<T>(path: string): Promise<T>
 httpPost<TBody, TResp>(path: string, body: TBody): Promise<TResp>
 httpPut<TBody, TResp>(path: string, body: TBody): Promise<TResp>
 ```
 
-**Automatic behaviors:**
-- JWT Bearer token injection from Supabase session
-- `x-client-key` header for rate limiting
-- `X-Request-Id` header for request tracking (UUID)
-- `credentials: 'include'` for CORS
-- `cache: 'no-store'` for GET requests
-- Throws `ApiError` with `status` and `body` properties
+**The HTTP client automatically handles:**
+- **JWT Bearer token injection** - Retrieves and injects the current Supabase session token
+- **Rate limiting header** - Adds `x-client-key` header for API rate limiting
+- **Request tracking** - Generates and includes `X-Request-Id` header (UUID) for distributed tracing
+- **CORS credentials** - Sets `credentials: 'include'` for cross-origin requests
+- **Cache control** - Applies `cache: 'no-store'` to all GET requests to prevent stale data
+- **Timeout handling** - All requests timeout after 30 seconds to prevent infinite loading states
+- **Error handling** - Throws typed `ApiError` instances with `status` and `body` properties
+
+**Environment-based configuration:**
+- Base URL set via `NEXT_PUBLIC_API_BASE` environment variable
+- Client key set via `NEXT_PUBLIC_RADLY_CLIENT_KEY` environment variable
+- Configuration validated at build time to prevent runtime errors
 
 #### Authentication Flow
 
-1. User visits `/auth/signin` or clicks sign-in button
-2. Supabase redirects to OAuth provider (Google, Apple) or sends magic link
-3. Provider redirects back to `/auth/callback`
-4. Middleware captures session and stores in cookies
-5. `AuthProvider` hydrates authentication state
-6. User can now access protected `/app/*` routes
-7. HTTP client automatically injects Bearer token
+The authentication system uses Supabase Auth with JWT tokens:
+
+1. **Initiate Sign-In**: User visits `/auth/signin` or clicks a sign-in button
+2. **Provider Selection**: User chooses OAuth provider (Google, Apple) or requests a Magic Link via email
+3. **External Authentication**: Supabase redirects to the selected OAuth provider or sends a Magic Link email
+4. **Callback Handling**: Provider redirects back to `/auth/callback` with authentication code
+5. **Middleware Processing**: Next.js middleware captures the session and stores it in HTTP-only cookies
+6. **State Hydration**: `AuthProvider` hydrates the authentication state in React Context
+7. **Protected Access**: User can now access protected `/app/*` routes
+8. **Automatic Token Injection**: HTTP client automatically retrieves and injects Bearer token for all API calls
+9. **Token Refresh**: Tokens are automatically refreshed when expired (handled by Supabase)
+10. **Sign Out**: User can sign out, which clears session cookies and redirects to the landing page
 
 #### Polling Strategy
 
-The application uses intelligent polling hooks for real-time updates:
+The application uses intelligent polling hooks (located in `src/hooks/useSafePolling.ts`) for real-time status updates:
 
-- `useSafePolling()` - Base hook with tab visibility detection and exponential backoff
-- `useJobStatusPolling()` - Optimized for job status (10s base, 2min max, 2x backoff)
-- `useQueueStatsPolling()` - Optimized for queue stats (15s base, 1min max, 1.5x backoff)
+- **`useSafePolling()`** - Base hook with customizable polling configuration
+  - Tab visibility detection (pauses when tab is hidden to save resources)
+  - Exponential backoff on errors to prevent server overload
+  - Configurable intervals, max intervals, and backoff multipliers
 
-**Features:**
-- Pauses polling when tab is hidden
-- Exponential backoff on errors
-- Resets backoff on successful requests
-- Manual trigger, pause, resume controls
-- Automatic cleanup on unmount
+- **`useJobStatusPolling()`** - Optimized for monitoring job status at `/v1/jobs/:id`
+  - Base interval: 10 seconds
+  - Max interval: 2 minutes
+  - Backoff multiplier: 2.0x on errors
+
+- **`useQueueStatsPolling()`** - Optimized for queue statistics at `/v1/queue/stats`
+  - Base interval: 15 seconds
+  - Max interval: 1 minute
+  - Backoff multiplier: 1.5x on errors
+
+**Key Features:**
+- **Automatic pause/resume** - Polling pauses when browser tab is hidden and resumes when visible
+- **Exponential backoff** - Increases polling interval on consecutive errors to prevent server overload
+- **Backoff reset** - Resets to base interval on successful requests
+- **Manual controls** - Provides `trigger()`, `pause()`, and `resume()` methods for programmatic control
+- **Automatic cleanup** - Cleans up timers and listeners on component unmount to prevent memory leaks
 
 ## Technology Stack
 
@@ -845,45 +888,158 @@ Response (200 OK):
 
 ## Contributing
 
-### Code Style
-- **TypeScript** - Strict mode enabled
-- **Linting** - ESLint configured
-- **Formatting** - Prettier via Turbopack
-- **Components** - Follow Radix UI + Tailwind patterns
+We welcome contributions! Please follow these guidelines to maintain code quality and consistency.
+
+### Code Style Guidelines
+
+- **TypeScript** - Strict mode enabled; avoid `any` types
+- **Linting** - ESLint configured with Next.js recommended rules
+- **Formatting** - Consistent formatting via Turbopack
+- **Components** - Follow Radix UI primitives + Tailwind CSS patterns
+- **Naming** - Use descriptive names; components in PascalCase, utilities in camelCase
 
 ### Testing Requirements
-Before submitting changes:
+
+Before submitting changes, ensure all tests pass:
+
 ```bash
-npm run lint      # No linting errors
-npm run test      # Unit tests pass
-npm run test:e2e  # E2E tests pass
-npm run build     # Production build succeeds
+npm run lint      # Must pass with no errors
+npm run test      # All unit tests must pass
+npm run test:e2e  # All E2E tests must pass
+npm run build     # Production build must succeed
 ```
 
-### Creating Components
-1. **UI Components** (`src/components/ui/`)
-   - Primitive, reusable components
-   - Use Radix UI + Tailwind + CVA for variants
+**Test Coverage:**
+- Write unit tests for utility functions and hooks
+- Write E2E tests for critical user workflows
+- Maintain or improve code coverage with each PR
 
-2. **Feature Components** (`src/components/features/`)
-   - Domain-specific logic
-   - Import UI components
+### How to Add New Components
 
-3. **Page Components** (`src/app/**/page.tsx`)
-   - Server Components by default
-   - Add "use client" for interactivity
+#### 1. UI Components (`src/components/ui/`)
+Primitive, reusable components that form the design system:
+- Use Radix UI primitives as the base
+- Style with Tailwind CSS utility classes
+- Use Class Variance Authority (CVA) for component variants
+- Export from `src/components/ui/index.ts` for easy imports
 
-### Creating API Calls
-1. Define types in `src/types/api.ts`
-2. Use `httpGet/Post/Put` from `src/lib/http.ts`
-3. Wrap in React Query hook for caching
-4. Handle errors in query error callback
+**Example:**
+```typescript
+// src/components/ui/custom-button.tsx
+import { cva, type VariantProps } from "class-variance-authority"
 
-### Adding Forms
-1. Define Zod schema in `src/lib/schemas.ts`
-2. Use React Hook Form with `zodResolver`
-3. Build UI with `src/components/ui/` components
-4. Submit via `httpPost` with type-safe payload
+const buttonVariants = cva(/* ... */)
+
+export function CustomButton({ variant, ...props }: ButtonProps) {
+  return <button className={buttonVariants({ variant })} {...props} />
+}
+```
+
+#### 2. Feature Components (`src/components/features/`)
+Domain-specific components with business logic:
+- Import UI components from `src/components/ui/`
+- Keep logic separate from presentation
+- Use custom hooks for complex state management
+
+#### 3. Page Components (`src/app/**/page.tsx`)
+Route-level page components:
+- Use Server Components by default for better performance
+- Add `"use client"` directive only when you need client-side interactivity
+- Keep pages lightweight; extract complex logic to feature components
+
+### How to Add API Calls
+
+Follow this pattern for all API interactions:
+
+1. **Define types** in `src/types/api.ts`:
+   ```typescript
+   export interface UserProfile {
+     id: string
+     name: string
+     email: string
+   }
+   ```
+
+2. **Use HTTP client** from `src/lib/http.ts`:
+   ```typescript
+   import { httpGet, httpPost } from '@/lib/http'
+
+   export async function getUserProfile(): Promise<UserProfile> {
+     return httpGet<UserProfile>('/v1/users/profile')
+   }
+   ```
+
+3. **Wrap in React Query** hook for caching:
+   ```typescript
+   import { useQuery } from '@tanstack/react-query'
+
+   export function useUserProfile() {
+     return useQuery({
+       queryKey: ['user', 'profile'],
+       queryFn: getUserProfile,
+       staleTime: 5 * 60 * 1000, // 5 minutes
+     })
+   }
+   ```
+
+4. **Handle errors** in component:
+   ```typescript
+   const { data, error, isLoading } = useUserProfile()
+
+   if (error) {
+     return <ErrorMessage error={error} />
+   }
+   ```
+
+### How to Add Forms
+
+1. **Define Zod schema** in `src/lib/schemas.ts`:
+   ```typescript
+   export const userProfileSchema = z.object({
+     name: z.string().min(2, "Name must be at least 2 characters"),
+     email: z.string().email("Invalid email address"),
+   })
+
+   export type UserProfileFormData = z.infer<typeof userProfileSchema>
+   ```
+
+2. **Use React Hook Form** with `zodResolver`:
+   ```typescript
+   import { useForm } from 'react-hook-form'
+   import { zodResolver } from '@hookform/resolvers/zod'
+
+   const form = useForm<UserProfileFormData>({
+     resolver: zodResolver(userProfileSchema),
+     defaultValues: { name: '', email: '' },
+   })
+   ```
+
+3. **Build UI** with components from `src/components/ui/`:
+   ```typescript
+   <form onSubmit={form.handleSubmit(onSubmit)}>
+     <Input {...form.register('name')} />
+     <Input {...form.register('email')} type="email" />
+     <Button type="submit">Save</Button>
+   </form>
+   ```
+
+4. **Submit via HTTP client**:
+   ```typescript
+   const onSubmit = async (data: UserProfileFormData) => {
+     await httpPost('/v1/users/profile', data)
+   }
+   ```
+
+### Pull Request Process
+
+1. Create a feature branch from `main`
+2. Make your changes with clear, descriptive commits
+3. Write or update tests as needed
+4. Run all tests and linting locally
+5. Submit a PR with a clear description of changes
+6. Address review feedback promptly
+
+For more detailed contribution guidelines, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## Troubleshooting
 
@@ -950,25 +1106,43 @@ NEXT_PUBLIC_SITE_URL
 
 ## Documentation
 
-### Reference Files
-- **CLAUDE.md** - Development guidelines and architecture decisions
-- **CHANGELOG.md** - Version history and feature updates
-- **docs/frontend-performance.md** - Performance optimization guide
-- **docs/frontend-security.md** - Security best practices
+Comprehensive documentation is available to help you understand and work with the codebase:
+
+### Development Documentation
+- **[CLAUDE.md](./CLAUDE.md)** - Comprehensive development guidelines, architecture decisions, and patterns for AI-assisted development
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Detailed contribution guidelines and workflow processes
+- **[CHANGELOG.md](./CHANGELOG.md)** - Version history, feature updates, and release notes
+
+### Technical Documentation
+- **[docs/frontend-performance.md](./docs/frontend-performance.md)** - Performance optimization strategies, bundle analysis, and best practices
+- **[docs/frontend-security.md](./docs/frontend-security.md)** - Security implementation details, best practices, and compliance guidelines
+- **[docs/audit-fix-plan.md](./docs/audit-fix-plan.md)** - Technical debt tracking and resolution plan
+- **[docs/auth-magiclink-universal-deeplinks.md](./docs/auth-magiclink-universal-deeplinks.md)** - Magic link authentication and universal deep linking implementation
+
+### Testing Documentation
+- **[e2e/README.md](./e2e/README.md)** - End-to-end testing guide with Playwright
 
 ## Support
 
-For questions or issues:
-1. Check existing GitHub issues
-2. Review documentation in `CLAUDE.md`
-3. Check troubleshooting section above
-4. Create a new GitHub issue with details
+For questions, issues, or contributions:
+
+1. **Check Documentation** - Review the relevant documentation files listed above
+2. **Search Issues** - Check [existing GitHub issues](https://github.com/your-org/radly-web/issues) for similar problems
+3. **Troubleshooting** - Review the troubleshooting section in this README
+4. **Create an Issue** - If you can't find a solution, create a detailed issue with:
+   - Steps to reproduce
+   - Expected vs actual behavior
+   - Environment details (Node version, OS, browser)
+   - Relevant error messages or screenshots
 
 ## License
 
-This project is private and proprietary to Radly Inc. All rights reserved.
+This project is **private and proprietary** to Radly Inc. All rights reserved.
+
+Unauthorized copying, distribution, or use of this software is strictly prohibited.
 
 ---
 
-**Last Updated:** October 2025
+**Last Updated:** November 2025
+**Version:** 0.1.0
 **Maintainers:** Radly Engineering Team
