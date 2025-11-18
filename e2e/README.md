@@ -1,10 +1,16 @@
 # E2E Testing with Playwright
 
-This document describes the end-to-end (E2E) testing setup for the Radly application using Playwright.
+This document describes the end-to-end (E2E) testing setup for the Radly application using [Playwright](https://playwright.dev).
 
 ## Overview
 
-The E2E tests validate complete user workflows from start to finish, ensuring that all critical user journeys work correctly across different browsers and devices.
+End-to-end tests validate complete user workflows from start to finish, simulating real user interactions to ensure that all critical user journeys work correctly across different browsers and devices.
+
+**Purpose:**
+- Catch integration issues between frontend and backend
+- Verify user flows work across different browsers (Chromium, Firefox, WebKit)
+- Test responsive behavior on mobile devices
+- Ensure authentication and protected routes work correctly
 
 ## Test Coverage
 
@@ -60,22 +66,29 @@ e2e/
 
 ## Running Tests
 
+### Prerequisites
+
+Before running E2E tests, ensure:
+- Development server is running (`npm run dev`) or tests will start it automatically
+- Environment variables are configured (see "Environment Variables" section)
+- Playwright browsers are installed (`npx playwright install`)
+
 ### Local Development
 
 ```bash
-# Run all E2E tests
+# Run all E2E tests (starts dev server automatically)
 npm run test:e2e
 
-# Run tests in UI mode (interactive)
+# Run tests in UI mode (interactive, recommended for development)
 npm run test:e2e:ui
 
-# Run tests in debug mode
+# Run tests in debug mode (step through tests)
 npm run test:e2e:debug
 
-# Run tests in headed mode (visible browser)
+# Run tests in headed mode (visible browser windows)
 npm run test:e2e:headed
 
-# Show test report
+# Show HTML test report (after running tests)
 npm run test:e2e:report
 ```
 
@@ -127,15 +140,24 @@ npx playwright test --project="Mobile Safari"
 
 ### Environment Variables
 
-The tests use the following environment variables:
+The tests require the following environment variables (set in `.env.local`):
 
 ```bash
+# Required for authentication testing
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-NEXT_PUBLIC_ALLOW_MAGIC_LINK=1
-NEXT_PUBLIC_ALLOW_GOOGLE=0
-NEXT_PUBLIC_ALLOW_APPLE=0
+
+# Authentication method flags (set to 1 to enable)
+NEXT_PUBLIC_ALLOW_MAGIC_LINK=1   # Enable magic link authentication
+NEXT_PUBLIC_ALLOW_GOOGLE=0       # Enable Google OAuth
+NEXT_PUBLIC_ALLOW_APPLE=0        # Enable Apple OAuth
+
+# Optional: Test mode flags
+NEXT_PUBLIC_TEST_MODE=true       # Enable test mode features
+NEXT_PUBLIC_BYPASS_AUTH=true     # Bypass authentication (for testing only)
 ```
+
+**Note:** `BYPASS_AUTH` should **only** be used in test environments, never in production.
 
 ## Test Data
 
