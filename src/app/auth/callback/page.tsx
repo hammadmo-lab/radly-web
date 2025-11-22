@@ -12,36 +12,51 @@ export default function AuthCallbackPage() {
   const [errorMessage, setErrorMessage] = useState<string>('')
 
   useEffect(() => {
+    let cancelled = false
+
+    const code = searchParams.get('code')
+    const error = searchParams.get('error')
+    const errorDescription = searchParams.get('error_description')
+    const queryAccessToken = searchParams.get('access_token')
+    const queryRefreshToken = searchParams.get('refresh_token')
+    const queryExpiresIn = searchParams.get('expires_in')
+    const token = searchParams.get('token')
+    const type = searchParams.get('type')
+    const hashParams =
+      typeof window !== 'undefined' && window.location.hash
+        ? new URLSearchParams(window.location.hash.substring(1))
+        : null
+    const hashAccessToken = hashParams?.get('access_token')
+    const hashRefreshToken = hashParams?.get('refresh_token')
+    const hashExpiresIn = hashParams?.get('expires_in')
+    const accessToken = queryAccessToken || hashAccessToken || undefined
+    const refreshToken = queryRefreshToken || hashRefreshToken || undefined
+    const expiresIn = queryExpiresIn || hashExpiresIn || undefined
+    const hasOAuthTokens = !!accessToken || !!refreshToken
+    const hasMagicLinkToken = !!token
+
     const handleCallback = async () => {
-      const code = searchParams.get('code')
-      const error = searchParams.get('error')
-      const errorDescription = searchParams.get('error_description')
-      const queryAccessToken = searchParams.get('access_token')
-      const queryRefreshToken = searchParams.get('refresh_token')
-      const queryExpiresIn = searchParams.get('expires_in')
-      const hashParams =
-        typeof window !== 'undefined' && window.location.hash
-          ? new URLSearchParams(window.location.hash.substring(1))
-          : null
-      const hashAccessToken = hashParams?.get('access_token')
-      const hashRefreshToken = hashParams?.get('refresh_token')
-      const hashExpiresIn = hashParams?.get('expires_in')
-      const accessToken = queryAccessToken || hashAccessToken || undefined
-      const refreshToken = queryRefreshToken || hashRefreshToken || undefined
-      const expiresIn = queryExpiresIn || hashExpiresIn || undefined
-      const hasOAuthTokens = !!accessToken || !!refreshToken
+      if (cancelled) return
 
       if (error) {
         setStatus('error')
         setErrorMessage(errorDescription || error)
-        setTimeout(() => router.push('/auth/signin'), 3000)
+        setTimeout(() => {
+          if (!cancelled) {
+            router.push('/auth/signin')
+          }
+        }, 3000)
         return
       }
 
-      if (!code && !hasOAuthTokens) {
+      if (!code && !hasOAuthTokens && !hasMagicLinkToken) {
         setStatus('error')
-        setErrorMessage('Missing authorization code')
-        setTimeout(() => router.push('/auth/signin'), 3000)
+        setErrorMessage('Missing authorization parameters')
+        setTimeout(() => {
+          if (!cancelled) {
+            router.push('/auth/signin')
+          }
+        }, 3000)
         return
       }
 
@@ -50,6 +65,8 @@ export default function AuthCallbackPage() {
 
         // First check if we already have a valid session (native flow case)
         const { data: sessionData } = await supabase.auth.getSession()
+        if (cancelled) return
+
         if (sessionData.session) {
           console.log('🔐 Session already exists (native flow), skipping PKCE exchange')
           setStatus('success')
@@ -64,13 +81,25 @@ export default function AuthCallbackPage() {
           console.log('🔐 Auth callback successful (existing session), redirecting to:', redirectTo)
 
           setTimeout(() => {
-            router.push(redirectTo)
+            if (!cancelled) {
+              router.push(redirectTo)
+            }
           }, 500)
           return
         }
 
-        // If no session exists and we have a code, try PKCE exchange (web flow case)
-        if (code) {
+        // If magic link token is present (iOS deep link or web fallback), verify it directly
+        if (hasMagicLinkToken) {
+          const otpType = (type || 'magiclink') as Parameters<typeof supabase.auth.verifyOtp>[0]['type']
+          const { error: verifyError } = await supabase.auth.verifyOtp({
+            token_hash: token as string,
+            type: otpType,
+          })
+
+          if (verifyError) {
+            throw verifyError
+          }
+        } else if (code) {
           console.log('🔐 No session found, attempting PKCE exchange for web flow')
           const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
           if (exchangeError) {
@@ -105,6 +134,8 @@ export default function AuthCallbackPage() {
           }
         }
 
+        if (cancelled) return
+
         setStatus('success')
 
         // Get stored redirect from cookie or use default
@@ -118,17 +149,61 @@ export default function AuthCallbackPage() {
 
         // Use a small delay to ensure session is saved
         setTimeout(() => {
-          router.push(redirectTo)
+          if (!cancelled) {
+            router.push(redirectTo)
+          }
         }, 500)
       } catch (err) {
+        if (cancelled) return
         setStatus('error')
         setErrorMessage(err instanceof Error ? err.message : 'Authentication failed')
         console.error('🔐 Auth callback error:', err)
-        setTimeout(() => router.push('/auth/signin'), 3000)
+        setTimeout(() => {
+          if (!cancelled) {
+            router.push('/auth/signin')
+          }
+        }, 3000)
       }
     }
 
-    handleCallback()
+    const isIOS =
+      typeof navigator !== 'undefined' &&
+      (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
+    const isStandalone =
+      typeof window !== 'undefined' &&
+      ((window.navigator as unknown as { standalone?: boolean }).standalone === true ||
+        window.matchMedia?.('(display-mode: standalone)')?.matches)
+    const shouldAttemptDeepLink = isIOS && !isStandalone && hasMagicLinkToken && (!type || type === 'magiclink')
+
+    if (shouldAttemptDeepLink) {
+      const appURL = `radly://auth/callback?token=${encodeURIComponent(token as string)}&type=${encodeURIComponent(
+        type || 'magiclink'
+      )}`
+
+      // Attempt to open the native app; fallback to web auth if we remain on the page
+      const fallbackTimer = window.setTimeout(() => {
+        if (!cancelled) {
+          const stillHere = document.visibilityState === 'visible' && document.hasFocus()
+          if (stillHere) {
+            void handleCallback()
+          }
+        }
+      }, 2500)
+
+      window.location.href = appURL
+
+      return () => {
+        cancelled = true
+        clearTimeout(fallbackTimer)
+      }
+    }
+
+    void handleCallback()
+
+    return () => {
+      cancelled = true
+    }
   }, [searchParams, router])
 
   return (
