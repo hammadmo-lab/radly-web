@@ -11,6 +11,15 @@ export default function AuthCallbackPage() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [errorMessage, setErrorMessage] = useState<string>('')
 
+  type OtpType =
+    | 'magiclink'
+    | 'email'
+    | 'sms'
+    | 'phone_change'
+    | 'email_change'
+    | 'recovery'
+    | 'invite'
+
   useEffect(() => {
     let cancelled = false
 
@@ -90,7 +99,7 @@ export default function AuthCallbackPage() {
 
         // If magic link token is present (iOS deep link or web fallback), verify it directly
         if (hasMagicLinkToken) {
-          const otpType = (type || 'magiclink') as Parameters<typeof supabase.auth.verifyOtp>[0]['type']
+          const otpType: OtpType = (type as OtpType) || 'magiclink'
           const { error: verifyError } = await supabase.auth.verifyOtp({
             token_hash: token as string,
             type: otpType,
