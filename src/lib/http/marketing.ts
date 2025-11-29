@@ -1,3 +1,5 @@
+import { getAuthHeaderName } from '@/lib/config';
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE;
 const CLIENT_KEY = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY;
 
@@ -75,10 +77,14 @@ export async function marketingGet<T>(path: string): Promise<T> {
     return resolveFallback<T>(path);
   }
 
+  // Determine which auth header to use based on environment
+  // Production (edge.radly.app) uses x-client-key, staging uses x-api-key
+  const authHeaderName = getAuthHeaderName();
+
   try {
     const response = await fetch(`${BASE_URL}${path}`, {
       headers: {
-        "x-client-key": CLIENT_KEY,
+        [authHeaderName]: CLIENT_KEY,
         "X-Request-Id": crypto.randomUUID(),
       },
       cache: "no-store",
