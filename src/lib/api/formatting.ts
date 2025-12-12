@@ -1,4 +1,5 @@
 import { httpGet, httpPost, httpPut } from '@/lib/http';
+import { getAuthHeaderName } from '@/lib/config';
 
 export interface FormattingConfig {
   patient_info?: {
@@ -92,6 +93,10 @@ export async function uploadTemplate(
   const BASE_URL = process.env.NEXT_PUBLIC_API_BASE!;
   const CLIENT_KEY = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY!;
 
+  // Determine which auth header to use based on environment
+  // Production (edge.radly.app) uses x-client-key, staging uses x-api-key
+  const authHeaderName = getAuthHeaderName();
+
   // Get auth token
   const { createBrowserSupabase } = await import('@/lib/supabase/client');
   const supabase = createBrowserSupabase();
@@ -99,7 +104,7 @@ export async function uploadTemplate(
   const token = session?.access_token;
 
   const headers: Record<string, string> = {
-    'x-client-key': CLIENT_KEY,
+    [authHeaderName]: CLIENT_KEY,
     'X-Request-Id': crypto.randomUUID(),
   };
 
@@ -157,13 +162,17 @@ export async function deleteProfile(profileId: string): Promise<{ success: boole
   const BASE_URL = process.env.NEXT_PUBLIC_API_BASE!;
   const CLIENT_KEY = process.env.NEXT_PUBLIC_RADLY_CLIENT_KEY!;
 
+  // Determine which auth header to use based on environment
+  // Production (edge.radly.app) uses x-client-key, staging uses x-api-key
+  const authHeaderName = getAuthHeaderName();
+
   const { createBrowserSupabase } = await import('@/lib/supabase/client');
   const supabase = createBrowserSupabase();
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;
 
   const headers: Record<string, string> = {
-    'x-client-key': CLIENT_KEY,
+    [authHeaderName]: CLIENT_KEY,
     'X-Request-Id': crypto.randomUUID(),
   };
 

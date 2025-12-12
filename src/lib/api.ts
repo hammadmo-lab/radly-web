@@ -4,7 +4,7 @@
 import { createSupabaseBrowser } from "@/utils/supabase/browser";
 import { JobDoneResult, PatientBlock } from "@/lib/types";
 import { Signature } from "@/types/report";
-import { API_BASE, RADLY_CLIENT_KEY } from "@/lib/config";
+import { API_BASE, RADLY_CLIENT_KEY, getAuthHeaderName } from "@/lib/config";
 
 const CLIENT_KEY = RADLY_CLIENT_KEY;
 
@@ -30,9 +30,13 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
 
   const token = await getAccessToken();
 
+  // Determine which auth header to use based on environment
+  // Production (edge.radly.app) uses x-client-key, staging uses x-api-key
+  const authHeaderName = getAuthHeaderName();
+
   const headers = new Headers(init.headers || {});
   if (!headers.has("content-type")) headers.set("content-type", "application/json");
-  headers.set("x-client-key", CLIENT_KEY);
+  headers.set(authHeaderName, CLIENT_KEY);
   headers.set("X-Request-Id", crypto.randomUUID());
 
   if (token) headers.set("authorization", `Bearer ${token}`);

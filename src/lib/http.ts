@@ -1,6 +1,6 @@
 import type { ApiError } from '@/types/api';
 import { createBrowserSupabase } from '@/lib/supabase/client';
-import { API_BASE, RADLY_CLIENT_KEY } from '@/lib/config';
+import { API_BASE, RADLY_CLIENT_KEY, getAuthHeaderName } from '@/lib/config';
 
 const BASE_URL = API_BASE;
 const CLIENT_KEY = RADLY_CLIENT_KEY;
@@ -141,8 +141,12 @@ async function handle<T>(res: Response): Promise<T> {
  * @returns Headers object
  */
 function buildHeaders(token: string | null, contentType: string = 'application/json'): Record<string, string> {
+  // Determine which auth header to use based on environment
+  // Production (edge.radly.app) uses x-client-key, staging uses x-api-key
+  const authHeaderName = getAuthHeaderName();
+
   const headers: Record<string, string> = {
-    'x-client-key': CLIENT_KEY,
+    [authHeaderName]: CLIENT_KEY,
     'X-Request-Id': crypto.randomUUID(),
   };
 
