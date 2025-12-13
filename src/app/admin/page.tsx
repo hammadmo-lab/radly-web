@@ -1,11 +1,11 @@
 "use client"
 
 import { useState, useCallback, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { 
-  Users, 
-  DollarSign, 
-  TrendingUp, 
+import { useRouter, useSearchParams } from 'next/navigation'
+import {
+  Users,
+  DollarSign,
+  TrendingUp,
   Calendar,
   LogOut,
   Shield,
@@ -25,13 +25,30 @@ import { toast } from 'sonner'
 
 export default function AdminDashboard() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { logout } = useAdminAuth()
-  
-  const [filters, setFilters] = useState<SubscriptionListParams>({
-    limit: 10,
-    offset: 0,
+
+  // Initialize filters from URL params or defaults
+  const [filters, setFilters] = useState<SubscriptionListParams>(() => {
+    const status = searchParams.get('status') || 'active'
+    const tier = searchParams.get('tier') || undefined
+    const region = searchParams.get('region') || undefined
+    const search = searchParams.get('search') || undefined
+    const page = parseInt(searchParams.get('page') || '1', 10)
+    const limit = 10
+
+    return {
+      status,
+      tier,
+      region,
+      search,
+      limit,
+      offset: (page - 1) * limit,
+    }
   })
-  const [currentPage, setCurrentPage] = useState(1)
+  const [currentPage, setCurrentPage] = useState(() =>
+    parseInt(searchParams.get('page') || '1', 10)
+  )
 
   const { 
     data: subscriptionsData, 
@@ -48,25 +65,68 @@ export default function AdminDashboard() {
   // Check if there are any errors
   const hasErrors = subscriptionsError || revenueError
 
-  const handleSearch = useCallback((search: string) => {
-    setFilters(prev => ({ ...prev, search, offset: 0 }))
-    setCurrentPage(1)
-  }, [])
+  // Update URL params when filters change
+  const updateUrlParams = useCallback(
+    (newFilters: SubscriptionListParams, page: number) => {
+      const params = new URLSearchParams()
+      if (newFilters.status && newFilters.status !== 'active') params.set('status', newFilters.status)
+      if (newFilters.tier) params.set('tier', newFilters.tier)
+      if (newFilters.region) params.set('region', newFilters.region)
+      if (newFilters.search) params.set('search', newFilters.search)
+      if (page > 1) params.set('page', page.toString())
 
-  const handleFilterChange = useCallback((key: string, value: string) => {
-    setFilters(prev => ({ 
-      ...prev, 
-      [key]: value || undefined, 
-      offset: 0 
-    }))
-    setCurrentPage(1)
-  }, [])
+      const newUrl = params.toString() ? `/admin?${params.toString()}` : '/admin'
+      router.replace(newUrl, { scroll: false })
+    },
+    [router]
+  )
 
-  const handlePageChange = useCallback((page: number) => {
-    const newOffset = (page - 1) * (filters.limit || 10)
-    setFilters(prev => ({ ...prev, offset: newOffset }))
-    setCurrentPage(page)
-  }, [filters.limit])
+  const handleSearch = useCallback(
+    (search: string) => {
+      const newFilters = { ...filters, search, offset: 0 }
+      setFilters(newFilters)
+      setCurrentPage(1)
+      updateUrlParams(newFilters, 1)
+    },
+    [filters, updateUrlParams]
+  )
+
+  const handleFilterChange = useCallback(
+    (key: string, value: string) => {
+      const newFilters = {
+        ...filters,
+        [key]: value || undefined,
+        offset: 0,
+      }
+      setFilters(newFilters)
+      setCurrentPage(1)
+      updateUrlParams(newFilters, 1)
+    },
+    [filters, updateUrlParams]
+  )
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      const newOffset = (page - 1) * (filters.limit || 10)
+      const newFilters = { ...filters, offset: newOffset }
+      setFilters(newFilters)
+      setCurrentPage(page)
+      updateUrlParams(newFilters, page)
+    },
+    [filters, updateUrlParams]
+  )
+
+  const handleClearFilters = useCallback(() => {
+    const newFilters: SubscriptionListParams = {
+      status: 'active',
+      limit: 10,
+      offset: 0,
+    }
+    setFilters(newFilters)
+    setCurrentPage(1)
+    updateUrlParams(newFilters, 1)
+    toast.success('Filters cleared')
+  }, [updateUrlParams])
 
   const handleRefresh = useCallback(() => {
     refetchSubscriptions()
@@ -280,6 +340,8 @@ export default function AdminDashboard() {
                     onRefresh={handleRefresh}
                     onExport={handleExport}
                     onViewUser={handleViewUser}
+                    onClearFilters={handleClearFilters}
+                    currentFilters={filters}
                   />
                 )}
               </section>
