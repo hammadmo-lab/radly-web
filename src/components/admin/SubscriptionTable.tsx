@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,7 +32,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Subscription } from '@/types/admin'
+import { Subscription, SubscriptionListParams } from '@/types/admin'
 import { UsageProgressBar } from './UsageProgressBar'
 import { useUserEmails } from '@/hooks/useUserEmails'
 import { cn } from '@/lib/utils'
@@ -48,6 +49,8 @@ interface SubscriptionTableProps {
   onRefresh: () => void
   onExport: () => void
   onViewUser: (userId: string) => void
+  onClearFilters: () => void
+  currentFilters: SubscriptionListParams
 }
 
 const STATUS_BADGE_STYLES: Record<string, string> = {
@@ -75,8 +78,43 @@ export function SubscriptionTable({
   onRefresh,
   onExport,
   onViewUser,
+  onClearFilters,
+  currentFilters,
 }: SubscriptionTableProps) {
-  const [searchValue, setSearchValue] = useState('')
+  const [searchValue, setSearchValue] = useState(currentFilters.search || '')
+
+  // Helper function to calculate days since expiration
+  const getDaysSinceExpiration = (periodEnd: string): number => {
+    const endDate = new Date(periodEnd)
+    const today = new Date()
+    const diffTime = today.getTime() - endDate.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays
+  }
+
+  // Helper function to format expiration message
+  const getExpirationMessage = (periodEnd: string): string => {
+    const days = getDaysSinceExpiration(periodEnd)
+    if (days === 0) return 'Expired today'
+    if (days === 1) return 'Expired 1 day ago'
+    return `Expired ${days} days ago`
+  }
+
+  // Check if any filters are applied (beyond the default "active" status)
+  const hasActiveFilters = !!(
+    (currentFilters.status && currentFilters.status !== 'active') ||
+    currentFilters.tier ||
+    currentFilters.region ||
+    currentFilters.search
+  )
+
+  // Get status label for display
+  const getStatusLabel = (): string => {
+    if (!currentFilters.status || currentFilters.status === 'active') return 'Active'
+    if (currentFilters.status === 'expired') return 'Expired'
+    if (currentFilters.status === 'cancelled') return 'Cancelled'
+    return 'All'
+  }
 
   // Deduplicate subscriptions - only show the most recent subscription per user
   const deduplicatedSubscriptions = useMemo(() => {
@@ -178,12 +216,26 @@ export function SubscriptionTable({
             <div className="space-y-1">
               <h2 className="text-xl font-semibold text-white">Subscriptions</h2>
               <p className="text-sm text-[rgba(207,207,207,0.65)]">
-                Tracking {total} customer plans across tiers
+                Showing {total} {getStatusLabel().toLowerCase()} subscription{total !== 1 ? 's' : ''}
+                {hasActiveFilters && (
+                  <span className="ml-1 text-[#4B8EFF]">(filtered)</span>
+                )}
               </p>
             </div>
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClearFilters}
+                className="h-10 border border-[rgba(255,107,107,0.32)] bg-[rgba(255,107,107,0.12)] text-[#FFD1D1] hover:border-[rgba(255,107,107,0.45)] hover:bg-[rgba(255,107,107,0.18)]"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Clear Filters
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -209,7 +261,7 @@ export function SubscriptionTable({
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[rgba(207,207,207,0.45)]" />
             <Input
-              placeholder="Search by email, user ID, or plan..."
+              placeholder="Search by user ID..."
               value={searchValue}
               onChange={(event) => handleSearch(event.target.value)}
               className="h-12 rounded-xl border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] pl-12 text-white placeholder:text-[rgba(207,207,207,0.45)] focus-visible:ring-[#4B8EFF]"
@@ -218,6 +270,7 @@ export function SubscriptionTable({
 
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <Select
+              value={currentFilters.status || 'active'}
               onValueChange={(value) => onFilterChange('status', value === 'all' ? '' : value)}
             >
               <SelectTrigger className="h-11 min-w-[140px] rounded-xl border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.75)] hover:border-[#4B8EFF]/40">
@@ -356,8 +409,20 @@ export function SubscriptionTable({
                         {subscription.currency} {subscription.price_paid}
                       </TableCell>
 
-                      <TableCell className="px-6 py-5 text-sm text-[rgba(207,207,207,0.75)]">
-                        {new Date(subscription.period_end).toLocaleDateString()}
+                      <TableCell className="px-6 py-5">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-sm text-[rgba(207,207,207,0.75)]">
+                            {new Date(subscription.period_end).toLocaleDateString()}
+                          </span>
+                          {subscription.status === 'expired' && (
+                            <span className="text-xs text-[rgba(255,107,107,0.85)]">
+                              {getExpirationMessage(subscription.period_end)}
+                              {getDaysSinceExpiration(subscription.period_end) <= 7 && (
+                                <span className="ml-1 font-semibold">(recent)</span>
+                              )}
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
 
                       <TableCell className="px-6 py-5">
