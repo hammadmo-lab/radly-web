@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
   Users,
@@ -169,10 +169,34 @@ export function SubscriptionTable({
   const startItem = hasResults ? (currentPage - 1) * pageSize + 1 : 0
   const endItem = hasResults ? Math.min(currentPage * pageSize, total) : 0
 
-  const handleSearch = (value: string) => {
+  // Debounce search to prevent excessive API calls
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    // Set new timeout - only search after user stops typing for 500ms
+    searchTimeoutRef.current = setTimeout(() => {
+      // Only trigger search if value has actually changed
+      if (searchValue !== (currentFilters.search || '')) {
+        onSearch(searchValue)
+      }
+    }, 500)
+
+    // Cleanup on unmount
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
+    }
+  }, [searchValue, onSearch, currentFilters.search])
+
+  const handleSearchInputChange = (value: string) => {
     setSearchValue(value)
-    // Pass search value to backend - backend should search across user_id, email, and tier
-    onSearch(value)
+    // Actual search will be triggered by useEffect after debounce delay
   }
 
   const renderStatusBadge = (status: string) => {
@@ -264,7 +288,7 @@ export function SubscriptionTable({
             <Input
               placeholder="Search by email, user ID, or tier..."
               value={searchValue}
-              onChange={(event) => handleSearch(event.target.value)}
+              onChange={(event) => handleSearchInputChange(event.target.value)}
               className="h-12 rounded-xl border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] pl-12 text-white placeholder:text-[rgba(207,207,207,0.45)] focus-visible:ring-[#4B8EFF]"
             />
           </div>
