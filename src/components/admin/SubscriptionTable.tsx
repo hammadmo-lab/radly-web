@@ -171,6 +171,7 @@ export function SubscriptionTable({
 
   const handleSearch = (value: string) => {
     setSearchValue(value)
+    // Pass search value to backend - backend should search across user_id, email, and tier
     onSearch(value)
   }
 
@@ -261,7 +262,7 @@ export function SubscriptionTable({
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[rgba(207,207,207,0.45)]" />
             <Input
-              placeholder="Search by user ID..."
+              placeholder="Search by email, user ID, or tier..."
               value={searchValue}
               onChange={(event) => handleSearch(event.target.value)}
               className="h-12 rounded-xl border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] pl-12 text-white placeholder:text-[rgba(207,207,207,0.45)] focus-visible:ring-[#4B8EFF]"
