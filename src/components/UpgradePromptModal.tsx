@@ -19,7 +19,7 @@ export interface UpgradePromptModalProps {
   open: boolean;
   onClose: () => void;
   currentTier: SubscriptionTier;
-  reason: 'trial_exhausted' | 'tier_blocked' | 'daily_limit';
+  reason: 'trial_exhausted' | 'tier_blocked' | 'daily_limit' | 'duration_exceeded';
   onUpgrade: () => void;
 }
 
@@ -36,21 +36,28 @@ export function UpgradePromptModal({
         return {
           title: 'Free Trial Completed',
           description:
-            "You've used your 3 free voice dictation trials. Upgrade to Professional or Premium to continue using this powerful feature.",
+            "You've used your 3 free voice dictation trials. Upgrade to Starter (25/day) or Professional (100/day) to continue using this powerful feature.",
           icon: <Mic className="h-12 w-12 text-primary" />,
         };
       case 'tier_blocked':
         return {
           title: 'Premium Feature',
           description:
-            'Voice dictation is available for Professional and Premium plans. Upgrade to unlock this feature and speed up your report generation.',
+            'Voice dictation is available for Starter, Professional, and Premium plans. Upgrade to unlock this feature and speed up your report generation.',
           icon: <Zap className="h-12 w-12 text-yellow-500" />,
         };
       case 'daily_limit':
         return {
           title: 'Daily Limit Reached',
           description:
-            "You've reached your daily transcription limit. Upgrade to Premium for higher limits and longer recording times.",
+            "You've reached your daily transcription limit. Upgrade to Professional for higher limits (100/day) and longer recording times (3 minutes).",
+          icon: <Clock className="h-12 w-12 text-orange-500" />,
+        };
+      case 'duration_exceeded':
+        return {
+          title: 'Recording Too Long',
+          description:
+            'Your recording exceeds the 2-minute limit for Starter tier. Upgrade to Professional for 3-minute recordings or Premium for 5-minute recordings.',
           icon: <Clock className="h-12 w-12 text-orange-500" />,
         };
     }

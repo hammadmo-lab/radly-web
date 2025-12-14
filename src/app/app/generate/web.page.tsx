@@ -70,7 +70,7 @@ export default function GeneratePage() {
 
   // Voice dictation state
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-  const [upgradeReason, setUpgradeReason] = useState<'trial_exhausted' | 'tier_blocked' | 'daily_limit'>('tier_blocked')
+  const [upgradeReason, setUpgradeReason] = useState<'trial_exhausted' | 'tier_blocked' | 'daily_limit' | 'duration_exceeded'>('tier_blocked')
   const [currentTier, setCurrentTier] = useState<SubscriptionTier>('free')
 
   const { data: template, isLoading: templateLoading, error: templateError } = useQuery({
@@ -265,6 +265,8 @@ export default function GeneratePage() {
         setUpgradeReason('trial_exhausted');
       } else if (errorMsg.includes('daily limit')) {
         setUpgradeReason('daily_limit');
+      } else if (errorMsg.includes('duration') || errorMsg.includes('exceeds') || errorMsg.includes('2-minute') || errorMsg.includes('too long')) {
+        setUpgradeReason('duration_exceeded');
       } else {
         setUpgradeReason('tier_blocked');
       }
