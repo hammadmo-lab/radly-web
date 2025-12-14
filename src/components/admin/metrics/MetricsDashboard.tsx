@@ -35,10 +35,10 @@ const TIME_RANGES = [
 function isLowTrafficPeriod(data: DashboardMetrics | undefined): boolean {
   if (!data) return false;
 
-  // Check queue depth - if it's 0 and most other metrics are 0, likely low traffic
-  const queueDepth = parsePrometheusResult(data.queue_depth)[0]?.value || 0;
+  // Parse available metrics
   const jobStages = parsePrometheusResult(data.job_stages);
   const llmTokens = parsePrometheusResult(data.llm_tokens);
+  const queueRates = parsePrometheusResult(data.queue_rates);
 
   // Count how many job stages have zero timing
   const zeroStages = jobStages.filter(s => s.value === 0).length;
@@ -48,11 +48,14 @@ function isLowTrafficPeriod(data: DashboardMetrics | undefined): boolean {
   const zeroTokens = llmTokens.filter(t => t.value === 0).length;
   const totalTokens = llmTokens.length;
 
-  // If queue is empty AND most metrics are zero, it's low traffic
+  // Check if queue rates are all zero
+  const allQueueRatesZero = queueRates.length > 0 && queueRates.every(r => r.value === 0);
+
+  // If most metrics are zero, it's low traffic
   const mostStagesZero = totalStages > 0 && zeroStages / totalStages > 0.7;
   const mostTokensZero = totalTokens > 0 && zeroTokens / totalTokens > 0.7;
 
-  return queueDepth === 0 && (mostStagesZero || mostTokensZero);
+  return allQueueRatesZero && (mostStagesZero || mostTokensZero);
 }
 
 export function MetricsDashboard() {
