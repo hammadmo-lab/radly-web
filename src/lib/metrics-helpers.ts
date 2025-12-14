@@ -12,6 +12,14 @@ import {
 } from './admin-metrics';
 
 /**
+ * Safely parse a value, treating NaN as 0
+ */
+function safeParseFloat(value: string): number {
+  const parsed = parseFloat(value);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+/**
  * Convert Prometheus query result to chart-friendly format
  */
 export function parsePrometheusResult(result: PrometheusResult | undefined) {
@@ -20,7 +28,7 @@ export function parsePrometheusResult(result: PrometheusResult | undefined) {
   }
   return result.data.result.map(item => ({
     name: item.metric.stage || item.metric.provider || item.metric.category || 'unknown',
-    value: parseFloat(item.value[1]),
+    value: safeParseFloat(item.value[1]),
     timestamp: item.value[0],
     labels: item.metric,
   }));
@@ -38,7 +46,7 @@ export function parsePrometheusTimeSeries(result: PrometheusTimeSeriesResult | u
     name: series.metric.stage || series.metric.provider || series.metric.category || 'unknown',
     data: series.values.map(([timestamp, value]) => ({
       x: timestamp * 1000, // Convert to milliseconds
-      y: parseFloat(value),
+      y: safeParseFloat(value),
     })),
     labels: series.metric,
   }));
@@ -52,8 +60,12 @@ export function calculateMetricTrend(
   previous: number,
   sparklineData?: number[]
 ): MetricWithTrend {
-  const changeAbsolute = current - previous;
-  const change = previous !== 0 ? (changeAbsolute / previous) * 100 : 0;
+  // Handle NaN values
+  const safeCurrent = isNaN(current) ? 0 : current;
+  const safePrevious = isNaN(previous) ? 0 : previous;
+
+  const changeAbsolute = safeCurrent - safePrevious;
+  const change = safePrevious !== 0 ? (changeAbsolute / safePrevious) * 100 : 0;
 
   const threshold = 0.5; // 0.5% change threshold
   const trend: 'up' | 'down' | 'neutral' =
@@ -61,10 +73,10 @@ export function calculateMetricTrend(
     change > 0 ? 'up' : 'down';
 
   return {
-    current,
-    previous,
-    change,
-    changeAbsolute,
+    current: safeCurrent,
+    previous: safePrevious,
+    change: isNaN(change) ? 0 : change,
+    changeAbsolute: isNaN(changeAbsolute) ? 0 : changeAbsolute,
     trend,
     sparkline: sparklineData,
     timestamp: Date.now(),
@@ -100,7 +112,7 @@ export function extractSparkline(
 
   // Take last N points
   const values = series.values.slice(-maxPoints);
-  return values.map(([, value]) => parseFloat(value));
+  return values.map(([, value]) => safeParseFloat(value));
 }
 
 /**

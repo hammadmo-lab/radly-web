@@ -3,7 +3,7 @@
  * Main dashboard container component
  */
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Download, Clock, ArrowLeft } from 'lucide-react';
+import { RefreshCw, Download, Clock, ArrowLeft, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMetricsDashboard } from '@/hooks/useMetricsDashboard';
@@ -18,7 +18,8 @@ import { AlertsPanel } from './AlertsPanel';
 import { UserMetricsPanel } from './UserMetricsPanel';
 import { MetricsLoading } from './MetricsLoading';
 import { StatusSummary } from './StatusSummary';
-import { generateAlerts } from '@/lib/metrics-helpers';
+import { generateAlerts, parsePrometheusResult } from '@/lib/metrics-helpers';
+import { DashboardMetrics } from '@/lib/admin-metrics';
 
 const TIME_RANGES = [
   { value: '5m', label: 'Last 5 minutes' },
@@ -27,6 +28,32 @@ const TIME_RANGES = [
   { value: '6h', label: 'Last 6 hours' },
   { value: '24h', label: 'Last 24 hours' },
 ];
+
+/**
+ * Detect if we're in a low traffic period (most metrics are zero or missing)
+ */
+function isLowTrafficPeriod(data: DashboardMetrics | undefined): boolean {
+  if (!data) return false;
+
+  // Check queue depth - if it's 0 and most other metrics are 0, likely low traffic
+  const queueDepth = parsePrometheusResult(data.queue_depth)[0]?.value || 0;
+  const jobStages = parsePrometheusResult(data.job_stages);
+  const llmTokens = parsePrometheusResult(data.llm_tokens);
+
+  // Count how many job stages have zero timing
+  const zeroStages = jobStages.filter(s => s.value === 0).length;
+  const totalStages = jobStages.length;
+
+  // Count how many LLM token metrics are zero
+  const zeroTokens = llmTokens.filter(t => t.value === 0).length;
+  const totalTokens = llmTokens.length;
+
+  // If queue is empty AND most metrics are zero, it's low traffic
+  const mostStagesZero = totalStages > 0 && zeroStages / totalStages > 0.7;
+  const mostTokensZero = totalTokens > 0 && zeroTokens / totalTokens > 0.7;
+
+  return queueDepth === 0 && (mostStagesZero || mostTokensZero);
+}
 
 export function MetricsDashboard() {
   const [timeRange, setTimeRange] = useState('5m');
@@ -170,6 +197,36 @@ export function MetricsDashboard() {
         alerts={generateAlerts(data)}
         uptime={data.system_health?.uptime}
       />
+
+      {/* Low Traffic Info Banner */}
+      {isLowTrafficPeriod(data) && (
+        <div className="aurora-card border border-[rgba(75,142,255,0.28)] bg-[rgba(75,142,255,0.08)] p-5">
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[rgba(75,142,255,0.35)] bg-[rgba(75,142,255,0.16)]">
+              <Info className="h-5 w-5 text-[#4B8EFF]" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-base font-semibold text-white">Low Traffic Period Detected</h3>
+              <p className="mt-1.5 text-sm text-[rgba(207,207,207,0.7)]">
+                Some metrics may show zeros or be incomplete due to low system activity in the selected time range.
+                {timeRange === '5m' && (
+                  <> Try selecting a longer time range (15m or 1h) for more meaningful data, or generate some test jobs to populate the metrics.</>
+                )}
+              </p>
+              {timeRange === '5m' && (
+                <Button
+                  onClick={() => setTimeRange('15m')}
+                  variant="ghost"
+                  size="sm"
+                  className="mt-3 h-9 rounded-lg border border-[rgba(75,142,255,0.35)] bg-[rgba(75,142,255,0.12)] px-4 text-[#D7E3FF] hover:border-[rgba(75,142,255,0.45)] hover:bg-[rgba(75,142,255,0.18)]"
+                >
+                  Switch to 15m Range
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Overview Cards */}
       <OverviewCards data={data} />
