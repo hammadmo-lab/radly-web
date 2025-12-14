@@ -95,6 +95,7 @@ export function getTranscriptionLimits(
   let tier: TranscriptionLimits['tier'] = 'free';
   const limitNum = parseInt(limit, 10);
   if (limitNum === 3) tier = 'free';
+  else if (limitNum === 25) tier = 'starter';
   else if (limitNum === 100) tier = 'professional';
   else if (limitNum === 300) tier = 'premium';
 

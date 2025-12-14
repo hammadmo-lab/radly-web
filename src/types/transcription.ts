@@ -101,10 +101,10 @@ export const TIER_CONFIGS: Record<SubscriptionTier, TierConfig> = {
     trialLimit: 3,
   },
   starter: {
-    maxDuration: 0,
-    dailyLimit: 0,
-    maxConcurrentStreams: 0,
-    hasAccess: false,
+    maxDuration: 120, // 2 minutes
+    dailyLimit: 25,
+    maxConcurrentStreams: 5,
+    hasAccess: true,
   },
   professional: {
     maxDuration: 180, // 3 minutes
