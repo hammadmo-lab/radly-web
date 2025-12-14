@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import {
   Users,
@@ -169,34 +169,21 @@ export function SubscriptionTable({
   const startItem = hasResults ? (currentPage - 1) * pageSize + 1 : 0
   const endItem = hasResults ? Math.min(currentPage * pageSize, total) : 0
 
-  // Debounce search to prevent excessive API calls
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  useEffect(() => {
-    // Clear existing timeout
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current)
-    }
-
-    // Set new timeout - only search after user stops typing for 500ms
-    searchTimeoutRef.current = setTimeout(() => {
-      // Only trigger search if value has actually changed
-      if (searchValue !== (currentFilters.search || '')) {
-        onSearch(searchValue)
-      }
-    }, 500)
-
-    // Cleanup on unmount
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current)
-      }
-    }
-  }, [searchValue, onSearch, currentFilters.search])
-
   const handleSearchInputChange = (value: string) => {
     setSearchValue(value)
-    // Actual search will be triggered by useEffect after debounce delay
+  }
+
+  const handleSearchSubmit = () => {
+    // Only trigger search if value has actually changed
+    if (searchValue !== (currentFilters.search || '')) {
+      onSearch(searchValue)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearchSubmit()
+    }
   }
 
   const renderStatusBadge = (status: string) => {
@@ -286,9 +273,10 @@ export function SubscriptionTable({
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[rgba(207,207,207,0.45)]" />
             <Input
-              placeholder="Search by email, user ID, or tier..."
+              placeholder="Search by email, user ID, or tier (press Enter)"
               value={searchValue}
               onChange={(event) => handleSearchInputChange(event.target.value)}
+              onKeyDown={handleKeyDown}
               className="h-12 rounded-xl border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] pl-12 text-white placeholder:text-[rgba(207,207,207,0.45)] focus-visible:ring-[#4B8EFF]"
             />
           </div>
