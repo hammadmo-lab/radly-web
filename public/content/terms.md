@@ -1,80 +1,104 @@
-# Terms of Service
+# Radly Assistant Terms of Service
 
-## 1. Acceptance of Terms
+**Effective Date: January 2025**
 
-By accessing and using Radly ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+These Terms of Service ("Terms") govern your access to and use of Radly Assistant, including the web application, iOS app, and Android app (collectively, the "Service"). By creating an account or using the Service, you agree to be bound by these Terms.
 
-## 2. Use License
+## 1. Service Description & AI Disclosure
+Radly is an AI-powered productivity assistant that helps radiologists create structured reports more efficiently.
 
-Permission is granted to temporarily use Radly for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
+**How Radly Works:**
+- You provide clinical findings through voice or text input
+- Our AI generates a draft report including structured findings, suggested impressions, and recommended follow-up language
+- You review, edit, and approve all content before finalizing
+- The final report reflects your professional judgment and clinical decision-making
 
-- modify or copy the materials
-- use the materials for any commercial purpose or for any public display (commercial or non-commercial)
-- attempt to decompile or reverse engineer any software contained on Radly's website
-- remove any copyright or other proprietary notations from the materials
+**Important:**
+- All AI-generated content, including suggested opinions and recommendations, is presented as a draft for your review
+- Radly does not make autonomous clinical decisions
+- You, as the licensed radiologist, bear full professional responsibility for reviewing, modifying, and approving all report content
+- Radly assists with efficiency and formatting; clinical interpretation remains your professional duty
+- Radly is not a medical device and does not replace professional medical judgment.
 
-## 3. Medical Disclaimer
+## 2. Account & Access
+You must provide accurate registration information and maintain the confidentiality of your login credentials. You are solely responsible for all activity that occurs under your account.
 
-Radly is a tool designed to assist healthcare professionals in generating medical reports. However:
+You agree to:
+- Notify us immediately of any unauthorized access
+- Ensure only authorized clinical professionals use your account
+- Maintain appropriate security on devices used to access the Service
 
-- All generated content should be reviewed by qualified medical professionals
-- Radly does not provide medical advice, diagnosis, or treatment
-- Users are responsible for the accuracy and appropriateness of all generated reports
-- Radly is not liable for any medical decisions made based on generated content
+## 3. Clinical Responsibility
+You retain full professional responsibility for all clinical content and decisions.
 
-## 4. Privacy and Data Protection
+As a Radly user, you must:
+- Review and verify all AI-generated draft content before use
+- Edit and correct any suggested text as clinically appropriate
+- Provide final approval on every report
+- Comply with your institution's documentation standards
 
-- We are committed to protecting your privacy and patient data
-- All data is encrypted and stored securely
-- We comply with HIPAA regulations
-- Patient data is only used for report generation and is not shared with third parties
+Radly generates drafts to enhance your productivity. The final clinical interpretation, opinion, and recommendations are yours.
 
-## 5. User Responsibilities
+## 4. Subscription & Payment
+Radly offers subscription-based access to premium features.
 
-As a user of Radly, you agree to:
+- **Auto-Renewal:** Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current billing period. Manage your subscription in Settings (iOS: Apple ID > Subscriptions; Android: Google Play > Subscriptions).
+- **Payment:** Charged to your Apple ID or Google Play account at confirmation of purchase. Subscription fees are non-refundable except as required by law.
 
-- Provide accurate and truthful information
-- Use the service only for legitimate medical reporting purposes
-- Maintain the confidentiality of patient information
-- Comply with all applicable laws and regulations
-- Not attempt to circumvent any security measures
+## 5. Acceptable Use
+You agree not to:
+- Misuse the Service or attempt unauthorized access
+- Reverse engineer or disassemble the Service
+- Use the Service for unlawful purposes
+- Share credentials with unauthorized parties
 
-## 6. Prohibited Uses
+You will comply with all applicable laws and regulations, including those governing Protected Health Information (PHI).
 
-You may not use Radly:
+## 6. Data & Privacy
+Your privacy matters. See our Privacy Policy for details.
 
-- For any unlawful purpose or to solicit others to perform unlawful acts
-- To violate any international, federal, provincial, or state regulations, rules, laws, or local ordinances
-- To infringe upon or violate our intellectual property rights or the intellectual property rights of others
-- To harass, abuse, insult, harm, defame, slander, disparage, intimidate, or discriminate
-- To submit false or misleading information
+**Key Points:**
+- We process your input solely to provide the Service
+- Data is encrypted in transit and at rest
+- We do not sell your personal information
+- You may delete your account and data at any time
 
-## 7. Service Availability
+## 7. Account Deletion
+Delete your account anytime via Settings in the app or web application. Upon deletion:
+- Your account and profile are permanently removed
+- Your data is deleted from our systems
+- Active subscriptions are cancelled
+- Certain financial records may be retained as required by law.
 
-- We strive to maintain high service availability but do not guarantee uninterrupted access
-- We reserve the right to modify or discontinue the service at any time
-- Scheduled maintenance may temporarily interrupt service availability
+## 8. Intellectual Property
+Radly's name, logo, and technology are protected by intellectual property laws.
 
-## 8. Limitation of Liability
+**Your Content:** You retain ownership of all content you submit and reports you approve. You grant Radly a limited license to process your content solely to provide the Service.
 
-In no event shall Radly, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your use of the service.
+## 9. Service Availability
+We strive for reliable availability but cannot guarantee uninterrupted access. The Service may be unavailable for maintenance or due to technical issues. We may modify or discontinue features with reasonable notice.
 
-## 9. Indemnification
+## 10. Disclaimers
+THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND. WE DISCLAIM ALL WARRANTIES INCLUDING MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-You agree to defend, indemnify, and hold harmless Radly and its licensee and licensors, and their employees, contractors, agents, officers and directors, from and against any and all claims, damages, obligations, losses, liabilities, costs or debt, and expenses (including but not limited to attorney's fees).
+Radly is a productivity tool. It generates draft content for your review; it does not provide autonomous diagnoses or replace your clinical judgment.
 
-## 10. Termination
+## 11. Limitation of Liability
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, WE SHALL NOT BE LIABLE FOR INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES.
 
-We may terminate or suspend your account and bar access to the service immediately, without prior notice or liability, under our sole discretion, for any reason whatsoever and without limitation, including but not limited to a breach of the Terms.
+Total liability is limited to subscription fees paid in the 12 months preceding a claim. Nothing limits liability for gross negligence, fraud, or willful misconduct.
 
-## 11. Changes to Terms
+## 12. Termination
+You may stop using Radly and delete your account anytime. We may suspend access for Terms violations or if required by law.
 
-We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days notice prior to any new terms taking effect.
+## 13. Changes to Terms
+We may update these Terms with 30 days notice via email or in-app notification. Continued use after changes take effect constitutes acceptance.
 
-## 12. Contact Information
+## 14. Contact
+- Email: legal@radly.app
+- Support: support@radly.app
+- Website: https://radly.app
 
-If you have any questions about these Terms of Service, please contact us at legal@radly.app.
+Radly is developed by Dr. Mohamed Hammad.
 
----
-
-**Last updated: December 2024**
+**Last Updated: October 2025**

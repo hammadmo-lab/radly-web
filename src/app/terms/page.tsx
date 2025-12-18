@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import { Breadcrumb } from "@/components/marketing/Breadcrumb";
 
-const metadataDescription = "Radly Terms of Service: clinical oversight, acceptable use, data handling. Radiologists remain accountable for all reports generated with Radly.";
+const metadataDescription = "Radly Assistant Terms of Service (Effective January 2025): AI-assisted reporting, clinical responsibility, subscriptions, data privacy, and limitations of liability.";
 
 export const metadata: Metadata = {
   title: "Terms of Service | Radly Assistant",
@@ -73,85 +73,177 @@ export default function TermsPage() {
             Terms of Service
           </h1>
           <p className="max-w-2xl text-sm text-[rgba(207,207,207,0.7)] sm:text-base">
-            These terms govern your access to and use of the Radly assistant. By creating an account or using the
-            service, you agree to the clauses below. Radiologists retain responsibility for reviewing and approving every
-            report produced with Radly.
+            These Terms of Service govern your access to Radly Assistant across the web app, iOS app, and Android app.
+            By creating an account or using Radly, you agree to the terms below. Radiologists retain responsibility for
+            reviewing, editing, and approving every report.
+          </p>
+          <p className="text-xs font-semibold tracking-[0.18em] text-[rgba(207,207,207,0.65)]">
+            Effective Date: January 2025
           </p>
         </div>
 
-        <Section title="1. Account &amp; Access">
+        <Section title="1. Service Description &amp; AI Disclosure">
           <p>
-            You must provide accurate registration information and maintain the confidentiality of your credentials. You
-            are responsible for activity within your account and ensuring only authorised clinical staff use Radly on
-            your behalf.
+            Radly is an AI-powered productivity assistant that helps radiologists create structured reports more efficiently.
+          </p>
+          <div className="space-y-2">
+            <p className="font-semibold text-white">How Radly Works:</p>
+            <ul className="list-disc list-inside space-y-2 text-[rgba(207,207,207,0.8)]">
+              <li>You provide clinical findings through voice or text input</li>
+              <li>Our AI generates a draft report including structured findings, suggested impressions, and recommended follow-up language</li>
+              <li>You review, edit, and approve all content before finalizing</li>
+              <li>The final report reflects your professional judgment and clinical decision-making</li>
+            </ul>
+          </div>
+          <div className="space-y-2">
+            <p className="font-semibold text-white">Important:</p>
+            <ul className="list-disc list-inside space-y-2 text-[rgba(207,207,207,0.8)]">
+              <li>All AI-generated content, including suggested opinions and recommendations, is presented as a draft for your review</li>
+              <li>Radly does not make autonomous clinical decisions</li>
+              <li>You, as the licensed radiologist, bear full professional responsibility for reviewing, modifying, and approving all report content</li>
+              <li>Radly assists with efficiency and formatting; clinical interpretation remains your professional duty</li>
+              <li>Radly is not a medical device and does not replace professional medical judgment.</li>
+            </ul>
+          </div>
+        </Section>
+
+        <Section title="2. Account &amp; Access">
+          <p>
+            You must provide accurate registration information and maintain the confidentiality of your login credentials.
+            You are solely responsible for all activity that occurs under your account.
+          </p>
+          <p className="font-semibold text-white">You agree to:</p>
+          <ul className="list-disc list-inside space-y-2 text-[rgba(207,207,207,0.8)]">
+            <li>Notify us immediately of any unauthorized access</li>
+            <li>Ensure only authorized clinical professionals use your account</li>
+            <li>Maintain appropriate security on devices used to access the Service</li>
+          </ul>
+        </Section>
+
+        <Section title="3. Clinical Responsibility">
+          <p>
+            You retain full professional responsibility for all clinical content and decisions.
+          </p>
+          <p className="font-semibold text-white">As a Radly user, you must:</p>
+          <ul className="list-disc list-inside space-y-2 text-[rgba(207,207,207,0.8)]">
+            <li>Review and verify all AI-generated draft content before use</li>
+            <li>Edit and correct any suggested text as clinically appropriate</li>
+            <li>Provide final approval on every report</li>
+            <li>Comply with your institution&apos;s documentation standards</li>
+          </ul>
+          <p>
+            Radly generates drafts to enhance your productivity. The final clinical interpretation, opinion, and recommendations are yours.
           </p>
         </Section>
 
-        <Section title="2. Clinical Oversight">
+        <Section title="4. Subscription &amp; Payment">
           <p>
-            Radly is an intelligent assistant, not a medical device. It generates report content based on clinician
-            input. Radiologists must review, edit, and sign off every report, and remain accountable for final clinical
-            decisions.
+            Radly offers subscription-based access to premium features.
+          </p>
+          <ul className="list-disc list-inside space-y-2 text-[rgba(207,207,207,0.8)]">
+            <li><span className="font-semibold text-white">Auto-Renewal:</span> Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current billing period. Manage your subscription in Settings (iOS: Apple ID &gt; Subscriptions; Android: Google Play &gt; Subscriptions).</li>
+            <li><span className="font-semibold text-white">Payment:</span> Charged to your Apple ID or Google Play account at confirmation of purchase. Subscription fees are non-refundable except as required by law.</li>
+          </ul>
+        </Section>
+
+        <Section title="5. Acceptable Use">
+          <p>You agree not to:</p>
+          <ul className="list-disc list-inside space-y-2 text-[rgba(207,207,207,0.8)]">
+            <li>Misuse the Service or attempt unauthorized access</li>
+            <li>Reverse engineer or disassemble the Service</li>
+            <li>Use the Service for unlawful purposes</li>
+            <li>Share credentials with unauthorized parties</li>
+          </ul>
+          <p>
+            You will comply with all applicable laws and regulations, including those governing Protected Health Information (PHI).
           </p>
         </Section>
 
-        <Section title="3. Acceptable Use">
+        <Section title="6. Data &amp; Privacy">
           <p>
-            You agree not to misuse Radly, attempt unauthorised access, or reverse engineer the service. You will comply
-            with applicable laws and ensure Protected Health Information is handled according to your organisation’s
-            policies.
+            Your privacy matters. See our Privacy Policy for details.
+          </p>
+          <p className="font-semibold text-white">Key Points:</p>
+          <ul className="list-disc list-inside space-y-2 text-[rgba(207,207,207,0.8)]">
+            <li>We process your input solely to provide the Service</li>
+            <li>Data is encrypted in transit and at rest</li>
+            <li>We do not sell your personal information</li>
+            <li>You may delete your account and data at any time</li>
+          </ul>
+        </Section>
+
+        <Section title="7. Account Deletion">
+          <p>
+            Delete your account anytime via Settings in the app or web application. Upon deletion:
+          </p>
+          <ul className="list-disc list-inside space-y-2 text-[rgba(207,207,207,0.8)]">
+            <li>Your account and profile are permanently removed</li>
+            <li>Your data is deleted from our systems</li>
+            <li>Active subscriptions are cancelled</li>
+            <li>Certain financial records may be retained as required by law.</li>
+          </ul>
+        </Section>
+
+        <Section title="8. Intellectual Property">
+          <p>
+            Radly&apos;s name, logo, and technology are protected by intellectual property laws.
+          </p>
+          <p>
+            <span className="font-semibold text-white">Your Content:</span> You retain ownership of all content you submit and reports you approve. You grant Radly a limited license to process your content solely to provide the Service.
           </p>
         </Section>
 
-        <Section title="4. Intellectual Property">
+        <Section title="9. Service Availability">
           <p>
-            Radly and its brand elements are owned by Radly Labs. You retain ownership of the content you submit and the
-            reports you approve. You grant us a limited licence to process that content solely to provide the assistant
-            experience.
+            We strive for reliable availability but cannot guarantee uninterrupted access. The Service may be unavailable for maintenance or due to technical issues. We may modify or discontinue features with reasonable notice.
           </p>
         </Section>
 
-        <Section title="5. Service Availability">
+        <Section title="10. Disclaimers">
+          <p className="font-semibold text-white">
+            THE SERVICE IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTIES OF ANY KIND. WE DISCLAIM ALL WARRANTIES INCLUDING MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+          </p>
           <p>
-            We strive to keep Radly available and performant, but temporary interruptions may occur for maintenance or
-            unforeseen issues. We may modify features or discontinue the service with reasonable notice.
+            Radly is a productivity tool. It generates draft content for your review; it does not provide autonomous diagnoses or replace your clinical judgment.
           </p>
         </Section>
 
-        <Section title="6. Limitation of Liability">
+        <Section title="11. Limitation of Liability">
           <p>
-            To the maximum extent permitted by law, Radly Labs is not liable for indirect or consequential damages. Our
-            total liability is limited to the subscription fees paid during the 12 months preceding a claim. Nothing here
-            limits liability for gross negligence, fraud, or intentional misconduct.
+            TO THE MAXIMUM EXTENT PERMITTED BY LAW, WE SHALL NOT BE LIABLE FOR INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES.
+          </p>
+          <p>
+            Total liability is limited to subscription fees paid in the 12 months preceding a claim. Nothing limits liability for gross negligence, fraud, or willful misconduct.
           </p>
         </Section>
 
-        <Section title="7. Termination">
+        <Section title="12. Termination">
           <p>
-            You may stop using Radly at any time. We may suspend or terminate access if these terms are violated or if
-            continued use poses risk to the service or other users.
+            You may stop using Radly and delete your account anytime. We may suspend access for Terms violations or if required by law.
           </p>
         </Section>
 
-        <Section title="8. Changes">
+        <Section title="13. Changes to Terms">
           <p>
-            We may update these terms from time to time. Material changes will be communicated via email or in-app
-            notices. Continued use after changes become effective constitutes acceptance of the new terms.
+            We may update these Terms with 30 days notice via email or in-app notification. Continued use after changes take effect constitutes acceptance.
           </p>
         </Section>
 
-        <Section title="9. Contact">
-          <p>
-            Questions about these terms? Contact{" "}
-            <Link href="mailto:legal@radly.app" className="text-[#8F82FF] hover:underline">
-              legal@radly.app
-            </Link>
-            .
-          </p>
+        <Section title="14. Contact">
+          <ul className="list-disc list-inside space-y-2 text-[rgba(207,207,207,0.8)]">
+            <li>Email: <Link href="mailto:legal@radly.app" className="text-[#8F82FF] hover:underline">legal@radly.app</Link></li>
+            <li>Support: <Link href="mailto:support@radly.app" className="text-[#8F82FF] hover:underline">support@radly.app</Link></li>
+            <li>Website: <Link href="https://radly.app" className="text-[#8F82FF] hover:underline">https://radly.app</Link></li>
+          </ul>
         </Section>
 
-        <div className="text-xs uppercase tracking-[0.18em] text-[rgba(207,207,207,0.5)]">
-          Last updated: January 2025
+        <div className="space-y-2">
+          <p className="text-sm text-[rgba(207,207,207,0.7)]">
+            Radly is developed by Dr. Mohamed Hammad.
+          </p>
+          <div className="text-xs uppercase tracking-[0.18em] text-[rgba(207,207,207,0.5)]">
+            Last updated: October 2025
+          </div>
         </div>
       </main>
     </div>
