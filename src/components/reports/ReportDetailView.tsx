@@ -108,16 +108,6 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
       const resultPatient: Patient = parsed.patient ?? {};
       const resultSignature: Signature | undefined = parsed.signature;
 
-      const hasPatientData = Boolean(
-        resultPatient &&
-          (resultPatient.name ||
-            resultPatient.age !== undefined ||
-            resultPatient.sex ||
-            resultPatient.mrn ||
-            resultPatient.dob ||
-            resultPatient.history),
-      );
-
       const filename = resultReport.title
         ? `${resultReport.title.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')}.docx`
         : 'radiology_report.docx';
@@ -126,7 +116,7 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
         resultReport,
         resultPatient,
         resultSignature,
-        hasPatientData,
+        true, // Always include identifiers
         filename,
         selectedFormattingProfile,
         user?.id,
