@@ -42,7 +42,16 @@ export async function enqueueJob(input: EnqueueInput): Promise<{ job_id: string 
     if (input.patient.mrn?.trim()) p.mrn = input.patient.mrn.trim();
     const dob = toISO(input.patient.dob || null);
     if (dob) p.dob = dob;
-    if (input.patient.history?.trim()) p.history = input.patient.history.trim();
+
+    // Populate history from indication if not already provided
+    // This ensures clinical indication appears in DOCX exports
+    if (input.patient.history?.trim()) {
+      p.history = input.patient.history.trim();
+    } else if (input.indication?.trim()) {
+      // Use indication as clinical history for radiology reports
+      p.history = input.indication.trim();
+    }
+
     if (Object.keys(p).length) body.patient = p;
   }
 
