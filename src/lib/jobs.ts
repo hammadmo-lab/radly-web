@@ -12,16 +12,22 @@ export type RecentJobRow = {
 
 function toISO(d?: string | null): string | null {
   if (!d) return null;
-  const t = Date.parse(d);
-  if (!Number.isNaN(t)) return new Date(t).toISOString().slice(0,10);
+
+  // Match DD/MM/YYYY or DD-MM-YYYY format (as expected by schema)
   const m = d.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
   if (m) {
-    const [ , a, b, y ] = m;
-    const mm = parseInt(a,10) > 12 ? b : a;
-    const dd = parseInt(a,10) > 12 ? a : b;
+    const [ , dd, mm, y ] = m;
     const yyyy = y.length === 2 ? `20${y}` : y;
+    // DD/MM/YYYY format: first group is day, second is month
     return `${yyyy.padStart(4,'0')}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
   }
+
+  // Fallback: try parsing as ISO date string (YYYY-MM-DD)
+  const isoMatch = d.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    return d;
+  }
+
   return null;
 }
 
