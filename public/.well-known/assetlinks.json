@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.radly.app",
+      "sha256_cert_fingerprints": [
+        "74:10:4F:23:DC:A6:CC:B5:B8:88:18:D9:1F:99:01:04:A3:26:59:67:3E:C0:98:B0:EE:8C:74:1F:B7:A5:9D:F6"
+      ]
+    }
+  }
+]
