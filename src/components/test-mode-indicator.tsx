@@ -1,14 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { isTestMode } from '@/lib/test-mode'
 
 export function TestModeIndicator() {
-  const [showIndicator, setShowIndicator] = useState(false)
-
-  useEffect(() => {
-    setShowIndicator(isTestMode())
-  }, [])
+  const [showIndicator] = useState(() => isTestMode())
 
   if (!showIndicator || process.env.NODE_ENV === 'production') {
     return null

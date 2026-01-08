@@ -64,7 +64,6 @@ export function ReliabilityPanel({
         titleColor: '#FFFFFF',
         bodyColor: '#D7E3FF',
         callbacks: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           label: function (this: any, tooltipItem: any) {
             const total = tooltipItem.dataset.data.reduce((a: number, b: number) => a + b, 0);
             const percentage = ((tooltipItem.parsed / total) * 100).toFixed(1);
@@ -109,7 +108,6 @@ export function ReliabilityPanel({
         beginAtZero: true,
         max: 100,
         ticks: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           callback: function (value: any) {
             return `${value}%`;
           },

@@ -58,7 +58,6 @@ export function QueueMetricsChart({ queueRates, queueSaturation }: QueueMetricsC
         titleColor: '#FFFFFF',
         bodyColor: '#D7E3FF',
         callbacks: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           label: function (this: any, tooltipItem: any) {
             return `${tooltipItem.dataset.label}: ${tooltipItem.parsed.y.toFixed(2)} jobs/sec`;
           },
@@ -140,7 +139,6 @@ export function QueueMetricsChart({ queueRates, queueSaturation }: QueueMetricsC
         titleColor: '#FFFFFF',
         bodyColor: '#D7E3FF',
         callbacks: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           label: function (this: any, tooltipItem: any) {
             return `Saturation: ${formatPercentage(tooltipItem.parsed.y)}`;
           },
@@ -157,7 +155,6 @@ export function QueueMetricsChart({ queueRates, queueSaturation }: QueueMetricsC
           color: axisColor,
         },
         ticks: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           callback: function (value: any) {
             return `${value}%`;
           },

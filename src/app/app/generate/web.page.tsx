@@ -125,7 +125,7 @@ export default function GeneratePage() {
     reset,
     trigger,
     formState: { errors, isDirty, isSubmitting: formIsSubmitting },
-  } = useForm<GenerateFormValues>({
+  } = useForm({
     resolver: zodResolver(generateFormSchema),
     mode: 'onBlur', // Validate on blur for earlier feedback
     reValidateMode: 'onChange', // Re-validate on change after first blur

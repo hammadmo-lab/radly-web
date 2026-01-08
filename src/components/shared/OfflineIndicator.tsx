@@ -8,13 +8,16 @@ import { WifiOff, Wifi } from 'lucide-react';
  * Component that displays when the user is offline
  */
 export function OfflineIndicator() {
-  const [isOnline, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState(() => {
+    // Lazy initializer - set initial state from navigator
+    if (typeof window !== 'undefined') {
+      return navigator.onLine;
+    }
+    return true;
+  });
   const [showOnlineNotification, setShowOnlineNotification] = useState(false);
 
   useEffect(() => {
-    // Set initial state
-    setIsOnline(navigator.onLine);
-
     const handleOnline = () => {
       setIsOnline(true);
       setShowOnlineNotification(true);

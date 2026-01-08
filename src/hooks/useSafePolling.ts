@@ -58,6 +58,7 @@ export function useSafePolling(
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const backoffCountRef = useRef(0)
   const isMountedRef = useRef(true)
+  const scheduleNextPollRef = useRef<() => void>(() => {})
 
   // Store callback in ref to avoid stale closures
   const callbackRef = useRef(callback)
@@ -93,8 +94,8 @@ export function useSafePolling(
           setCurrentInterval(baseInterval)
         }
 
-        // Schedule next poll
-        scheduleNextPoll()
+        // Schedule next poll using ref to avoid immutability error
+        scheduleNextPollRef.current()
       } catch (error) {
         console.error('Polling callback error:', error)
 
@@ -105,18 +106,23 @@ export function useSafePolling(
           maxInterval
         )
         setCurrentInterval(newInterval)
-        
+
         if (cleanupOnError) {
           console.warn('Polling stopped due to error')
           setIsPolling(false)
           return
         }
-        
-        // Schedule next poll with backoff
-        scheduleNextPoll()
+
+        // Schedule next poll with backoff using ref
+        scheduleNextPollRef.current()
       }
     }, currentInterval)
   }, [isPolling, isVisible, pauseWhenHidden, currentInterval, baseInterval, maxInterval, backoffMultiplier, resetBackoffOnSuccess, cleanupOnError, clearCurrentTimeout])
+
+  // Update schedule ref whenever the function changes
+  useEffect(() => {
+    scheduleNextPollRef.current = scheduleNextPoll
+  }, [scheduleNextPoll])
 
   // Track tab visibility
   useEffect(() => {

@@ -13,30 +13,29 @@ interface SelectionState {
 const SELECTION_KEY_PREFIX = 'radly_report_selection_';
 
 export function useReportSelection(userId?: string | null) {
-  const [selection, setSelection] = useState<SelectionState>({
-    selectedIds: new Set(),
-    selectAll: false,
-  });
-
   const selectionKey = userId ? `${SELECTION_KEY_PREFIX}${userId}` : null;
 
-  // Load selection from localStorage on mount
-  useEffect(() => {
-    if (!selectionKey) return;
+  // Initialize selection from localStorage
+  const [selection, setSelection] = useState<SelectionState>(() => {
+    if (!selectionKey || typeof window === 'undefined') {
+      return { selectedIds: new Set(), selectAll: false };
+    }
 
     try {
       const saved = localStorage.getItem(selectionKey);
       if (saved) {
         const { selectedIds } = JSON.parse(saved);
-        setSelection({
+        return {
           selectedIds: new Set(selectedIds),
           selectAll: false,
-        });
+        };
       }
     } catch (error) {
       console.error('Failed to load selection state:', error);
     }
-  }, [selectionKey]);
+
+    return { selectedIds: new Set(), selectAll: false };
+  });
 
   // Save selection to localStorage whenever it changes
   const saveSelection = useCallback(

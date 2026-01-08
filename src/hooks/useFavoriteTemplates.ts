@@ -69,22 +69,21 @@ export interface UseFavoriteTemplatesReturn {
  * ```
  */
 export function useFavoriteTemplates(): UseFavoriteTemplatesReturn {
-  const [favorites, setFavorites] = useState<Set<string>>(new Set())
-  const [isHydrated, setIsHydrated] = useState(false)
-
-  // Load favorites from localStorage on mount
-  useEffect(() => {
+  const [favorites, setFavorites] = useState<Set<string>>(() => {
+    // Lazy initializer - load from localStorage on mount
+    if (typeof window === 'undefined') return new Set()
     try {
       const stored = localStorage.getItem(FAVORITES_KEY)
       if (stored) {
         const parsed = JSON.parse(stored) as string[]
-        setFavorites(new Set(parsed))
+        return new Set(parsed)
       }
     } catch (error) {
       console.error('Failed to load favorite templates:', error)
     }
-    setIsHydrated(true)
-  }, [])
+    return new Set()
+  })
+  const [isHydrated, setIsHydrated] = useState(() => typeof window !== 'undefined')
 
   // Save favorites to localStorage whenever they change
   useEffect(() => {

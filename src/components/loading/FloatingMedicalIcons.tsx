@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useMemo } from 'react';
 import {
   Stethoscope,
   Heart,
@@ -23,15 +24,31 @@ const MEDICAL_ICONS = [
   { Icon: Droplet, delay: 3.5 }
 ];
 
+interface IconProps {
+  startX: number;
+  endX: number;
+  size: number;
+  duration: number;
+}
+
 export function FloatingMedicalIcons() {
+  // Generate stable random values on mount
+  const iconProps = useMemo<IconProps[]>(() => {
+    return MEDICAL_ICONS.map(() => ({
+      startX: Math.random() * 100,
+      endX: 0, // Will be calculated below
+      size: 24 + Math.random() * 24,
+      duration: 15 + Math.random() * 10,
+    })).map(props => ({
+      ...props,
+      endX: props.startX + (Math.random() * 40 - 20),
+    }));
+  }, []);
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {MEDICAL_ICONS.map(({ Icon, delay }, index) => {
-        // Generate random positions and properties
-        const startX = Math.random() * 100;
-        const endX = startX + (Math.random() * 40 - 20);
-        const size = 24 + Math.random() * 24; // 24-48px
-        const duration = 15 + Math.random() * 10; // 15-25s
+        const { startX, endX, size, duration } = iconProps[index];
 
         return (
           <motion.div

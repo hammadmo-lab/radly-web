@@ -74,7 +74,17 @@ export default function TemplatesPage() {
   const filteredTemplates = useMemo(() => {
     if (!templates) return []
 
-    return templates.filter(template => {
+    // Deduplicate templates by ID to avoid React key conflicts
+    const seen = new Set<string>()
+    const uniqueTemplates = templates.filter(template => {
+      if (seen.has(template.id)) {
+        return false
+      }
+      seen.add(template.id)
+      return true
+    })
+
+    return uniqueTemplates.filter(template => {
       // Favorites filter
       const favoritesMatch = !showFavoritesOnly || isFavorite(template.id)
 

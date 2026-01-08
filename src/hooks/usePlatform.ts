@@ -20,7 +20,7 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   getPlatform,
   isNativeApp,
@@ -91,15 +91,13 @@ export interface UsePlatformReturn {
  * ```
  */
 export function usePlatform(): UsePlatformReturn {
-  // Initialize with web platform to match SSR
-  const [isReady, setIsReady] = useState(false)
-  const [config, setConfig] = useState(() => getPlatformConfig())
-
-  useEffect(() => {
-    // After hydration, update with actual platform
-    setConfig(getPlatformConfig())
-    setIsReady(true)
-  }, [])
+  // Initialize with actual platform config
+  const [config] = useState(() => getPlatformConfig())
+  const [isReady, setIsReady] = useState(() => {
+    // On the server, always return false
+    // On the client, return true immediately (hydration already happened)
+    return typeof window !== 'undefined'
+  })
 
   return {
     ...config,

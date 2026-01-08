@@ -1,18 +1,22 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useLayoutEffect } from "react";
 import { createBrowserSupabase } from '@/lib/supabase/client'
 import { isTestMode, getTestSession } from '@/lib/test-mode'
 import type { Session } from '@supabase/supabase-js'
 
 export function useAuthSession() {
-  const [mounted, setMounted] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
-
-  useEffect(() => {
-    // Return test session in test mode
+  const [mounted, setMounted] = useState(() => isTestMode());
+  const [session, setSession] = useState<Session | null>(() => {
+    // Lazy initializer for test mode
     if (isTestMode()) {
-      setSession(getTestSession())
-      setMounted(true)
+      return getTestSession()
+    }
+    return null
+  });
+
+  useLayoutEffect(() => {
+    // Return early if already set in test mode
+    if (isTestMode()) {
       return
     }
 
