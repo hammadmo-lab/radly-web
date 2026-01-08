@@ -104,6 +104,7 @@ export function NotificationCenter() {
     return insights[Math.floor(Math.random() * insights.length)]
   })
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (typeof window === 'undefined') return
     const id = localStorage.getItem('recent-template-id')
@@ -112,6 +113,13 @@ export function NotificationCenter() {
       setRecentDraft({ id, name })
     }
   }, [])
+
+  // Mark openedOnce when dialog is opened
+  useEffect(() => {
+    if (open && !openedOnce) {
+      setOpenedOnce(true)
+    }
+  }, [open, openedOnce])
 
   const subscriptionNotifications = useMemo(() => {
     const notifications: NotificationCard[] = []

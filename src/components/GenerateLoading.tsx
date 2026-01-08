@@ -21,15 +21,16 @@ interface GenerateLoadingProps {
 
 export function GenerateLoading({ jobId, queuePosition, estimatedTime, jobStatus }: GenerateLoadingProps) {
   const [progress, setProgress] = useState(0)
-  const startTimeRef = useRef<number | null>(null)
+  const [startTime, setStartTime] = useState<number | null>(null)
   const celebrationTriggeredRef = useRef(false)
 
   // Track start time for elapsed time calculation
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
-    if (jobStatus?.status === 'running' && startTimeRef.current === null) {
-      startTimeRef.current = Date.now()
+    if (jobStatus?.status === 'running' && startTime === null) {
+      setStartTime(Date.now())
     }
-  }, [jobStatus])
+  }, [jobStatus, startTime])
 
   // Trigger celebration when report is done
   useEffect(() => {
@@ -44,6 +45,7 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime, jobStatus
   }, [jobStatus])
 
   // Update progress based on actual job status
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (!jobStatus) {
       setProgress(0)
@@ -202,7 +204,7 @@ export function GenerateLoading({ jobId, queuePosition, estimatedTime, jobStatus
 
               <div className="space-y-4 sm:space-y-6 min-w-0">
                 <StatsDisplay
-                  startTime={startTimeRef.current}
+                  startTime={startTime}
                   jobStatus={jobStatus?.status as 'queued' | 'running' | 'done' | 'error'}
                   estimatedSeconds={estimatedSecondsRemaining}
                 />

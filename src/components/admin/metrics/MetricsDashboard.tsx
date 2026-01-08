@@ -2,7 +2,7 @@
  * src/components/admin/metrics/MetricsDashboard.tsx
  * Main dashboard container component
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useMemo } from 'react';
 import { RefreshCw, Download, Clock, ArrowLeft, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -60,16 +60,13 @@ function isLowTrafficPeriod(data: DashboardMetrics | undefined): boolean {
 
 export function MetricsDashboard() {
   const [timeRange, setTimeRange] = useState('5m');
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const router = useRouter();
 
   const { data, isLoading, error, refetch } = useMetricsDashboard(timeRange);
 
-  useEffect(() => {
-    if (data) {
-      setLastUpdated(new Date());
-    }
-  }, [data]);
+  // Derive lastUpdated from data changes instead of storing in state
+  // Note: We re-create the date object whenever data changes to trigger a re-render
+  const lastUpdated = useMemo(() => new Date(), [data ? data.system_health?.uptime : 0]);
 
   const handleRefresh = () => {
     refetch();

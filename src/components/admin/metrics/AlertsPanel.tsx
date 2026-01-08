@@ -4,7 +4,7 @@
  * src/components/admin/metrics/AlertsPanel.tsx
  * Active alerts with actionable recommendations and recent history
  */
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   AlertCircle,
   AlertTriangle,
@@ -143,17 +143,22 @@ function AlertItem({ alert }: AlertItemProps) {
 export function AlertsPanel({ metrics }: AlertsPanelProps) {
   const alerts = generateAlerts(metrics);
   const [showResolved, setShowResolved] = useState(false);
+  const [resolvedTimestamp] = useState(() => Date.now() - 10800000);
 
-  const mockResolvedAlerts =
-    alerts.length === 0
-      ? [
-          {
-            message: 'Queue saturation spike',
-            resolvedAt: Date.now() - 10800000,
-            duration: '15 minutes',
-          },
-        ]
-      : [];
+  // Memoize mock resolved alerts with stable timestamp
+  const mockResolvedAlerts = useMemo(
+    () =>
+      alerts.length === 0
+        ? [
+            {
+              message: 'Queue saturation spike',
+              resolvedAt: resolvedTimestamp,
+              duration: '15 minutes',
+            },
+          ]
+        : [],
+    [alerts.length, resolvedTimestamp]
+  )
 
   if (alerts.length === 0) {
     return (

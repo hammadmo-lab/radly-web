@@ -57,8 +57,7 @@ export function JobStageChart({ data }: JobStageChartProps) {
         titleColor: '#FFFFFF',
         bodyColor: '#D7E3FF',
         callbacks: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          label: function(this: any, tooltipItem: any) {
+          label: (tooltipItem: any) => {
             return `${tooltipItem.parsed.x.toFixed(3)}s (${formatDuration(tooltipItem.parsed.x)})`;
           },
         },
@@ -73,8 +72,7 @@ export function JobStageChart({ data }: JobStageChartProps) {
           color: axisColor,
         },
         ticks: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          callback: function(value: any) {
+          callback: (value: any) => {
             return formatDuration(value);
           },
           color: axisColor,

@@ -84,7 +84,6 @@ export function useFormDraft<T extends FieldValues>({
     if (!draftData) return
 
     Object.entries(draftData).forEach(([key, value]) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setValue(key as any, value, { shouldValidate: false })
     })
   }, [setValue])

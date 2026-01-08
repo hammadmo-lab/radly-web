@@ -60,8 +60,7 @@ export function DatabaseMetricsChart({ data }: DatabaseMetricsChartProps) {
         titleColor: '#FFFFFF',
         bodyColor: '#D7E3FF',
         callbacks: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          label: function (this: any, tooltipItem: any) {
+          label: (tooltipItem: any) => {
             return `${tooltipItem.dataset.label}: ${tooltipItem.parsed.y} connections`;
           },
         },

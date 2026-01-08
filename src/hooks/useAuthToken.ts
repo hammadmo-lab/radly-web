@@ -1,23 +1,26 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useLayoutEffect } from "react";
 import { createBrowserSupabase } from '@/lib/supabase/client'
 import { isTestMode, getTestSession } from '@/lib/test-mode'
 
 type AuthStatus = "loading" | "authenticated" | "signed_out";
 
 export function useAuthToken() {
-  const [status, setStatus] = useState<AuthStatus>("loading");
-  const [token, setToken] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  const testSession = getTestSession()
+  const [status, setStatus] = useState<AuthStatus>(() =>
+    isTestMode() ? "authenticated" : "loading"
+  );
+  const [token, setToken] = useState<string | null>(() =>
+    isTestMode() ? (testSession?.access_token || 'test-access-token') : null
+  );
+  const [userId, setUserId] = useState<string | null>(() =>
+    isTestMode() ? (testSession?.user?.id || 'test-user-id-12345') : null
+  );
 
-  useEffect(() => {
-    // Return test token in test mode
+  useLayoutEffect(() => {
+    // Return early if already set in test mode
     if (isTestMode()) {
-      const testSession = getTestSession()
-      setToken(testSession?.access_token || 'test-access-token')
-      setUserId(testSession?.user?.id || 'test-user-id-12345')
-      setStatus("authenticated")
       return
     }
 

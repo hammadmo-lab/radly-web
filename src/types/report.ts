@@ -29,8 +29,8 @@ export const ReportSchema = z.object({
 export type StrictReport = z.infer<typeof ReportSchema>;
 
 export const JobResultSchema = z.object({
-  report: ReportSchema.optional().default({}),
-  patient: PatientSchema.optional().default({}),
+  report: ReportSchema.optional(),
+  patient: PatientSchema.optional(),
   signature: SignatureSchema.optional(),
 });
 

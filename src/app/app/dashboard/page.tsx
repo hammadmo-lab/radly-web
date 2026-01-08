@@ -26,7 +26,14 @@ function daysUntil(dateString?: string) {
 function WebDashboardPage() {
   const router = useRouter()
   const { data: subscriptionData, clearCache } = useSubscription()
-  const [recentTemplate, setRecentTemplate] = useState<{ id: string; name: string | null } | null>(null)
+
+  // Initialize recentTemplate from localStorage
+  const [recentTemplate, setRecentTemplate] = useState<{ id: string; name: string | null } | null>(() => {
+    if (typeof window === 'undefined') return null
+    const id = localStorage.getItem('recent-template-id')
+    const name = localStorage.getItem('recent-template-name')
+    return id ? { id, name } : null
+  })
 
   // Clear cache on page load to ensure fresh subscription data
   useEffect(() => {
@@ -36,18 +43,6 @@ function WebDashboardPage() {
     }
     initializePage()
   }, [clearCache])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const id = localStorage.getItem('recent-template-id')
-    const name = localStorage.getItem('recent-template-name')
-    if (id) {
-      setRecentTemplate({
-        id,
-        name,
-      })
-    }
-  }, [])
 
   useEffect(() => {
     if (

@@ -16,27 +16,16 @@ export const patientSchema = z.object({
     .regex(/^[a-zA-Z0-9\-_]*$/, "MRN can only contain letters, numbers, hyphens, and underscores")
     .optional()
     .or(z.literal('')),
-  age: z.preprocess(
-    (v) => {
-      // Handle empty strings and null/undefined
-      if (v === '' || v === null || v === undefined) return undefined
-      // Convert to number
-      const num = Number(v)
-      // Return undefined for NaN
-      return isNaN(num) ? undefined : num
-    },
-    z.number({
-      required_error: "Patient age is required",
-      invalid_type_error: "Please enter a valid age"
+  age: z.coerce
+    .number({
+      message: "Please enter a valid age"
     })
     .int("Age must be a whole number")
     .positive("Age must be greater than 0")
     .max(130, "Please enter a valid age (maximum 130)")
-    .min(1, "Age must be at least 1")
-  ),
+    .min(1, "Age must be at least 1"),
   sex: z.enum(['M', 'F', 'O'], {
-    required_error: "Please select the patient's sex",
-    invalid_type_error: "Please select a valid option"
+    message: "Please select the patient's sex"
   }), // M = Male, F = Female, O = Other
 })
 
@@ -59,7 +48,7 @@ export const generateFormSchema = z.object({
   templateId: z.string()
     .min(1, 'Template is required')
     .max(100, 'Template ID is too long'),
-  includePatient: z.boolean().default(true),
+  includePatient: z.boolean().optional(),
   patient: patientSchema,
   indication: z.string()
     .trim()
@@ -82,7 +71,7 @@ export const generateFormSchema = z.object({
     .max(2000, 'Technique must not exceed 2000 characters')
     .optional()
     .or(z.literal('')),
-  signature: signatureSchema.default({ name: '', date: '' }),
+  signature: signatureSchema.optional(),
 })
 
 export type GenerateFormValues = z.infer<typeof generateFormSchema>

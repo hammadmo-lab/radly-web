@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Download, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -47,7 +47,7 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
 
   const startedAtMs = useRef<number | null>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setJobStatus(null);
     setErr(null);
     setQueueDepth(null);
@@ -104,8 +104,8 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
     setIsExporting(true);
     try {
       const parsed = JobResultSchema.parse(jobStatus.result);
-      const resultReport: StrictReport = parsed.report;
-      const resultPatient: Patient = parsed.patient ?? {};
+      const resultReport: StrictReport = parsed.report ?? { title: '', technique: '', findings: '', impression: '', recommendations: '' };
+      const resultPatient: Patient = parsed.patient ?? { name: undefined, mrn: undefined, age: undefined, dob: undefined, sex: undefined, history: undefined };
       const resultSignature: Signature | undefined = parsed.signature;
 
       const filename = resultReport.title
@@ -223,8 +223,8 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
     );
   }
 
-  const resultReport: StrictReport = parsed.report;
-  const resultPatient: Patient = parsed.patient ?? {};
+  const resultReport: StrictReport = parsed.report ?? { title: '', technique: '', findings: '', impression: '', recommendations: '' };
+  const resultPatient: Patient = parsed.patient ?? { name: undefined, mrn: undefined, age: undefined, dob: undefined, sex: undefined, history: undefined };
   const resultSignature: Signature | undefined = parsed.signature;
 
   return (
