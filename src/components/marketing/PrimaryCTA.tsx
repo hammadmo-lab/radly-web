@@ -31,7 +31,7 @@ export function PrimaryCTA({ href, children, eventName = "primary-cta-click", cl
       asChild
       size="lg"
       className={cn(
-        "cta-primary h-12 sm:h-13 rounded-2xl px-6 sm:px-8 text-sm sm:text-base font-semibold shadow-[0_24px_64px_rgba(38,83,255,0.42)] focus-visible:ring-offset-0 w-full sm:w-auto min-h-[44px] touch-manipulation",
+        "cta-primary h-12 sm:h-13 rounded-2xl px-6 sm:px-8 text-sm sm:text-base font-semibold shadow-[0_8px_24px_rgba(212,180,131,0.25)] focus-visible:ring-offset-0 w-full sm:w-auto min-h-[44px] touch-manipulation bg-gold hover:bg-gold/90 text-black",
         className
       )}
     >
@@ -49,7 +49,7 @@ export function SecondaryCTA({ href, children, className, ariaLabel }: Omit<Comm
       size="lg"
       variant="outline"
       className={cn(
-        "cta-secondary h-12 sm:h-13 rounded-2xl border-[rgba(255,255,255,0.18)] bg-[rgba(12,16,28,0.72)] px-6 sm:px-8 text-sm sm:text-base font-semibold text-[rgba(207,207,207,0.88)] backdrop-blur focus-visible:ring-offset-0 hover:bg-[rgba(12,16,28,0.85)] hover:text-white w-full sm:w-auto min-h-[44px] touch-manipulation",
+        "cta-secondary h-12 sm:h-13 rounded-2xl border-[rgba(255,255,255,0.15)] bg-[rgba(26,21,16,0.6)] px-6 sm:px-8 text-sm sm:text-base font-semibold text-[rgba(232,220,200,0.9)] backdrop-blur focus-visible:ring-offset-0 hover:bg-[rgba(212,180,131,0.1)] hover:border-[rgba(212,180,131,0.3)] hover:text-white w-full sm:w-auto min-h-[44px] touch-manipulation",
         className
       )}
     >
