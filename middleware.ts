@@ -46,6 +46,32 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(url);
     }
 
+    // Auto-detect pricing region based on country
+    const isPricingPage = pathname === '/pricing' || pathname === '/pricing/';
+    if (isPricingPage && !req.nextUrl.searchParams.has('region')) {
+      const country = req.headers.get('x-vercel-ip-country') || req.headers.get('cf-ipcountry');
+
+      if (country) {
+        // Bot detection: default international for SEO
+        const userAgent = req.headers.get('user-agent') || '';
+        const isBot = /bot|crawler|spider|googlebot|bingbot|slurp|duckduckbot/i.test(userAgent);
+
+        if (country !== 'EG' || isBot) {
+          // Non-Egypt countries or bots → international pricing
+          const url = req.nextUrl.clone();
+          url.searchParams.set('region', 'international');
+          const response = NextResponse.rewrite(url);
+          response.headers.set('x-region-detected', 'true');
+          return response;
+        }
+        // Egypt users → default EGP pricing
+        res.headers.set('x-region-detected', 'true');
+      } else {
+        // No country detected → show modal client-side
+        res.headers.set('x-region-detected', 'false');
+      }
+    }
+
     // Don't redirect root route - let the client handle it
     // This prevents the "page can't be reached" error on first load
     

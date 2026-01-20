@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { Check, ArrowRight, Briefcase, Truck, RotateCcw, Lock, Mail } from "lucide-react";
 import { marketingGet } from "@/lib/http/marketing";
 import { PrimaryCTA, SecondaryCTA } from "@/components/marketing/PrimaryCTA";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { Breadcrumb } from "@/components/marketing/Breadcrumb";
 import { MobileAppPricingRedirect } from "@/components/pricing/MobileAppPricingRedirect";
+import { RegionDetectionWrapper } from "@/components/pricing/RegionDetectionWrapper";
 
 export const dynamic = "force-dynamic";
 
@@ -85,6 +87,10 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
     notFound();
   }
 
+  // Check if middleware detected the region
+  const headersList = await headers();
+  const regionDetected = headersList.get('x-region-detected') === 'true';
+
   const tiers = await marketingGet<Tier[]>(`/v1/subscription/tiers?region=${region}`);
 
   // Build WebPage schema
@@ -161,24 +167,8 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
           </p>
         </header>
 
-        <div className="mt-10 flex justify-center gap-2 rounded-full border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.72)] p-1 text-sm">
-          {regions.map((item) => {
-            const isActive = item.id === region;
-            return (
-              <Link
-                key={item.id}
-                href={item.id === "egypt" ? "/pricing" : `/pricing?region=${item.id}`}
-                className={`flex items-center rounded-full px-5 py-2 font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(143,130,255,0.65)] ${
-                  isActive
-                    ? "bg-[linear-gradient(90deg,#2653FF_0%,#4B8EFF_45%,#8F82FF_100%)] text-white"
-                    : "text-[rgba(207,207,207,0.78)] hover:text-white"
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </div>
+        {/* Region detection wrapper with fallback modal */}
+        <RegionDetectionWrapper regionDetected={regionDetected} />
 
         <section className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {tiers.map((tier) => {
@@ -192,9 +182,8 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
             return (
               <article
                 key={tier.tier_id}
-                className={`aurora-card h-full border border-[rgba(255,255,255,0.1)] p-6 ${
-                  isRecommended ? "ring-1 ring-[rgba(111,231,183,0.5)]" : ""
-                }`}
+                className={`aurora-card h-full border border-[rgba(255,255,255,0.1)] p-6 ${isRecommended ? "ring-1 ring-[rgba(111,231,183,0.5)]" : ""
+                  }`}
               >
                 {isRecommended ? (
                   <span className="mb-4 inline-flex items-center rounded-full bg-[rgba(111,231,183,0.18)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-[rgba(111,231,183,0.9)]">
