@@ -3,13 +3,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { useSafeClickHandler } from '@/hooks/useButtonResponsiveness'
 import { triggerHaptic } from '@/utils/haptics'
-import { 
-  BookTemplate, 
-  Settings, 
-  LogOut, 
-  Menu, 
+import {
+  BookTemplate,
+  Settings,
+  LogOut,
+  Menu,
   X,
   User as UserIcon,
   ChevronDown,
@@ -19,7 +20,7 @@ import {
   Shield
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -50,15 +51,15 @@ const NavLink = ({ href, icon: Icon, label, isActive }: NavLinkProps) => {
       onClick={handleNavClick}
       className={cn(
         "flex items-center gap-3 rounded-xl border border-[rgba(255,255,255,0.08)] px-4 py-3 text-sm font-medium transition-all duration-200 active:scale-95",
-        "min-h-[44px] touch-manipulation text-[rgba(207,207,207,0.7)] bg-[rgba(12,16,28,0.72)] hover:border-[rgba(75,142,255,0.32)] hover:bg-[rgba(75,142,255,0.12)] hover:text-white hover:shadow-[0_14px_30px_rgba(31,64,175,0.35)]",
+        "min-h-[44px] touch-manipulation text-[rgba(207,207,207,0.7)] bg-[rgba(12,16,28,0.72)] hover:border-[rgba(212,180,131,0.32)] hover:bg-[rgba(212,180,131,0.12)] hover:text-white hover:shadow-[0_14px_30px_rgba(168,159,145,0.35)]",
         isActive &&
-          "border-[rgba(75,142,255,0.45)] bg-[rgba(75,142,255,0.16)] text-white shadow-[0_18px_42px_rgba(31,64,175,0.4)]"
+        "border-[rgba(212,180,131,0.45)] bg-[rgba(212,180,131,0.16)] text-white shadow-[0_18px_42px_rgba(168,159,145,0.4)]"
       )}
     >
       <div
         className={cn(
           "flex h-9 w-9 items-center justify-center rounded-lg border border-[rgba(255,255,255,0.08)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.7)] transition-colors",
-          isActive && "border-[rgba(75,142,255,0.35)] bg-[rgba(75,142,255,0.2)] text-[#D7E3FF]"
+          isActive && "border-[rgba(212,180,131,0.35)] bg-[rgba(212,180,131,0.2)] text-[#E8DCC8]"
         )}
       >
         <Icon className="h-4.5 w-4.5" />
@@ -120,22 +121,22 @@ export function MobileNav({ user, onSignOut }: MobileNavProps) {
           className="fixed inset-0 z-50 md:hidden"
         >
           {/* Backdrop */}
-          <div 
+          <div
             className="absolute inset-0 bg-background/80 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
           />
-          
+
           {/* Side panel */}
           <motion.div
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          className="relative h-full w-80 max-w-[88vw] bg-[rgba(8,12,22,0.96)] border-r border-[rgba(75,142,255,0.25)] shadow-[0_30px_80px_rgba(10,14,24,0.75)] safe-area-inset-top"
-        >
+            className="relative h-full w-80 max-w-[88vw] bg-[rgba(8,12,22,0.96)] border-r border-[rgba(212,180,131,0.25)] shadow-[0_30px_80px_rgba(10,14,24,0.75)] safe-area-inset-top"
+          >
             <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.08)] p-4 safe-area-pt">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#2653FF_0%,#4B8EFF_60%,#8F82FF_100%)] shadow-[0_18px_42px_rgba(31,64,175,0.42)]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#D4B483_0%,#E3C99E_60%,#B89666_100%)] shadow-[0_18px_42px_rgba(168,159,145,0.42)]">
                   <FileText className="h-5 w-5 text-white" />
                 </div>
                 <div className="flex flex-col">
@@ -213,7 +214,7 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { isAuthenticated: isAdmin } = useAdminAuth()
-  
+
   const handleNewReport = useSafeClickHandler(() => {
     router.push('/app/templates')
   })
@@ -234,16 +235,22 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[rgba(12,12,14,0.92)] border-b border-[rgba(255,255,255,0.05)] shadow-[0_1px_2px_rgba(255,255,255,0.05)] safe-area-inset-top">
+    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-[rgba(26,21,16,0.85)] border-b border-[rgba(255,255,255,0.05)] shadow-[0_1px_2px_rgba(212,180,131,0.05)] safe-area-inset-top">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6 safe-area-px">
         {/* Enhanced Logo with gradient and animation */}
         <Link href="/app/dashboard" className="flex items-center gap-3 group">
           <div className="relative">
             {/* Gradient glow effect */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#4B8EFF_0%,rgba(12,12,14,0)_65%)] rounded-xl blur-sm opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#D4B483_0%,rgba(12,12,14,0)_65%)] rounded-xl blur-sm opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
             {/* Logo container */}
-            <div className="relative w-10 h-10 bg-[linear-gradient(135deg,rgba(58,130,247,0.9)0%,rgba(143,130,255,0.9)100%)] rounded-xl flex items-center justify-center shadow-[0_8px_24px_rgba(58,130,247,0.45)]">
-              <FileText className="w-6 h-6 text-white drop-shadow" />
+            <div className="relative w-10 h-10 bg-[linear-gradient(135deg,rgba(212,180,131,0.9)0%,rgba(168,159,145,0.9)100%)] rounded-xl flex items-center justify-center shadow-[0_8px_24px_rgba(212,180,131,0.45)] overflow-hidden">
+              <Image
+                src="/radly-logo-icon.png"
+                alt="Radly Logo"
+                width={24}
+                height={24}
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
           <div className="flex flex-col">
@@ -268,17 +275,17 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
                   "relative px-4 py-2 rounded-lg transition-all duration-200",
                   "flex items-center gap-2 text-sm font-medium text-[var(--ds-text-secondary)]",
                   isActive
-                    ? "text-[#3A82F7] bg-[rgba(58,130,247,0.12)]"
+                    ? "text-[#D4B483] bg-[rgba(212,180,131,0.12)]"
                     : "hover:text-white hover:bg-[rgba(255,255,255,0.06)]"
                 )}
               >
-                <item.icon className={cn("w-4 h-4 text-[var(--ds-text-secondary)]", isActive && "text-[#3A82F7]")} />
+                <item.icon className={cn("w-4 h-4 text-[var(--ds-text-secondary)]", isActive && "text-[#D4B483]")} />
                 <span>{item.label}</span>
                 {/* Animated underline for active state */}
                 {isActive && (
                   <motion.div
                     layoutId="activeNavTab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#3A82F7]"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#D4B483]"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
@@ -302,8 +309,8 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
           {/* User Dropdown Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 className="flex items-center gap-2 h-10 px-3"
               >
                 <Avatar className="w-8 h-8">
@@ -334,7 +341,7 @@ export function DesktopNav({ user, onSignOut }: DesktopNavProps) {
                 <span>Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={onSignOut}
                 className="text-error focus:text-error focus:bg-error/10"
               >
@@ -355,7 +362,7 @@ interface BottomNavProps {
 
 export function BottomNav({ pathname }: BottomNavProps) {
   const { isAuthenticated: isAdmin } = useAdminAuth()
-  
+
   const navItems = [
     { href: '/app/dashboard', icon: Activity, label: 'Home' },
     { href: '/app/templates', icon: BookTemplate, label: 'Templates' },
@@ -390,7 +397,7 @@ export function BottomNav({ pathname }: BottomNavProps) {
               {isActive && (
                 <motion.div
                   layoutId="mobileActiveTab"
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#3A82F7] rounded-full"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-[#D4B483] rounded-full"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
@@ -402,14 +409,14 @@ export function BottomNav({ pathname }: BottomNavProps) {
                   "p-3 rounded-xl transition-all duration-200",
                   "min-w-[44px] min-h-[44px] flex items-center justify-center",
                   isActive
-                    ? "bg-[rgba(58,130,247,0.16)]"
+                    ? "bg-[rgba(212,180,131,0.16)]"
                     : "group-active:bg-[rgba(255,255,255,0.08)]"
                 )}
               >
                 <item.icon
                   className={cn(
                     "w-6 h-6 transition-colors",
-                    isActive ? "text-[#3A82F7]" : "text-[rgba(207,207,207,0.7)]"
+                    isActive ? "text-[#D4B483]" : "text-[rgba(207,207,207,0.7)]"
                   )}
                 />
               </motion.div>
@@ -418,7 +425,7 @@ export function BottomNav({ pathname }: BottomNavProps) {
               <span className={cn(
                 "text-xs font-medium transition-colors",
                 isActive
-                  ? "text-[#3A82F7]"
+                  ? "text-[#D4B483]"
                   : "text-[rgba(207,207,207,0.7)]"
               )}>
                 {item.label}

@@ -68,10 +68,10 @@ export function NotificationCenter() {
         title: 'Plan tomorrow\'s templates today',
         description: 'Queue up tomorrow\'s cases in Templates and they\'ll be ready for review when you log in.',
         icon: Sparkles,
-        iconClassName: 'bg-[rgba(143,130,255,0.18)] text-[#8F82FF] ring-[rgba(143,130,255,0.45)]',
+        iconClassName: 'bg-[rgba(168,159,145,0.18)] text-[#A89F91] ring-[rgba(168,159,145,0.45)]',
         badge: 'Workflow tip',
         badgeVariant: 'outline' as const,
-        badgeClassName: 'border-transparent bg-[rgba(143,130,255,0.18)] text-[#D7D1FF]',
+        badgeClassName: 'border-transparent bg-[rgba(168,159,145,0.18)] text-[#E8DCC8]',
         actionLabel: 'Browse templates',
         href: '/app/templates',
       },
@@ -80,10 +80,10 @@ export function NotificationCenter() {
         title: 'Keep your report history tidy',
         description: 'Archive older reports from the Reports page to keep search lightning fast.',
         icon: FileText,
-        iconClassName: 'bg-[rgba(75,142,255,0.16)] text-[#4B8EFF] ring-[rgba(75,142,255,0.35)]',
+        iconClassName: 'bg-[rgba(212,180,131,0.16)] text-[#D4B483] ring-[rgba(212,180,131,0.35)]',
         badge: 'Housekeeping',
         badgeVariant: 'outline' as const,
-        badgeClassName: 'border-transparent bg-[rgba(75,142,255,0.18)] text-[#C7DAFF]',
+        badgeClassName: 'border-transparent bg-[rgba(212,180,131,0.18)] text-[#E8DCC8]',
         actionLabel: 'Open reports',
         href: '/app/reports',
       },
@@ -92,10 +92,10 @@ export function NotificationCenter() {
         title: 'Speed up with reusable snippets',
         description: 'Save recurring phrases as template snippets so every new report starts 80% complete.',
         icon: Zap,
-        iconClassName: 'bg-[rgba(63,191,140,0.16)] text-[#3FBF8C] ring-[rgba(63,191,140,0.35)]',
+        iconClassName: 'bg-[rgba(212,180,131,0.16)] text-[#D4B483] ring-[rgba(212,180,131,0.35)]',
         badge: 'Power user',
         badgeVariant: 'outline' as const,
-        badgeClassName: 'border-transparent bg-[rgba(63,191,140,0.18)] text-[#B6F2DB]',
+        badgeClassName: 'border-transparent bg-[rgba(212,180,131,0.18)] text-[#E8DCC8]',
         actionLabel: 'Manage templates',
         href: '/app/templates',
       },
@@ -147,12 +147,12 @@ export function NotificationCenter() {
         icon: TrendingUp,
         iconClassName: isRunningLow
           ? 'bg-[rgba(255,107,107,0.18)] text-[#FF6B6B] ring-[rgba(255,107,107,0.35)]'
-          : 'bg-[rgba(63,191,140,0.16)] text-[#3FBF8C] ring-[rgba(63,191,140,0.35)]',
+          : 'bg-[rgba(212,180,131,0.16)] text-[#D4B483] ring-[rgba(212,180,131,0.35)]',
         badge: `${Math.round(usagePercent)}% used`,
         badgeVariant: 'outline',
         badgeClassName: isRunningLow
           ? 'bg-[rgba(255,107,107,0.18)] text-[#FFD7D7] border-transparent'
-          : 'bg-[rgba(63,191,140,0.18)] text-[#D0F7EB] border-transparent',
+          : 'bg-[rgba(212,180,131,0.18)] text-[#E8DCC8] border-transparent',
         meta: resetCopy,
         progress: usagePercent,
         actionLabel: isRunningLow ? 'Review plans' : undefined,
@@ -167,10 +167,10 @@ export function NotificationCenter() {
           title: `Reports finish in ~${formatSeconds(avgSeconds)}`,
           description: 'Your 30-day average generation time looks healthy. We will surface alerts if it trends upward.',
           icon: Clock,
-          iconClassName: 'bg-[rgba(75,142,255,0.16)] text-[#4B8EFF] ring-[rgba(75,142,255,0.35)]',
+          iconClassName: 'bg-[rgba(168,159,145,0.16)] text-[#A89F91] ring-[rgba(168,159,145,0.35)]',
           badge: 'Performance',
           badgeVariant: 'outline',
-          badgeClassName: 'border-transparent bg-[rgba(75,142,255,0.18)] text-[#C7DAFF]',
+          badgeClassName: 'border-transparent bg-[rgba(168,159,145,0.18)] text-[#E8DCC8]',
           meta: `Tracking ${subscriptionData?.usage_stats?.total_reports ?? subscription.reports_used} recent reports`,
         })
       }
@@ -192,10 +192,10 @@ export function NotificationCenter() {
       title: trimmedName ? `Resume "${trimmedName}"` : 'Resume your saved draft',
       description: 'We\'ll restore the latest inputs so you can finish in one click.',
       icon: FileText,
-      iconClassName: 'bg-[rgba(143,130,255,0.18)] text-[#8F82FF] ring-[rgba(143,130,255,0.45)]',
+      iconClassName: 'bg-[rgba(212,180,131,0.18)] text-[#D4B483] ring-[rgba(212,180,131,0.45)]',
       badge: 'Draft ready',
       badgeVariant: 'outline',
-      badgeClassName: 'border-transparent bg-[rgba(75,142,255,0.18)] text-[#C7DAFF]',
+      badgeClassName: 'border-transparent bg-[rgba(168,159,145,0.18)] text-[#E8DCC8]',
       actionLabel: 'Open draft',
       href: `/app/generate?templateId=${encodeURIComponent(recentDraft.id)}`,
       attention: true,
@@ -246,7 +246,7 @@ export function NotificationCenter() {
           size="icon"
           className={cn(
             'relative hidden sm:flex text-[rgba(207,207,207,0.75)] transition-transform hover:scale-[1.03] hover:text-white',
-            open && 'text-[#4B8EFF]'
+            open && 'text-[#D4B483]'
           )}
           title="Notifications"
           aria-label="Open notifications"
@@ -260,7 +260,7 @@ export function NotificationCenter() {
         </Button>
       </DialogTrigger>
       <DialogContent className="flex w-full max-w-lg max-h-[85vh] flex-col overflow-hidden rounded-3xl border border-[rgba(255,255,255,0.08)] bg-[rgba(12,12,14,0.95)] p-0 shadow-[0_24px_48px_rgba(0,0,0,0.6)] backdrop-blur-xl safe-area-inset-top">
-        <div className="border-b border-[rgba(255,255,255,0.08)] bg-[linear-gradient(135deg,rgba(38,83,255,0.4)0%,rgba(12,12,14,0.9)70%)] px-6 py-5 safe-area-pt safe-area-px">
+        <div className="border-b border-[rgba(255,255,255,0.08)] bg-[linear-gradient(135deg,rgba(212,180,131,0.4)0%,rgba(12,12,14,0.9)70%)] px-6 py-5 safe-area-pt safe-area-px">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-[rgba(207,207,207,0.75)]">
@@ -273,7 +273,7 @@ export function NotificationCenter() {
                 Tailored nudges and insights so your reporting flow stays fast.
               </DialogDescription>
             </div>
-            <div className="hidden sm:flex h-11 w-11 items-center justify-center rounded-xl bg-[rgba(255,255,255,0.12)] text-[#4B8EFF] shadow-[0_0_10px_rgba(75,142,255,0.35)]">
+            <div className="hidden sm:flex h-11 w-11 items-center justify-center rounded-xl bg-[rgba(255,255,255,0.12)] text-[#D4B483] shadow-[0_0_10px_rgba(212,180,131,0.35)]">
               <Sparkles className="h-5 w-5" />
             </div>
           </div>
@@ -289,7 +289,7 @@ export function NotificationCenter() {
           ) : notifications.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-[rgba(255,255,255,0.16)] bg-[rgba(22,22,26,0.7)] p-6 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[rgba(255,255,255,0.1)] shadow">
-                <Sparkles className="h-6 w-6 text-[#4B8EFF]" />
+                <Sparkles className="h-6 w-6 text-[#D4B483]" />
               </div>
               <h3 className="mt-4 text-lg font-semibold text-white">
                 All quiet for now
@@ -360,7 +360,7 @@ export function NotificationCenter() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-9 px-4 text-sm font-semibold text-[#4B8EFF] border-[#4B8EFF]/30 hover:bg-[rgba(75,142,255,0.12)]"
+                      className="h-9 px-4 text-sm font-semibold text-[#D4B483] border-[#D4B483]/30 hover:bg-[rgba(212,180,131,0.12)]"
                       onClick={() => handleNavigate(notification.href, notification.onAction)}
                     >
                       {notification.actionLabel}
@@ -384,7 +384,7 @@ export function NotificationCenter() {
               <Button
                 size="sm"
                 variant="outline"
-                className="mt-1 h-9 px-3 text-sm font-semibold text-[#4B8EFF] border-[#4B8EFF]/30 hover:bg-[rgba(75,142,255,0.12)] sm:mt-0"
+                className="mt-1 h-9 px-3 text-sm font-semibold text-[#D4B483] border-[#D4B483]/30 hover:bg-[rgba(212,180,131,0.12)] sm:mt-0"
                 onClick={() => handleNavigate('/app/settings')}
               >
                 Adjust settings

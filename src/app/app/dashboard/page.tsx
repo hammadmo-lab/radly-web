@@ -68,8 +68,8 @@ function WebDashboardPage() {
         value: sub ? `${sub.reports_used}/${sub.reports_limit}` : '—',
         change: sub ? `${sub.reports_remaining} remaining` : '',
         icon: FileText,
-        bgClass: 'bg-[rgba(75,142,255,0.18)] shadow-[0_0_12px_rgba(75,142,255,0.25)]',
-        iconClass: 'text-[#4B8EFF]',
+        bgClass: 'bg-[rgba(212,180,131,0.18)] shadow-[0_0_12px_rgba(212,180,131,0.25)]',
+        iconClass: 'text-[#D4B483]',
       },
       {
         label: 'Avg. generation time',
@@ -77,19 +77,19 @@ function WebDashboardPage() {
         change: hasAvgGenerationData
           ? 'Last 30 days'
           : usageStats
-          ? 'Timing data not yet available'
-          : '',
+            ? 'Timing data not yet available'
+            : '',
         icon: Clock,
-        bgClass: 'bg-[rgba(143,130,255,0.18)] shadow-[0_0_12px_rgba(143,130,255,0.25)]',
-        iconClass: 'text-[#8F82FF]',
+        bgClass: 'bg-[rgba(168,159,145,0.18)] shadow-[0_0_12px_rgba(168,159,145,0.25)]',
+        iconClass: 'text-[#A89F91]',
       },
       {
         label: 'Plan',
         value: sub?.tier_display_name ?? '—',
         change: sub ? sub.status : '',
         icon: BookTemplate,
-        bgClass: 'bg-[rgba(63,191,140,0.18)] shadow-[0_0_12px_rgba(63,191,140,0.25)]',
-        iconClass: 'text-[#3FBF8C]',
+        bgClass: 'bg-[rgba(212,180,131,0.18)] shadow-[0_0_12px_rgba(212,180,131,0.25)]',
+        iconClass: 'text-[#D4B483]',
       },
       {
         label: 'Resets in',
@@ -112,28 +112,28 @@ function WebDashboardPage() {
     return [
       recentTemplate
         ? {
-            icon: Plus,
-            title: recentTitle ? `Resume ${recentTitle}` : 'Resume recent draft',
-            description: 'Pick up where you left off',
-            href: `/app/generate?templateId=${encodeURIComponent(recentTemplate.id)}`,
-            gradient: 'from-[#4B8EFF] to-[#8F82FF]',
-            badge: 'Draft saved',
-            cta: 'Continue',
-          }
+          icon: Plus,
+          title: recentTitle ? `Resume ${recentTitle}` : 'Resume recent draft',
+          description: 'Pick up where you left off',
+          href: `/app/generate?templateId=${encodeURIComponent(recentTemplate.id)}`,
+          gradient: 'from-[#D4B483] to-[#B89666]',
+          badge: 'Draft saved',
+          cta: 'Continue',
+        }
         : {
-            icon: Plus,
-            title: 'Choose a Template',
-            description: 'Start a fresh report from our library',
-            href: '/app/templates',
-            gradient: 'from-[#4B8EFF] to-[#3FBF8C]',
-            cta: 'Get started',
-          },
+          icon: Plus,
+          title: 'Choose a Template',
+          description: 'Start a fresh report from our library',
+          href: '/app/templates',
+          gradient: 'from-[#D4B483] to-[#C68E59]',
+          cta: 'Get started',
+        },
       {
         icon: BookTemplate,
         title: 'Browse Templates',
         description: 'View all available report templates',
         href: '/app/templates',
-        gradient: 'from-[#8F82FF] to-[#4B8EFF]',
+        gradient: 'from-[#B89666] to-[#D4B483]',
         cta: 'Browse',
       },
       {
@@ -141,7 +141,7 @@ function WebDashboardPage() {
         title: 'View Reports',
         description: 'Access your generated reports',
         href: '/app/reports',
-        gradient: 'from-[#3FBF8C] to-[#4B8EFF]',
+        gradient: 'from-[#C68E59] to-[#D4B483]',
         cta: 'Open reports',
       },
     ]
@@ -162,7 +162,7 @@ function WebDashboardPage() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="aurora-card border border-[rgba(58,130,247,0.28)] bg-[rgba(22,30,52,0.82)] px-4 sm:px-6 py-5 text-sm text-[#D7E3FF] shadow-[0_18px_44px_rgba(58,130,247,0.22)] w-full max-w-full"
+          className="aurora-card border border-[rgba(212,180,131,0.28)] bg-[rgba(22,30,52,0.82)] px-4 sm:px-6 py-5 text-sm text-[#E8DCC8] shadow-[0_18px_44px_rgba(212,180,131,0.22)] w-full max-w-full"
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between w-full">
             <div className="space-y-1 min-w-0 flex-1">
@@ -178,7 +178,7 @@ function WebDashboardPage() {
             </div>
             <Button
               variant="outline"
-              className="h-10 px-4 sm:px-5 text-sm font-semibold text-[#4B8EFF] border-[#4B8EFF]/40 hover:bg-[rgba(75,142,255,0.12)] w-full sm:w-auto min-h-[44px] shrink-0"
+              className="h-10 px-4 sm:px-5 text-sm font-semibold text-[#D4B483] border-[#D4B483]/40 hover:bg-[rgba(212,180,131,0.12)] w-full sm:w-auto min-h-[44px] shrink-0"
               onClick={() => router.push('/pricing')}
               type="button"
             >
@@ -192,10 +192,10 @@ function WebDashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="aurora-card relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(135deg,rgba(38,83,255,0.32)0%,rgba(12,12,14,0.85)70%)] p-6 sm:p-8 lg:p-12 shadow-[0_24px_48px_rgba(0,0,0,0.6)] w-full max-w-full"
+        className="aurora-card relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(135deg,rgba(212,180,131,0.12)0%,rgba(12,12,14,0.85)70%)] p-6 sm:p-8 lg:p-12 shadow-[0_24px_48px_rgba(0,0,0,0.6)] w-full max-w-full"
       >
         <div className="flex items-center gap-3 mb-4">
-          <Sparkles className="w-8 h-8 text-[#4B8EFF] animate-pulse" />
+          <Sparkles className="w-8 h-8 text-[#D4B483] animate-pulse" />
           <span className="text-sm font-medium text-[rgba(207,207,207,0.75)] uppercase tracking-wide">
             Welcome back
           </span>
@@ -204,7 +204,7 @@ function WebDashboardPage() {
         <h1
           className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-white"
           style={{
-            textShadow: '0 0 30px rgba(75, 142, 255, 0.4)'
+            textShadow: '0 0 30px rgba(212, 180, 131, 0.4)'
           }}
         >
           <span className="text-gradient-brand">Generate Reports</span>
@@ -218,9 +218,9 @@ function WebDashboardPage() {
 
         {/* Value Propositions Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-          <div className="flex items-start gap-3 p-4 rounded-xl bg-[rgba(75,142,255,0.08)] border border-[rgba(75,142,255,0.2)]">
-            <div className="p-2 rounded-lg bg-[rgba(75,142,255,0.15)]">
-              <Zap className="w-5 h-5 text-[#4B8EFF]" />
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-[rgba(212,180,131,0.08)] border border-[rgba(212,180,131,0.2)]">
+            <div className="p-2 rounded-lg bg-[rgba(212,180,131,0.15)]">
+              <Zap className="w-5 h-5 text-[#D4B483]" />
             </div>
             <div>
               <h3 className="text-sm font-semibold text-white mb-1">Lightning Fast</h3>
@@ -228,9 +228,9 @@ function WebDashboardPage() {
             </div>
           </div>
 
-          <div className="flex items-start gap-3 p-4 rounded-xl bg-[rgba(143,130,255,0.08)] border border-[rgba(143,130,255,0.2)]">
-            <div className="p-2 rounded-lg bg-[rgba(143,130,255,0.15)]">
-              <FileText className="w-5 h-5 text-[#8F82FF]" />
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-[rgba(168,159,145,0.08)] border border-[rgba(168,159,145,0.2)]">
+            <div className="p-2 rounded-lg bg-[rgba(168,159,145,0.15)]">
+              <FileText className="w-5 h-5 text-[#A89F91]" />
             </div>
             <div>
               <h3 className="text-sm font-semibold text-white mb-1">Professional Quality</h3>
@@ -238,9 +238,9 @@ function WebDashboardPage() {
             </div>
           </div>
 
-          <div className="flex items-start gap-3 p-4 rounded-xl bg-[rgba(63,191,140,0.08)] border border-[rgba(63,191,140,0.2)]">
-            <div className="p-2 rounded-lg bg-[rgba(63,191,140,0.15)]">
-              <BookTemplate className="w-5 h-5 text-[#3FBF8C]" />
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-[rgba(212,180,131,0.08)] border border-[rgba(212,180,131,0.2)]">
+            <div className="p-2 rounded-lg bg-[rgba(212,180,131,0.15)]">
+              <BookTemplate className="w-5 h-5 text-[#D4B483]" />
             </div>
             <div>
               <h3 className="text-sm font-semibold text-white mb-1">Multiple Templates</h3>
@@ -267,7 +267,7 @@ function WebDashboardPage() {
                       <stat.icon className={`w-6 h-6 ${stat.iconClass}`} />
                     </div>
                     {stat.change ? (
-                      <span className="text-xs text-[#3FBF8C] bg-[rgba(63,191,140,0.18)] px-2 py-1 rounded-full font-medium">
+                      <span className="text-xs text-[#D4B483] bg-[rgba(212,180,131,0.18)] px-2 py-1 rounded-full font-medium">
                         {stat.change}
                       </span>
                     ) : null}
@@ -285,11 +285,11 @@ function WebDashboardPage() {
       <Suspense fallback={<GridCardsSkeleton count={3} columns={1} variant="card" />}>
         <div className="w-full max-w-full">
           <div className="flex items-center gap-2 mb-6">
-            <Zap className="w-5 h-5 text-[#4B8EFF]" />
+            <Zap className="w-5 h-5 text-[#D4B483]" />
             <h2
               className="text-2xl font-bold text-white"
               style={{
-                textShadow: '0 0 20px rgba(75, 142, 255, 0.3)'
+                textShadow: '0 0 20px rgba(212, 180, 131, 0.3)'
               }}
             >
               Quick Actions
@@ -304,16 +304,16 @@ function WebDashboardPage() {
                 onClick={() => router.push(action.href)}
               >
                 <CardContent className="p-6 w-full">
-                  <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${action.gradient} mb-4 shadow-[0_0_16px_rgba(75,142,255,0.35)] group-hover:scale-110 transition-transform`}>
+                  <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${action.gradient} mb-4 shadow-[0_0_16px_rgba(212,180,131,0.35)] group-hover:scale-110 transition-transform`}>
                     <action.icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-[#4B8EFF] transition-colors break-words">
+                  <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-[#D4B483] transition-colors break-words">
                     {action.title}
                   </h3>
                   <p className="text-sm sm:text-base text-[rgba(207,207,207,0.75)] mb-4 break-words">{action.description}</p>
-                  <div className="flex items-center text-[#4B8EFF] font-medium">
+                  <div className="flex items-center text-[#D4B483] font-medium">
                     {action.badge ? (
-                      <span className="mr-2 rounded-full bg-[rgba(63,191,140,0.2)] px-2 py-0.5 text-xs font-semibold text-[#B6F2DB]">
+                      <span className="mr-2 rounded-full bg-[rgba(212,180,131,0.2)] px-2 py-0.5 text-xs font-semibold text-[#E8DCC8]">
                         {action.badge}
                       </span>
                     ) : null}

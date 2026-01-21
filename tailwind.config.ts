@@ -65,6 +65,11 @@ const config: Config = {
           border: "hsl(var(--card-border))",
         },
         surface: "hsl(var(--surface))",
+        gold: {
+          DEFAULT: "#D4B483",
+          glow: "rgba(212, 180, 131, 0.5)",
+          dim: "rgba(212, 180, 131, 0.1)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
