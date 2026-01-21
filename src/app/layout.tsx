@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     creator: siteConfig.twitterHandle,
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.png",
     apple: "/icon-192.png",
   },
   appleWebApp: {
