@@ -115,7 +115,7 @@ export default function TemplatesPage() {
         </div>
         <Button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="h-12 px-6 bg-[linear-gradient(90deg,#2653FF_0%,#4B8EFF_100%)] text-white shadow-[0_10px_24px_rgba(75,142,255,0.35)] hover:shadow-[0_16px_28px_rgba(75,142,255,0.45)]"
+          className="h-12 px-6 bg-[linear-gradient(90deg,#E5C478_0%,#F5D791_100%)] text-white shadow-[0_10px_24px_rgba(245,215,145,0.35)] hover:shadow-[0_16px_28px_rgba(245,215,145,0.45)]"
         >
           <Plus className="w-5 h-5 mr-2" />
           New Report
@@ -132,7 +132,7 @@ export default function TemplatesPage() {
             <p className="text-xs sm:text-sm text-[rgba(207,207,207,0.75)] leading-relaxed">
               Tap the{' '}
               <span className="inline-flex items-center px-2 py-1 rounded-md border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.08)] gap-1.5 align-middle">
-                <Settings className="w-3 h-3 text-[#8F82FF]" />
+                <Settings className="w-3 h-3 text-[#E5C478]" />
                 <span className="text-xs font-medium uppercase tracking-wider text-[rgba(207,207,207,0.85)]">Settings</span>
               </span>{' '}
               icon on any template to add preferences (e.g. &quot;always mention lymphadenopathy&quot;). The AI remembers them for every future report.
@@ -150,7 +150,7 @@ export default function TemplatesPage() {
               placeholder="Search templates by name, modality, or body system..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 h-12 sm:h-13 bg-[rgba(18,22,36,0.85)] border border-[rgba(255,255,255,0.08)] text-white placeholder:text-[rgba(207,207,207,0.45)] focus-visible:ring-[#4B8EFF]"
+              className="pl-12 h-12 sm:h-13 bg-[rgba(18,22,36,0.85)] border border-[rgba(255,255,255,0.08)] text-white placeholder:text-[rgba(207,207,207,0.45)] focus-visible:ring-[#F5D791]"
             />
           </div>
 
@@ -188,14 +188,14 @@ export default function TemplatesPage() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className={`h-11 rounded-lg border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-white hover:border-[#4B8EFF]/40 hover:text-white ${
-                  selectedModality ? 'border-[#4B8EFF]/40 bg-[rgba(75,142,255,0.12)]' : ''
+                className={`h-11 rounded-lg border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-white hover:border-[#F5D791]/40 hover:text-white ${
+                  selectedModality ? 'border-[#F5D791]/40 bg-[rgba(245,215,145,0.12)]' : ''
                 }`}
               >
                 <Filter className="w-4 h-4 mr-2" />
                 Modality
                 {selectedModality && (
-                  <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-[rgba(75,142,255,0.2)] text-[#D7E3FF]">
+                  <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-[rgba(245,215,145,0.2)] text-[#E8DCC8]">
                     {selectedModality}
                   </span>
                 )}
@@ -211,7 +211,7 @@ export default function TemplatesPage() {
                 <DropdownMenuItem
                   key={modality}
                   onClick={() => handleModalityChange(modality)}
-                  className={selectedModality === modality ? 'bg-[rgba(75,142,255,0.18)] text-[#D7E3FF]' : ''}
+                  className={selectedModality === modality ? 'bg-[rgba(245,215,145,0.18)] text-[#E8DCC8]' : ''}
                 >
                   {modality}
                 </DropdownMenuItem>
@@ -223,15 +223,15 @@ export default function TemplatesPage() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className={`h-11 rounded-lg border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-white hover:border-[#4B8EFF]/40 hover:text-white ${
-                  selectedAnatomy ? 'border-[#4B8EFF]/40 bg-[rgba(75,142,255,0.12)]' : ''
+                className={`h-11 rounded-lg border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-white hover:border-[#F5D791]/40 hover:text-white ${
+                  selectedAnatomy ? 'border-[#F5D791]/40 bg-[rgba(245,215,145,0.12)]' : ''
                 } ${!selectedModality ? 'opacity-60 cursor-not-allowed' : ''}`}
                 disabled={!selectedModality}
               >
                 <Filter className="w-4 h-4 mr-2" />
                 Body System
                 {selectedAnatomy && (
-                  <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-[rgba(143,130,255,0.2)] text-[#E0D9FF]">
+                  <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-[rgba(245,215,145,0.2)] text-[#E8DCC8]">
                     {selectedAnatomy}
                   </span>
                 )}
@@ -247,7 +247,7 @@ export default function TemplatesPage() {
                 <DropdownMenuItem
                   key={anatomy}
                   onClick={() => setSelectedAnatomy(anatomy)}
-                  className={selectedAnatomy === anatomy ? 'bg-[rgba(143,130,255,0.18)] text-[#E0D9FF]' : ''}
+                  className={selectedAnatomy === anatomy ? 'bg-[rgba(245,215,145,0.18)] text-[#E8DCC8]' : ''}
                 >
                   {anatomy}
                 </DropdownMenuItem>
@@ -324,12 +324,12 @@ export default function TemplatesPage() {
               <div className="flex flex-col flex-1 space-y-3">
                 <div className="flex flex-wrap gap-2">
                   {template.modality && (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[rgba(75,142,255,0.18)] text-[#D7E3FF]">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[rgba(245,215,145,0.18)] text-[#E8DCC8]">
                       {template.modality}
                     </span>
                   )}
                   {template.anatomy && (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[rgba(143,130,255,0.18)] text-[#E0D9FF]">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[rgba(245,215,145,0.18)] text-[#E8DCC8]">
                       {template.anatomy}
                     </span>
                   )}
@@ -348,7 +348,7 @@ export default function TemplatesPage() {
 
               <div className="mt-auto pt-3">
                 <Button
-                  className="w-full h-10 sm:h-11 bg-[#2653FF] text-white hover:bg-[#4B8EFF]"
+                  className="w-full h-10 sm:h-11 bg-[#E5C478] text-white hover:bg-[#F5D791]"
                   onClick={(e) => {
                     e.stopPropagation()
                     router.push(`/app/generate?templateId=${template.id}`)

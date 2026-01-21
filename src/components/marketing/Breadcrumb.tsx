@@ -33,20 +33,20 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
       />
       <nav
         aria-label="breadcrumb"
-        className="flex flex-wrap items-center gap-2 text-sm text-[rgba(207,207,207,0.72)]"
+        className="inline-flex flex-nowrap items-center gap-2 text-sm text-[rgba(207,207,207,0.72)]"
       >
         {items.map((item, index) => (
-          <div key={item.url} className="flex items-center gap-2">
+          <span key={item.url} className="inline-flex items-center gap-2 whitespace-nowrap">
             <Link
               href={item.url}
-              className="text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline transition-colors"
+              className="inline-flex items-center text-[#F5D791] underline-offset-4 hover:underline hover:text-[#FFE8B0] transition-colors"
             >
               {item.label}
             </Link>
             {index < items.length - 1 && (
               <ChevronRight className="h-4 w-4 text-[rgba(207,207,207,0.45)]" aria-hidden />
             )}
-          </div>
+          </span>
         ))}
       </nav>
     </>

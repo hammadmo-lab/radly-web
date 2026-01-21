@@ -161,7 +161,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
           </div>
           <p className="mt-4 text-sm text-[rgba(207,207,207,0.75)] sm:text-base">
             All plans include five complimentary reports to evaluate the assistant. Detailed validation notes are available for compliance teams.{" "}
-            <a href="#pricing-policies" className="text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">
+            <a href="#pricing-policies" className="text-[rgba(245,215,145,0.9)] underline-offset-4 hover:underline">
               Need policies?
             </a>
           </p>
@@ -218,7 +218,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
                 </ul>
 
                 <div className="mt-8 text-sm text-[rgba(207,207,207,0.65)]">
-                  Radly assists clinicians. Radiologists review and finalise every report. See <Link href="/validation" className="text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">Validation</Link> for methodology.
+                  Radly assists clinicians. Radiologists review and finalise every report. See <Link href="/validation" className="text-[rgba(245,215,145,0.9)] underline-offset-4 hover:underline">Validation</Link> for methodology.
                 </div>
 
                 <PrimaryCTA href={tier.tier_name === "free" ? "/auth/signin" : `/pricing/checkout?tier=${tier.tier_name}&region=${region}`} ariaLabel={`Select the ${tier.tier_display_name} plan`} className="mt-6 w-full">
@@ -246,7 +246,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
                 description="Radly provides digital-only radiology report generation through monthly subscriptions. Tiers match the cards above: Free (5 reports/month), Starter (20 reports/month), Professional (100 reports/month), and Premium with enterprise-managed capacity and dedicated support. Every plan unlocks immediately after you create or upgrade an account."
               />
               <PolicyCard
-                icon={<Truck className="h-5 w-5 text-[rgba(143,130,255,0.9)]" aria-hidden />}
+                icon={<Truck className="h-5 w-5 text-[rgba(245,215,145,0.95)]" aria-hidden />}
                 title="Delivery & Shipping"
                 description="Access is delivered online—no physical products, couriers, or shipping timelines. Subscribers can use both the dashboard and API as soon as their tier is active."
               />
@@ -261,7 +261,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
                 description={
                   <>
                     We only process the clinical text you submit to generate reports and retain exports for a limited window. Detailed handling is documented in our{" "}
-                    <Link href="https://radly.app/privacy" className="text-[rgba(143,130,255,0.9)] underline-offset-4 hover:underline">
+                    <Link href="https://radly.app/privacy" className="text-[rgba(245,215,145,0.95)] underline-offset-4 hover:underline">
                       Privacy Policy
                     </Link>
                     , and questions are always welcome.
@@ -296,7 +296,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
             Includes five complimentary reports • No billing setup required to evaluate
           </p>
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-xs">
-            <Link href="/instructions" className="inline-flex items-center gap-1 text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">
+            <Link href="/instructions" className="inline-flex items-center gap-1 text-[rgba(245,215,145,0.9)] underline-offset-4 hover:underline">
               See workflow guide
               <ArrowRight className="h-3 w-3" aria-hidden />
             </Link>

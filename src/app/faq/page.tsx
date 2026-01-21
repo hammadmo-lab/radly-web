@@ -235,7 +235,7 @@ export default function FAQPage() {
         <div className="space-y-12">
           {faqCategories.map((category) => (
             <section key={category.category} className="space-y-6">
-              <h2 className="text-2xl font-semibold text-[rgba(143,130,255,0.85)]">
+              <h2 className="text-2xl font-semibold text-[rgba(245,215,145,0.9)]">
                 {category.category}
               </h2>
 
@@ -247,7 +247,7 @@ export default function FAQPage() {
                   >
                     <summary className="flex items-center justify-between text-lg font-semibold text-white list-none">
                       <span>{item.question}</span>
-                      <span className="text-[rgba(143,130,255,0.85)] group-open:rotate-180 transition-transform">
+                      <span className="text-[rgba(245,215,145,0.9)] group-open:rotate-180 transition-transform">
                         ▼
                       </span>
                     </summary>
@@ -274,13 +274,13 @@ export default function FAQPage() {
         <nav className="mt-12 flex justify-between items-center pt-8 border-t border-[rgba(255,255,255,0.1)]">
           <Link
             href="/instructions"
-            className="text-[rgba(143,130,255,0.85)] hover:text-[rgba(143,130,255,1)] transition-colors"
+            className="text-[rgba(245,215,145,0.9)] hover:text-[rgba(245,215,145,1)] transition-colors"
           >
             ← Back to Instructions
           </Link>
           <Link
             href="/security"
-            className="text-[rgba(143,130,255,0.85)] hover:text-[rgba(143,130,255,1)] transition-colors"
+            className="text-[rgba(245,215,145,0.9)] hover:text-[rgba(245,215,145,1)] transition-colors"
           >
             Security Details →
           </Link>

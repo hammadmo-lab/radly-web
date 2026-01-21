@@ -354,14 +354,14 @@ export default function GeneratePage() {
             <Button
               variant="ghost"
               onClick={() => router.push('/app/templates')}
-              className="rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.75)] px-5 text-[rgba(207,207,207,0.85)] hover:border-[rgba(75,142,255,0.45)] hover:bg-[rgba(75,142,255,0.18)] hover:text-white"
+              className="rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.75)] px-5 text-[rgba(207,207,207,0.85)] hover:border-[rgba(245,215,145,0.45)] hover:bg-[rgba(245,215,145,0.18)] hover:text-white"
             >
               Browse templates
             </Button>
             <Button
               variant="ghost"
               onClick={() => window.location.reload()}
-              className="rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.75)] px-5 text-[rgba(207,207,207,0.85)] hover:border-[rgba(75,142,255,0.45)] hover:bg-[rgba(75,142,255,0.18)] hover:text-white"
+              className="rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.75)] px-5 text-[rgba(207,207,207,0.85)] hover:border-[rgba(245,215,145,0.45)] hover:bg-[rgba(245,215,145,0.18)] hover:text-white"
             >
               Retry
             </Button>
@@ -585,7 +585,7 @@ export default function GeneratePage() {
         </div>
         {/* Draft Restoration Notification */}
         {showDraftNotification && draftData && (
-          <div className="aurora-card border border-[rgba(75,142,255,0.35)] bg-[rgba(75,142,255,0.12)] p-4 sm:p-5 rounded-2xl">
+          <div className="aurora-card border border-[rgba(245,215,145,0.35)] bg-[rgba(245,215,145,0.12)] p-4 sm:p-5 rounded-2xl">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="flex items-start gap-3 flex-1 min-w-0">
                 <RotateCcw className="h-5 w-5 text-[#D4B483] flex-shrink-0 mt-0.5" />
@@ -752,7 +752,7 @@ export default function GeneratePage() {
                 <div className="aurora-card border border-[rgba(255,255,255,0.08)] overflow-hidden">
                   <div className="border-b border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.78)] px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#3FBF8C,#6EE7B7)] text-white shadow-[0_14px_32px_rgba(63,191,140,0.35)]">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#D4B483,#E5C478)] text-white shadow-[0_14px_32px_rgba(212,180,131,0.35)]">
                         <User className="h-5 w-5" />
                       </div>
                       <div>
@@ -809,7 +809,7 @@ export default function GeneratePage() {
                           pattern="[0-9]*"
                           {...register('patient.age', { valueAsNumber: true })}
                           placeholder="45"
-                          className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] input-mobile"
+                          className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(245,215,145,0.45)] input-mobile"
                         />
                       </FormField>
                       <FormField
@@ -826,7 +826,7 @@ export default function GeneratePage() {
                         >
                           <SelectTrigger
                             id="patient.sex"
-                            className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white focus:border-[rgba(75,142,255,0.45)]"
+                            className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white focus:border-[rgba(245,215,145,0.45)]"
                           >
                             <SelectValue placeholder="Select sex" />
                           </SelectTrigger>
@@ -847,7 +847,7 @@ export default function GeneratePage() {
                 <div className="aurora-card border border-[rgba(255,255,255,0.08)] overflow-hidden">
                   <div className="border-b border-[rgba(255,255,255,0.08)] bg-[rgba(12,16,28,0.78)] px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#4B8EFF,#8F82FF)] text-white shadow-[0_14px_32px_rgba(31,64,175,0.35)]">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#F5D791,#E5C478)] text-white shadow-[0_14px_32px_rgba(212,180,131,0.35)]">
                         <Stethoscope className="h-5 w-5" />
                       </div>
                       <div>
@@ -874,7 +874,7 @@ export default function GeneratePage() {
                             {...register('indication')}
                             placeholder="Reason for study..."
                             rows={3}
-                            className="flex-1 border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] textarea-mobile"
+                            className="flex-1 border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(245,215,145,0.45)] textarea-mobile"
                           />
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -904,7 +904,7 @@ export default function GeneratePage() {
                             {...register('findings')}
                             placeholder="Enter your findings here. You can type bullet points, write in free text format, or use voice dictation."
                             rows={6}
-                            className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] textarea-mobile"
+                            className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(245,215,145,0.45)] textarea-mobile"
                           />
                           <p className="text-xs text-[rgba(207,207,207,0.45)]">Tip: Press Enter for a new line, or use the Voice Dictation button below for hands-free input.</p>
 
@@ -930,7 +930,7 @@ export default function GeneratePage() {
                           autoCapitalize="sentences"
                           {...register('technique')}
                           placeholder="Portal venous phase..."
-                          className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)] input-mobile"
+                          className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(245,215,145,0.45)] input-mobile"
                         />
                       </FormField>
                     </div>
@@ -967,7 +967,7 @@ export default function GeneratePage() {
                             id="signature.name"
                             {...register('signature.name')}
                             placeholder="Dr. Jane Smith"
-                            className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)]"
+                            className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(245,215,145,0.45)]"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 e.preventDefault();
@@ -985,7 +985,7 @@ export default function GeneratePage() {
                             id="signature.date"
                             {...register('signature.date')}
                             placeholder={new Date().toLocaleDateString()}
-                            className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(75,142,255,0.45)]"
+                            className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(245,215,145,0.45)]"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 e.preventDefault();
@@ -1019,7 +1019,7 @@ export default function GeneratePage() {
                       </div>
 
                       {/* Ready to Generate Notice */}
-                      <div className="mt-6 rounded-2xl border border-[rgba(75,142,255,0.35)] bg-[rgba(12,16,28,0.6)] p-4">
+                      <div className="mt-6 rounded-2xl border border-[rgba(245,215,145,0.35)] bg-[rgba(12,16,28,0.6)] p-4">
                         <div className="flex items-center gap-3">
                           <CheckCircle className="h-5 w-5 text-[#7AE7B4]" />
                           <div>
@@ -1044,7 +1044,7 @@ export default function GeneratePage() {
               onClick={handlePrevious}
               disabled={currentStep === 1}
               className={cn(
-                "flex items-center justify-center rounded-full w-12 h-12 bg-[rgba(18,22,36,0.8)] border border-[rgba(255,255,255,0.12)] text-white hover:bg-[rgba(75,142,255,0.2)] hover:border-[rgba(75,142,255,0.4)] transition-all",
+                "flex items-center justify-center rounded-full w-12 h-12 bg-[rgba(18,22,36,0.8)] border border-[rgba(255,255,255,0.12)] text-white hover:bg-[rgba(245,215,145,0.2)] hover:border-[rgba(245,215,145,0.4)] transition-all",
                 currentStep === 1 && "opacity-40 cursor-not-allowed"
               )}
               aria-label="Previous step"
@@ -1057,7 +1057,7 @@ export default function GeneratePage() {
                 <Button
                   type="button"
                   onClick={handleNext}
-                  className="flex items-center justify-center rounded-full w-12 h-12 bg-[#2653FF] hover:bg-[#4B8EFF] text-white transition-all"
+                  className="flex items-center justify-center rounded-full w-12 h-12 bg-[#E5C478] hover:bg-[#F5D791] text-white transition-all"
                   aria-label="Next step"
                 >
                   <ChevronRight className="w-6 h-6" />
@@ -1066,7 +1066,7 @@ export default function GeneratePage() {
                 <Button
                   type="submit"
                   disabled={isSubmitting || formIsSubmitting || (usage?.subscription && usage.subscription.reports_used >= usage.subscription.reports_limit)}
-                  className="flex items-center justify-center gap-2 rounded-full px-6 h-12 bg-[#3FBF8C] hover:bg-[#6EE7B7] text-white font-semibold transition-all disabled:opacity-60"
+                  className="flex items-center justify-center gap-2 rounded-full px-6 h-12 bg-[#D4B483] hover:bg-[#E5C478] text-white font-semibold transition-all disabled:opacity-60"
                   onClick={() => {
                     setIntentionalSubmit(true);
                   }}
@@ -1092,14 +1092,14 @@ export default function GeneratePage() {
 
         {(isSubmitting || formIsSubmitting) && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(4,8,18,0.95)] backdrop-blur-sm">
-            <div className="relative w-full max-w-md mx-4 rounded-3xl border border-[rgba(75,142,255,0.3)] bg-gradient-to-br from-[rgba(12,16,28,0.98)] to-[rgba(5,8,16,0.95)] px-8 py-10 text-center shadow-2xl">
+            <div className="relative w-full max-w-md mx-4 rounded-3xl border border-[rgba(245,215,145,0.35)] bg-gradient-to-br from-[rgba(12,16,28,0.98)] to-[rgba(5,8,16,0.95)] px-8 py-10 text-center shadow-2xl">
               {/* Simple animated background glow */}
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[rgba(75,142,255,0.08)] to-transparent opacity-50 pointer-events-none" />
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[rgba(245,215,145,0.08)] to-transparent opacity-50 pointer-events-none" />
 
               <div className="relative space-y-6">
                 {/* Spinner */}
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[rgba(75,142,255,0.3)] bg-[rgba(12,16,28,0.9)] shadow-lg">
-                  <div className="h-12 w-12 rounded-full border-3 border-[rgba(143,130,255,0.3)] border-t-[rgba(143,130,255,0.9)] animate-spin" style={{ borderWidth: '3px' }} />
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[rgba(245,215,145,0.35)] bg-[rgba(12,16,28,0.9)] shadow-lg">
+                  <div className="h-12 w-12 rounded-full border-3 border-[rgba(245,215,145,0.35)] border-t-[rgba(245,215,145,0.95)] animate-spin" style={{ borderWidth: '3px' }} />
                 </div>
 
                 {/* Text content */}

@@ -187,23 +187,23 @@ export default function AboutPage() {
               </div>
               <ul className="space-y-3 text-[rgba(207,207,207,0.75)]">
                 <li className="flex gap-3">
-                  <span className="text-[rgba(143,130,255,0.85)]">✓</span>
+                  <span className="text-[rgba(245,215,145,0.9)]">✓</span>
                   <span>Inconsistent report structure across teams</span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="text-[rgba(143,130,255,0.85)]">✓</span>
+                  <span className="text-[rgba(245,215,145,0.9)]">✓</span>
                   <span>Clerical documentation taking away from clinical time</span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="text-[rgba(143,130,255,0.85)]">✓</span>
+                  <span className="text-[rgba(245,215,145,0.9)]">✓</span>
                   <span>Copy-paste errors and missing findings</span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="text-[rgba(143,130,255,0.85)]">✓</span>
+                  <span className="text-[rgba(245,215,145,0.9)]">✓</span>
                   <span>Training new radiologists on department standards</span>
                 </li>
                 <li className="flex gap-3">
-                  <span className="text-[rgba(143,130,255,0.85)]">✓</span>
+                  <span className="text-[rgba(245,215,145,0.9)]">✓</span>
                   <span>Integration friction with existing PACS workflows</span>
                 </li>
               </ul>
@@ -236,7 +236,7 @@ export default function AboutPage() {
             <div className="grid gap-8 lg:grid-cols-2 items-start">
               {/* Avatar placeholder - in production this would be an actual image */}
               <div className="flex flex-col items-center space-y-4">
-                <div className="w-64 h-80 sm:w-72 sm:h-96 rounded-2xl overflow-hidden border border-[rgba(143,130,255,0.3)]">
+                <div className="w-64 h-80 sm:w-72 sm:h-96 rounded-2xl overflow-hidden border border-[rgba(245,215,145,0.35)]">
                   <Image
                     src="/team/mohamed-hammad.jpg"
                     alt="Dr. Mohamed A. Hammad"
@@ -251,7 +251,7 @@ export default function AboutPage() {
                     href="https://www.linkedin.com/in/mohamed-h-47953589"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[rgba(143,130,255,0.15)] text-[rgba(143,130,255,0.85)] hover:bg-[rgba(143,130,255,0.25)] transition-colors"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[rgba(245,215,145,0.15)] text-[rgba(245,215,145,0.9)] hover:bg-[rgba(245,215,145,0.25)] transition-colors"
                     aria-label="Mohamed Hammad LinkedIn"
                   >
                     <Linkedin className="w-5 h-5" />
@@ -260,7 +260,7 @@ export default function AboutPage() {
                     href="https://twitter.com/ThisIsHammadMo"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[rgba(143,130,255,0.15)] text-[rgba(143,130,255,0.85)] hover:bg-[rgba(143,130,255,0.25)] transition-colors"
+                    className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[rgba(245,215,145,0.15)] text-[rgba(245,215,145,0.9)] hover:bg-[rgba(245,215,145,0.25)] transition-colors"
                     aria-label="Mohamed Hammad Twitter"
                   >
                     𝕏
@@ -272,7 +272,7 @@ export default function AboutPage() {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-2xl font-semibold text-white">Dr. Mohamed A. Hammad</h3>
-                  <p className="text-[rgba(143,130,255,0.85)] font-semibold mt-1">
+                  <p className="text-[rgba(245,215,145,0.9)] font-semibold mt-1">
                     Founder and CEO, Radiologist
                   </p>
                 </div>
@@ -310,7 +310,7 @@ export default function AboutPage() {
                     href="https://mohamedhammad.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-[rgba(143,130,255,0.85)] hover:text-[rgba(143,130,255,1)] transition-colors text-sm"
+                    className="inline-flex items-center gap-2 text-[rgba(245,215,145,0.9)] hover:text-[rgba(245,215,145,1)] transition-colors text-sm"
                   >
                     Learn more → mohamedhammad.com
                   </a>
@@ -340,21 +340,21 @@ export default function AboutPage() {
         <nav className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 pt-8 border-t border-[rgba(255,255,255,0.1)]">
           <Link
             href="/"
-            className="text-[rgba(143,130,255,0.85)] hover:text-[rgba(143,130,255,1)] transition-colors"
+            className="text-[rgba(245,215,145,0.9)] hover:text-[rgba(245,215,145,1)] transition-colors"
           >
             ← Back to Home
           </Link>
           <div className="flex gap-4 text-sm">
             <Link
               href="/security"
-              className="text-[rgba(143,130,255,0.85)] hover:text-[rgba(143,130,255,1)] transition-colors"
+              className="text-[rgba(245,215,145,0.9)] hover:text-[rgba(245,215,145,1)] transition-colors"
             >
               Security & Privacy
             </Link>
             <span className="text-[rgba(207,207,207,0.3)]">•</span>
             <a
               href="mailto:hello@radly.app"
-              className="text-[rgba(143,130,255,0.85)] hover:text-[rgba(143,130,255,1)] transition-colors"
+              className="text-[rgba(245,215,145,0.9)] hover:text-[rgba(245,215,145,1)] transition-colors"
             >
               Contact Us
             </a>

@@ -313,7 +313,7 @@ export default function InstructionsPage() {
           <ol className="space-y-4">
             {journey.map((step, index) => (
               <li key={step.title} className="aurora-card flex gap-4 border border-[rgba(255,255,255,0.08)] p-6">
-                <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(143,130,255,0.35)] bg-[rgba(12,16,28,0.65)] text-sm font-semibold">
+                <div className="mt-1 flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(245,215,145,0.35)] bg-[rgba(12,16,28,0.65)] text-sm font-semibold">
                   {index + 1}
                 </div>
                 <div>
@@ -368,7 +368,7 @@ export default function InstructionsPage() {
               >
                 <div className="flex flex-col items-center gap-3">
                   <div className="text-4xl">{item.icon}</div>
-                  <div className="h-12 w-1 bg-gradient-to-b from-[rgba(143,130,255,0.5)] to-transparent"></div>
+                  <div className="h-12 w-1 bg-gradient-to-b from-[rgba(245,215,145,0.5)] to-transparent"></div>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
@@ -379,7 +379,7 @@ export default function InstructionsPage() {
                   <p className="text-[rgba(207,207,207,0.75)] mb-3">
                     {item.description}
                   </p>
-                  <span className="inline-block px-3 py-1 bg-[rgba(143,130,255,0.15)] text-[rgba(143,130,255,0.85)] text-xs font-semibold rounded-full">
+                  <span className="inline-block px-3 py-1 bg-[rgba(245,215,145,0.15)] text-[rgba(245,215,145,0.9)] text-xs font-semibold rounded-full">
                     {item.highlight}
                   </span>
                 </div>
@@ -387,7 +387,7 @@ export default function InstructionsPage() {
             ))}
           </div>
           <p className="text-sm text-[rgba(207,207,207,0.68)] mt-6">
-            Want to see how Radly validates accuracy? View recording notes and timing data on the <Link href="/validation" className="text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">Validation</Link> page.
+            Want to see how Radly validates accuracy? View recording notes and timing data on the <Link href="/validation" className="text-[rgba(245,215,145,0.9)] underline-offset-4 hover:underline">Validation</Link> page.
           </p>
         </section>
 
@@ -400,7 +400,7 @@ export default function InstructionsPage() {
                 <p className="mt-2 text-xs uppercase tracking-[0.28em] text-[rgba(207,207,207,0.55)]">{stat.label}</p>
                 <Link
                   href="/validation"
-                  className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline"
+                  className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[rgba(245,215,145,0.9)] underline-offset-4 hover:underline"
                 >
                   Methods
                   <ArrowRight className="h-3 w-3" aria-hidden />
@@ -415,7 +415,7 @@ export default function InstructionsPage() {
           <div className="grid gap-4 sm:grid-cols-3">
             {proTips.map((tip) => (
               <div key={tip.title} className="aurora-card border border-[rgba(255,255,255,0.08)] p-6 text-sm text-[rgba(207,207,207,0.72)]">
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[rgba(143,130,255,0.35)] bg-[rgba(12,16,28,0.65)] text-[#D7E3FF]">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[rgba(245,215,145,0.35)] bg-[rgba(12,16,28,0.65)] text-[#E8DCC8]">
                   <tip.icon className="h-5 w-5" aria-hidden />
                 </div>
                 <h3 className="text-lg font-semibold text-white">{tip.title}</h3>
