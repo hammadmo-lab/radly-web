@@ -1,9 +1,10 @@
 // Voice Input Component for dictation
 // Fixed: React error #185 - ref forwarding issues resolved
+// Fixed: Duplicate transcription bug - deduplication guard added
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { useVoiceRecording } from '@/hooks/useVoiceRecording';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,9 @@ export interface VoiceInputProps {
   showLabel?: boolean;
 }
 
+// Deduplication window in milliseconds
+const DEDUP_WINDOW_MS = 500;
+
 export function VoiceInput({
   onTranscript,
   onError,
@@ -27,6 +31,9 @@ export function VoiceInput({
   className,
   showLabel = true,
 }: VoiceInputProps) {
+  // Track last processed transcript to prevent duplicates
+  const lastTranscriptRef = useRef<{ text: string; timestamp: number } | null>(null);
+
   const {
     state,
     interimTranscript,
@@ -42,6 +49,18 @@ export function VoiceInput({
   } = useVoiceRecording({
     onTranscript: (text, isFinal) => {
       if (isFinal) {
+        const now = Date.now();
+        const last = lastTranscriptRef.current;
+
+        // Skip duplicate transcripts received within the deduplication window
+        if (last && last.text === text && (now - last.timestamp) < DEDUP_WINDOW_MS) {
+          console.log('⏭️ Skipping duplicate transcript:', text.substring(0, 30) + '...');
+          return;
+        }
+
+        // Update last transcript reference
+        lastTranscriptRef.current = { text, timestamp: now };
+
         const invoke = () => onTranscript(text);
         if (typeof queueMicrotask === 'function') {
           queueMicrotask(invoke);
