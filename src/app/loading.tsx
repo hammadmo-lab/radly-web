@@ -5,10 +5,10 @@ export default function Loading() {
         <div className="absolute inset-x-10 -top-24 h-48">
           <div className="hero-aurora" />
         </div>
-        <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full border border-[rgba(75,142,255,0.45)] bg-[rgba(12,16,28,0.75)] shadow-[0_30px_80px_rgba(31,64,175,0.4)]">
+        <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-full border border-[rgba(245,215,145,0.45)] bg-[rgba(12,16,28,0.75)] shadow-[0_30px_80px_rgba(212,180,131,0.4)]">
           <span className="relative block h-14 w-14">
             <span className="absolute inset-0 rounded-full border-2 border-[rgba(75,142,255,0.28)]"></span>
-            <span className="absolute inset-0 rounded-full border-2 border-[rgba(143,130,255,0.75)] border-t-transparent animate-spin"></span>
+            <span className="absolute inset-0 rounded-full border-2 border-[rgba(245,215,145,0.8)] border-t-transparent animate-spin"></span>
           </span>
         </div>
         <div className="space-y-3">

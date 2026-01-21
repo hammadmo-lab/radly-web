@@ -231,9 +231,9 @@ export default function TermsPage() {
 
         <Section title="14. Contact">
           <ul className="list-disc list-inside space-y-2 text-[rgba(207,207,207,0.8)]">
-            <li>Email: <Link href="mailto:legal@radly.app" className="text-[#8F82FF] hover:underline">legal@radly.app</Link></li>
-            <li>Support: <Link href="mailto:support@radly.app" className="text-[#8F82FF] hover:underline">support@radly.app</Link></li>
-            <li>Website: <Link href="https://radly.app" className="text-[#8F82FF] hover:underline">https://radly.app</Link></li>
+            <li>Email: <Link href="mailto:legal@radly.app" className="text-[#F5D791] hover:underline">legal@radly.app</Link></li>
+            <li>Support: <Link href="mailto:support@radly.app" className="text-[#F5D791] hover:underline">support@radly.app</Link></li>
+            <li>Website: <Link href="https://radly.app" className="text-[#F5D791] hover:underline">https://radly.app</Link></li>
           </ul>
         </Section>
 

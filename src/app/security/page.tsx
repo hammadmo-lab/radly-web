@@ -133,7 +133,7 @@ export default function SecurityPage() {
           <div className="grid gap-6 sm:grid-cols-2">
             {commitments.map((item) => (
               <div key={item.title} className="aurora-card border border-[rgba(255,255,255,0.1)] p-6 text-sm text-[rgba(207,207,207,0.72)]">
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[rgba(143,130,255,0.35)] bg-[rgba(12,16,28,0.65)] text-[#D7E3FF]">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[rgba(245,215,145,0.35)] bg-[rgba(12,16,28,0.65)] text-[#E8DCC8]">
                   <item.icon className="h-5 w-5" aria-hidden />
                 </div>
                 <h3 className="text-lg font-semibold text-white">{item.title}</h3>
@@ -164,7 +164,7 @@ export default function SecurityPage() {
         <section className="mt-12 space-y-4 rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.68)] p-6 text-sm text-[rgba(207,207,207,0.75)]">
           <h2 className="text-2xl font-semibold text-white">Data subject requests</h2>
           <p>
-            Email <Link href="mailto:privacy@radly.app" className="text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">privacy@radly.app</Link> to request deletion, export, or to review subprocessors. We respond within two business days.
+            Email <Link href="mailto:privacy@radly.app" className="text-[rgba(245,215,145,0.9)] underline-offset-4 hover:underline">privacy@radly.app</Link> to request deletion, export, or to review subprocessors. We respond within two business days.
           </p>
           <p>Radly assists clinicians. Radiologists review and finalise every report.</p>
         </section>
@@ -183,12 +183,12 @@ export default function SecurityPage() {
             </SecondaryCTA>
           </div>
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-xs">
-            <Link href="/validation" className="inline-flex items-center gap-1 text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">
+            <Link href="/validation" className="inline-flex items-center gap-1 text-[rgba(245,215,145,0.9)] underline-offset-4 hover:underline">
               Review validation
               <ArrowRight className="h-3 w-3" aria-hidden />
             </Link>
             <span className="hidden sm:inline text-[rgba(207,207,207,0.3)]">•</span>
-            <Link href="/instructions" className="inline-flex items-center gap-1 text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">
+            <Link href="/instructions" className="inline-flex items-center gap-1 text-[rgba(245,215,145,0.9)] underline-offset-4 hover:underline">
               See how it works
               <ArrowRight className="h-3 w-3" aria-hidden />
             </Link>

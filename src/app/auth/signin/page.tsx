@@ -120,8 +120,8 @@ function SignInContent() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-[var(--ds-bg-gradient)] text-white">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 opacity-55 bg-[radial-gradient(circle_at_18%_16%,rgba(75,142,255,0.25),transparent_60%),radial-gradient(circle_at_82%_8%,rgba(143,130,255,0.2),transparent_65%)]" />
-        <div className="absolute inset-y-0 -left-24 w-72 bg-[radial-gradient(circle,rgba(63,191,140,0.2),transparent_68%)]" />
+        <div className="absolute inset-0 opacity-55 bg-[radial-gradient(circle_at_18%_16%,rgba(245,215,145,0.25),transparent_60%),radial-gradient(circle_at_82%_8%,rgba(245,215,145,0.2),transparent_65%)]" />
+        <div className="absolute inset-y-0 -left-24 w-72 bg-[radial-gradient(circle,rgba(212,180,131,0.2),transparent_68%)]" />
         <div className="absolute inset-y-0 -right-40 w-80 bg-[radial-gradient(circle,rgba(248,183,77,0.18),transparent_70%)]" />
       </div>
 
@@ -153,7 +153,7 @@ function SignInContent() {
             </div>
           </div>
 
-          <div className="hero-starfield relative overflow-hidden rounded-[40px] px-8 py-10 shadow-[0_36px_92px_rgba(31,64,175,0.45)] sm:px-10 sm:py-12">
+          <div className="hero-starfield relative overflow-hidden rounded-[40px] px-8 py-10 shadow-[0_36px_92px_rgba(212,180,131,0.45)] sm:px-10 sm:py-12">
             <div className="hero-aurora" />
             <div className="relative space-y-8">
               <div className="space-y-3 text-center">
@@ -201,7 +201,7 @@ function SignInContent() {
                     <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[rgba(207,207,207,0.5)]" />
                     <Input
                       type="email"
-                      className="h-12 rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.78)] pl-11 pr-4 text-sm text-white placeholder:text-[rgba(207,207,207,0.5)] focus-visible:ring-[rgba(75,142,255,0.45)] focus-visible:ring-offset-0"
+                      className="h-12 rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.78)] pl-11 pr-4 text-sm text-white placeholder:text-[rgba(207,207,207,0.5)] focus-visible:ring-[rgba(245,215,145,0.45)] focus-visible:ring-offset-0"
                       placeholder="you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -236,13 +236,13 @@ export default function SignInPage() {
     <Suspense fallback={
       <main className="relative min-h-screen overflow-hidden bg-[var(--ds-bg-gradient)] text-white">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 opacity-55 bg-[radial-gradient(circle_at_20%_18%,rgba(75,142,255,0.22),transparent_62%),radial-gradient(circle_at_78%_12%,rgba(143,130,255,0.18),transparent_65%)]" />
-          <div className="absolute inset-y-0 -left-24 w-72 bg-[radial-gradient(circle,rgba(63,191,140,0.18),transparent_70%)]" />
+          <div className="absolute inset-0 opacity-55 bg-[radial-gradient(circle_at_20%_18%,rgba(245,215,145,0.22),transparent_62%),radial-gradient(circle_at_78%_12%,rgba(245,215,145,0.18),transparent_65%)]" />
+          <div className="absolute inset-y-0 -left-24 w-72 bg-[radial-gradient(circle,rgba(212,180,131,0.18),transparent_70%)]" />
           <div className="absolute inset-y-0 -right-40 w-80 bg-[radial-gradient(circle,rgba(248,183,77,0.16),transparent_72%)]" />
         </div>
 
         <div className="relative flex min-h-screen items-center justify-center px-5 py-16">
-          <div className="hero-starfield relative w-full max-w-md rounded-[36px] px-8 py-10 text-center shadow-[0_32px_88px_rgba(31,64,175,0.45)]">
+          <div className="hero-starfield relative w-full max-w-md rounded-[36px] px-8 py-10 text-center shadow-[0_32px_88px_rgba(212,180,131,0.45)]">
             <div className="hero-aurora" />
             <div className="relative space-y-4">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[rgba(207,207,207,0.5)]">

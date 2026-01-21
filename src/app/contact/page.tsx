@@ -167,7 +167,7 @@ export default function ContactPage() {
                   className="aurora-card border border-[rgba(255,255,255,0.08)] p-6 space-y-4"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-[rgba(143,130,255,0.15)] text-[rgba(143,130,255,0.85)]">
+                    <div className="p-2 rounded-lg bg-[rgba(245,215,145,0.15)] text-[rgba(245,215,145,0.9)]">
                       <IconComponent className="w-6 h-6" />
                     </div>
                     <div className="flex-1">
@@ -181,7 +181,7 @@ export default function ContactPage() {
                   </div>
                   <a
                     href={`mailto:${channel.email}`}
-                    className="inline-flex items-center gap-2 text-[rgba(143,130,255,0.85)] hover:text-[rgba(143,130,255,1)] transition-colors text-sm font-semibold"
+                    className="inline-flex items-center gap-2 text-[rgba(245,215,145,0.9)] hover:text-[rgba(245,215,145,1)] transition-colors text-sm font-semibold"
                   >
                     {channel.email}
                     <span>→</span>
@@ -204,7 +204,7 @@ export default function ContactPage() {
               href="https://facebook.com/radlyapp"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-6 py-3 rounded-lg bg-[rgba(143,130,255,0.15)] border border-[rgba(143,130,255,0.3)] text-[rgba(143,130,255,0.85)] hover:bg-[rgba(143,130,255,0.25)] transition-colors font-semibold"
+              className="inline-flex items-center gap-3 px-6 py-3 rounded-lg bg-[rgba(245,215,145,0.15)] border border-[rgba(245,215,145,0.35)] text-[rgba(245,215,145,0.9)] hover:bg-[rgba(245,215,145,0.25)] transition-colors font-semibold"
             >
               <Facebook className="w-5 h-5" />
               Facebook
@@ -216,21 +216,21 @@ export default function ContactPage() {
         <nav className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 pt-8 border-t border-[rgba(255,255,255,0.1)]">
           <Link
             href="/about"
-            className="text-[rgba(143,130,255,0.85)] hover:text-[rgba(143,130,255,1)] transition-colors"
+            className="text-[rgba(245,215,145,0.9)] hover:text-[rgba(245,215,145,1)] transition-colors"
           >
             ← Back to About
           </Link>
           <div className="flex gap-4 text-sm">
             <Link
               href="/security"
-              className="text-[rgba(143,130,255,0.85)] hover:text-[rgba(143,130,255,1)] transition-colors"
+              className="text-[rgba(245,215,145,0.9)] hover:text-[rgba(245,215,145,1)] transition-colors"
             >
               Security & Privacy
             </Link>
             <span className="text-[rgba(207,207,207,0.3)]\">•</span>
             <Link
               href="/faq"
-              className="text-[rgba(143,130,255,0.85)] hover:text-[rgba(143,130,255,1)] transition-colors"
+              className="text-[rgba(245,215,145,0.9)] hover:text-[rgba(245,215,145,1)] transition-colors"
             >
               FAQ
             </Link>

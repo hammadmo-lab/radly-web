@@ -71,11 +71,11 @@ const cleanupJobs = (jobs: LocalStorageJob[]): { cleaned: LocalStorageJob[], rem
 const STATUS_STYLES: Record<string, { label: string; badgeClass: string }> = {
   done: {
     label: 'Completed',
-    badgeClass: 'bg-[rgba(63,191,140,0.18)] border border-[rgba(63,191,140,0.32)] text-[#C8F3E2]',
+    badgeClass: 'bg-[rgba(212,180,131,0.18)] border border-[rgba(212,180,131,0.32)] text-[#C8F3E2]',
   },
   running: {
     label: 'Generating',
-    badgeClass: 'bg-[rgba(75,142,255,0.16)] border border-[rgba(75,142,255,0.35)] text-[#D7E3FF]',
+    badgeClass: 'bg-[rgba(245,215,145,0.16)] border border-[rgba(245,215,145,0.35)] text-[#E8DCC8]',
   },
   queued: {
     label: 'Queued',
@@ -607,7 +607,7 @@ export default function ReportsPage() {
           <Button
             variant="outline"
             size="sm"
-            className="h-10 px-4 text-[#4B8EFF] border-[#4B8EFF]/40 hover:bg-[rgba(75,142,255,0.12)]"
+            className="h-10 px-4 text-[#F5D791] border-[#F5D791]/40 hover:bg-[rgba(245,215,145,0.12)]"
             onClick={() => {
               triggerHaptic('light');
               load();
@@ -628,7 +628,7 @@ export default function ReportsPage() {
                 setSearchQuery(e.target.value)
                 setCurrentPage(1)
               }}
-              className="pl-9 bg-[rgba(18,22,36,0.8)] border border-[rgba(255,255,255,0.08)] text-white placeholder:text-[rgba(207,207,207,0.45)] focus-visible:ring-[#4B8EFF]"
+              className="pl-9 bg-[rgba(18,22,36,0.8)] border border-[rgba(255,255,255,0.08)] text-white placeholder:text-[rgba(207,207,207,0.45)] focus-visible:ring-[#F5D791]"
               aria-label="Search reports"
             />
           </div>
@@ -654,8 +654,8 @@ export default function ReportsPage() {
             }}
             className={`px-4 py-2 min-h-[44px] rounded-lg border transition-colors text-sm font-medium touch-manipulation active:scale-95 ${
               statusFilter === null
-                ? 'border-[#4B8EFF] bg-[rgba(75,142,255,0.12)] text-[#D7E3FF]'
-                : 'border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.75)] hover:border-[rgba(75,142,255,0.4)] hover:text-white'
+                ? 'border-[#F5D791] bg-[rgba(245,215,145,0.12)] text-[#E8DCC8]'
+                : 'border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.75)] hover:border-[rgba(245,215,145,0.4)] hover:text-white'
             }`}
             aria-label="Show all reports"
           >
@@ -731,8 +731,8 @@ export default function ReportsPage() {
                 key={r.job_id}
                 className={`aurora-card border transition-all duration-300 hover:-translate-y-1 p-5 sm:p-6 ${
                   isSelected(r.job_id)
-                    ? 'border-[rgba(75,142,255,0.5)] bg-[rgba(75,142,255,0.1)]'
-                    : 'border-[rgba(255,255,255,0.05)] hover:border-[rgba(75,142,255,0.35)] hover:shadow-[0_18px_42px_rgba(20,28,45,0.55)]'
+                    ? 'border-[rgba(75,142,255,0.5)] bg-[rgba(245,215,145,0.1)]'
+                    : 'border-[rgba(255,255,255,0.05)] hover:border-[rgba(245,215,145,0.35)] hover:shadow-[0_18px_42px_rgba(20,28,45,0.55)]'
                 }`}
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -742,11 +742,11 @@ export default function ReportsPage() {
                       toggleSelection(r.job_id);
                       triggerHaptic('light');
                     }}
-                    className="flex-shrink-0 p-2 min-h-[44px] min-w-[44px] rounded hover:bg-[rgba(75,142,255,0.12)] transition-colors active:scale-95 flex items-center justify-center touch-manipulation"
+                    className="flex-shrink-0 p-2 min-h-[44px] min-w-[44px] rounded hover:bg-[rgba(245,215,145,0.12)] transition-colors active:scale-95 flex items-center justify-center touch-manipulation"
                     aria-label={`Select report ${r.job_id}`}
                   >
                     {isSelected(r.job_id) ? (
-                      <CheckCircle2 className="h-5 w-5 text-[#4B8EFF]" />
+                      <CheckCircle2 className="h-5 w-5 text-[#F5D791]" />
                     ) : (
                       <Circle className="h-5 w-5 text-[rgba(207,207,207,0.4)]" />
                     )}
@@ -770,14 +770,14 @@ export default function ReportsPage() {
                             copy(r.job_id);
                             triggerHaptic('light');
                           }}
-                          className="p-2 min-h-[44px] min-w-[44px] rounded hover:bg-[rgba(75,142,255,0.12)] transition-colors active:scale-95 flex items-center justify-center touch-manipulation"
+                          className="p-2 min-h-[44px] min-w-[44px] rounded hover:bg-[rgba(245,215,145,0.12)] transition-colors active:scale-95 flex items-center justify-center touch-manipulation"
                           title="Copy Job ID"
                           aria-label="Copy Job ID"
                         >
                           {isCopied && jobToDelete === r.job_id ? (
-                            <Check className="h-4 w-4 text-[#3FBF8C]" />
+                            <Check className="h-4 w-4 text-[#D4B483]" />
                           ) : (
-                            <Copy className="h-4 w-4 text-[rgba(207,207,207,0.5)] hover:text-[#4B8EFF]" />
+                            <Copy className="h-4 w-4 text-[rgba(207,207,207,0.5)] hover:text-[#F5D791]" />
                           )}
                         </button>
                       </div>
@@ -787,7 +787,7 @@ export default function ReportsPage() {
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <Link
                       href={`/app/report/${r.job_id}`}
-                      className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[linear-gradient(90deg,#2653FF_0%,#4B8EFF_100%)] text-white shadow-[0_10px_24px_rgba(75,142,255,0.35)] hover:shadow-[0_16px_28px_rgba(75,142,255,0.45)] transition-all touch-target text-sm"
+                      className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[linear-gradient(90deg,#E5C478_0%,#F5D791_100%)] text-white shadow-[0_10px_24px_rgba(245,215,145,0.35)] hover:shadow-[0_16px_28px_rgba(245,215,145,0.45)] transition-all touch-target text-sm"
                       onClick={() => triggerHaptic('light')}
                     >
                       <Eye className="h-4 w-4" />

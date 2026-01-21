@@ -141,7 +141,7 @@ export default function ValidationPage() {
           <div className="grid gap-6 sm:grid-cols-3">
             {validationHighlights.map((item) => (
               <div key={item.title} className="aurora-card border border-[rgba(255,255,255,0.1)] p-6 text-sm text-[rgba(207,207,207,0.72)]">
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[rgba(143,130,255,0.35)] bg-[rgba(12,16,28,0.65)] text-[#D7E3FF]">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[rgba(245,215,145,0.35)] bg-[rgba(12,16,28,0.65)] text-[#E8DCC8]">
                   <item.icon className="h-5 w-5" aria-hidden />
                 </div>
                 <h3 className="text-lg font-semibold text-white">{item.title}</h3>
@@ -158,7 +158,7 @@ export default function ValidationPage() {
             <li>Voice recordings captured in real reading rooms with typical ambient noise.</li>
             <li>Reports reviewed by attending radiologists; edits categorised by section and severity.</li>
           </ul>
-          <p className="mt-3">Detailed metrics and anonymised samples are available on request. Email <Link href="mailto:validation@radly.app" className="text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">validation@radly.app</Link>.</p>
+          <p className="mt-3">Detailed metrics and anonymised samples are available on request. Email <Link href="mailto:validation@radly.app" className="text-[rgba(245,215,145,0.9)] underline-offset-4 hover:underline">validation@radly.app</Link>.</p>
         </section>
 
         <section className="mt-12 space-y-4">
@@ -166,7 +166,7 @@ export default function ValidationPage() {
           <ul className="space-y-3 text-sm text-[rgba(207,207,207,0.75)]">
             {limitations.map((item) => (
               <li key={item} className="flex items-start gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 text-[rgba(143,130,255,0.85)]" aria-hidden />
+                <CheckCircle2 className="mt-0.5 h-4 w-4 text-[rgba(245,215,145,0.9)]" aria-hidden />
                 <span>{item}</span>
               </li>
             ))}
@@ -187,7 +187,7 @@ export default function ValidationPage() {
             </SecondaryCTA>
           </div>
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-xs">
-            <Link href="/instructions" className="inline-flex items-center gap-1 text-[rgba(143,130,255,0.85)] underline-offset-4 hover:underline">
+            <Link href="/instructions" className="inline-flex items-center gap-1 text-[rgba(245,215,145,0.9)] underline-offset-4 hover:underline">
               See workflow guide
               <ArrowRight className="h-3 w-3" aria-hidden />
             </Link>

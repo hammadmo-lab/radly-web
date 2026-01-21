@@ -174,7 +174,7 @@ export default function PrivacyPage() {
           </ul>
           <p>
             To request deletion, use the in-app option or email{" "}
-            <Link href="mailto:privacy@radly.app" className="text-[#8F82FF] hover:underline">
+            <Link href="mailto:privacy@radly.app" className="text-[#F5D791] hover:underline">
               privacy@radly.app
             </Link>.
           </p>
@@ -205,7 +205,7 @@ export default function PrivacyPage() {
           </ul>
           <p>
             To exercise these rights, contact{" "}
-            <Link href="mailto:privacy@radly.app" className="text-[#8F82FF] hover:underline">
+            <Link href="mailto:privacy@radly.app" className="text-[#F5D791] hover:underline">
               privacy@radly.app
             </Link>.
           </p>
@@ -245,7 +245,7 @@ export default function PrivacyPage() {
         <Section title="13. Changes to This Policy">
           <p>
             We may update this Privacy Policy periodically. Material changes will be communicated via email or in-app notification. The current version is always available at{" "}
-            <Link href="https://radly.app/privacy" className="text-[#8F82FF] hover:underline">
+            <Link href="https://radly.app/privacy" className="text-[#F5D791] hover:underline">
               https://radly.app/privacy
             </Link>.
           </p>
@@ -253,9 +253,9 @@ export default function PrivacyPage() {
 
         <Section title="14. Contact Us">
           <ul className="list-disc list-inside space-y-2 text-[rgba(207,207,207,0.8)]">
-            <li>Privacy inquiries: <Link href="mailto:privacy@radly.app" className="text-[#8F82FF] hover:underline">privacy@radly.app</Link></li>
-            <li>General support: <Link href="mailto:support@radly.app" className="text-[#8F82FF] hover:underline">support@radly.app</Link></li>
-            <li>Website: <Link href="https://radly.app" className="text-[#8F82FF] hover:underline">https://radly.app</Link></li>
+            <li>Privacy inquiries: <Link href="mailto:privacy@radly.app" className="text-[#F5D791] hover:underline">privacy@radly.app</Link></li>
+            <li>General support: <Link href="mailto:support@radly.app" className="text-[#F5D791] hover:underline">support@radly.app</Link></li>
+            <li>Website: <Link href="https://radly.app" className="text-[#F5D791] hover:underline">https://radly.app</Link></li>
           </ul>
           <div className="space-y-2 pt-2">
             <p className="text-sm text-[rgba(207,207,207,0.7)]">
