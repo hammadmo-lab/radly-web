@@ -31,7 +31,7 @@ export function PrimaryCTA({ href, children, eventName = "primary-cta-click", cl
       asChild
       size="lg"
       className={cn(
-        "cta-primary h-12 sm:h-13 rounded-2xl px-6 sm:px-8 text-sm sm:text-base font-semibold shadow-[0_8px_24px_rgba(212,180,131,0.25)] focus-visible:ring-offset-0 w-full sm:w-auto min-h-[44px] touch-manipulation bg-gold hover:bg-gold/90 text-black",
+        "cta-primary h-12 sm:h-13 rounded-2xl px-6 sm:px-8 text-sm sm:text-base font-semibold shadow-[0_8px_32px_rgba(245,215,145,0.35)] focus-visible:ring-offset-0 w-full sm:w-auto min-h-[44px] touch-manipulation bg-gradient-to-r from-[#F5D791] to-[#E5C478] hover:from-[#FFE8B0] hover:to-[#F5D791] text-[#1A1510] border border-[rgba(255,255,255,0.15)]",
         className
       )}
     >

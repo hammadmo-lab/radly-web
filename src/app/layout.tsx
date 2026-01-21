@@ -3,7 +3,7 @@ import Script from "next/script";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
-import { PerformanceMonitor } from "@/components/performance-monitor";
+// Performance monitor removed from layout - use React DevTools or browser performance tab instead
 import { ClientPerformanceSetup } from "@/components/client-performance-setup";
 import { TestModeIndicator } from "@/components/test-mode-indicator";
 import { OfflineIndicator } from "@/components/shared/OfflineIndicator";
@@ -131,7 +131,6 @@ export default function RootLayout({
           </Providers>
         </RootErrorBoundary>
         <ClientPerformanceSetup />
-        <PerformanceMonitor />
         <TestModeIndicator />
         <OfflineIndicator />
         {gaEnabled ? (
