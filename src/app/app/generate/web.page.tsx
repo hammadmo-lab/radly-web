@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -72,6 +72,10 @@ export default function GeneratePage() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [upgradeReason, setUpgradeReason] = useState<'trial_exhausted' | 'tier_blocked' | 'daily_limit' | 'duration_exceeded'>('tier_blocked')
   const [currentTier, setCurrentTier] = useState<SubscriptionTier>('free')
+
+  // Track last voice transcript time for paragraph detection
+  const lastVoiceTranscriptTimeRef = useRef<number>(0)
+  const VOICE_PARAGRAPH_PAUSE_MS = 4000 // 4 seconds pause = new paragraph
 
   const { data: template, isLoading: templateLoading, error: templateError } = useQuery({
     queryKey: ['template', templateId],
@@ -244,12 +248,30 @@ export default function GeneratePage() {
   }, []);
 
   // Memoized callback for voice transcript to prevent React error #185
+  // Uses time-based paragraph detection: same line with space, new paragraph after 4s pause
   const handleVoiceTranscript = useCallback(
     (text: string) => {
+      const now = Date.now();
+      const timeSinceLastTranscript = now - lastVoiceTranscriptTimeRef.current;
       const currentFindings = (watch('findings') || '').trimEnd();
-      const separator = currentFindings ? '\n\n' : '';
+
+      // Determine separator based on pause duration
+      let separator = '';
+      if (currentFindings) {
+        if (timeSinceLastTranscript >= VOICE_PARAGRAPH_PAUSE_MS) {
+          // Long pause (4+ seconds) = new paragraph
+          separator = '\n\n';
+        } else {
+          // Short pause = continue on same line with space
+          separator = ' ';
+        }
+      }
+
       const newFindings = `${currentFindings}${separator}${text}`;
       setValue('findings', newFindings, { shouldValidate: true, shouldDirty: true });
+
+      // Update timestamp for next transcript
+      lastVoiceTranscriptTimeRef.current = now;
     },
     [watch, setValue]
   );
