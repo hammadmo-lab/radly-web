@@ -161,3 +161,46 @@ export async function fetchDashboardMetrics(credentials: AdminCredentials, timeR
   }
   return response.json();
 }
+
+// --- New Database-Backed Metrics Endpoints ---
+import type { MetricsSummary, MetricsCounts } from '@/types/metrics-summary.types';
+
+/**
+ * Fetch the comprehensive metrics summary from the database-backed endpoint.
+ * This endpoint has a 30-minute server-side cache.
+ */
+export async function fetchMetricsSummary(credentials: AdminCredentials): Promise<MetricsSummary> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000';
+
+  const response = await fetch(`${baseUrl}/v1/admin/metrics/summary`, {
+    method: 'GET',
+    headers: getAdminHeaders(credentials),
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const txt = await response.text().catch(() => 'no body');
+    throw new Error('Failed to fetch metrics summary: ' + txt);
+  }
+  return response.json();
+}
+
+/**
+ * Fetch lightweight metrics counts from the database-backed endpoint.
+ * Use this for more frequent polling (shorter cache).
+ */
+export async function fetchMetricsCounts(credentials: AdminCredentials): Promise<MetricsCounts> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000';
+
+  const response = await fetch(`${baseUrl}/v1/admin/metrics/counts`, {
+    method: 'GET',
+    headers: getAdminHeaders(credentials),
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const txt = await response.text().catch(() => 'no body');
+    throw new Error('Failed to fetch metrics counts: ' + txt);
+  }
+  return response.json();
+}
