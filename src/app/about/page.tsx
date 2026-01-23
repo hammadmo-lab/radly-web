@@ -120,7 +120,7 @@ export default function AboutPage() {
     "@context": "https://schema.org",
     "@type": "Person",
     "name": "Dr. Mohamed A. Hammad",
-    "jobTitle": "Founder and CEO, Radiologist",
+    "jobTitle": "Founder & Radiologist",
     "url": "https://mohamedhammad.com",
     "sameAs": [
       "https://www.linkedin.com/in/mohamed-h-47953589",
@@ -273,7 +273,7 @@ export default function AboutPage() {
                 <div>
                   <h3 className="text-2xl font-semibold text-white">Dr. Mohamed A. Hammad</h3>
                   <p className="text-[rgba(245,215,145,0.9)] font-semibold mt-1">
-                    Founder and CEO, Radiologist
+                    Founder & Radiologist
                   </p>
                 </div>
 
@@ -281,7 +281,7 @@ export default function AboutPage() {
                   <div>
                     <p className="text-sm font-semibold text-[rgba(207,207,207,0.55)] uppercase">Focus at Radly</p>
                     <p className="mt-1 text-[rgba(207,207,207,0.75)]">
-                      Product direction, clinical validation, and ensuring Radly stays true to radiologist needs.
+                      Building the assistant I always wanted. I ensure every feature serves a real clinical purpose and respects the radiologist's workflow.
                     </p>
                   </div>
 
@@ -320,21 +320,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Future Careers CTA */}
-        <section className="mb-20 space-y-6 rounded-3xl border border-[rgba(255,255,255,0.1)] bg-[rgba(12,16,28,0.65)] p-8">
-          <h2 className="text-2xl font-semibold">We're Growing</h2>
-          <p className="text-[rgba(207,207,207,0.75)]">
-            We're looking for clinical experts, engineers, and healthcare innovators to join our team. If you're passionate about improving radiology workflows, we'd love to hear from you.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <PrimaryCTA href="mailto:hello@radly.app?subject=Interested%20in%20Radly" ariaLabel="Email Radly about careers">
-              Express Interest
-            </PrimaryCTA>
-            <SecondaryCTA href="/security" ariaLabel="Learn about Radly security">
-              Our Commitment to Security
-            </SecondaryCTA>
-          </div>
-        </section>
+
 
         {/* Navigation */}
         <nav className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 pt-8 border-t border-[rgba(255,255,255,0.1)]">
