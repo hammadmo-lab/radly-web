@@ -52,24 +52,44 @@ export async function middleware(req: NextRequest) {
       const countryHeader = req.headers.get('x-vercel-ip-country') || req.headers.get('cf-ipcountry');
       const country = countryHeader ? countryHeader.toUpperCase() : null;
 
+      console.log('[Pricing Middleware] Country detected:', country, 'Header:', countryHeader);
+
       if (country) {
         // Bot detection: default international for SEO
         const userAgent = req.headers.get('user-agent') || '';
         const isBot = /bot|crawler|spider|googlebot|bingbot|slurp|duckduckbot/i.test(userAgent);
 
-        if (country !== 'EG' || isBot) {
-          // Non-Egypt countries or bots → international pricing
+        if (isBot) {
+          // Bots → international pricing for SEO
           const url = req.nextUrl.clone();
           url.searchParams.set('region', 'international');
           const response = NextResponse.rewrite(url);
           response.headers.set('x-region-detected', 'true');
+          response.headers.set('x-debug-country', country);
           return response;
         }
-        // Egypt users → default EGP pricing
-        res.headers.set('x-region-detected', 'true');
+
+        if (country === 'EG') {
+          // Egypt users → EGP pricing
+          const url = req.nextUrl.clone();
+          url.searchParams.set('region', 'egypt');
+          const response = NextResponse.rewrite(url);
+          response.headers.set('x-region-detected', 'true');
+          response.headers.set('x-debug-country', country);
+          return response;
+        } else {
+          // Non-Egypt countries → international pricing
+          const url = req.nextUrl.clone();
+          url.searchParams.set('region', 'international');
+          const response = NextResponse.rewrite(url);
+          response.headers.set('x-region-detected', 'true');
+          response.headers.set('x-debug-country', country);
+          return response;
+        }
       } else {
         // No country detected → show modal client-side
         res.headers.set('x-region-detected', 'false');
+        res.headers.set('x-debug-country', 'NONE');
       }
     }
 
