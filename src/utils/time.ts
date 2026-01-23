@@ -51,7 +51,7 @@ export function resolveAvgGenerationSeconds(stats?: Record<string, unknown> | nu
 
 export function formatSeconds(rawValue: SecondsLike): string {
   const value = toSeconds(rawValue)
-  if (value == null) return '—'
+  if (value == null) return '-'
   if (value <= 0.0) return '<0.1s'
   if (value < 0.1) return '<0.1s'
   if (value < 1) return `${value.toFixed(2)}s`

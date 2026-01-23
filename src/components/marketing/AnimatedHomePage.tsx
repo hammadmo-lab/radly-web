@@ -64,7 +64,7 @@ export function AnimatedHomePage({
             Voice-supported reporting
           </motion.span>
 
-          {/* IMPROVED HEADLINE - More confident, less defensive */}
+          {/* IMPROVED HEADLINE - Clear value prop */}
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -74,7 +74,7 @@ export function AnimatedHomePage({
             <span className="text-[#F0E6D3]">Report drafts in half the time.</span>
             <br />
             <span className="bg-gradient-to-r from-[#F5D791] via-[#FFE8B0] to-[#F5D791] bg-clip-text text-transparent bg-[length:200%_auto] animate-shimmer">
-              Your sign-off, every time.
+              You dictate. We structure. You sign.
             </span>
           </motion.h1>
 
@@ -92,20 +92,42 @@ export function AnimatedHomePage({
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.8 }}
-            className="relative mt-8 mx-auto max-w-md sm:max-w-lg overflow-hidden"
+            className="relative mt-8 mx-auto w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl overflow-hidden rounded-2xl"
             style={{
-              maskImage: 'linear-gradient(to bottom, transparent 0%, black 8%, black 75%, transparent 100%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 8%, black 75%, transparent 100%)'
+              maskImage: 'linear-gradient(to bottom, transparent 0%, black 3%, black 90%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 3%, black 90%, transparent 100%)',
+              boxShadow: '0 0 40px rgba(245, 215, 145, 0.4), 0 0 80px rgba(245, 215, 145, 0.3), 0 0 120px rgba(245, 215, 145, 0.2), 0 0 180px rgba(245, 215, 145, 0.1), inset 0 0 0 2px rgba(245, 215, 145, 0.35)'
             }}
           >
+            {/* Glow border overlay */}
+            <div
+              className="absolute inset-0 rounded-2xl pointer-events-none z-10"
+              style={{
+                boxShadow: 'inset 0 0 0 2px rgba(245, 215, 145, 0.4), inset 0 0 30px rgba(245, 215, 145, 0.15)',
+                background: 'linear-gradient(to bottom, rgba(245, 215, 145, 0.15) 0%, transparent 25%, transparent 75%, rgba(245, 215, 145, 0.1) 100%)'
+              }}
+            />
             <Image
               src="/hero-background.jpg"
-              alt="Radiology professional at work"
-              width={600}
-              height={375}
-              className="w-full h-auto object-cover rounded-2xl opacity-85"
+              alt="Radly workstation with CT scan and interface"
+              width={1400}
+              height={600}
+              className="w-full h-auto object-cover rounded-2xl"
+              style={{ filter: 'brightness(1.15)' }}
               priority
             />
+            {/* Watermark overlay */}
+            <span
+              className="absolute bottom-6 right-6 sm:bottom-8 sm:right-8 text-[#F5D791] font-bold tracking-wider pointer-events-none select-none z-20"
+              style={{
+                fontSize: 'clamp(18px, 5vw, 28px)',
+                opacity: 0.4,
+                textShadow: '0 2px 8px rgba(0,0,0,0.6)'
+              }}
+              aria-hidden="true"
+            >
+              Radly
+            </span>
           </motion.div>
 
           <motion.div
@@ -118,8 +140,8 @@ export function AnimatedHomePage({
               Get started free
               <ArrowRight className="ml-2 h-5 w-5" aria-hidden />
             </PrimaryCTA>
-            <SecondaryCTA href="/app/templates" ariaLabel="See available templates">
-              See templates
+            <SecondaryCTA href="/instructions" ariaLabel="See how Radly works">
+              See how it works
             </SecondaryCTA>
           </motion.div>
 
@@ -379,7 +401,7 @@ export function AnimatedHomePage({
             How Radly fits your workflow
           </h2>
           <p className="mt-3 text-sm sm:text-base text-[#B8AFA1] max-w-3xl mx-auto">
-            Three steps from findings to export—you stay in command at every stage.
+            Three steps from findings to export - you stay in command at every stage.
           </p>
         </motion.div>
 
@@ -618,7 +640,7 @@ export function AnimatedHomePage({
               <ArrowRight className="ml-2 h-5 w-5" aria-hidden />
             </PrimaryCTA>
             <SecondaryCTA href="/instructions" ariaLabel="See how Radly works">
-              See instructions
+              See how it works
             </SecondaryCTA>
           </motion.div>
           <motion.div

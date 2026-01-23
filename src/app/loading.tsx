@@ -17,8 +17,7 @@ export default function Loading() {
           </p>
           <h1 className="text-2xl font-semibold sm:text-[2rem]">Generating your Radly experience</h1>
           <p className="text-sm text-[rgba(207,207,207,0.68)]">
-            Fetching templates, refining gradients, and warming up the smart radiology assistant. This only takes a few
-            seconds.
+            Preparing your workspace...
           </p>
         </div>
       </div>

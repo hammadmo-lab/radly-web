@@ -40,7 +40,7 @@ const faqCategories = [
       {
         question: "What modalities does Radly support?",
         answer:
-          "Radly currently supports X-ray, Ultrasound, CT, and Fluoroscopy. MRI and PET-CT support are coming soon. Modality-specific templates guide the structured report format for each imaging type.",
+          "Radly supports all modalities including X-ray, Ultrasound, CT, MRI, Mammography, and PET-CT. Modality-specific templates guide the structured report format for each imaging type.",
       },
       {
         question: "Can I customize templates for my department?",
@@ -55,7 +55,7 @@ const faqCategories = [
       {
         question: "Can I use Radly on mobile devices?",
         answer:
-          "Radly is optimized for web browsers on desktop and tablets. Mobile browser access is available, though the full experience is best on larger screens.",
+          "Radly is available on the web, App Store, and Play Store. You can access the full experience on desktop or use our dedicated mobile apps for iOS and Android.",
       },
     ],
   },
@@ -75,7 +75,7 @@ const faqCategories = [
       {
         question: "What if the transcription makes a mistake?",
         answer:
-          "Simply edit the text directly. Corrections are quick—most typos take seconds to fix. You remain in full control of the final report before it's finalized.",
+          "Simply edit the text directly. Corrections are quick - most typos take seconds to fix. You remain in full control of the final report before it's finalized.",
       },
       {
         question: "Does Radly store audio?",
@@ -102,11 +102,7 @@ const faqCategories = [
         answer:
           "Radly excels with standard cases. For complex or unusual presentations, you can use keyboard editing to add detailed clinical context. The assistant learns from your corrections to improve future suggestions.",
       },
-      {
-        question: "How do templates stay up to date?",
-        answer:
-          "Templates are reviewed with partner sites. Updates ship with release notes and can be audited on request.",
-      },
+
     ],
   },
   {
@@ -115,7 +111,7 @@ const faqCategories = [
       {
         question: "How is patient data protected?",
         answer:
-          "All patient data is encrypted during transmission and at rest. Audio is never stored—only the text you keep in the report is retained. See our Security and Privacy pages for complete details.",
+          "All patient data is encrypted during transmission and at rest. Audio is never stored - only the text you keep in the report is retained. See our Security and Privacy pages for complete details.",
       },
       {
         question: "Can we audit usage logs?",
