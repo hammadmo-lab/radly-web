@@ -47,7 +47,7 @@ export async function getRecentReportsClient(limit = 50): Promise<RecentReportRo
 
   return (data ?? []).map((r) => ({
     job_id: r.id,
-    template_id: r.title ?? '—',
+    template_id: r.title ?? '-',
     status: (r.status ?? 'queued') as RecentReportRow['status'],
     doc_url: r.doc_url ?? null,
     created_at: r.created_at,

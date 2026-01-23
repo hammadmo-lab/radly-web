@@ -192,7 +192,7 @@ export default function ReportsPage() {
           jobMap.set(job.job_id, {
             job_id: job.job_id,
             status: job.status || 'queued',
-            template_id: job.template_id || job.title || '—'
+            template_id: job.template_id || job.title || '-'
           });
         }
       });
@@ -432,7 +432,7 @@ export default function ReportsPage() {
             jobMap.set(job.job_id, {
               job_id: job.job_id,
               status: job.status || 'queued',
-              template_id: job.template_id || job.title || '—'
+              template_id: job.template_id || job.title || '-'
             });
           }
         });
@@ -441,10 +441,10 @@ export default function ReportsPage() {
 
         // Only update if there are changes
         if (mergedJobs.length !== rows.length ||
-            mergedJobs.some(job => {
-              const existingRow = rows.find(r => r.job_id === job.job_id);
-              return !existingRow || existingRow.status !== job.status;
-            })) {
+          mergedJobs.some(job => {
+            const existingRow = rows.find(r => r.job_id === job.job_id);
+            return !existingRow || existingRow.status !== job.status;
+          })) {
           setRows(mergedJobs);
           console.log(`Synced ${mergedJobs.length} reports from server`);
         }
@@ -652,11 +652,10 @@ export default function ReportsPage() {
               setCurrentPage(1);
               triggerHaptic('light');
             }}
-            className={`px-4 py-2 min-h-[44px] rounded-lg border transition-colors text-sm font-medium touch-manipulation active:scale-95 ${
-              statusFilter === null
+            className={`px-4 py-2 min-h-[44px] rounded-lg border transition-colors text-sm font-medium touch-manipulation active:scale-95 ${statusFilter === null
                 ? 'border-[#F5D791] bg-[rgba(245,215,145,0.12)] text-[#E8DCC8]'
                 : 'border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.75)] hover:border-[rgba(245,215,145,0.4)] hover:text-white'
-            }`}
+              }`}
             aria-label="Show all reports"
           >
             All Reports
@@ -669,11 +668,10 @@ export default function ReportsPage() {
                 setCurrentPage(1);
                 triggerHaptic('light');
               }}
-              className={`px-4 py-2 min-h-[44px] rounded-lg border transition-colors text-sm font-medium touch-manipulation active:scale-95 ${
-                statusFilter === status
+              className={`px-4 py-2 min-h-[44px] rounded-lg border transition-colors text-sm font-medium touch-manipulation active:scale-95 ${statusFilter === status
                   ? badgeClass.replace('bg-', 'bg-').replace('border', 'border') + ' border-current'
                   : 'border-[rgba(255,255,255,0.12)] bg-[rgba(18,22,36,0.85)] text-[rgba(207,207,207,0.75)] hover:border-[rgba(255,255,255,0.2)] hover:text-white'
-              }`}
+                }`}
               aria-label={`Filter by ${label.toLowerCase()}`}
             >
               {label}
@@ -712,14 +710,14 @@ export default function ReportsPage() {
               toggleSelectAll(filteredAndSortedRows.map(r => r.job_id));
               triggerHaptic('light');
             }}
-            onCopyJobIds={() => {}}
+            onCopyJobIds={() => { }}
             onBulkDelete={(failedIds) => {
               // Remove deleted reports from the list
               setRows(prevRows =>
                 prevRows.filter(row => !getSelectedIds().includes(row.job_id) || failedIds.includes(row.job_id))
               );
             }}
-            onBulkExport={() => {}}
+            onBulkExport={() => { }}
           />
         )}
 
@@ -729,11 +727,10 @@ export default function ReportsPage() {
             return (
               <li
                 key={r.job_id}
-                className={`aurora-card border transition-all duration-300 hover:-translate-y-1 p-5 sm:p-6 ${
-                  isSelected(r.job_id)
+                className={`aurora-card border transition-all duration-300 hover:-translate-y-1 p-5 sm:p-6 ${isSelected(r.job_id)
                     ? 'border-[rgba(75,142,255,0.5)] bg-[rgba(245,215,145,0.1)]'
                     : 'border-[rgba(255,255,255,0.05)] hover:border-[rgba(245,215,145,0.35)] hover:shadow-[0_18px_42px_rgba(20,28,45,0.55)]'
-                }`}
+                  }`}
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   {/* Checkbox */}

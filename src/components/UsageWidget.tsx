@@ -281,7 +281,7 @@ export default function UsageWidget() {
             <div>
               <p className="text-xs text-[rgba(207,207,207,0.55)] mb-1">Avg. Time</p>
               <p className="text-lg font-semibold text-white">
-                {avgGenerationSeconds != null ? formatSeconds(avgGenerationSeconds) : '—'}
+                {avgGenerationSeconds != null ? formatSeconds(avgGenerationSeconds) : '-'}
               </p>
             </div>
           </div>

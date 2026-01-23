@@ -248,7 +248,7 @@ export default async function PricingPage({ searchParams }: { searchParams?: Pro
               <PolicyCard
                 icon={<Truck className="h-5 w-5 text-[rgba(245,215,145,0.95)]" aria-hidden />}
                 title="Delivery & Shipping"
-                description="Access is delivered online—no physical products, couriers, or shipping timelines. Subscribers can use both the dashboard and API as soon as their tier is active."
+                description="Access is delivered online - no physical products, couriers, or shipping timelines. Subscribers can use both the dashboard and API as soon as their tier is active."
               />
               <PolicyCard
                 icon={<RotateCcw className="h-5 w-5 text-[rgba(248,183,77,0.9)]" aria-hidden />}

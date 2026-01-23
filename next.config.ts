@@ -51,8 +51,9 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://static.cloudflareinsights.com https://www.googletagmanager.com https://www.google-analytics.com", // Required for Next.js + Cloudflare + GTM/GA
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
-      "font-src 'self' data:",
+      "font-src 'self' data: https://r2cdn.perplexity.ai",
       `connect-src 'self' ${apiBase} wss://${new URL(apiBase).hostname} ${apiBase} https://*.supabase.co https://cloudflareinsights.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com wss:`,
+      "frame-src 'self' https://www.youtube-nocookie.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -77,7 +78,7 @@ const nextConfig: NextConfig = {
       '@radix-ui/react-tooltip',
     ],
   },
-  
+
   // Image optimization
   images: {
     remotePatterns: s3Domain ? [
@@ -91,19 +92,19 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
   },
-  
+
   // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  
+
   // Output standalone for Docker deployments
   output: 'standalone',
-  
+
   // Performance optimizations
   poweredByHeader: false,
   compress: true,
-  
+
   async headers() {
     return [
       {

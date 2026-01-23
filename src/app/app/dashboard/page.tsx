@@ -65,7 +65,7 @@ function WebDashboardPage() {
     return [
       {
         label: 'Reports used',
-        value: sub ? `${sub.reports_used}/${sub.reports_limit}` : '—',
+        value: sub ? `${sub.reports_used}/${sub.reports_limit}` : '-',
         change: sub ? `${sub.reports_remaining} remaining` : '',
         icon: FileText,
         bgClass: 'bg-[rgba(212,180,131,0.18)] shadow-[0_0_12px_rgba(212,180,131,0.25)]',
@@ -73,7 +73,7 @@ function WebDashboardPage() {
       },
       {
         label: 'Avg. generation time',
-        value: hasAvgGenerationData ? formatSeconds(avgGenerationSeconds) : '—',
+        value: hasAvgGenerationData ? formatSeconds(avgGenerationSeconds) : '-',
         change: hasAvgGenerationData
           ? 'Last 30 days'
           : usageStats
@@ -85,7 +85,7 @@ function WebDashboardPage() {
       },
       {
         label: 'Plan',
-        value: sub?.tier_display_name ?? '—',
+        value: sub?.tier_display_name ?? '-',
         change: sub ? sub.status : '',
         icon: BookTemplate,
         bgClass: 'bg-[rgba(212,180,131,0.18)] shadow-[0_0_12px_rgba(212,180,131,0.25)]',
@@ -93,7 +93,7 @@ function WebDashboardPage() {
       },
       {
         label: 'Resets in',
-        value: resetDays != null ? `${resetDays} day${resetDays === 1 ? '' : 's'}` : '—',
+        value: resetDays != null ? `${resetDays} day${resetDays === 1 ? '' : 's'}` : '-',
         change: sub?.period_end ? new Date(sub.period_end).toLocaleDateString() : '',
         icon: TrendingUp,
         bgClass: 'bg-[rgba(248,183,77,0.2)] shadow-[0_0_12px_rgba(248,183,77,0.25)]',
@@ -173,7 +173,7 @@ function WebDashboardPage() {
                 {`You're ${subscriptionData.subscription.reports_remaining} reports away from your ${subscriptionData.subscription.tier_display_name} limit.`}
               </p>
               <p className="text-[rgba(215,227,255,0.65)] break-words">
-                Keep momentum going—upgrade now to unlock more capacity this cycle.
+                Keep momentum going - upgrade now to unlock more capacity this cycle.
               </p>
             </div>
             <Button

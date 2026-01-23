@@ -68,7 +68,7 @@ const stats = [
     label: "Median draft time in internal tests",
   },
   {
-    value: "High accuracy",
+    value: "97%+ accuracy",
     label: "Voice transcription on clinical vocabulary",
   },
   {

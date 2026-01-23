@@ -177,7 +177,7 @@ export default function AboutPage() {
                 We built Radly to generate clear, structured reports that integrate with existing tools while keeping privacy and reliability as non-negotiables.
               </p>
               <p className="text-lg text-[rgba(207,207,207,0.75)] leading-relaxed">
-                Every report is reviewed and finalized by a radiologist. Radly assists—it doesn't decide.
+                Every report is reviewed and finalized by a radiologist. Radly assists - it doesn't decide.
               </p>
             </div>
 
