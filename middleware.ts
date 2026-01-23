@@ -22,7 +22,7 @@ export async function middleware(req: NextRequest) {
         },
       }
     );
-    
+
     const { data: { session } } = await supabase.auth.getSession();
 
     const { pathname, search } = req.nextUrl;
@@ -49,7 +49,8 @@ export async function middleware(req: NextRequest) {
     // Auto-detect pricing region based on country
     const isPricingPage = pathname === '/pricing' || pathname === '/pricing/';
     if (isPricingPage && !req.nextUrl.searchParams.has('region')) {
-      const country = req.headers.get('x-vercel-ip-country') || req.headers.get('cf-ipcountry');
+      const countryHeader = req.headers.get('x-vercel-ip-country') || req.headers.get('cf-ipcountry');
+      const country = countryHeader ? countryHeader.toUpperCase() : null;
 
       if (country) {
         // Bot detection: default international for SEO
@@ -74,7 +75,7 @@ export async function middleware(req: NextRequest) {
 
     // Don't redirect root route - let the client handle it
     // This prevents the "page can't be reached" error on first load
-    
+
   } catch (error) {
     // CRITICAL: Only catch session lookup errors
     // Re-throw configuration/setup errors to fail closed
