@@ -80,17 +80,22 @@ const stats = [
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: siteConfig.name,
-  applicationCategory: "HealthApplication",
-  offers: {
+  "name": "Radly",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Web, iOS",
+  "description": "AI-powered radiology reporting assistant that turns voice dictation into structured, PACS-ready reports in under 2 minutes.",
+  "url": "https://radly.app",
+  "offers": {
     "@type": "Offer",
-    price: "0",
-    priceCurrency: "USD",
-    description: "Five complimentary reports to evaluate Radly.",
+    "price": "0",
+    "priceCurrency": "USD",
+    "description": "Free tier with 5 reports/month"
   },
-  areaServed: "Global",
-  operatingSystem: "Web",
-  url: siteConfig.url,
+  "creator": {
+    "@type": "Organization",
+    "name": "Radly Labs",
+    "url": "https://radly.app"
+  }
 };
 
 const searchActionSchema = {
@@ -125,30 +130,34 @@ const serviceSchema = {
   "url": "https://radly.app"
 };
 
-export const metadata: Metadata = {
-  title: "Radly Assistant | Voice-supported radiology reporting",
-  description:
-    "Radly is a voice-supported assistant that helps radiologists draft structured reports quickly while keeping clinicians in full control.",
+export const metadata = {
+  title: 'Radly — AI-Powered Radiology Reporting | Dictate to Structured Report in 2 Minutes',
+  description: 'Radly turns voice dictation into structured, PACS-ready radiology reports in under 2 minutes. 97%+ accuracy on clinical vocabulary. Built by radiologists. Start free.',
+  keywords: 'radiology reporting software, AI radiology assistant, voice dictation radiology, structured radiology reports, PACS reporting',
+  authors: [{ name: 'Radly Labs' }],
   openGraph: {
-    title: "Radly Assistant",
-    description:
-      "Voice-supported reporting that keeps radiologists in command of every case.",
-    url: siteConfig.url,
+    type: 'website',
+    url: 'https://radly.app/',
+    title: 'Radly — Radiology Reports in Half the Time',
+    description: 'You dictate. We structure. You sign. AI-powered radiology reporting with 97%+ accuracy. Start free with 5 reports.',
+    siteName: 'Radly',
     images: [
       {
-        url: siteConfig.ogImage,
+        url: 'https://radly.app/og-image-homepage.png',
         width: 1200,
         height: 630,
-        alt: "Radly Assistant interface preview",
+        alt: 'Radly - Radiology Reports in Half the Time',
       },
     ],
   },
   twitter: {
-    title: "Radly Assistant",
-    description: "Voice-supported reporting built for radiologists.",
-    card: "summary_large_image",
-    images: [siteConfig.ogImage],
+    card: 'summary_large_image',
+    title: 'Radly — Radiology Reports in Half the Time',
+    description: 'You dictate. We structure. You sign. AI-powered radiology reporting with 97%+ accuracy.',
+    images: ['https://radly.app/og-image-homepage.png'],
   },
+  robots: 'index, follow',
+  canonical: 'https://radly.app/',
 };
 
 export default function Home() {

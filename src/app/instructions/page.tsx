@@ -92,32 +92,31 @@ const faq = [
 
 const metadataDescription = "Watch Radly turn voice dictation into a structured radiology report in under 2 minutes. See the 4-step workflow: template, dictate, review, export.";
 
-export const metadata: Metadata = {
-  title: "How Radly Works - Voice Dictation to Structured Report Demo | Radly Assistant",
-  description: metadataDescription,
-  alternates: {
-    canonical: "https://radly.app/instructions",
-  },
+export const metadata = {
+  title: 'How Radly Works — Voice Dictation to Structured Report Demo | Radly',
+  description: 'Watch Radly turn voice dictation into a structured radiology report in under 2 minutes. See the 4-step workflow: choose template, dictate findings, review draft, export to PACS.',
+  keywords: 'radiology reporting demo, voice dictation radiology, how Radly works, radiology workflow demo',
   openGraph: {
-    title: "How Radly Works - Voice Dictation to Structured Report Demo",
-    description: metadataDescription,
-    url: "https://radly.app/instructions",
-    type: "article",
+    type: 'website',
+    url: 'https://radly.app/instructions',
+    title: 'See Radly in Action — 2-Minute Demo',
+    description: 'Watch the full workflow: dictate findings, Radly structures, you sign. From voice to PACS-ready report in under 2 minutes.',
     images: [
       {
-        url: "https://radly.app/og-default.png",
+        url: 'https://radly.app/og-image-homepage.png',
         width: 1200,
         height: 630,
-        alt: "Radly voice-supported reporting workflow - 4 step process",
+        alt: 'Radly Demo - Voice to Structured Report',
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "How Radly Works - Voice to Report Demo",
-    description: "Voice-supported reporting workflow for radiology",
-    images: ["https://radly.app/og-default.png"],
+    card: 'summary_large_image',
+    title: 'See Radly in Action — 2-Minute Demo',
+    description: 'Watch the full workflow: dictate findings, Radly structures, you sign.',
+    images: ['https://radly.app/og-image-homepage.png'],
   },
+  canonical: 'https://radly.app/instructions',
 };
 
 function FAQAccordionItem({ question, answer }: { question: string; answer: string }) {
