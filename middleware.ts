@@ -49,7 +49,9 @@ export async function middleware(req: NextRequest) {
     // Auto-detect pricing region based on country
     const isPricingPage = pathname === '/pricing' || pathname === '/pricing/';
     if (isPricingPage && !req.nextUrl.searchParams.has('region')) {
-      const countryHeader = req.headers.get('x-vercel-ip-country') || req.headers.get('cf-ipcountry');
+      // Check Cloudflare header first (production with orange cloud proxy),
+      // then fall back to Vercel header (staging/direct to Vercel)
+      const countryHeader = req.headers.get('cf-ipcountry') || req.headers.get('x-vercel-ip-country');
       const country = countryHeader ? countryHeader.toUpperCase() : null;
 
       console.log('[Pricing Middleware] Country detected:', country, 'Header:', countryHeader);
