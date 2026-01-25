@@ -157,7 +157,7 @@ export function AnimatedHomePage({
             </span>
             <span className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-[#F5D791]" />
-              5 free reports/day
+              5 free reports/month
             </span>
             <Link
               href="/pricing"
