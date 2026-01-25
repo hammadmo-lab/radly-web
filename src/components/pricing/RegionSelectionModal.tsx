@@ -33,7 +33,7 @@ export function RegionSelectionModal({ open, onClose }: RegionSelectionModalProp
                 </DialogHeader>
 
                 <div className="py-4 space-y-3">
-                    <Link href="/pricing" onClick={onClose} className="block">
+                    <Link href="/pricing?region=egypt" onClick={onClose} className="block">
                         <Button variant="outline" className="w-full h-auto py-4 justify-start">
                             <div className="flex items-center gap-3">
                                 <span className="text-2xl">🇪🇬</span>
