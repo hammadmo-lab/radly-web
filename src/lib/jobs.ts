@@ -13,19 +13,34 @@ export type RecentJobRow = {
 function toISO(d?: string | null): string | null {
   if (!d) return null;
 
-  // Match DD/MM/YYYY or DD-MM-YYYY format (as expected by schema)
-  const m = d.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-  if (m) {
-    const [ , dd, mm, y ] = m;
-    const yyyy = y.length === 2 ? `20${y}` : y;
-    // DD/MM/YYYY format: first group is day, second is month
-    return `${yyyy.padStart(4,'0')}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
+  // First, try to match ISO 8601 format (YYYY-MM-DD) - pass through as-is
+  const isoMatch = d.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (isoMatch) {
+    const [, yyyy, mm, dd] = isoMatch;
+    // Validate and ensure proper padding
+    const month = parseInt(mm, 10);
+    const day = parseInt(dd, 10);
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      return `${yyyy}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
   }
 
-  // Fallback: try parsing as ISO date string (YYYY-MM-DD)
-  const isoMatch = d.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (isoMatch) {
-    return d;
+  // Match DD/MM/YYYY or DD-MM-YYYY format
+  const dmyMatch = d.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (dmyMatch) {
+    const [, first, second, y] = dmyMatch;
+    const yyyy = y.length === 2 ? `20${y}` : y;
+    const firstNum = parseInt(first, 10);
+    const secondNum = parseInt(second, 10);
+
+    // DD/MM/YYYY: first is day, second is month
+    // Output: YYYY-MM-DD (year-month-day)
+    const day = firstNum;
+    const month = secondNum;
+
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      return `${yyyy.padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
   }
 
   return null;

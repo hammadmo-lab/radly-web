@@ -6,9 +6,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+- No changes yet
+
+---
+
+## [1.2.0] - 2026-01-26
+
 ### Added
-- Initial public release documentation
-- Professional README and CHANGELOG
+
+#### Report Editing (New Feature)
+- **Inline Report Editing** - Click-to-edit functionality for report sections
+  - Edit Findings, Impression, and Recommendations before exporting
+  - Auto-save after 2 seconds of inactivity
+  - Character counters with visual progress indicators (green → yellow → red)
+  - Save status indicator showing saving/saved/error states
+- **Edit Hint Banner** - Dismissible "New: Edit Before Export" banner
+  - Shows once per user (remembered in localStorage)
+  - Informs users about the new editing capability
+  - Gold/bronze themed to match app design
+- **Export with Edits** - DOCX export includes edited content
+  - Added `job_id` to export request for backend edit lookup
+  - Seamless integration with existing export flow
+
+#### New Files
+- `src/lib/report-edit.ts` - API client for report editing
+- `src/hooks/useReportEdit.ts` - React hook with auto-save logic
+- `src/components/reports/CharacterCounter.tsx` - Circular progress indicator
+- `src/components/reports/EditStatusIndicator.tsx` - Save status display
+- `src/components/reports/ReportEditableSection.tsx` - Inline editable section
+- `src/components/reports/EditableReportRenderer.tsx` - Extended report renderer
+- `src/components/reports/EditHintBanner.tsx` - Feature discovery banner
+
+### Changed
+- `src/lib/http.ts` - Added `httpPatch` function for PATCH requests
+- `src/lib/api.ts` - Added `job_id` parameter to `exportReportDocx`
+- `src/components/reports/ReportDetailView.tsx` - Integrated editing workflow
+
+### Fixed
+- Backend payload structure for report editing (findings/impression/recommendations at root level)
+
+---
 
 ## [0.1.0] - 2025-10-26
 

@@ -34,7 +34,6 @@ export default function SettingsPage() {
   const currentTier = useSubscriptionTier() // Fetch real subscription tier
   const { clearCache } = useSubscription() // Get cache clearing function
   const [defaultSignatureName, setDefaultSignatureName] = useState('')
-  const [defaultDateFormat, setDefaultDateFormat] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [connectivityStatus, setConnectivityStatus] = useState<'checking' | 'connected' | 'error'>('checking')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
@@ -71,7 +70,6 @@ export default function SettingsPage() {
   useEffect(() => {
     if (profile) {
       setDefaultSignatureName(profile.default_signature_name || '')
-      setDefaultDateFormat(profile.default_signature_date_format || 'MM/DD/YYYY')
       setLastSaved(profile.updated_at ? new Date(profile.updated_at) : null)
     }
   }, [profile])
@@ -81,15 +79,13 @@ export default function SettingsPage() {
 
     console.log('Saving settings:', {
       userId: user.id,
-      defaultSignatureName,
-      defaultDateFormat
+      defaultSignatureName
     });
 
     setIsSaving(true)
     try {
       await updateUserData(user.id, {
         default_signature_name: defaultSignatureName,
-        default_signature_date_format: defaultDateFormat,
       })
 
       // Invalidate and refetch profile data
@@ -111,7 +107,7 @@ export default function SettingsPage() {
     } finally {
       setIsSaving(false)
     }
-  }, [user, defaultSignatureName, defaultDateFormat, queryClient])
+  }, [user, defaultSignatureName, queryClient])
 
   // Auto-save functionality
   useEffect(() => {
@@ -122,16 +118,15 @@ export default function SettingsPage() {
     }, 2000)
 
     return () => clearTimeout(timeoutId)
-  }, [defaultSignatureName, defaultDateFormat, autoSave, hasUnsavedChanges, handleSaveSettings])
+  }, [defaultSignatureName, autoSave, hasUnsavedChanges, handleSaveSettings])
 
   // Track changes
   useEffect(() => {
     const hasChanges =
-      defaultSignatureName !== (profile?.default_signature_name || '') ||
-      defaultDateFormat !== (profile?.default_signature_date_format || 'MM/DD/YYYY')
+      defaultSignatureName !== (profile?.default_signature_name || '')
 
     setHasUnsavedChanges(hasChanges)
-  }, [defaultSignatureName, defaultDateFormat, profile])
+  }, [defaultSignatureName, profile])
 
   // Test connectivity
   useEffect(() => {
@@ -192,11 +187,11 @@ export default function SettingsPage() {
             Configuration
           </span>
         </div>
-        
+
         <h1 className="text-4xl font-bold mb-2">
           <span className="text-gradient-brand">Smart Settings</span>
         </h1>
-        
+
         <p className="text-lg text-gray-600 max-w-2xl">
           Customize your Radly experience with intelligent defaults and preferences
         </p>
@@ -216,7 +211,7 @@ export default function SettingsPage() {
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           {lastSaved && (
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <CheckCircle className="w-4 h-4 text-emerald-500" />
@@ -241,7 +236,7 @@ export default function SettingsPage() {
           <Save className="w-4 h-4 mr-2" />
           {isSaving ? 'Saving...' : 'Save Changes'}
         </Button>
-        
+
         <Button
           variant="outline"
           onClick={() => setShowAdvanced(!showAdvanced)}
@@ -291,7 +286,7 @@ export default function SettingsPage() {
                   </Badge>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-gray-600">User ID</Label>
                 <div className="flex items-center gap-2">
@@ -301,7 +296,7 @@ export default function SettingsPage() {
                   </Button>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="text-sm font-medium text-gray-600">Member Since</Label>
                 <p className="text-lg font-semibold text-gray-900">
@@ -346,7 +341,7 @@ export default function SettingsPage() {
                   className="data-[state=checked]:bg-emerald-500"
                 />
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label className="text-sm font-medium">Notifications</Label>
@@ -358,7 +353,7 @@ export default function SettingsPage() {
                   className="data-[state=checked]:bg-emerald-500"
                 />
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label className="text-sm font-medium">Dark Mode</Label>
@@ -409,23 +404,17 @@ export default function SettingsPage() {
                   This will be pre-filled when creating new reports
                 </p>
               </div>
-              
+
               <div className="space-y-2">
-                <Label htmlFor="default-date-format" className="text-sm font-medium">
-                  Default Date Format
+                <Label className="text-sm font-medium">
+                  Date Format
                 </Label>
-                <Select value={defaultDateFormat} onValueChange={setDefaultDateFormat}>
-                  <SelectTrigger className="border-2 focus:border-emerald-500">
-                    <SelectValue placeholder="Select date format" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="MM/DD/YYYY">MM/DD/YYYY (US Format)</SelectItem>
-                    <SelectItem value="DD/MM/YYYY">DD/MM/YYYY (EU Format)</SelectItem>
-                    <SelectItem value="YYYY-MM-DD">YYYY-MM-DD (ISO Format)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                  <span className="text-sm font-medium text-gray-700">YYYY-MM-DD</span>
+                  <span className="text-xs text-gray-500">(ISO 8601 Standard)</span>
+                </div>
                 <p className="text-xs text-gray-500">
-                  Choose your preferred date format for reports
+                  Dates are formatted using the international ISO 8601 standard for compatibility
                 </p>
               </div>
             </CardContent>
@@ -464,7 +453,7 @@ export default function SettingsPage() {
                     </div>
                   </Badge>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Response Time</span>
@@ -472,17 +461,17 @@ export default function SettingsPage() {
                       {connectivityStatus === 'connected' ? '< 100ms' : 'N/A'}
                     </span>
                   </div>
-                  <Progress 
-                    value={connectivityStatus === 'connected' ? 100 : 0} 
+                  <Progress
+                    value={connectivityStatus === 'connected' ? 100 : 0}
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Last Profile Update</span>
                   <span className="text-sm font-medium">
-                    {profile?.updated_at 
+                    {profile?.updated_at
                       ? new Date(profile.updated_at).toLocaleString()
                       : 'Never'
                     }
@@ -531,15 +520,14 @@ export default function SettingsPage() {
                     <p className="text-xs text-gray-500 mb-2">
                       Download your profile data, settings, and preferences as a JSON file for backup or migration purposes.
                     </p>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full"
                       onClick={() => {
                         const exportData = {
                           profile: profile,
                           settings: {
                             defaultSignatureName,
-                            defaultDateFormat,
                             autoSave,
                             notifications,
                             darkMode
@@ -560,14 +548,14 @@ export default function SettingsPage() {
                       Export Profile Data
                     </Button>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Data Import</Label>
                     <p className="text-xs text-gray-500 mb-2">
                       Import previously exported settings to restore your configuration or migrate from another account.
                     </p>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full"
                       onClick={() => {
                         const input = document.createElement('input');
@@ -581,7 +569,6 @@ export default function SettingsPage() {
                               const data = JSON.parse(text);
                               if (data.settings) {
                                 setDefaultSignatureName(data.settings.defaultSignatureName || '');
-                                setDefaultDateFormat(data.settings.defaultDateFormat || 'MM/DD/YYYY');
                                 setAutoSave(data.settings.autoSave ?? true);
                                 setNotifications(data.settings.notifications ?? true);
                                 setDarkMode(data.settings.darkMode ?? false);
@@ -602,7 +589,7 @@ export default function SettingsPage() {
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="pt-4 border-t">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
@@ -611,13 +598,12 @@ export default function SettingsPage() {
                         Reset all settings to their default values. This action cannot be undone.
                       </p>
                     </div>
-                    <Button 
-                      variant="destructive" 
+                    <Button
+                      variant="destructive"
                       size="sm"
                       onClick={() => {
                         if (confirm('Are you sure you want to reset all settings to defaults? This action cannot be undone.')) {
                           setDefaultSignatureName('');
-                          setDefaultDateFormat('MM/DD/YYYY');
                           setAutoSave(true);
                           setNotifications(true);
                           setDarkMode(false);

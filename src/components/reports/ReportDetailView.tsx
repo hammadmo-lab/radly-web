@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState, useLayoutEffect } from 'react';
+import { useEffect, useRef, useState, useLayoutEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { GenerateLoading } from '@/components/GenerateLoading';
-import ReportRenderer from '@/components/ReportRenderer';
+import { EditableReportRenderer } from '@/components/reports/EditableReportRenderer';
+import { EditHintBanner } from '@/components/reports/EditHintBanner';
 import { FormattingProfileSelector } from '@/components/formatting/FormattingProfileSelector';
 import { ReportMetadataSidebar } from '@/components/reports/ReportMetadataSidebar';
 import { useAuth } from '@/components/auth-provider';
@@ -14,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { useSafeClickHandler } from '@/hooks/useButtonResponsiveness';
 import { useJobStatusPolling, useQueueStatsPolling } from '@/hooks/useSafePolling';
 import { useSubscriptionTier } from '@/hooks/useSubscription';
+import { useReportEdit } from '@/hooks/useReportEdit';
 import { exportReportDocx } from '@/lib/api';
 import { getJob, getQueueStats, JobStatusResponse } from '@/lib/jobs';
 import {
@@ -98,28 +100,82 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
     { immediate: hasJobId }
   );
 
+  // Parse report for edit hook
+  const parsedResult = useMemo(() => {
+    if (!jobStatus?.result) return null;
+    try {
+      return JobResultSchema.parse(jobStatus.result);
+    } catch {
+      return null;
+    }
+  }, [jobStatus?.result]);
+
+  const resultReport: StrictReport = parsedResult?.report ?? {
+    title: '',
+    technique: '',
+    findings: '',
+    impression: '',
+    recommendations: ''
+  };
+
+  // Initialize edit hook with original report content
+  const editHook = useReportEdit({
+    jobId: normalizedJobId,
+    original: {
+      findings: resultReport.findings || '',
+      impression: resultReport.impression || '',
+      recommendations: resultReport.recommendations || '',
+    },
+    autoSaveDelay: 2000,
+    onSaveSuccess: (response) => {
+      if (response.edited_fields.length > 0) {
+        toast.success(`Saved ${response.edited_fields.length} field(s)`);
+      }
+    },
+    onSaveError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   const handleExportDocx = useSafeClickHandler(async () => {
     if (!jobStatus?.result) return;
 
     setIsExporting(true);
     try {
       const parsed = JobResultSchema.parse(jobStatus.result);
-      const resultReport: StrictReport = parsed.report ?? { title: '', technique: '', findings: '', impression: '', recommendations: '' };
-      const resultPatient: Patient = parsed.patient ?? { name: undefined, mrn: undefined, age: undefined, dob: undefined, sex: undefined, history: undefined };
+
+      // Use edited content if available
+      const exportReport: StrictReport = {
+        title: parsed.report?.title || '',
+        technique: parsed.report?.technique || '',
+        findings: editHook.editState.findings || parsed.report?.findings || '',
+        impression: editHook.editState.impression || parsed.report?.impression || '',
+        recommendations: editHook.editState.recommendations || parsed.report?.recommendations || '',
+      };
+
+      const resultPatient: Patient = parsed.patient ?? {
+        name: undefined,
+        mrn: undefined,
+        age: undefined,
+        dob: undefined,
+        sex: undefined,
+        history: undefined
+      };
       const resultSignature: Signature | undefined = parsed.signature;
 
-      const filename = resultReport.title
-        ? `${resultReport.title.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')}.docx`
+      const filename = exportReport.title
+        ? `${exportReport.title.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')}.docx`
         : 'radiology_report.docx';
 
       const exportResult = await exportReportDocx(
-        resultReport,
+        exportReport,
         resultPatient,
         resultSignature,
         true, // Always include identifiers
         filename,
         selectedFormattingProfile,
         user?.id,
+        normalizedJobId, // Include job_id so backend can look up edited versions
       );
 
       const downloadUrl = exportResult.public_url || exportResult.url;
@@ -139,6 +195,10 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
     } finally {
       setIsExporting(false);
     }
+  });
+
+  const handleManualSave = useSafeClickHandler(async () => {
+    await editHook.save();
   });
 
   if (!hasJobId) {
@@ -203,12 +263,8 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
     );
   }
 
-  let parsed: JobResult;
-  try {
-    parsed = JobResultSchema.parse(result);
-  } catch (error) {
-    console.error('Failed to parse job result:', error);
-    console.error('Raw result data:', result);
+  if (!parsedResult) {
+    console.error('Failed to parse job result');
     return (
       <div className="max-w-3xl mx-auto py-16 text-center space-y-4">
         <p className="text-red-600 font-medium">Report generation failed.</p>
@@ -223,9 +279,15 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
     );
   }
 
-  const resultReport: StrictReport = parsed.report ?? { title: '', technique: '', findings: '', impression: '', recommendations: '' };
-  const resultPatient: Patient = parsed.patient ?? { name: undefined, mrn: undefined, age: undefined, dob: undefined, sex: undefined, history: undefined };
-  const resultSignature: Signature | undefined = parsed.signature;
+  const resultPatient: Patient = parsedResult.patient ?? {
+    name: undefined,
+    mrn: undefined,
+    age: undefined,
+    dob: undefined,
+    sex: undefined,
+    history: undefined
+  };
+  const resultSignature: Signature | undefined = parsedResult.signature;
 
   return (
     <div className="py-8">
@@ -240,28 +302,62 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
                 userTier={userTier}
               />
             </div>
-            <Button
-              onClick={handleExportDocx}
-              disabled={isExporting}
-              variant="outline"
-              className="flex items-center gap-2 w-full sm:w-auto"
-              aria-label="Download report as DOCX"
-            >
-              {isExporting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Download className="h-4 w-4" />
+            <div className="flex gap-2 w-full sm:w-auto">
+              {/* Manual Save Button - only show when dirty */}
+              {editHook.isDirty && (
+                <Button
+                  onClick={handleManualSave}
+                  disabled={editHook.saveStatus === 'saving' || !editHook.isValid}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  aria-label="Save changes"
+                >
+                  {editHook.saveStatus === 'saving' ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  Save
+                </Button>
               )}
-              {isExporting ? 'Exporting...' : 'Download DOCX'}
-            </Button>
+              <Button
+                onClick={handleExportDocx}
+                disabled={isExporting}
+                variant="outline"
+                className="flex items-center gap-2 flex-1 sm:flex-initial"
+                aria-label="Download report as DOCX"
+              >
+                {isExporting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+                {isExporting ? 'Exporting...' : 'Download DOCX'}
+              </Button>
+            </div>
           </div>
         </div>
 
+        {/* Edit Hint Banner - shows once for new users */}
+        <EditHintBanner className="mb-6" />
+
         {/* Content Grid - Report + Sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 lg:gap-6">
-          {/* Report - Left column */}
+          {/* Report - Left column with editing */}
           <div>
-            <ReportRenderer report={resultReport} patient={resultPatient} signature={resultSignature} />
+            <EditableReportRenderer
+              report={resultReport}
+              patient={resultPatient}
+              signature={resultSignature}
+              isEditing={true}
+              editState={editHook.editState}
+              onFieldChange={editHook.updateField}
+              saveStatus={editHook.saveStatus}
+              lastSavedAt={editHook.lastSavedAt}
+              error={editHook.error}
+              isOverLimit={editHook.isOverLimit}
+              isSaving={editHook.saveStatus === 'saving'}
+            />
           </div>
 
           {/* Metadata Sidebar - Right column, hidden on mobile */}
@@ -273,4 +369,3 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
     </div>
   );
 }
-
