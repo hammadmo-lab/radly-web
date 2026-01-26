@@ -217,3 +217,16 @@ export async function httpPut<TBody, TResp = unknown>(path: string, body: TBody)
     body: JSON.stringify(body),
   });
 }
+
+/**
+ * Make PATCH request to API endpoint
+ * @param path - API endpoint path
+ * @param body - Request body
+ * @returns Promise that resolves to response data
+ */
+export async function httpPatch<TBody, TResp = unknown>(path: string, body: TBody): Promise<TResp> {
+  return makeRequest<TResp>(path, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+}

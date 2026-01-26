@@ -65,6 +65,7 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
  * @param filename - The filename for the exported document
  * @param formattingProfileId - Optional formatting profile ID to apply custom formatting
  * @param userId - Optional user ID for formatting profile lookup
+ * @param jobId - Optional job ID to look up edited versions of the report
  * @returns Promise with export response containing download URL
  */
 export async function exportReportDocx(
@@ -74,7 +75,8 @@ export async function exportReportDocx(
   includeIdentifiers: boolean,
   filename: string,
   formattingProfileId?: string | null,
-  userId?: string | null
+  userId?: string | null,
+  jobId?: string | null
 ): Promise<{
   url: string;
   public_url?: string;
@@ -111,6 +113,10 @@ export async function exportReportDocx(
   }
   if (userId) {
     payload.user_id = userId;
+  }
+  // Add job_id so backend can look up edited versions
+  if (jobId) {
+    payload.job_id = jobId;
   }
 
   const response = await apiFetch("/export/docx/link", {

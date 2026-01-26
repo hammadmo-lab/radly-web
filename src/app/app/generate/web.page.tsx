@@ -1006,7 +1006,7 @@ export default function GeneratePage() {
                           <Input
                             id="signature.date"
                             {...register('signature.date')}
-                            placeholder={new Date().toLocaleDateString()}
+                            placeholder="YYYY-MM-DD"
                             className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(245,215,145,0.45)]"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
