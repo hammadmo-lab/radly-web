@@ -15,6 +15,7 @@ Radly Frontend is a cutting-edge web application that enables users to generate 
 ### Key Features
 
 - **4-Step Report Generation Flow** - Intuitive multi-step form for report creation
+- **Inline Report Editing** - Edit Findings, Impression, and Recommendations before exporting with auto-save
 - **Real-Time Status Polling** - Monitor report generation with smart polling and exponential backoff
 - **Responsive Web Support** - Optimized for desktop and mobile browsers; native apps live in a separate Swift project
 - **Advanced Authentication** - Supabase-powered JWT authentication with OAuth (Google, Apple) and Magic Link
