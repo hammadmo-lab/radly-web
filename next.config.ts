@@ -52,7 +52,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data: https://r2cdn.perplexity.ai",
-      `connect-src 'self' ${apiBase} wss://${new URL(apiBase).hostname} ${apiBase} https://*.supabase.co https://cloudflareinsights.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com wss:`,
+      `connect-src 'self' ${apiBase} https://api.radly.app wss://${new URL(apiBase).hostname} ${apiBase} https://*.supabase.co https://cloudflareinsights.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com wss:`,
       "frame-src 'self' https://www.youtube-nocookie.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",

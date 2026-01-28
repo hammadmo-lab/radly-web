@@ -10,10 +10,15 @@ import {
   ActivateSubscriptionData,
   CancelSubscriptionData
 } from '@/types/admin'
+import {
+  ApiKeyListParams,
+  CreateApiKeyRequest,
+  UpdateApiKeyRequest
+} from '@/types/api-keys'
 
 export function useSubscriptions(params: SubscriptionListParams) {
   const { adminKey, apiKey } = useAdminAuth()
-  
+
   return useQuery({
     queryKey: ['admin', 'subscriptions', params],
     queryFn: async () => {
@@ -112,7 +117,7 @@ export function useUserSubscription(userId: string) {
 export function useActivateSubscription() {
   const { adminKey, apiKey } = useAdminAuth()
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async (data: ActivateSubscriptionData) => {
       if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
@@ -153,7 +158,7 @@ export function useActivateSubscription() {
 export function useCancelSubscription() {
   const { adminKey, apiKey } = useAdminAuth()
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: async (data: CancelSubscriptionData) => {
       if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
@@ -193,7 +198,7 @@ export function useCancelSubscription() {
 
 export function useUsageAnalytics(days: number = 30) {
   const { adminKey, apiKey } = useAdminAuth()
-  
+
   return useQuery({
     queryKey: ['admin', 'analytics', 'usage', days],
     queryFn: async () => {
@@ -303,5 +308,138 @@ export function useChangeTier() {
       }
       return failureCount < 2
     },
+  })
+}
+
+// ==================== API Keys Hooks ====================
+
+export function useApiKeys(params?: ApiKeyListParams) {
+  const { adminKey, apiKey } = useAdminAuth()
+
+  return useQuery({
+    queryKey: ['admin', 'api-keys', params],
+    queryFn: async () => {
+      if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
+      const client = new AdminApiClient({ adminKey, apiKey })
+      return client.listApiKeys(params)
+    },
+    enabled: Boolean(adminKey && apiKey),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: (failureCount, error) => {
+      if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
+        return false
+      }
+      return failureCount < 2
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  })
+}
+
+export function useApiKey(id: number) {
+  const { adminKey, apiKey } = useAdminAuth()
+
+  return useQuery({
+    queryKey: ['admin', 'api-keys', id],
+    queryFn: async () => {
+      if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
+      const client = new AdminApiClient({ adminKey, apiKey })
+      return client.getApiKey(id)
+    },
+    enabled: Boolean(adminKey && apiKey && id),
+    staleTime: 2 * 60 * 1000,
+    retry: (failureCount, error) => {
+      if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
+        return false
+      }
+      return failureCount < 2
+    },
+  })
+}
+
+export function useCreateApiKey() {
+  const { adminKey, apiKey } = useAdminAuth()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: CreateApiKeyRequest) => {
+      if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
+      const client = new AdminApiClient({ adminKey, apiKey })
+      return client.createApiKey(data)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'api-keys'] })
+      toast.success('API key created successfully')
+    },
+    onError: (error: Error) => {
+      if (error.message.includes('401')) {
+        toast.error('Authentication failed. Please check your admin credentials.')
+      } else if (error.message.includes('403')) {
+        toast.error('Access forbidden. You do not have permission to create API keys.')
+      } else if (error.message.includes('404')) {
+        toast.error('User not found. Please check the user ID.')
+      } else {
+        toast.error(`Failed to create API key: ${error.message}`)
+      }
+    },
+    retry: false,
+  })
+}
+
+export function useUpdateApiKey() {
+  const { adminKey, apiKey } = useAdminAuth()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: UpdateApiKeyRequest }) => {
+      if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
+      const client = new AdminApiClient({ adminKey, apiKey })
+      return client.updateApiKey(id, data)
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'api-keys'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'api-keys', variables.id] })
+      toast.success('API key updated successfully')
+    },
+    onError: (error: Error) => {
+      if (error.message.includes('401')) {
+        toast.error('Authentication failed. Please check your admin credentials.')
+      } else if (error.message.includes('403')) {
+        toast.error('Access forbidden. You do not have permission to update API keys.')
+      } else if (error.message.includes('404')) {
+        toast.error('API key not found.')
+      } else {
+        toast.error(`Failed to update API key: ${error.message}`)
+      }
+    },
+    retry: false,
+  })
+}
+
+export function useDeleteApiKey() {
+  const { adminKey, apiKey } = useAdminAuth()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
+      const client = new AdminApiClient({ adminKey, apiKey })
+      return client.deleteApiKey(id)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'api-keys'] })
+      toast.success('API key revoked successfully')
+    },
+    onError: (error: Error) => {
+      if (error.message.includes('401')) {
+        toast.error('Authentication failed. Please check your admin credentials.')
+      } else if (error.message.includes('403')) {
+        toast.error('Access forbidden. You do not have permission to delete API keys.')
+      } else if (error.message.includes('404')) {
+        toast.error('API key not found.')
+      } else {
+        toast.error(`Failed to revoke API key: ${error.message}`)
+      }
+    },
+    retry: false,
   })
 }

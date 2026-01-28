@@ -8,7 +8,20 @@ import {
   UsageAnalytics,
   RevenueAnalytics
 } from '@/types/admin'
-import { API_BASE } from '@/lib/config'
+import {
+  ApiKey,
+  ApiKeyListParams,
+  ApiKeyListResponse,
+  CreateApiKeyRequest,
+  CreateApiKeyResponse,
+  UpdateApiKeyRequest,
+  DeleteApiKeyResponse
+} from '@/types/api-keys'
+
+// Admin endpoints go directly to api.radly.app, bypassing the edge proxy
+// This is because admin endpoints are protected by RADLY_ADMIN_KEYS (server-side)
+// and don't need user JWT or edge rate limiting
+const ADMIN_API_BASE = 'https://api.radly.app'
 
 export class AdminApiClient {
   private credentials: AdminCredentials
@@ -16,15 +29,14 @@ export class AdminApiClient {
 
   constructor(credentials: AdminCredentials) {
     this.credentials = credentials
-    this.baseUrl = API_BASE
+    this.baseUrl = ADMIN_API_BASE
   }
 
   private getHeaders() {
     return {
       'Content-Type': 'application/json',
       'x-admin-key': this.credentials.adminKey,
-      'Authorization': `Bearer ${this.credentials.apiKey}`,
-      'X-Request-Id': crypto.randomUUID(),
+      'x-api-key': this.credentials.apiKey,
     }
   }
 
@@ -45,7 +57,7 @@ export class AdminApiClient {
 
   async listSubscriptions(params: SubscriptionListParams): Promise<SubscriptionListResponse> {
     const searchParams = new URLSearchParams()
-    
+
     if (params.status) searchParams.set('status', params.status)
     if (params.tier) searchParams.set('tier', params.tier)
     if (params.region) searchParams.set('region', params.region)
@@ -58,7 +70,7 @@ export class AdminApiClient {
     const response = await fetch(`${this.baseUrl}/v1/admin/subscriptions/list?${searchParams}`, {
       method: 'GET',
       headers: this.getHeaders(),
-      credentials: 'include',
+      credentials: 'omit',
     })
 
     if (!response.ok) {
@@ -74,7 +86,7 @@ export class AdminApiClient {
     const response = await fetch(`${this.baseUrl}/v1/admin/subscriptions/user-id/${userId}`, {
       method: 'GET',
       headers: this.getHeaders(),
-      credentials: 'include',
+      credentials: 'omit',
     })
 
     if (!response.ok) {
@@ -91,7 +103,7 @@ export class AdminApiClient {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
-      credentials: 'include',
+      credentials: 'omit',
     })
 
     if (!response.ok) {
@@ -108,7 +120,7 @@ export class AdminApiClient {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify(data),
-      credentials: 'include',
+      credentials: 'omit',
     })
 
     if (!response.ok) {
@@ -124,7 +136,7 @@ export class AdminApiClient {
     const response = await fetch(`${this.baseUrl}/v1/admin/analytics/usage?days=${days}`, {
       method: 'GET',
       headers: this.getHeaders(),
-      credentials: 'include',
+      credentials: 'omit',
     })
 
     if (!response.ok) {
@@ -140,7 +152,7 @@ export class AdminApiClient {
     const response = await fetch(`${this.baseUrl}/v1/admin/analytics/revenue?days=${days}`, {
       method: 'GET',
       headers: this.getHeaders(),
-      credentials: 'include',
+      credentials: 'omit',
     })
 
     if (!response.ok) {
@@ -183,7 +195,7 @@ export class AdminApiClient {
     const response = await fetch(`${this.baseUrl}/v1/admin/users/${userId}`, {
       method: 'DELETE',
       headers: this.getHeaders(),
-      credentials: 'include',
+      credentials: 'omit',
     })
 
     if (!response.ok) {
@@ -200,7 +212,97 @@ export class AdminApiClient {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify({ tier_name: tierName, region }),
-      credentials: 'include',
+      credentials: 'omit',
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error')
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
+    }
+
+    return response.json()
+  }
+
+  // ==================== API Keys ====================
+
+  async listApiKeys(params?: ApiKeyListParams): Promise<ApiKeyListResponse> {
+    const searchParams = new URLSearchParams()
+    if (params?.user_id) searchParams.set('user_id', params.user_id)
+
+    const queryString = searchParams.toString()
+    const url = `${this.baseUrl}/v1/admin/api-keys${queryString ? `?${queryString}` : ''}`
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: this.getHeaders(),
+      credentials: 'omit',
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error')
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
+    }
+
+    return response.json()
+  }
+
+  async getApiKey(id: number): Promise<ApiKey> {
+    const response = await fetch(`${this.baseUrl}/v1/admin/api-keys/${id}`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+      credentials: 'omit',
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error')
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
+    }
+
+    return response.json()
+  }
+
+  async createApiKey(data: CreateApiKeyRequest): Promise<CreateApiKeyResponse> {
+    const response = await fetch(`${this.baseUrl}/v1/admin/api-keys`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data),
+      credentials: 'omit',
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error')
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
+    }
+
+    return response.json()
+  }
+
+  async updateApiKey(id: number, data: UpdateApiKeyRequest): Promise<ApiKey> {
+    const response = await fetch(`${this.baseUrl}/v1/admin/api-keys/${id}`, {
+      method: 'PATCH',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data),
+      credentials: 'omit',
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error')
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
+    }
+
+    return response.json()
+  }
+
+  async deleteApiKey(id: number): Promise<DeleteApiKeyResponse> {
+    const response = await fetch(`${this.baseUrl}/v1/admin/api-keys/${id}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+      credentials: 'omit',
     })
 
     if (!response.ok) {

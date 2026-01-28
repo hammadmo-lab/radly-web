@@ -10,7 +10,8 @@ import {
   LogOut,
   Shield,
   AlertCircle,
-  BarChart3
+  BarChart3,
+  Key
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AdminGuard } from '@/components/admin/AdminGuard'
@@ -50,16 +51,16 @@ export default function AdminDashboard() {
     parseInt(searchParams.get('page') || '1', 10)
   )
 
-  const { 
-    data: subscriptionsData, 
-    isLoading: subscriptionsLoading, 
+  const {
+    data: subscriptionsData,
+    isLoading: subscriptionsLoading,
     error: subscriptionsError,
-    refetch: refetchSubscriptions 
+    refetch: refetchSubscriptions
   } = useSubscriptions(filters)
-  const { 
-    data: revenueAnalytics, 
+  const {
+    data: revenueAnalytics,
     isLoading: revenueLoading,
-    error: revenueError 
+    error: revenueError
   } = useRevenueAnalytics(30)
 
   // Check if there are any errors
@@ -143,7 +144,7 @@ export default function AdminDashboard() {
       toast.error('Cannot view user: user ID not available')
       return
     }
-    
+
     console.log('Viewing user:', userId)
     router.push(`/admin/users/${userId}`)
   }, [router])
@@ -172,9 +173,9 @@ export default function AdminDashboard() {
     if (amount === null || amount === undefined || isNaN(amount)) {
       return '$0'
     }
-    return `$${amount.toLocaleString('en-US', { 
+    return `$${amount.toLocaleString('en-US', {
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0 
+      maximumFractionDigits: 0
     })}`
   }
 
@@ -242,6 +243,14 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <Button
+                    variant="ghost"
+                    onClick={() => router.push('/admin/api-keys')}
+                    className="h-11 rounded-xl border border-[rgba(75,142,255,0.35)] bg-[rgba(75,142,255,0.16)] px-5 text-[#D7E3FF] hover:border-[rgba(75,142,255,0.45)] hover:bg-[rgba(75,142,255,0.22)]"
+                  >
+                    <Key className="mr-2 h-4 w-4" />
+                    API Keys
+                  </Button>
                   <Button
                     variant="ghost"
                     onClick={() => router.push('/admin/metrics')}
