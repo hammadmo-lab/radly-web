@@ -191,15 +191,20 @@ export function AnimatedHomePage({
                   <span className="text-base font-bold text-[#F0E6D3] leading-tight group-hover:text-[#F5D791] transition-colors">App Store</span>
                 </div>
               </a>
-              <div className="flex items-center gap-3 px-6 py-3.5 bg-[#1A1714]/80 border border-[#3A332B] rounded-2xl">
-                <svg className="w-8 h-8 text-[#6B6560]" viewBox="0 0 24 24" fill="currentColor">
+              <a
+                href="https://play.google.com/store/apps/details?id=com.radly.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-6 py-3.5 bg-gradient-to-r from-[#2A251F] to-[#1A1714] border-2 border-[#F5D791]/50 rounded-2xl hover:border-[#F5D791] hover:shadow-[0_0_20px_rgba(245,215,145,0.3)] transition-all duration-300 group"
+              >
+                <svg className="w-8 h-8 text-[#F5D791]" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 0 1 0 1.73l-2.807 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.8 9.99l-2.302 2.302-8.634-8.634z" />
                 </svg>
                 <div className="flex flex-col">
-                  <span className="text-xs text-[#6B6560] leading-tight">Android</span>
-                  <span className="text-base font-bold text-[#8A857D] leading-tight">Coming Soon</span>
+                  <span className="text-xs text-[#A89F91] leading-tight">Get it on</span>
+                  <span className="text-base font-bold text-[#F0E6D3] leading-tight group-hover:text-[#F5D791] transition-colors">Google Play</span>
                 </div>
-              </div>
+              </a>
             </div>
           </motion.div>
         </div>
