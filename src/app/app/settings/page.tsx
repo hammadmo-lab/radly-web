@@ -19,9 +19,9 @@ import {
   User, Settings, Wifi, Palette,
   Save, CheckCircle, AlertCircle, Clock,
   Eye, Download, Upload,
-  Activity, Lock, FileText
+  Activity, Lock, Sparkles
 } from 'lucide-react'
-import { FormattingDashboard } from '@/components/formatting/FormattingDashboard'
+import { StyleProfilesDashboard } from '@/components/style-profiles/StyleProfilesDashboard'
 import { TierGate } from '@/components/formatting/TierGate'
 import { useSubscriptionTier } from '@/hooks/useSubscription'
 import { SubscriptionStatusCard } from '@/components/subscription/SubscriptionStatusCard'
@@ -621,21 +621,21 @@ export default function SettingsPage() {
         )}
       </AnimatePresence>
 
-      {/* Custom Formatting Section */}
+      {/* Style Profiles Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
+        transition={{ delay: 0.7 }}
         className="space-y-6"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-            <FileText className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">Custom Report Formatting</h2>
+            <h2 className="text-2xl font-bold">Style Profiles</h2>
             <p className="text-gray-600">
-              Upload and manage DOCX templates for custom report formatting
+              Upload DOCX templates to teach Radly your institution&apos;s writing style
             </p>
           </div>
         </div>
@@ -643,9 +643,9 @@ export default function SettingsPage() {
         <TierGate
           requiredTiers={['professional', 'premium']}
           currentTier={currentTier}
-          featureName="Custom Report Formatting"
+          featureName="Style Profiles"
         >
-          <FormattingDashboard />
+          <StyleProfilesDashboard />
         </TierGate>
       </motion.div>
     </div>

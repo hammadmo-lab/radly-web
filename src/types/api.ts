@@ -22,4 +22,6 @@ export interface EnqueueInput {
   technique?: string | null;
   patient?: PatientInput | null;
   signature?: SignatureInput | null;
+  /** Style profile UUID to apply during generation. Omit to use backend default. */
+  styleProfileId?: string;
 }
