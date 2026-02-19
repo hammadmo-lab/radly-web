@@ -16,13 +16,13 @@ Radly Frontend is a cutting-edge web application that enables users to generate 
 
 - **4-Step Report Generation Flow** - Intuitive multi-step form for report creation
 - **Inline Report Editing** - Edit Findings, Impression, and Recommendations before exporting with auto-save
+- **Custom DOCX Templates (Style Profiles)** - Upload your hospital letterhead; Radly fills in report content while keeping your exact formatting. Supports scalar tags (`{findings}`, `{impression}`, patient info, etc.) and loop tags for bullet lists and organ-by-organ layouts
 - **Real-Time Status Polling** - Monitor report generation with smart polling and exponential backoff
 - **Responsive Web Support** - Optimized for desktop and mobile browsers; native apps live in a separate Swift project
 - **Advanced Authentication** - Supabase-powered JWT authentication with OAuth (Google, Apple) and Magic Link
 - **Responsive Design** - Mobile-first design with dual navigation (bottom tabs for mobile, top nav for desktop)
 - **Admin Dashboard** - Comprehensive metrics, user management, and system monitoring
 - **Voice Input** - Voice-to-text transcription for hands-free report generation
-- **Document Formatting** - Customizable formatting profiles for generated reports
 - **Subscription Management** - Multi-tier subscriptions with usage tracking and upgrade prompts
 - **Offline Support** - PWA-ready with service worker for offline functionality
 
@@ -971,5 +971,6 @@ This project is private and proprietary to Radly Inc. All rights reserved.
 
 ---
 
-**Last Updated:** October 2025
+**Version:** 1.3.0
+**Last Updated:** February 2026
 **Maintainers:** Radly Engineering Team

@@ -10,6 +10,53 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.3.0] - 2026-02-19
+
+### Added
+
+#### Style Profiles — Custom DOCX Templates (New Feature)
+- **Template Upload** — Upload your hospital or clinic's DOCX letterhead; Radly preserves fonts, logo, headers, footers, and margins and fills in report content at export time
+- **Placeholder Tag System** — Place tags inside your Word document to mark where content goes:
+  - Required: `{findings}`, `{impression}`
+  - Optional: `{exam_title}`, `{patient_name}`, `{age_gender}`, `{date}`, `{mrn}`, `{clinical_history}`, `{technique}`, `{recommendations}`, `{reported_by}`, `{report_date}`
+- **Loop Tags for Advanced Layouts** — New tag blocks for structured output:
+  - `{#findings_list}{.}{/findings_list}` — one bullet/paragraph per finding line
+  - `{#impression_list}{.}{/impression_list}` — same for impression
+  - `{#findings_sections}{organ}: {description}{/findings_sections}` — organ-by-organ breakdown
+  - `{#impression_sections}{organ}: {description}{/impression_sections}` — organ-by-organ impression
+- **Instant Activation** — Template is active immediately on upload; no background processing or confidence scoring
+- **Detected Placeholders** — Upload success screen shows all scalar tags found in the document as badge pills
+- **Style Selector** — Dropdown in report view and generate form to pick which template to apply on DOCX export
+- **In-App User Guide** — Plain-language step-by-step guide in the dashboard explaining all tags and loop block layouts, written for non-technical users
+- **Set as Default** — Mark a template to apply automatically to every DOCX export
+
+#### New Files
+- `src/types/style-profiles.ts` — TypeScript types for the new style profile model
+- `src/lib/api/style-profiles.ts` — API client (list, upload, update, delete, set-default)
+- `src/hooks/use-style-profiles.ts` — React Query hooks (`useStyleProfiles`, `useUploadStyleProfile`, `useUpdateStyleProfile`, `useDeleteStyleProfile`, `useSetDefaultStyleProfile`)
+- `src/components/style-profiles/StyleProfilesDashboard.tsx` — Full dashboard with profile cards and empty-state guide
+- `src/components/style-profiles/UploadStyleProfileDialog.tsx` — Upload dialog with tag reference and success state
+- `src/components/features/generate/StyleSelector.tsx` — Dropdown component for selecting a style profile
+
+### Changed
+- `src/components/reports/ReportDetailView.tsx` — Replaced old `FormattingProfileSelector` with new `StyleSelector`
+- `src/lib/api.ts` — Renamed `formattingProfileId` → `styleProfileId`; payload key changed from `formatting_profile_id` → `style_profile_id`
+- `src/app/app/settings/page.tsx` — Removed deprecated "Custom Report Formatting" section
+- `src/app/app/generate/web.page.tsx` — Added `StyleSelector` to generate form; fixed date auto-fill to use locale-independent `DD/MM/YYYY` format (was incorrectly using `toLocaleDateString()`)
+- `src/lib/schemas.ts` — Added `styleProfileId` optional field to generate form schema
+- `src/lib/jobs.ts` — Pass `styleProfileId` through to `enqueueJob`
+
+### Removed
+- Old `FormattingDashboard` section from settings page (replaced by `StyleProfilesDashboard`)
+- Confidence score display, version badge, and "Rebuild rules" action (no longer part of the backend model)
+- `useRebuildStyleRules` hook
+
+### Fixed
+- Date field in generate form was auto-filling as `MM-DD-YYYY` (locale-dependent); now always produces `DD/MM/YYYY`
+- Report view showed "No custom formatting profiles" even when style profiles existed (was querying the wrong API)
+
+---
+
 ## [1.2.0] - 2026-01-26
 
 ### Added
