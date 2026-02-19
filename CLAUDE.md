@@ -1,6 +1,13 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides comprehensive guidance to Claude Code (claude.ai/code) and other AI-assisted development tools when working with code in this repository.
+
+## Purpose
+
+This document serves as a reference for:
+- **AI Assistants** - Understanding the codebase structure, patterns, and conventions
+- **Developers** - Quick reference for common development tasks and architectural decisions
+- **Code Review** - Ensuring consistency with established patterns and best practices
 
 ## Development Commands
 
@@ -52,53 +59,62 @@ npm run analyze:server   # Analyze server bundle only
 
 ### State Management Philosophy
 
-This application uses a **layered state management** approach:
+This application uses a **layered state management** approach to separate concerns and optimize performance:
 
 1. **Authentication State** - React Context (`AuthProvider`)
-   - User session, auth status, signOut method
+   - Manages user session, authentication status, and sign-out functionality
    - Access via `useAuth()` hook
-   - Located in `src/components/auth-provider.tsx`
+   - Implementation: `src/components/auth-provider.tsx`
+   - Session persisted in HTTP-only cookies via Supabase
 
 2. **Server State** - TanStack React Query
-   - API data fetching, caching, and synchronization
-   - Automatic retries with exponential backoff
-   - Standard stale time: 5-10 minutes
-   - Retry logic ignores 401/403/404 errors (do not retry)
+   - Handles API data fetching, caching, and synchronization
+   - Automatic retries with exponential backoff for failed requests
+   - Standard stale time: 5-10 minutes (configurable per query)
+   - Retry logic **does not retry** 401/403/404 errors (auth failures, forbidden access, not found)
+   - Query invalidation on user actions (create, update, delete)
 
 3. **Form State** - React Hook Form + Zod
-   - Form values and validation
-   - Schemas defined in `src/lib/schemas.ts`
+   - Type-safe form validation with runtime schema checking
+   - All validation schemas centralized in `src/lib/schemas.ts`
+   - Validation modes: `onSubmit` (default) or `onChange` (for immediate feedback)
 
-4. **UI State** - Local `useState`
-   - Modal visibility, step tracking, toggles
-   - Keep ephemeral and co-located with components
+4. **UI State** - Local `useState` and `useReducer`
+   - Component-level ephemeral state: modal visibility, step tracking, toggles, loading states
+   - Keep state co-located with components
+   - Do not persist to storage
 
 5. **Client Storage** - localStorage
-   - Recent jobs, user preferences
-   - User-specific keys to avoid collisions
+   - Non-sensitive data only: recent jobs, user preferences, UI settings
+   - User-specific keys to avoid collisions (e.g., `user_${userId}_preferences`)
+   - **Never store PHI** (Protected Health Information) or authentication tokens
+   - Access via `src/lib/secure-storage.ts` for type-safe operations
 
 ### API Integration Pattern
 
 **Core HTTP client**: `src/lib/http.ts`
 
-All API calls go through three type-safe functions:
+All API calls flow through a centralized HTTP client with three type-safe methods:
+
 ```typescript
 httpGet<T>(path: string): Promise<T>
 httpPost<TBody, TResp>(path: string, body: TBody): Promise<TResp>
 httpPut<TBody, TResp>(path: string, body: TBody): Promise<TResp>
 ```
 
-**Key behaviors**:
-- Automatically injects Bearer token from Supabase session
-- Adds `x-client-key` header for rate limiting
-- Adds `X-Request-Id` (UUID) for request tracking
-- Sets `credentials: 'include'` for CORS
-- Sets `cache: 'no-store'` for GET requests
-- Throws `ApiError` with `status` and `body` properties
+**Automatic behaviors** (handled by HTTP client):
+- **JWT Bearer token injection** - Retrieves and injects the current Supabase session token
+- **Rate limiting header** - Adds `x-client-key` header for API rate limiting
+- **Request tracking** - Generates and includes `X-Request-Id` header (UUID) for distributed tracing
+- **CORS credentials** - Sets `credentials: 'include'` for cross-origin requests
+- **Cache control** - Applies `cache: 'no-store'` to all GET requests to prevent stale data
+- **Timeout handling** - All requests timeout after 30 seconds to prevent infinite loading states
+- **Error handling** - Throws typed `ApiError` instances with `status` and `body` properties
 
-**Environment variables**:
-- `NEXT_PUBLIC_API_BASE` - Backend API URL (default: `https://edge.radly.app`)
-- `NEXT_PUBLIC_RADLY_CLIENT_KEY` - 64-char public API key
+**Required environment variables**:
+- `NEXT_PUBLIC_API_BASE` - Backend API URL (production: `https://edge.radly.app`)
+- `NEXT_PUBLIC_RADLY_CLIENT_KEY` - 64-character public API key for rate limiting
+- Configuration validated at build time to prevent runtime errors
 
 ### Polling Strategy
 
@@ -335,29 +351,125 @@ NEXT_PUBLIC_SITE_URL=             # Site URL for redirects
 
 ### Common Patterns
 
-**Creating a new API endpoint call**:
-1. Add types to `src/types/api.ts`
-2. Use `httpGet/Post/Put` from `src/lib/http.ts`
-3. Wrap in React Query hook for caching
-4. Handle errors in query error callback
+#### Creating a New API Endpoint Call
 
-**Adding a new form**:
-1. Define Zod schema in `src/lib/schemas.ts`
-2. Use React Hook Form with `zodResolver`
-3. Build UI with `src/components/ui/` components
-4. Submit via `httpPost` with type-safe payload
+Follow this pattern for all API integrations:
 
-**Adding a new page**:
-1. Create route in `src/app/` directory
-2. Use Server Components by default
-3. Add "use client" for interactivity
-4. Protect with middleware if needed
+1. **Define types** in `src/types/api.ts`:
+   ```typescript
+   export interface UserProfile {
+     id: string
+     name: string
+     email: string
+   }
+   ```
 
-**Working with admin features**:
-1. Use `AdminAuthProvider` and `useAdminAuth()`
-2. Admin API calls in `src/lib/admin-api.ts`
-3. Admin types in `src/types/admin.ts`
-4. Admin routes require authentication check
+2. **Create API function** using HTTP client from `src/lib/http.ts`:
+   ```typescript
+   import { httpGet, httpPost } from '@/lib/http'
+
+   export async function getUserProfile(): Promise<UserProfile> {
+     return httpGet<UserProfile>('/v1/users/profile')
+   }
+   ```
+
+3. **Wrap in React Query hook** for caching and state management:
+   ```typescript
+   import { useQuery } from '@tanstack/react-query'
+
+   export function useUserProfile() {
+     return useQuery({
+       queryKey: ['user', 'profile'],
+       queryFn: getUserProfile,
+       staleTime: 5 * 60 * 1000, // 5 minutes
+     })
+   }
+   ```
+
+4. **Handle errors** in component:
+   ```typescript
+   const { data, error, isLoading } = useUserProfile()
+
+   if (error) {
+     return <ErrorMessage error={error} />
+   }
+   ```
+
+#### Adding a New Form
+
+1. **Define Zod schema** in `src/lib/schemas.ts`:
+   ```typescript
+   export const userProfileSchema = z.object({
+     name: z.string().min(2, "Name must be at least 2 characters"),
+     email: z.string().email("Invalid email address"),
+   })
+
+   export type UserProfileFormData = z.infer<typeof userProfileSchema>
+   ```
+
+2. **Use React Hook Form** with `zodResolver`:
+   ```typescript
+   import { useForm } from 'react-hook-form'
+   import { zodResolver } from '@hookform/resolvers/zod'
+
+   const form = useForm<UserProfileFormData>({
+     resolver: zodResolver(userProfileSchema),
+     defaultValues: { name: '', email: '' },
+   })
+   ```
+
+3. **Build UI** with components from `src/components/ui/`:
+   ```typescript
+   <form onSubmit={form.handleSubmit(onSubmit)}>
+     <Input {...form.register('name')} />
+     <Input {...form.register('email')} type="email" />
+     <Button type="submit">Save</Button>
+   </form>
+   ```
+
+4. **Submit via HTTP client** with type-safe payload:
+   ```typescript
+   const onSubmit = async (data: UserProfileFormData) => {
+     await httpPost('/v1/users/profile', data)
+   }
+   ```
+
+#### Adding a New Page
+
+1. **Create route** in `src/app/` directory following Next.js App Router conventions
+2. **Use Server Components by default** for better performance
+3. **Add `"use client"` directive** only when you need client-side interactivity
+4. **Protect with middleware** if needed (middleware.ts handles `/app/*` routes)
+
+**Example:**
+```typescript
+// src/app/app/new-feature/page.tsx
+export default function NewFeaturePage() {
+  // Server Component by default
+  return <div>Server-rendered content</div>
+}
+```
+
+#### Working with Admin Features
+
+1. **Use `AdminAuthProvider`** and `useAdminAuth()` hook for authentication
+2. **Admin API calls** go in `src/lib/admin-api.ts`
+3. **Admin types** defined in `src/types/admin.ts`
+4. **Admin routes** (`/admin/*`) require admin authentication (API key in localStorage)
+
+**Example:**
+```typescript
+import { useAdminAuth } from '@/components/admin/AdminAuthProvider'
+
+export function AdminComponent() {
+  const { isAuthenticated, apiKey } = useAdminAuth()
+
+  if (!isAuthenticated) {
+    return <AdminLogin />
+  }
+
+  // Admin content
+}
 
 ### Docker Deployment
 

@@ -2,7 +2,16 @@
 
 ## Overview
 
-Radly frontend implements comprehensive client-side security measures to protect user data and prevent common web vulnerabilities.
+The Radly frontend implements comprehensive client-side security measures to protect user data and prevent common web vulnerabilities.
+
+**Security Goals:**
+- Protect user authentication credentials and session data
+- Prevent common web attacks (XSS, CSRF, injection)
+- Ensure secure communication with the backend API
+- Comply with healthcare data protection best practices (HIPAA considerations)
+- Provide audit logging and security monitoring
+
+This document covers the security features, best practices, and compliance considerations for the frontend application.
 
 ## Security Features
 
@@ -10,27 +19,41 @@ Radly frontend implements comprehensive client-side security measures to protect
 
 **Implementation**: `src/lib/auth-security.ts`
 
-- JWT token validation and format checking
-- Automatic token refresh (every 4 minutes)
-- Secure logout with data cleanup
-- No tokens in localStorage (Supabase handles securely)
+The authentication system uses Supabase Auth with JWT tokens, providing:
 
-**Usage**:
+- **JWT Token Management**
+  - Token validation and format checking
+  - Automatic token refresh (every 4 minutes before expiration)
+  - Secure token storage in HTTP-only cookies (handled by Supabase)
+  - **Never** stores tokens in localStorage or sessionStorage
+
+- **Session Management**
+  - Secure logout with complete data cleanup
+  - Session timeout after inactivity
+  - Multi-tab session synchronization
+
+**Usage Example:**
 ```typescript
 import { AuthSecurity } from '@/lib/auth-security'
 
-// Get secure token
+// Get current authentication token
 const token = await AuthSecurity.getSecureToken()
 
 // Check if token is expired
-const expired = await AuthSecurity.isTokenExpired()
+const isExpired = await AuthSecurity.isTokenExpired()
 
 // Refresh token if needed
 await AuthSecurity.refreshTokenIfNeeded()
 
-// Secure logout
+// Perform secure logout (clears session and local data)
 await AuthSecurity.secureLogout()
 ```
+
+**Security Notes:**
+- Tokens are transmitted only over HTTPS in production
+- Token expiration is enforced on both client and server
+- Refresh tokens are rotated on each use
+- Failed authentication attempts are logged and monitored
 
 ### 2. Request Signing
 
@@ -106,32 +129,57 @@ if (!InputValidator.isValidName(patientName)) {
 
 **Implementation**: `src/lib/secure-storage.ts`
 
-**CRITICAL: Never store PHI in browser storage**
+**CRITICAL: Never store PHI (Protected Health Information) in browser storage**
 
-✅ **Safe to store**:
-- User preferences (theme, language)
-- UI state (sidebar collapsed)
-- Non-sensitive settings
+The storage utility provides type-safe access to browser storage with built-in security checks.
 
-❌ **Never store**:
-- Patient names, MRN, DOB
-- Clinical findings
-- Generated reports
-- Authentication tokens
+#### What is Safe to Store
 
-**Usage**:
+✅ **Safe to store** (non-sensitive data):
+- User preferences (theme, language, UI settings)
+- UI state (sidebar collapsed, table column widths)
+- Non-sensitive application settings
+- Recent job IDs (not job content)
+
+#### What Should Never Be Stored
+
+❌ **Never store** (sensitive data):
+- Patient names, MRN (Medical Record Number), DOB (Date of Birth)
+- Clinical findings, diagnoses, or medical observations
+- Generated reports or report content
+- Authentication tokens or API keys
+- Personal identifiable information (PII)
+- Protected health information (PHI)
+
+#### Usage Examples
+
 ```typescript
 import { SecureStorage } from '@/lib/secure-storage'
 
-// Store preferences (OK)
+// Store user preferences (safe)
 SecureStorage.setItem('theme', 'dark')
+SecureStorage.setItem('language', 'en')
 
-// Store temporary workflow data (use sessionStorage)
+// Store temporary workflow data in sessionStorage (cleared on tab close)
 SecureStorage.setSessionItem('currentStep', 2)
+SecureStorage.setSessionItem('formDraft', JSON.stringify(draftData))
 
-// Clear session on logout
+// Clear all session data on logout
 SecureStorage.clearSession()
+
+// Check if storage is available (respects user privacy settings)
+if (SecureStorage.isAvailable()) {
+  // Safe to use storage
+}
 ```
+
+#### Storage Best Practices
+
+1. **Use sessionStorage for temporary data** - Cleared when tab/window closes
+2. **Use localStorage for persistent preferences** - Survives browser restarts
+3. **Always clear storage on logout** - Prevent data leakage
+4. **Never log storage contents** - Avoid exposing data in console
+5. **Validate data before storing** - Ensure it's non-sensitive
 
 ### 6. Content Security Policy
 
