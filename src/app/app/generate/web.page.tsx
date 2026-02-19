@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -30,8 +30,17 @@ import { VoiceInput } from '@/components/VoiceInput';
 import { UpgradePromptModal } from '@/components/UpgradePromptModal';
 import type { SubscriptionTier } from '@/types/transcription';
 import { cn } from '@/lib/utils'
+import { StyleSelector } from '@/components/features/generate/StyleSelector'
 
 export const dynamic = 'force-dynamic';
+
+/** Returns today's date as DD/MM/YYYY — matching the schema validation format. */
+function formatDateDDMMYYYY(d: Date): string {
+  const dd = String(d.getDate()).padStart(2, '0')
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const yyyy = d.getFullYear()
+  return `${dd}/${mm}/${yyyy}`
+}
 
 // Usage data interface
 interface UsageData {
@@ -128,6 +137,7 @@ export default function GeneratePage() {
     setValue,
     reset,
     trigger,
+    control,
     formState: { errors, isDirty, isSubmitting: formIsSubmitting },
   } = useForm({
     resolver: zodResolver(generateFormSchema),
@@ -142,8 +152,9 @@ export default function GeneratePage() {
       technique: '',
       signature: {
         name: '',
-        date: new Date().toLocaleDateString(),
+        date: formatDateDDMMYYYY(new Date()),
       },
+      styleProfileId: undefined,
     },
   })
 
@@ -171,13 +182,7 @@ export default function GeneratePage() {
   // Update form defaults when profile loads
   useEffect(() => {
     if (profile) {
-      const formattedDate = profile.default_signature_date_format
-        ? new Date().toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit'
-        }).replace(/\//g, profile.default_signature_date_format.includes('/') ? '/' : '-')
-        : new Date().toLocaleDateString();
+      const formattedDate = formatDateDDMMYYYY(new Date());
 
       reset({
         templateId: templateId || '',
@@ -190,6 +195,7 @@ export default function GeneratePage() {
           name: profile.default_signature_name || '',
           date: formattedDate,
         },
+        styleProfileId: undefined,
       });
     }
   }, [profile, reset, templateId]);
@@ -428,6 +434,7 @@ export default function GeneratePage() {
         technique: data.technique || '',
         patient: patient,
         signature: data.signature,
+        styleProfileId: data.styleProfileId || undefined,
       }
 
       // Enqueue the job using new API helper
@@ -978,6 +985,18 @@ export default function GeneratePage() {
 
                     {/* Form Fields */}
                     <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                      {/* Style Profile selector — renders only when active profiles exist */}
+                      <Controller
+                        control={control}
+                        name="styleProfileId"
+                        render={({ field }) => (
+                          <StyleSelector
+                            value={field.value}
+                            onChange={(v) => field.onChange(v ?? undefined)}
+                          />
+                        )}
+                      />
+
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <FormField
                           label="Signature Name"

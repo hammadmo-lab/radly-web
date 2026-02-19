@@ -74,7 +74,7 @@ export async function exportReportDocx(
   signature: Signature | undefined,
   includeIdentifiers: boolean,
   filename: string,
-  formattingProfileId?: string | null,
+  styleProfileId?: string | null,
   userId?: string | null,
   jobId?: string | null
 ): Promise<{
@@ -107,9 +107,8 @@ export async function exportReportDocx(
     filename: filename,
   };
 
-  // Add formatting profile if provided
-  if (formattingProfileId) {
-    payload.formatting_profile_id = formattingProfileId;
+  if (styleProfileId) {
+    payload.style_profile_id = styleProfileId;
   }
   if (userId) {
     payload.user_id = userId;

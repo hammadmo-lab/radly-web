@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { GenerateLoading } from '@/components/GenerateLoading';
 import { EditableReportRenderer } from '@/components/reports/EditableReportRenderer';
 import { EditHintBanner } from '@/components/reports/EditHintBanner';
-import { FormattingProfileSelector } from '@/components/formatting/FormattingProfileSelector';
+import { StyleSelector } from '@/components/features/generate/StyleSelector';
 import { ReportMetadataSidebar } from '@/components/reports/ReportMetadataSidebar';
 import { useAuth } from '@/components/auth-provider';
 import { Button } from '@/components/ui/button';
@@ -40,9 +40,7 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
   const [queueDepth, setQueueDepth] = useState<number | null>(null);
   const [running, setRunning] = useState<number | null>(null);
   const [isExporting, setIsExporting] = useState(false);
-  const [selectedFormattingProfile, setSelectedFormattingProfile] = useState<string | null>(
-    null,
-  );
+  const [selectedStyleProfile, setSelectedStyleProfile] = useState<string | undefined>(undefined);
 
   const { user } = useAuth();
   const userTier = useSubscriptionTier();
@@ -55,7 +53,7 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
     setQueueDepth(null);
     setRunning(null);
     setIsExporting(false);
-    setSelectedFormattingProfile(null);
+    setSelectedStyleProfile(undefined);
     startedAtMs.current = null;
   }, [normalizedJobId]);
 
@@ -173,7 +171,7 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
         resultSignature,
         true, // Always include identifiers
         filename,
-        selectedFormattingProfile,
+        selectedStyleProfile,
         user?.id,
         normalizedJobId, // Include job_id so backend can look up edited versions
       );
@@ -296,10 +294,9 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
         <div className="mb-6 space-y-4">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
             <div className="flex-1 w-full">
-              <FormattingProfileSelector
-                value={selectedFormattingProfile}
-                onChange={setSelectedFormattingProfile}
-                userTier={userTier}
+              <StyleSelector
+                value={selectedStyleProfile}
+                onChange={setSelectedStyleProfile}
               />
             </div>
             <div className="flex gap-2 w-full sm:w-auto">

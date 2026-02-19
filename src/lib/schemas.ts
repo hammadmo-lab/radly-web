@@ -72,6 +72,7 @@ export const generateFormSchema = z.object({
     .optional()
     .or(z.literal('')),
   signature: signatureSchema.optional(),
+  styleProfileId: z.string().uuid().optional(),
 })
 
 export type GenerateFormValues = z.infer<typeof generateFormSchema>

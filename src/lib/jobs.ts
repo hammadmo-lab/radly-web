@@ -76,6 +76,9 @@ export async function enqueueJob(input: EnqueueInput): Promise<{ job_id: string 
     if (Object.keys(p).length) body.patient = p;
   }
 
+  // Backend contract: /v1/generate/async uses camelCase styleProfileId
+  if (input.styleProfileId) body.styleProfileId = input.styleProfileId;
+
   if (input.signature) {
     const s: Record<string, unknown> = {};
     if (input.signature.name?.trim()) s.name = input.signature.name.trim();
