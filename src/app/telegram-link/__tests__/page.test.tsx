@@ -4,6 +4,7 @@ import TelegramLinkPage from '@/app/telegram-link/page'
 const mockReplace = jest.fn()
 const mockGetSession = jest.fn()
 const mockFetch = jest.fn()
+let consoleErrorSpy: jest.SpyInstance
 
 let mockToken = 'a'.repeat(64)
 
@@ -30,7 +31,7 @@ jest.mock('@/lib/supabase/client', () => ({
 }))
 
 jest.mock('@/lib/orchestrator', () => ({
-  getOrchestratorUrl: () => 'https://bot.radly.app',
+  getTelegramConfirmUrl: () => 'https://bot.radly.app/telegram/link/confirm',
 }))
 
 describe('TelegramLinkPage', () => {
@@ -38,6 +39,11 @@ describe('TelegramLinkPage', () => {
     jest.clearAllMocks()
     mockToken = 'a'.repeat(64)
     global.fetch = mockFetch as unknown as typeof fetch
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore()
   })
 
   it('redirects to sign-in when there is no active session', async () => {
