@@ -5,7 +5,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type React
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { createBrowserSupabase } from '@/lib/supabase/client'
-import { getOrchestratorUrl } from '@/lib/orchestrator'
+import { getTelegramConfirmUrl } from '@/lib/orchestrator'
 
 type LinkState = 'loading' | 'success' | 'link-error' | 'network-error'
 
@@ -87,7 +87,13 @@ function TelegramLinkContent() {
   }, [returnTo, router])
 
   const confirmLink = useCallback(async () => {
+    const confirmUrl = getTelegramConfirmUrl()
+
     try {
+      if (typeof window === 'undefined') {
+        return
+      }
+
       const supabase = createBrowserSupabase()
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
@@ -96,7 +102,7 @@ function TelegramLinkContent() {
         return
       }
 
-      const response = await fetch(`${getOrchestratorUrl()}/telegram/link/confirm`, {
+      const response = await fetch(confirmUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -115,7 +121,11 @@ function TelegramLinkContent() {
       }
 
       setState('link-error')
-    } catch {
+    } catch (error) {
+      console.error('[TelegramLink] confirm request failed', {
+        endpoint: confirmUrl,
+        message: error instanceof Error ? error.message : 'Unknown error',
+      })
       setState('network-error')
     }
   }, [redirectToSignIn, token])
