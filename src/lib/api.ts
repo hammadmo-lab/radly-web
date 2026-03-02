@@ -98,6 +98,7 @@ export async function exportReportDocx(
       mrn: patient.mrn,
       dob: patient.dob,
       history: patient.history,
+      referring_physician: patient.referring_physician || null,
     },
     signature: signature ? {
       name: signature.name,
