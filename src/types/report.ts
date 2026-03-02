@@ -7,6 +7,7 @@ export const PatientSchema = z.object({
   dob: z.string().nullable().optional().transform(val => val ?? undefined),
   sex: z.string().nullable().optional().transform(val => val ?? undefined),
   history: z.string().nullable().optional().transform(val => val ?? undefined),
+  referring_physician: z.string().nullable().optional().transform(val => val ?? undefined),
 });
 
 export type Patient = z.infer<typeof PatientSchema>;
