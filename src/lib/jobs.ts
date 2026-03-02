@@ -54,7 +54,7 @@ export async function enqueueJob(input: EnqueueInput): Promise<{ job_id: string 
   if (input.indication?.trim()) body.indication = input.indication.trim();
   if (input.impression?.trim()) body.impression = input.impression.trim();
   if (input.technique?.trim()) body.technique = input.technique.trim();
-  if (input.referring_physician?.trim()) body.referring_physician = input.referring_physician.trim();
+  body.referring_physician = input.referring_physician?.trim() || null;
 
   if (input.patient) {
     const p: Record<string, unknown> = {};
