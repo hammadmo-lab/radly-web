@@ -5,6 +5,7 @@ export type PatientBlock = {
   dob?: string
   sex?: string
   history?: string
+  referring_physician?: string | null
 }
 
 export type StrictReport = {
@@ -37,9 +38,9 @@ export type GeneratePayload = {
 export type EnqueueResp = { job_id: string; status?: string }
 
 export type ApiErrorType = { status: number; message: string; body?: unknown };
-export type ApiResult<T> = { 
-  data: T | null; 
-  error?: ApiErrorType 
+export type ApiResult<T> = {
+  data: T | null;
+  error?: ApiErrorType
 }
 
 export type JobDoneResult = {

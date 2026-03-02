@@ -150,6 +150,7 @@ export default function GeneratePage() {
       indication: '',
       findings: '',
       technique: '',
+      referringPhysician: '',
       signature: {
         name: '',
         date: formatDateDDMMYYYY(new Date()),
@@ -191,6 +192,7 @@ export default function GeneratePage() {
         indication: '',
         findings: '',
         technique: '',
+        referringPhysician: '',
         signature: {
           name: profile.default_signature_name || '',
           date: formattedDate,
@@ -435,6 +437,7 @@ export default function GeneratePage() {
         patient: patient,
         signature: data.signature,
         styleProfileId: data.styleProfileId || undefined,
+        referring_physician: data.referringPhysician || undefined,
       }
 
       // Enqueue the job using new API helper
@@ -866,6 +869,21 @@ export default function GeneratePage() {
                           </SelectContent>
                         </Select>
                       </FormField>
+                      <FormField
+                        label="Referring Physician"
+                        optional
+                        htmlFor="referringPhysician"
+                        error={errors.referringPhysician?.message}
+                      >
+                        <Input
+                          id="referringPhysician"
+                          inputMode="text"
+                          autoCapitalize="words"
+                          {...register('referringPhysician')}
+                          placeholder="Dr. John Doe"
+                          className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(212,180,131,0.45)] input-mobile"
+                        />
+                      </FormField>
                     </div>
                   </div>
                 </div>
@@ -962,6 +980,8 @@ export default function GeneratePage() {
                           className="border border-[rgba(255,255,255,0.12)] bg-[rgba(12,16,28,0.8)] text-white placeholder:text-[rgba(207,207,207,0.35)] focus:border-[rgba(245,215,145,0.45)] input-mobile"
                         />
                       </FormField>
+
+
                     </div>
                   </TooltipProvider>
                 </div>
@@ -1056,6 +1076,12 @@ export default function GeneratePage() {
                             <span className="text-white font-medium">Findings:</span>
                             <p className="mt-1 whitespace-pre-wrap break-words">{watch('findings') || 'Not provided'}</p>
                           </div>
+                          {watch('referringPhysician') && (
+                            <div>
+                              <span className="text-white font-medium">Referring Physician:</span>
+                              <p className="mt-1">{watch('referringPhysician')}</p>
+                            </div>
+                          )}
                         </div>
                       </div>
 

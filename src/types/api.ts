@@ -24,4 +24,6 @@ export interface EnqueueInput {
   signature?: SignatureInput | null;
   /** Style profile UUID to apply during generation. Omit to use backend default. */
   styleProfileId?: string;
+  /** Optional referring physician name, e.g. "Dr. John Doe" */
+  referring_physician?: string;
 }

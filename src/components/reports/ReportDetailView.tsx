@@ -157,7 +157,8 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
         age: undefined,
         dob: undefined,
         sex: undefined,
-        history: undefined
+        history: undefined,
+        referring_physician: undefined
       };
       const resultSignature: Signature | undefined = parsed.signature;
 
@@ -283,7 +284,8 @@ export default function ReportDetailView({ jobId }: ReportDetailViewProps) {
     age: undefined,
     dob: undefined,
     sex: undefined,
-    history: undefined
+    history: undefined,
+    referring_physician: undefined
   };
   const resultSignature: Signature | undefined = parsedResult.signature;
 

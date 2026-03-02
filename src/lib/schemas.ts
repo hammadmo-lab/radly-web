@@ -52,12 +52,8 @@ export const generateFormSchema = z.object({
   patient: patientSchema,
   indication: z.string()
     .trim()
-    .min(10, 'Indication/history must be at least 10 characters')
-    .max(5000, 'Indication/history must not exceed 5000 characters')
-    .refine(
-      (val) => val.split(/\s+/).filter(w => w.length > 0).length >= 3,
-      { message: "Indication/history must contain at least 3 words" }
-    ),
+    .min(1, 'Indication/history is required')
+    .max(5000, 'Indication/history must not exceed 5000 characters'),
   findings: z.string()
     .trim()
     .min(10, 'Findings must be at least 10 characters')
@@ -73,6 +69,11 @@ export const generateFormSchema = z.object({
     .or(z.literal('')),
   signature: signatureSchema.optional(),
   styleProfileId: z.string().uuid().optional(),
+  referringPhysician: z.string()
+    .trim()
+    .max(200, 'Referring physician name must not exceed 200 characters')
+    .optional()
+    .or(z.literal('')),
 })
 
 export type GenerateFormValues = z.infer<typeof generateFormSchema>
