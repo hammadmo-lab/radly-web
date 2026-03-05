@@ -74,11 +74,6 @@ export async function enqueueJob(input: EnqueueInput): Promise<{ job_id: string 
       p.history = input.indication.trim();
     }
 
-    // Include referring physician in patient object if provided
-    if (input.referring_physician?.trim()) {
-      p.referring_physician = input.referring_physician.trim();
-    }
-
     if (Object.keys(p).length) body.patient = p;
   }
 
