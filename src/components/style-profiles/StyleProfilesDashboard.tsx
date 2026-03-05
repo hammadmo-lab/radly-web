@@ -178,6 +178,7 @@ export function StyleProfilesDashboard() {
                         ['{recommendations}', 'Recommendations section'],
                         ['{reported_by}', 'Reporting radiologist name'],
                         ['{report_date}', 'Date the report was signed off'],
+                        ['{referring_physician}', 'Referring / requesting physician name'],
                       ] as const).map(([tag, desc]) => (
                         <div key={tag} className="flex items-start gap-2">
                           <code className="text-xs font-mono bg-violet-100 text-violet-800 px-1.5 py-0.5 rounded flex-shrink-0 whitespace-nowrap">{tag}</code>
