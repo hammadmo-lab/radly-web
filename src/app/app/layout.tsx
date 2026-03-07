@@ -6,6 +6,9 @@ import { DesktopNav, MobileNav, BottomNav } from '@/components/layout/Navigation
 import { usePathname } from 'next/navigation'
 import { toast } from 'sonner'
 import { isTestMode } from '@/lib/test-mode'
+import { ChatProvider } from '@/hooks/useChatClient'
+import { ChatFAB } from '@/components/chat/ChatFAB'
+import { ChatPanel } from '@/components/chat/ChatPanel'
 
 export default function AppLayout({
   children,
@@ -29,30 +32,36 @@ export default function AppLayout({
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-[var(--ds-bg-gradient)] text-[var(--ds-text-primary)] overflow-x-hidden safe-area-inset-top">
-        {/* Test Mode Indicator */}
-        {testMode && (
-          <div className="bg-yellow-500/10 border-b border-yellow-500/30 px-4 py-2 text-center text-sm text-yellow-200">
-            🧪 Test Mode Active
-          </div>
-        )}
+      <ChatProvider>
+        <div className="min-h-screen bg-[var(--ds-bg-gradient)] text-[var(--ds-text-primary)] overflow-x-hidden safe-area-inset-top">
+          {/* Test Mode Indicator */}
+          {testMode && (
+            <div className="bg-yellow-500/10 border-b border-yellow-500/30 px-4 py-2 text-center text-sm text-yellow-200">
+              🧪 Test Mode Active
+            </div>
+          )}
 
-        {/* Header */}
-        <DesktopNav user={testMode ? { email: 'test@radly.test' } : user} onSignOut={handleSignOut} />
+          {/* Header */}
+          <DesktopNav user={testMode ? { email: 'test@radly.test' } : user} onSignOut={handleSignOut} />
 
-        {/* Mobile Navigation */}
-        <MobileNav user={testMode ? { email: 'test@radly.test' } : user} onSignOut={handleSignOut} />
+          {/* Mobile Navigation */}
+          <MobileNav user={testMode ? { email: 'test@radly.test' } : user} onSignOut={handleSignOut} />
 
-        {/* Main Content */}
-        <main className="container max-w-6xl mx-auto px-4 sm:px-6 neon-page-stack w-full py-8 sm:py-12 pb-24 md:pb-12">
-          <div className="neon-shell p-6 sm:p-8 md:p-10 md:backdrop-blur-lg">
-            {children}
-          </div>
-        </main>
+          {/* Main Content */}
+          <main className="container max-w-6xl mx-auto px-4 sm:px-6 neon-page-stack w-full py-8 sm:py-12 pb-24 md:pb-12">
+            <div className="neon-shell p-6 sm:p-8 md:p-10 md:backdrop-blur-lg">
+              {children}
+            </div>
+          </main>
 
-        {/* Bottom Navigation for Mobile */}
-        <BottomNav pathname={pathname} />
-      </div>
+          {/* Bottom Navigation for Mobile */}
+          <BottomNav pathname={pathname} />
+
+          {/* Chat Assistant */}
+          <ChatFAB />
+          <ChatPanel />
+        </div>
+      </ChatProvider>
     </AuthGuard>
   )
 }
