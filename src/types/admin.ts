@@ -11,6 +11,7 @@ export interface Subscription {
   period_start: string
   period_end: string
   status: 'active' | 'cancelled' | 'expired'
+  platform: string
   payment_provider: string
   created_at: string
   updated_at: string
@@ -78,7 +79,7 @@ export interface CancelSubscriptionData {
 export interface UsageAnalytics {
   average_reports_per_user: number
   users_near_limit: Array<{
-    email: string
+    user_id: string
     usage_percentage: number
   }>
   usage_by_tier: Record<string, number>
@@ -104,6 +105,43 @@ export interface AdminAuthContext {
   isInitialized: boolean
   login: (adminKey: string, apiKey: string) => void
   logout: () => void
+}
+
+export interface RecentJob {
+  job_id: string
+  template_id: string
+  status: 'done' | 'failed' | 'processing' | 'queued'
+  created_at: string
+  processing_time_ms: number
+}
+
+export interface RecentJobsResponse {
+  jobs: RecentJob[]
+}
+
+export interface SecurityEvent {
+  event_type: string
+  event_count: number
+  last_occurrence: string
+}
+
+export interface SecurityStatsResponse {
+  failed_auth_count: number
+  unique_ips: number
+  security_events: SecurityEvent[]
+}
+
+export interface DatabaseStats {
+  size: { total_size: string }
+  counts: { job_history: number; subscriptions: number }
+  active_jobs: number
+}
+
+export interface CacheStats {
+  enabled: boolean
+  keyspace_hits: number
+  keyspace_misses: number
+  keys_count: number
 }
 
 export interface TierInfo {

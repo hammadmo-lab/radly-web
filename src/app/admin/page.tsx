@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Users,
@@ -19,8 +19,13 @@ import { StatCard } from '@/components/admin/StatCard'
 import { SubscriptionTable } from '@/components/admin/SubscriptionTable'
 import { AdminErrorBoundary } from '@/components/admin/AdminErrorBoundary'
 import { ConnectionStatus } from '@/components/admin/ConnectionStatus'
+import { UsersNearLimitPanel } from '@/components/admin/UsersNearLimitPanel'
+import { RevenueMRRSection } from '@/components/admin/RevenueMRRSection'
+import { RecentJobsSection } from '@/components/admin/RecentJobsSection'
+import { SecuritySection } from '@/components/admin/SecuritySection'
+import { InfrastructureSection } from '@/components/admin/InfrastructureSection'
 import { useAdminAuth } from '@/components/admin/AdminAuthProvider'
-import { useSubscriptions, useRevenueAnalytics } from '@/hooks/useAdminData'
+import { useSubscriptions, useRevenueAnalytics, useUsageAnalytics } from '@/hooks/useAdminData'
 import { SubscriptionListParams } from '@/types/admin'
 import { toast } from 'sonner'
 
@@ -28,6 +33,7 @@ export default function AdminDashboard() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { logout } = useAdminAuth()
+  const subscriptionTableRef = useRef<HTMLElement>(null)
 
   // Initialize filters from URL params or defaults
   const [filters, setFilters] = useState<SubscriptionListParams>(() => {
@@ -63,6 +69,12 @@ export default function AdminDashboard() {
     error: revenueError
   } = useRevenueAnalytics(30)
 
+  const {
+    data: usageAnalytics,
+    isLoading: usageLoading,
+    error: usageError,
+  } = useUsageAnalytics(30)
+
   // Check if there are any errors
   const hasErrors = subscriptionsError || revenueError
 
@@ -90,6 +102,17 @@ export default function AdminDashboard() {
       updateUrlParams(newFilters, 1)
     },
     [filters, updateUrlParams]
+  )
+
+  const handleFindUser = useCallback(
+    (userId: string) => {
+      setFilters(prev => ({ ...prev, search: userId, offset: 0 }))
+      setCurrentPage(1)
+      setTimeout(() => {
+        subscriptionTableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
+    },
+    []
   )
 
   const handleFilterChange = useCallback(
@@ -304,56 +327,42 @@ export default function AdminDashboard() {
                 </div>
               </section>
 
-              <section>
-                {subscriptionsLoading ? (
-                  <div className="aurora-card border border-[rgba(255,255,255,0.08)] p-10 text-center text-sm text-[rgba(207,207,207,0.65)]">
-                    <p className="text-lg font-medium text-white">Loading subscriptions…</p>
-                    <p className="mt-2 text-sm text-[rgba(207,207,207,0.55)]">
-                      Fetching the latest customer data. This should only take a moment.
-                    </p>
-                  </div>
-                ) : subscriptionsError ? (
-                  <div className="rounded-2xl border border-[rgba(255,107,107,0.32)] bg-[rgba(255,107,107,0.12)] p-5 sm:p-6">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="flex items-start gap-3">
-                        <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(255,107,107,0.32)] bg-[rgba(255,107,107,0.18)] text-[#FFD1D1]">
-                          <AlertCircle className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <h2 className="text-base font-semibold text-white">Error loading subscriptions</h2>
-                          <p className="text-sm text-[#FFD1D1]">
-                            {subscriptionsError.message}
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => refetchSubscriptions()}
-                        className="h-9 rounded-lg border border-[rgba(255,255,255,0.12)] px-4 text-[#FFD1D1] hover:border-[rgba(255,107,107,0.45)] hover:bg-[rgba(255,107,107,0.12)]"
-                      >
-                        Retry
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <SubscriptionTable
-                    subscriptions={subscriptionsData?.subscriptions || []}
-                    isLoading={subscriptionsLoading}
-                    total={subscriptionsData?.total || 0}
-                    currentPage={currentPage}
-                    pageSize={filters.limit || 10}
-                    onPageChange={handlePageChange}
-                    onSearch={handleSearch}
-                    onFilterChange={handleFilterChange}
-                    onRefresh={handleRefresh}
-                    onExport={handleExport}
-                    onViewUser={handleViewUser}
-                    onClearFilters={handleClearFilters}
-                    currentFilters={filters}
-                  />
-                )}
+              <UsersNearLimitPanel
+                users={usageAnalytics?.users_near_limit ?? []}
+                isLoading={usageLoading}
+                onFindUser={handleFindUser}
+              />
+
+              <section ref={subscriptionTableRef}>
+                <SubscriptionTable
+                  subscriptions={subscriptionsData?.subscriptions || []}
+                  isLoading={subscriptionsLoading}
+                  total={subscriptionsData?.total || 0}
+                  currentPage={currentPage}
+                  pageSize={filters.limit || 10}
+                  onPageChange={handlePageChange}
+                  onSearch={handleSearch}
+                  onFilterChange={handleFilterChange}
+                  onRefresh={handleRefresh}
+                  onExport={handleExport}
+                  onViewUser={handleViewUser}
+                  onClearFilters={handleClearFilters}
+                  currentFilters={filters}
+                />
               </section>
+              <div className="grid gap-6 md:grid-cols-2">
+                <RevenueMRRSection
+                  data={revenueAnalytics}
+                  isLoading={revenueLoading}
+                  error={revenueError}
+                />
+                <InfrastructureSection />
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2">
+                <RecentJobsSection />
+                <SecuritySection />
+              </div>
             </div>
           </div>
         </div>

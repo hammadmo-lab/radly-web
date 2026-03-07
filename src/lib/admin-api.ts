@@ -6,7 +6,11 @@ import {
   ActivateSubscriptionData,
   CancelSubscriptionData,
   UsageAnalytics,
-  RevenueAnalytics
+  RevenueAnalytics,
+  RecentJobsResponse,
+  SecurityStatsResponse,
+  DatabaseStats,
+  CacheStats
 } from '@/types/admin'
 import {
   ApiKey,
@@ -212,6 +216,70 @@ export class AdminApiClient {
       method: 'POST',
       headers: this.getHeaders(),
       body: JSON.stringify({ tier_name: tierName, region }),
+      credentials: 'omit',
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error')
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
+    }
+
+    return response.json()
+  }
+
+  async getRecentJobs(limit: number = 20): Promise<RecentJobsResponse> {
+    const response = await fetch(`${this.baseUrl}/v1/admin/jobs/recent?limit=${limit}`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+      credentials: 'omit',
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error')
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
+    }
+
+    return response.json()
+  }
+
+  async getSecurityStats(): Promise<SecurityStatsResponse> {
+    const response = await fetch(`${this.baseUrl}/v1/admin/security/stats`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+      credentials: 'omit',
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error')
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
+    }
+
+    return response.json()
+  }
+
+  async getDatabaseStats(): Promise<DatabaseStats> {
+    const response = await fetch(`${this.baseUrl}/v1/admin/database/stats`, {
+      method: 'GET',
+      headers: this.getHeaders(),
+      credentials: 'omit',
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error')
+      const errorMessage = this.getErrorMessage(response.status, errorText)
+      throw new Error(errorMessage)
+    }
+
+    return response.json()
+  }
+
+  async getCacheStats(): Promise<CacheStats> {
+    const response = await fetch(`${this.baseUrl}/v1/admin/cache/stats`, {
+      method: 'GET',
+      headers: this.getHeaders(),
       credentials: 'omit',
     })
 
