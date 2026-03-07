@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Users,
@@ -59,6 +59,12 @@ const STATUS_BADGE_STYLES: Record<string, string> = {
   expired: 'border-[rgba(207,207,207,0.2)] bg-[rgba(18,22,36,0.75)] text-[rgba(207,207,207,0.7)]',
 }
 
+const PLATFORM_BADGE_STYLES: Record<string, { label: string; classes: string }> = {
+  web: { label: 'Web', classes: 'border-[rgba(59,130,246,0.35)] bg-[rgba(59,130,246,0.16)] text-[#BFDBFE]' },
+  ios: { label: 'iOS', classes: 'border-[rgba(139,92,246,0.35)] bg-[rgba(139,92,246,0.16)] text-[#E2DAFF]' },
+  android: { label: 'Android', classes: 'border-[rgba(16,185,129,0.35)] bg-[rgba(16,185,129,0.16)] text-[#A7F3D0]' },
+}
+
 const TIER_BADGE_STYLES: Record<string, string> = {
   free: 'border-[rgba(207,207,207,0.18)] bg-[rgba(207,207,207,0.08)] text-[rgba(207,207,207,0.75)]',
   starter: 'border-[rgba(75,142,255,0.35)] bg-[rgba(75,142,255,0.16)] text-[#D7E3FF]',
@@ -82,6 +88,11 @@ export function SubscriptionTable({
   currentFilters,
 }: SubscriptionTableProps) {
   const [searchValue, setSearchValue] = useState(currentFilters.search || '')
+
+  // Sync search input when parent updates filters externally (e.g. "Find" from UsersNearLimitPanel)
+  useEffect(() => {
+    setSearchValue(currentFilters.search || '')
+  }, [currentFilters.search])
 
   // Helper function to calculate days since expiration
   const getDaysSinceExpiration = (periodEnd: string): number => {
@@ -198,6 +209,25 @@ export function SubscriptionTable({
         )}
       >
         {normalized.charAt(0).toUpperCase() + normalized.slice(1)}
+      </Badge>
+    )
+  }
+
+  const renderPlatformBadge = (platform: string) => {
+    const normalized = platform?.toLowerCase() ?? ''
+    const badge = PLATFORM_BADGE_STYLES[normalized]
+    const classes = badge
+      ? badge.classes
+      : 'border-[rgba(156,163,175,0.3)] bg-[rgba(156,163,175,0.1)] text-[rgba(207,207,207,0.7)]'
+    const label = badge ? badge.label : (platform || 'Unknown')
+    return (
+      <Badge
+        className={cn(
+          'border px-2.5 py-0.5 text-xs font-semibold uppercase tracking-[0.14em] bg-transparent',
+          classes
+        )}
+      >
+        {label}
       </Badge>
     )
   }
@@ -357,7 +387,7 @@ export function SubscriptionTable({
               <Table>
                 <TableHeader className="bg-[rgba(12,16,28,0.72)]">
                   <TableRow className="border-b border-[rgba(255,255,255,0.06)]">
-                    {['User', 'Tier', 'Status', 'Usage', 'Revenue', 'Period End', 'Actions'].map(
+                    {['User', 'Tier', 'Status', 'Platform', 'Usage', 'Revenue', 'Period End', 'Actions'].map(
                       (column) => (
                         <TableHead
                           key={column}
@@ -410,6 +440,7 @@ export function SubscriptionTable({
 
                       <TableCell className="px-6 py-5">{renderTierBadge(subscription.tier_name)}</TableCell>
                       <TableCell className="px-6 py-5">{renderStatusBadge(subscription.status)}</TableCell>
+                      <TableCell className="px-6 py-5">{renderPlatformBadge(subscription.platform)}</TableCell>
 
                       <TableCell className="px-6 py-5">
                         <UsageProgressBar

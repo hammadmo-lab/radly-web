@@ -311,6 +311,120 @@ export function useChangeTier() {
   })
 }
 
+export function usePlatformBreakdown() {
+  const { adminKey, apiKey } = useAdminAuth()
+
+  return useQuery({
+    queryKey: ['admin', 'subscriptions', { status: 'active', limit: 200 }],
+    queryFn: async () => {
+      if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
+      const client = new AdminApiClient({ adminKey, apiKey })
+      return client.listSubscriptions({ status: 'active', limit: 200 })
+    },
+    enabled: Boolean(adminKey && apiKey),
+    staleTime: 5 * 60 * 1000,
+    retry: (failureCount, error) => {
+      if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
+        return false
+      }
+      return failureCount < 2
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  })
+}
+
+export function useRecentJobs(limit: number = 20) {
+  const { adminKey, apiKey } = useAdminAuth()
+
+  return useQuery({
+    queryKey: ['admin', 'recent-jobs', limit],
+    queryFn: async () => {
+      if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
+      const client = new AdminApiClient({ adminKey, apiKey })
+      return client.getRecentJobs(limit)
+    },
+    enabled: Boolean(adminKey && apiKey),
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    retry: (failureCount, error) => {
+      if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
+        return false
+      }
+      return failureCount < 2
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  })
+}
+
+export function useSecurityStats() {
+  const { adminKey, apiKey } = useAdminAuth()
+
+  return useQuery({
+    queryKey: ['admin', 'security-stats'],
+    queryFn: async () => {
+      if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
+      const client = new AdminApiClient({ adminKey, apiKey })
+      return client.getSecurityStats()
+    },
+    enabled: Boolean(adminKey && apiKey),
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    retry: (failureCount, error) => {
+      if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
+        return false
+      }
+      return failureCount < 2
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  })
+}
+
+export function useDatabaseStats() {
+  const { adminKey, apiKey } = useAdminAuth()
+
+  return useQuery({
+    queryKey: ['admin', 'database-stats'],
+    queryFn: async () => {
+      if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
+      const client = new AdminApiClient({ adminKey, apiKey })
+      return client.getDatabaseStats()
+    },
+    enabled: Boolean(adminKey && apiKey),
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    retry: (failureCount, error) => {
+      if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
+        return false
+      }
+      return failureCount < 2
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  })
+}
+
+export function useCacheStats() {
+  const { adminKey, apiKey } = useAdminAuth()
+
+  return useQuery({
+    queryKey: ['admin', 'cache-stats'],
+    queryFn: async () => {
+      if (!adminKey || !apiKey) throw new Error('Admin credentials not available')
+      const client = new AdminApiClient({ adminKey, apiKey })
+      return client.getCacheStats()
+    },
+    enabled: Boolean(adminKey && apiKey),
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    retry: (failureCount, error) => {
+      if (error.message.includes('401') || error.message.includes('403') || error.message.includes('404')) {
+        return false
+      }
+      return failureCount < 2
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  })
+}
+
 // ==================== API Keys Hooks ====================
 
 export function useApiKeys(params?: ApiKeyListParams) {
