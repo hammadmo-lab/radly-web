@@ -2,7 +2,7 @@
 
 // Chat input bar with text field, mic button, and send button
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Send, Mic, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -13,12 +13,13 @@ export function ChatInput() {
     const { sendText, latestUiHint, connectionStatus } = useChatClient()
     const [text, setText] = useState('')
     const inputRef = useRef<HTMLInputElement>(null)
+    const liveBoxRef = useRef<HTMLDivElement>(null)
 
     const isVoicePrompt = latestUiHint?.type === 'voice_prompt'
     const isDisconnected = connectionStatus !== 'connected'
 
     // Voice recording
-    const { isRecording, isTranscribing, startRecording, stopRecording } = useChatVoice({
+    const { isRecording, isTranscribing, liveTranscript, interimTranscript, startRecording, stopRecording } = useChatVoice({
         onTranscript: (transcript) => {
             sendText(transcript)
         },
@@ -26,6 +27,13 @@ export function ChatInput() {
             console.error('Voice error:', error)
         },
     })
+
+    // Auto-scroll the live transcription box to bottom
+    useEffect(() => {
+        if (liveBoxRef.current) {
+            liveBoxRef.current.scrollTop = liveBoxRef.current.scrollHeight
+        }
+    }, [liveTranscript, interimTranscript])
 
     const handleSend = useCallback(() => {
         const trimmed = text.trim()
@@ -50,8 +58,49 @@ export function ChatInput() {
         }
     }
 
+    // Compose the full live display: final text + interim text
+    const displayText = [liveTranscript, interimTranscript].filter(Boolean).join(' ')
+
     return (
         <div className="border-t border-white/10 bg-black/20 px-3 py-3 backdrop-blur-sm">
+            {/* Live transcription panel */}
+            {(isRecording || isTranscribing) && (
+                <div className="mb-2">
+                    <div className="flex items-center gap-2 mb-1.5">
+                        <span className="flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-red-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                        </span>
+                        <span className="text-xs font-medium text-red-400 uppercase tracking-wider">
+                            Live Transcription
+                        </span>
+                    </div>
+                    <div
+                        ref={liveBoxRef}
+                        className="bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-[var(--ds-text-primary)] max-h-[120px] overflow-y-auto min-h-[48px]"
+                    >
+                        {displayText ? (
+                            <>
+                                {liveTranscript && (
+                                    <span>{liveTranscript}</span>
+                                )}
+                                {interimTranscript && (
+                                    <span className="text-[var(--ds-text-muted)] italic">
+                                        {liveTranscript ? ' ' : ''}{interimTranscript}
+                                    </span>
+                                )}
+                                <span className="inline-block w-0.5 h-4 bg-[var(--ds-primary)] animate-pulse ml-0.5 align-text-bottom" />
+                            </>
+                        ) : (
+                            <span className="text-[var(--ds-text-muted)] italic">
+                                Listening...
+                                <span className="inline-block w-0.5 h-4 bg-[var(--ds-primary)] animate-pulse ml-0.5 align-text-bottom" />
+                            </span>
+                        )}
+                    </div>
+                </div>
+            )}
+
             <div className="flex items-center gap-2">
                 {/* Mic button */}
                 <Button
@@ -94,7 +143,7 @@ export function ChatInput() {
                     onKeyDown={handleKeyDown}
                     placeholder={
                         isRecording
-                            ? 'Recording...'
+                            ? 'Listening...'
                             : isTranscribing
                                 ? 'Transcribing...'
                                 : 'Type a message...'
