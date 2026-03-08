@@ -17,7 +17,7 @@ function getAdminHeaders(credentials: AdminCredentials) {
   return {
     'Content-Type': 'application/json',
     'x-admin-key': credentials.adminKey,
-    'Authorization': `Bearer ${credentials.apiKey}`,
+    'x-api-key': credentials.apiKey,
     'X-Request-Id': crypto.randomUUID(),
   };
 }
