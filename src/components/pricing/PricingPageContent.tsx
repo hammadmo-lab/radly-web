@@ -88,6 +88,19 @@ export function PricingPageContent({ tiers, region }: PricingPageContentProps) {
                                 </div>
                             </div>
 
+                            {(tier.tier_name === "professional" || tier.tier_name === "premium") && (
+                                <ul className="space-y-2 mb-6 text-sm">
+                                    <li className="flex items-center gap-2 text-[rgba(207,207,207,0.9)]">
+                                        <Check className="w-4 h-4 text-[#F5D791] flex-shrink-0" />
+                                        <span>Custom DOCX Templates</span>
+                                    </li>
+                                    <li className="flex items-center gap-2 text-[rgba(207,207,207,0.9)]">
+                                        <Check className="w-4 h-4 text-[#F5D791] flex-shrink-0" />
+                                        <span>Radly Chatbot</span>
+                                    </li>
+                                </ul>
+                            )}
+
                             <div className="mt-auto">
                                 <PrimaryCTA
                                     href={isFree ? "/auth/signin" : `/pricing/checkout?tier=${tier.tier_name}&region=${region}`}
