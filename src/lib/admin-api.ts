@@ -25,7 +25,7 @@ import {
 // Admin endpoints go directly to api.radly.app, bypassing the edge proxy
 // This is because admin endpoints are protected by RADLY_ADMIN_KEYS (server-side)
 // and don't need user JWT or edge rate limiting
-const ADMIN_API_BASE = 'https://api.radly.app'
+export const ADMIN_API_BASE = 'https://api.radly.app'
 
 export class AdminApiClient {
   private credentials: AdminCredentials
