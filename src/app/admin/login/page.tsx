@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Shield, Loader2, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { adminLoginSchema, type AdminLoginData } from '@/lib/schemas'
-import { ADMIN_API_BASE } from '@/lib/admin-api'
+import { API_BASE } from '@/lib/config'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
 
     try {
       // Call the backend login endpoint
-      const response = await fetch(`${ADMIN_API_BASE}/v1/admin/auth/login`, {
+      const response = await fetch(`${API_BASE}/v1/admin/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
