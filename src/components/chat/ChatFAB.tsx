@@ -22,10 +22,10 @@ export function ChatFAB() {
                 isPanelOpen
                     ? 'h-12 w-12 rounded-full justify-center'
                     : 'h-12 px-4 rounded-full justify-center',
-                'bg-gradient-to-r from-[var(--ds-primary)] to-[#6B8FFF]',
-                'text-white font-semibold text-sm',
-                'shadow-[0_4px_24px_rgba(38,83,255,0.55)]',
-                'hover:shadow-[0_4px_32px_rgba(38,83,255,0.75)]',
+                'bg-gradient-to-r from-[var(--ds-primary)] to-[#E5C478]',
+                'text-black font-semibold text-sm',
+                'shadow-[0_4px_24px_rgba(38,83,255,0.45)]',
+                'hover:shadow-[0_4px_32px_rgba(229,196,120,0.5)]',
                 'transition-all duration-300',
             )}
             title={isPanelOpen ? 'Close assistant' : 'Open Radly Assistant'}
@@ -33,7 +33,7 @@ export function ChatFAB() {
         >
             {/* Subtle pulse ring — only when closed */}
             {!isPanelOpen && (
-                <span className="absolute inset-0 rounded-full bg-[var(--ds-primary)] animate-ping opacity-20 pointer-events-none" />
+                <span className="absolute inset-0 rounded-full bg-[#E5C478] animate-ping opacity-15 pointer-events-none" />
             )}
 
             <AnimatePresence mode="wait" initial={false}>
@@ -57,7 +57,7 @@ export function ChatFAB() {
                         transition={{ duration: 0.15 }}
                     >
                         <MessageCircle className="h-5 w-5 flex-shrink-0" />
-                        <span className="pr-0.5">Ask Radly</span>
+                        <span className="pr-0.5">Radly Assistant Bot</span>
                     </motion.span>
                 )}
             </AnimatePresence>
