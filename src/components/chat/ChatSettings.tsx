@@ -15,6 +15,7 @@ import {
     CheckCircle2,
     AlertTriangle,
     X,
+    PenLine,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useChatClient } from '@/hooks/useChatClient'
@@ -250,6 +251,13 @@ export function ChatSettings() {
                                         Quick Actions
                                     </p>
                                     <div className="space-y-1">
+                                        <button
+                                            onClick={() => { sendCommand('signature'); setIsOpen(false) }}
+                                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[var(--ds-text-secondary)] hover:bg-white/5 hover:text-[var(--ds-text-primary)] transition-colors text-left"
+                                        >
+                                            <PenLine className="h-4 w-4 text-[var(--ds-text-muted)]" />
+                                            Change Signature
+                                        </button>
                                         <button
                                             onClick={() => { sendCommand('stats'); setIsOpen(false) }}
                                             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[var(--ds-text-secondary)] hover:bg-white/5 hover:text-[var(--ds-text-primary)] transition-colors text-left"
