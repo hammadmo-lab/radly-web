@@ -15,25 +15,24 @@ interface ChatMessageProps {
 }
 
 // Extract DOCX URL from bot message text.
-// Handles two formats:
-//   1. Split: 📎 [Download DOCX]\n(url)\n_(expires in N minutes)_
-//   2. Inline markdown: 📎 [Download DOCX](url)
+// Finds any presigned .docx URL then strips the surrounding markdown block.
 function extractDocxUrl(text: string): { cleanText: string; docxUrl: string | null; expiryNote: string | null } {
-    // Format 1: URL on its own line in parentheses (stop capture at ) or newline)
-    const splitPattern = /📎\s*\[Download DOCX\][\r\n]+\((https?:\/\/[^)\r\n]+)\)[\s\r\n]*(_\([^_\r\n]+\)_)?/
-    // Format 2: standard inline markdown [text](url)
-    const inlinePattern = /📎?\s*\[Download DOCX\]\((https?:\/\/[^)]+)\)/
+    const urlMatch = text.match(/(https?:\/\/\S+\.docx\S*?)(?=\s*\)|\s*$)/m)
+    if (!urlMatch) return { cleanText: text, docxUrl: null, expiryNote: null }
 
-    for (const pattern of [splitPattern, inlinePattern]) {
-        const match = text.match(pattern)
-        if (!match) continue
-        const docxUrl = match[1].trim()
-        const expiryNote = match[2] ? match[2].replace(/_/g, '') : null
-        const cleanText = text.replace(match[0], '').trim()
-        return { cleanText, docxUrl, expiryNote }
-    }
+    const docxUrl = urlMatch[1].trim()
 
-    return { cleanText: text, docxUrl: null, expiryNote: null }
+    const expiryMatch = text.match(/\(expires in ([^)]+)\)/)
+    const expiryNote = expiryMatch ? `Expires in ${expiryMatch[1]}` : null
+
+    // Remove: optional emoji, [Download DOCX](...url...), expiry note, and leftover --- separator
+    let cleanText = text
+        .replace(/📎?\s*\[Download DOCX\]\s*\([\s\S]*?\)/g, '')
+        .replace(/_?\(expires in [^)]+\)_?/g, '')
+        .replace(/\n---\n/g, '\n')
+        .trim()
+
+    return { cleanText, docxUrl, expiryNote }
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
