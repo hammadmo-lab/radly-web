@@ -53,10 +53,15 @@ export function ChatPanel() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages, isTyping])
 
-    const showIdle   = connectionStatus === 'connected' && sessionState === 'idle' && messages.length === 0
-    const showResume = connectionStatus === 'connected' && sessionState !== 'idle' && messages.length === 0
-    const progress   = SESSION_PROGRESS[sessionState]
-    const showProgress = !!progress && messages.length > 0
+    const lastBotMessage = [...messages].reverse().find(m => m.role === 'bot')
+    const isCancelled = !!lastBotMessage?.text.toLowerCase().includes('cancelled')
+
+    const showIdle      = connectionStatus === 'connected' && sessionState === 'idle' && messages.length === 0
+    const showResume    = connectionStatus === 'connected' && sessionState !== 'idle' && messages.length === 0
+    const showWhatsNext = connectionStatus === 'connected' && messages.length > 0 && !isTyping &&
+        (sessionState === 'idle' || isCancelled)
+    const progress      = SESSION_PROGRESS[sessionState]
+    const showProgress  = !!progress && messages.length > 0 && !isCancelled
 
     return (
         <AnimatePresence>
@@ -295,7 +300,7 @@ export function ChatPanel() {
                                 {isTyping && <ChatTypingIndicator />}
 
                                 {/* Post-session "What's next?" */}
-                                {connectionStatus === 'connected' && sessionState === 'idle' && messages.length > 0 && (
+                                {showWhatsNext && (
                                     <div className="px-4 py-4">
                                         <div className="rounded-2xl border border-white/8 bg-white/2 p-4">
                                             <p className="text-[10px] text-[var(--ds-text-muted)] text-center mb-3 uppercase tracking-widest font-semibold">
