@@ -1,7 +1,5 @@
 'use client'
 
-// Chat input bar with text field, mic button, and send button
-
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Send, Mic, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -15,20 +13,14 @@ export function ChatInput() {
     const inputRef = useRef<HTMLInputElement>(null)
     const liveBoxRef = useRef<HTMLDivElement>(null)
 
-    const isVoicePrompt = latestUiHint?.type === 'voice_prompt'
+    const isVoicePrompt  = latestUiHint?.type === 'voice_prompt'
     const isDisconnected = connectionStatus !== 'connected'
 
-    // Voice recording
     const { isRecording, isTranscribing, liveTranscript, interimTranscript, startRecording, stopRecording } = useChatVoice({
-        onTranscript: (transcript) => {
-            sendText(transcript)
-        },
-        onError: (error) => {
-            console.error('Voice error:', error)
-        },
+        onTranscript: (transcript) => { sendText(transcript) },
+        onError: (error) => { console.error('Voice error:', error) },
     })
 
-    // Auto-scroll the live transcription box to bottom
     useEffect(() => {
         if (liveBoxRef.current) {
             liveBoxRef.current.scrollTop = liveBoxRef.current.scrollHeight
@@ -51,27 +43,73 @@ export function ChatInput() {
     }
 
     const handleMicClick = () => {
-        if (isRecording) {
-            stopRecording()
-        } else {
-            startRecording()
-        }
+        if (isRecording) stopRecording()
+        else startRecording()
     }
 
-    // Compose the full live display: final text + interim text
     const displayText = [liveTranscript, interimTranscript].filter(Boolean).join(' ')
 
+    // ── Voice prompt — full-width CTA ──────────────────────────────────
+    if (isVoicePrompt && !isRecording && !isTranscribing) {
+        return (
+            <div className="border-t border-white/10 bg-black/20 backdrop-blur-sm px-5 py-5 flex flex-col items-center gap-3">
+                <p className="text-xs font-medium text-[var(--ds-text-tertiary)] uppercase tracking-wider">
+                    Tap to dictate
+                </p>
+
+                {/* Big mic button with ripple */}
+                <button
+                    onClick={handleMicClick}
+                    disabled={isDisconnected}
+                    className="relative h-16 w-16 rounded-full bg-[var(--ds-primary)] flex items-center justify-center text-black shadow-lg hover:opacity-90 disabled:opacity-40 transition-opacity"
+                    aria-label="Start voice recording"
+                >
+                    <span className="absolute inset-0 rounded-full bg-[var(--ds-primary)] animate-ping opacity-20" />
+                    <Mic className="h-7 w-7 relative z-10" />
+                </button>
+
+                <p className="text-[11px] text-[var(--ds-text-muted)]">or type your response below</p>
+
+                {/* Keep text input accessible */}
+                <div className="flex items-center gap-2 w-full">
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        value={text}
+                        onChange={e => setText(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Type instead..."
+                        disabled={isDisconnected}
+                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-[var(--ds-text-primary)] placeholder:text-[var(--ds-text-muted)] focus:outline-none focus:border-[var(--ds-primary)]/40 focus:ring-1 focus:ring-[var(--ds-primary)]/20 transition-all"
+                    />
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleSend}
+                        disabled={!text.trim() || isDisconnected}
+                        className="flex-shrink-0 h-9 w-9 rounded-full text-[var(--ds-primary)] hover:bg-[var(--ds-primary)]/10 disabled:opacity-30"
+                    >
+                        <Send className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
+        )
+    }
+
+    // ── Standard input bar ─────────────────────────────────────────────
     return (
         <div className="border-t border-white/10 bg-black/20 px-3 py-3 backdrop-blur-sm">
+
             {/* Live transcription panel */}
             {(isRecording || isTranscribing) && (
                 <div className="mb-2">
                     <div className="flex items-center gap-2 mb-1.5">
-                        <span className="flex h-2 w-2">
+                        <span className="flex h-2 w-2 relative">
                             <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-red-400 opacity-75" />
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
                         </span>
-                        <span className="text-xs font-medium text-red-400 uppercase tracking-wider">
+                        <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">
                             Live Transcription
                         </span>
                     </div>
@@ -81,9 +119,7 @@ export function ChatInput() {
                     >
                         {displayText ? (
                             <>
-                                {liveTranscript && (
-                                    <span>{liveTranscript}</span>
-                                )}
+                                {liveTranscript && <span>{liveTranscript}</span>}
                                 {interimTranscript && (
                                     <span className="text-[var(--ds-text-muted)] italic">
                                         {liveTranscript ? ' ' : ''}{interimTranscript}
@@ -110,12 +146,10 @@ export function ChatInput() {
                     onClick={handleMicClick}
                     disabled={isDisconnected || isTranscribing}
                     className={cn(
-                        'flex-shrink-0 h-10 w-10 rounded-full transition-all',
+                        'relative flex-shrink-0 h-10 w-10 rounded-full transition-all',
                         isRecording
                             ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                            : isVoicePrompt
-                                ? 'bg-[var(--ds-primary)]/15 text-[var(--ds-primary)] animate-pulse hover:bg-[var(--ds-primary)]/25'
-                                : 'text-[var(--ds-text-tertiary)] hover:text-[var(--ds-text-secondary)] hover:bg-white/5'
+                            : 'text-[var(--ds-text-tertiary)] hover:text-[var(--ds-text-secondary)] hover:bg-white/5'
                     )}
                     title={isRecording ? 'Stop recording' : 'Start recording'}
                 >
@@ -124,8 +158,6 @@ export function ChatInput() {
                     ) : (
                         <Mic className="h-5 w-5" />
                     )}
-
-                    {/* Recording pulse indicator */}
                     {isRecording && (
                         <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
@@ -142,11 +174,9 @@ export function ChatInput() {
                     onChange={e => setText(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={
-                        isRecording
-                            ? 'Listening...'
-                            : isTranscribing
-                                ? 'Transcribing...'
-                                : 'Type a message...'
+                        isRecording    ? 'Listening...' :
+                        isTranscribing ? 'Transcribing...' :
+                        'Type a message...'
                     }
                     disabled={isDisconnected || isRecording || isTranscribing}
                     className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-[var(--ds-text-primary)] placeholder:text-[var(--ds-text-muted)] focus:outline-none focus:border-[var(--ds-primary)]/40 focus:ring-1 focus:ring-[var(--ds-primary)]/20 transition-all min-h-[40px]"
