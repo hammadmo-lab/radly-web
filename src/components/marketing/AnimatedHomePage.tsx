@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Brain, CheckCircle2, ClipboardList, Layers, Mic, FileText, Send, Sparkles, Shield } from "lucide-react";
+import { ArrowRight, Brain, CheckCircle2, ClipboardList, Layers, MessageCircle, Mic, FileText, Send, Sparkles, Shield, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { PrimaryCTA, SecondaryCTA } from "@/components/marketing/PrimaryCTA";
 
@@ -175,7 +175,7 @@ export function AnimatedHomePage({
             transition={{ delay: 1.1, duration: 0.5 }}
             className="mt-10 flex flex-col items-center justify-center gap-4"
           >
-            <span className="text-sm font-medium text-[#F5D791] tracking-wide uppercase">📱 Get the Mobile App</span>
+            <span className="text-sm font-medium text-[#F5D791] tracking-wide uppercase">Get Radly on your terms</span>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <a
                 href="https://apps.apple.com/app/radly-assistant/id6754604993"
@@ -203,6 +203,21 @@ export function AnimatedHomePage({
                 <div className="flex flex-col">
                   <span className="text-xs text-[#A89F91] leading-tight">Get it on</span>
                   <span className="text-base font-bold text-[#F0E6D3] leading-tight group-hover:text-[#F5D791] transition-colors">Google Play</span>
+                </div>
+              </a>
+              <a
+                href="https://t.me/radly_assistant_bot"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-6 py-3.5 bg-gradient-to-r from-[#0D2A3E] to-[#0A1F2E] border-2 border-[#29B6F6]/50 rounded-2xl hover:border-[#29B6F6] hover:shadow-[0_0_20px_rgba(41,182,246,0.3)] transition-all duration-300 group"
+              >
+                <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="12" r="12" fill="#29B6F6" />
+                  <path d="M5.125 11.862 17.35 7.17c.573-.207 1.074.14.888.998L16.3 16.93c-.136.612-.5.76-.998.472l-2.773-2.044-1.339 1.29c-.148.148-.272.272-.558.272l.199-2.818 5.13-4.634c.223-.198-.048-.308-.346-.11L7.032 13.98l-2.746-.857c-.597-.186-.61-.597.125-.88z" fill="white" />
+                </svg>
+                <div className="flex flex-col">
+                  <span className="text-xs text-[#7EC8E3] leading-tight">Chat with</span>
+                  <span className="text-base font-bold text-[#E8F4FD] leading-tight group-hover:text-[#29B6F6] transition-colors">Telegram Bot</span>
                 </div>
               </a>
             </div>
@@ -447,6 +462,208 @@ export function AnimatedHomePage({
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ===== TELEGRAM BOT SECTION ===== */}
+      <section className="mt-16 sm:mt-24 px-4 sm:px-0">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="rounded-[32px] sm:rounded-[44px] border border-[rgba(41,182,246,0.2)] bg-[rgba(13,30,46,0.7)] p-6 sm:p-8 lg:p-10 relative overflow-hidden"
+        >
+          {/* Ambient glows */}
+          <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-[rgba(41,182,246,0.07)] blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-[rgba(41,182,246,0.05)] blur-2xl pointer-events-none" />
+
+          <div className="relative z-10 grid gap-10 lg:grid-cols-2 lg:gap-16 items-center">
+
+            {/* Left: copy */}
+            <div>
+              <motion.span
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1, duration: 0.4 }}
+                className="inline-flex items-center gap-2 rounded-full border border-[rgba(41,182,246,0.4)] bg-[rgba(41,182,246,0.1)] px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-[#29B6F6]"
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="12" r="12" fill="#29B6F6" />
+                  <path d="M5.125 11.862 17.35 7.17c.573-.207 1.074.14.888.998L16.3 16.93c-.136.612-.5.76-.998.472l-2.773-2.044-1.339 1.29c-.148.148-.272.272-.558.272l.199-2.818 5.13-4.634c.223-.198-.048-.308-.346-.11L7.032 13.98l-2.746-.857c-.597-.186-.61-.597.125-.88z" fill="white" />
+                </svg>
+                Also on Telegram
+              </motion.span>
+
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="mt-5 text-2xl sm:text-3xl lg:text-4xl font-semibold leading-[1.15]"
+              >
+                <span className="text-[#F0E6D3]">Your reports.</span>
+                <br />
+                <span style={{ background: "linear-gradient(135deg, #29B6F6, #7EC8E3)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                  Wherever Telegram is.
+                </span>
+              </motion.h2>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.35, duration: 0.5 }}
+                className="mt-4 text-sm sm:text-base text-[#B8AFA1] leading-relaxed max-w-lg"
+              >
+                The Radly Assistant Bot lives inside the web app and on Telegram. Dictate your findings, receive a structured draft, copy to your PACS — the same clinical-grade assistant, in whichever interface you prefer.
+              </motion.p>
+
+              <motion.ul
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.45, duration: 0.5 }}
+                className="mt-6 space-y-3"
+              >
+                {([
+                  { icon: "zap",     text: "Built into the web app — open radly.app and start chatting instantly" },
+                  { icon: "message", text: "Also on Telegram — no installation, works on any device you already use" },
+                  { icon: "shield",  text: "Same clinical safeguards and radiology vocabulary on both channels" },
+                ] as const).map(({ icon, text }, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[rgba(41,182,246,0.15)] border border-[rgba(41,182,246,0.3)]">
+                      {icon === "zap"     && <Zap           className="h-3.5 w-3.5 text-[#29B6F6]" />}
+                      {icon === "message" && <MessageCircle className="h-3.5 w-3.5 text-[#29B6F6]" />}
+                      {icon === "shield"  && <Shield        className="h-3.5 w-3.5 text-[#29B6F6]" />}
+                    </span>
+                    <span className="text-sm text-[#C8C0B4] leading-relaxed">{text}</span>
+                  </li>
+                ))}
+              </motion.ul>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+                className="mt-8"
+              >
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {/* Primary: web app */}
+                  <Link
+                    href="/auth/signin"
+                    className="inline-flex items-center gap-3 px-7 py-3.5 rounded-2xl font-semibold text-sm text-[#0A1F2E] bg-gradient-to-r from-[#29B6F6] to-[#7EC8E3] hover:from-[#5ECBF8] hover:to-[#29B6F6] shadow-[0_8px_32px_rgba(41,182,246,0.35)] hover:shadow-[0_8px_40px_rgba(41,182,246,0.5)] transition-all duration-300 min-h-[44px] touch-manipulation"
+                  >
+                    <MessageCircle className="h-4 w-4" aria-hidden />
+                    Try in the web app
+                  </Link>
+                  {/* Secondary: Telegram */}
+                  <a
+                    href="https://t.me/radly_assistant_bot"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-3 px-6 py-3.5 rounded-2xl font-semibold text-sm text-[#29B6F6] border-2 border-[#29B6F6]/50 hover:border-[#29B6F6] hover:bg-[rgba(41,182,246,0.08)] transition-all duration-300 min-h-[44px] touch-manipulation"
+                    aria-label="Open Radly Assistant Bot on Telegram"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <circle cx="12" cy="12" r="12" fill="#29B6F6" />
+                      <path d="M5.125 11.862 17.35 7.17c.573-.207 1.074.14.888.998L16.3 16.93c-.136.612-.5.76-.998.472l-2.773-2.044-1.339 1.29c-.148.148-.272.272-.558.272l.199-2.818 5.13-4.634c.223-.198-.048-.308-.346-.11L7.032 13.98l-2.746-.857c-.597-.186-.61-.597.125-.88z" fill="white" />
+                    </svg>
+                    Open in Telegram
+                    <ArrowRight className="h-4 w-4" aria-hidden />
+                  </a>
+                </div>
+                <p className="mt-3 text-xs text-[#6E6E74]">Available on Professional &amp; Premium plans · Web and Telegram</p>
+              </motion.div>
+            </div>
+
+            {/* Right: stylised Telegram chat mockup */}
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="relative"
+            >
+              <div className="mx-auto max-w-xs sm:max-w-sm">
+                <div className="rounded-3xl border border-[rgba(41,182,246,0.25)] bg-[rgba(10,20,30,0.9)] shadow-[0_0_60px_rgba(41,182,246,0.15)] overflow-hidden">
+                  {/* Chat header */}
+                  <div className="flex items-center gap-3 px-4 py-3 bg-[rgba(41,182,246,0.1)] border-b border-[rgba(41,182,246,0.15)]">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#29B6F6] to-[#0288D1] flex items-center justify-center flex-shrink-0 shadow-md">
+                      <span className="text-white font-bold text-sm">R</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#E8F4FD]">Radly Bot</p>
+                      <p className="text-xs text-[#29B6F6]">online</p>
+                    </div>
+                  </div>
+
+                  {/* Messages */}
+                  <div className="px-4 py-4 space-y-3 min-h-[280px]">
+                    {/* User message */}
+                    <div className="flex justify-end">
+                      <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-[#29B6F6] px-4 py-2.5">
+                        <p className="text-xs text-[#0A1F2E] font-medium leading-relaxed">
+                          &ldquo;CT chest, no contrast. Lungs clear bilaterally. No pleural effusion. Mediastinum normal.&rdquo;
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Bot structured reply */}
+                    <div className="flex items-end gap-2">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#29B6F6] to-[#0288D1] flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-bold text-xs">R</span>
+                      </div>
+                      <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] px-4 py-3">
+                        <p className="text-[10px] font-semibold text-[#29B6F6] uppercase tracking-wider mb-1.5">IMPRESSION</p>
+                        <p className="text-xs text-[#C8C0B4] leading-relaxed">
+                          1. No acute cardiopulmonary process.<br />
+                          2. No pleural effusion or pneumothorax.
+                        </p>
+                        <p className="mt-2 text-[10px] font-semibold text-[#29B6F6] uppercase tracking-wider mb-1.5">TECHNIQUE</p>
+                        <p className="text-xs text-[#C8C0B4] leading-relaxed">CT chest without contrast.</p>
+                      </div>
+                    </div>
+
+                    {/* Bot follow-up */}
+                    <div className="flex items-end gap-2">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#29B6F6] to-[#0288D1] flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-bold text-xs">R</span>
+                      </div>
+                      <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] px-4 py-2.5">
+                        <p className="text-xs text-[#A89F91]">
+                          Draft ready. Reply <span className="text-[#29B6F6] font-semibold">/export</span> to copy or <span className="text-[#29B6F6] font-semibold">/edit</span> to revise.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Input bar */}
+                  <div className="px-4 py-3 border-t border-[rgba(255,255,255,0.06)] flex items-center gap-2">
+                    <div className="flex-1 rounded-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)] px-4 py-2">
+                      <p className="text-xs text-[#6E6E74]">Message Radly Bot...</p>
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-[#29B6F6] flex items-center justify-center flex-shrink-0">
+                      <Send className="w-3.5 h-3.5 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                  className="mt-3 text-center text-xs text-[#6E6E74]"
+                >
+                  Real Telegram interface — nothing to install
+                </motion.p>
+              </div>
+            </motion.div>
+
+          </div>
+        </motion.div>
       </section>
 
       {/* ===== COMPARISON SECTION - Split screen layout ===== */}
