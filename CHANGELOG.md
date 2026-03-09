@@ -10,6 +10,77 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.4.0] - 2026-03-09
+
+### Added
+
+#### Radly Assistant Bot on Telegram
+- **Telegram Bot Integration** — Radly Assistant Bot is now available on Telegram (`@radly_assistant_bot`)
+  - Exclusive to Professional & Premium subscription tiers
+  - Same clinical-grade assistant as the web app, no installation required
+  - Real-time voice transcription via WebSocket with live UI
+  - Signature command (`/signature`) to change signature via chat
+- **Landing Page Marketing** — Dedicated "Radly Bot" section below Workflow Timeline
+  - Stylised Telegram chat mockup showing radiology dictation → structured report flow
+  - Dual CTA: "Try in the web app" (primary) + "Open in Telegram" (secondary)
+  - Feature bullets highlighting bot availability on both channels
+  - Updated hero section with new label "Get Radly on your terms" and Telegram button
+
+#### Chat Feature — WebSocket & Real-Time Messaging
+- **Full Chat UI** — Redesigned chat panel and floating action button (FAB) with brand gradient
+  - Professional UX with glassmorphic styling
+  - Tab-like interface for multi-conversation support
+  - Auto-scroll and read receipts
+- **Real-Time Voice Transcription** — WebSocket-powered streaming transcription
+  - Live word-count updates during transcription
+  - Auto-punctuation and language detection
+  - Streaming UI with live text updates
+- **DOCX Download Integration** — Auto-parse and render DOCX links from bot messages
+  - Inline download button for generated reports
+  - URL extraction from Telegram-style message formatting
+- **Chat Commands** — Bot responds to special commands
+  - `/signature` — Change your reporting signature
+  - `/export` — Copy report to clipboard
+  - `/edit` — Request report revisions
+
+#### Chat Bug Fixes & Stability
+- Fixed duplicate raw text display when `report_card` UI hint is present
+- Fixed DOCX URL regex to stop at `)` instead of newline
+- Improved URL extraction for DOCX links in chat messages
+
+### Changed
+
+#### Settings Page
+- Removed deprecated "Custom Report Formatting" section
+- Settings now focus on core user preferences (profile, security, notifications)
+
+#### Admin Dashboard
+- **Redesigned layout** — 2-column metrics grid for better visual hierarchy
+- **Platform badge fix** — Correctly display platform badges (Web/iOS/Android) in user metrics
+
+#### Checkout & Localisation
+- Added RTL (right-to-left) support for Egypt market
+- Added Instapay payment method for Egypt checkout
+- Improved payment method selection for regional compliance
+
+#### Report Details
+- Referring physician field now configurable as a tag in style profiles
+- Patient data schema updated to include `referring_physician` as a configurable field
+
+### Fixed
+
+- Fixed "What's next?" buttons showing after session cancel
+- Admin login URL reverted to API_BASE for CORS compatibility
+- Admin metrics now correctly use `x-api-key` header (instead of `Authorization: Bearer`)
+- Report data persistence improved across app refreshes
+
+### Deprecated
+
+- Old formatting profile system (replaced by style profiles in v1.3)
+- Legacy chat UI components (replaced by new WebSocket-based chat)
+
+---
+
 ## [1.3.0] - 2026-02-19
 
 ### Added

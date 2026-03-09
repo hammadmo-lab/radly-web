@@ -22,6 +22,7 @@ Radly Frontend is a cutting-edge web application that enables users to generate 
 - **Advanced Authentication** - Supabase-powered JWT authentication with OAuth (Google, Apple) and Magic Link
 - **Responsive Design** - Mobile-first design with dual navigation (bottom tabs for mobile, top nav for desktop)
 - **Admin Dashboard** - Comprehensive metrics, user management, and system monitoring
+- **Radly Assistant Bot** - AI-powered chat interface available on web and Telegram; dictate findings and receive structured drafts with real-time voice transcription (Professional & Premium plans)
 - **Voice Input** - Voice-to-text transcription for hands-free report generation
 - **Subscription Management** - Multi-tier subscriptions with usage tracking and upgrade prompts
 - **Offline Support** - PWA-ready with service worker for offline functionality
