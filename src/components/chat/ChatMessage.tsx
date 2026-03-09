@@ -37,9 +37,10 @@ function extractDocxUrl(text: string): { cleanText: string; docxUrl: string | nu
 
 export function ChatMessage({ message }: ChatMessageProps) {
     const isBot = message.role === 'bot'
-    const { cleanText, docxUrl, expiryNote } = isBot
+    const hasReportCard = message.ui?.type === 'report_card'
+    const { cleanText, docxUrl, expiryNote } = isBot && !hasReportCard
         ? extractDocxUrl(message.text)
-        : { cleanText: message.text, docxUrl: null, expiryNote: null }
+        : { cleanText: hasReportCard ? null : message.text, docxUrl: null, expiryNote: null }
 
     return (
         <div
@@ -56,7 +57,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
                         : 'bg-[var(--ds-primary)]/15 border border-[var(--ds-primary)]/20 text-[var(--ds-text-primary)]'
                 )}
             >
-                {/* Text content */}
+                {/* Text content — hidden when report_card UI hint is present (card shows everything) */}
                 {cleanText && <p className="whitespace-pre-wrap break-words">{cleanText}</p>}
 
                 {/* Inline DOCX download button */}
