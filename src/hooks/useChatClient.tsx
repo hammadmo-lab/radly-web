@@ -36,7 +36,7 @@ interface ChatContextType {
 
     // Actions
     sendText: (text: string) => void
-    sendCommand: (command: 'report' | 'ask' | 'cancel' | 'stats' | 'status' | 'remove_template') => void
+    sendCommand: (command: 'report' | 'ask' | 'cancel' | 'stats' | 'status' | 'remove_template' | 'signature') => void
     togglePanel: () => void
     openPanel: () => void
     closePanel: () => void
@@ -149,14 +149,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     // ─── Actions ──────────────────────────────────────────────────────
 
     // Map slash commands typed in the input to proper command messages
-    type CommandType = 'report' | 'ask' | 'cancel' | 'stats' | 'status' | 'remove_template'
+    type CommandType = 'report' | 'ask' | 'cancel' | 'stats' | 'status' | 'remove_template' | 'signature'
     const SLASH_COMMANDS: Record<string, CommandType> = {
         '/report': 'report',
         '/ask': 'ask',
         '/cancel': 'cancel',
         '/stats': 'stats',
         '/status': 'status',
-        '/signature': 'report', // triggers onboarding flow
+        '/signature': 'signature',
         'report': 'report',
         'ask': 'ask',
         'cancel': 'cancel',

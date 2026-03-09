@@ -5,7 +5,7 @@
 
 export type ClientMessage =
     | { type: 'text'; text: string }
-    | { type: 'command'; command: 'report' | 'ask' | 'cancel' | 'stats' | 'status' | 'remove_template' }
+    | { type: 'command'; command: 'report' | 'ask' | 'cancel' | 'stats' | 'status' | 'remove_template' | 'signature' }
     | { type: 'ping' }
 
 // ─── Server → Client ────────────────────────────────────────────────
