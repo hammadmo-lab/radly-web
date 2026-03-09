@@ -15,17 +15,25 @@ interface ChatMessageProps {
 }
 
 // Extract DOCX URL from bot message text.
-// Handles the pattern: 📎 [Download DOCX]\n(url)\n_(expires in N minutes)_
+// Handles two formats:
+//   1. Split: 📎 [Download DOCX]\n(url)\n_(expires in N minutes)_
+//   2. Inline markdown: 📎 [Download DOCX](url)
 function extractDocxUrl(text: string): { cleanText: string; docxUrl: string | null; expiryNote: string | null } {
-    const pattern = /📎\s*\[Download DOCX\]\s*\n\((https?:\/\/[^\n]+)\)\s*\n?(_\(expires in [^_]+\)_)?/
-    const match = text.match(pattern)
-    if (!match) return { cleanText: text, docxUrl: null, expiryNote: null }
+    // Format 1: URL on its own line in parentheses (stop capture at ) or newline)
+    const splitPattern = /📎\s*\[Download DOCX\][\r\n]+\((https?:\/\/[^)\r\n]+)\)[\s\r\n]*(_\([^_\r\n]+\)_)?/
+    // Format 2: standard inline markdown [text](url)
+    const inlinePattern = /📎?\s*\[Download DOCX\]\((https?:\/\/[^)]+)\)/
 
-    const docxUrl = match[1].trim()
-    const expiryNote = match[2] ? match[2].replace(/_/g, '') : null
-    const cleanText = text.replace(match[0], '').trim()
+    for (const pattern of [splitPattern, inlinePattern]) {
+        const match = text.match(pattern)
+        if (!match) continue
+        const docxUrl = match[1].trim()
+        const expiryNote = match[2] ? match[2].replace(/_/g, '') : null
+        const cleanText = text.replace(match[0], '').trim()
+        return { cleanText, docxUrl, expiryNote }
+    }
 
-    return { cleanText, docxUrl, expiryNote }
+    return { cleanText: text, docxUrl: null, expiryNote: null }
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
